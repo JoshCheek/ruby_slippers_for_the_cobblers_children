@@ -18,6 +18,14 @@ module MyRuby
     end
   end
 
+  module HasName
+    attr_accessor :name
+    def initialize(options)
+      self.name = options.fetch(:name)
+      super
+    end
+  end
+
   module Indentation
     module Indent
       def indent?() true  end
@@ -43,6 +51,33 @@ module MyRuby
     BeginConstLookup       = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
     EndConstLookup         = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
 
+    BeginMethodCall        = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndMethodCall          = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+
+    BeginFindReceiver      = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndFindReceiver        = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+
+    SetMethodName          = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+
+    BeginAddArgs           = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndAddArgs             = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+
+    BeginAddArg            = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndAddArg              = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+
+    BeginDefineMethod      = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndDefineMethod        = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+
+    BeginBody              = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndBody                = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+
+    BeginParameters        = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndParameters          = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+
+    RequiredParameter      = Class.new(Instruction).include(HasAst).include(Indentation::Indent).include(HasName)
+
+    GetSymbol              = Class.new(Instruction).include(Indentation::NoOp).include(HasAst)
+    Self                   = Class.new(Instruction).include(Indentation::NoOp)
     ToplevelConstantLookup = Class.new(Instruction).include(Indentation::NoOp)
   end
 
@@ -82,9 +117,45 @@ module MyRuby
       end
       instructions << Instructions::EndConstLookup.new(ast: ast)
     when :send
+      instructions << Instructions::BeginMethodCall.new(ast: ast)
+      instructions << Instructions::BeginFindReceiver.new(ast: ast)
+      receiver, name, *args = ast.children
+      if receiver
+        self.walk(receiver, instructions)
+      else
+        instructions << Instructions::Self.new(ast: receiver)
+      end
+      instructions << Instructions::EndFindReceiver.new(ast: ast)
+      instructions << Instructions::SetMethodName.new(ast: name)
+      instructions << Instructions::BeginAddArgs.new(ast: args)
+      args.each do |arg|
+        instructions << Instructions::BeginAddArg.new(ast: arg)
+        self.walk(arg, instructions)
+        instructions << Instructions::EndAddArg.new(ast: arg)
+      end
+      instructions << Instructions::EndAddArgs.new(ast: args)
+      instructions << Instructions::EndMethodCall.new(ast: ast)
+    when :sym
+      instructions << Instructions::GetSymbol.new(ast: ast)
     when :def
+      instructions << Instructions::BeginDefineMethod.new(ast: ast)
+      method_name, args, body = ast.children
+      instructions << Instructions::SetMethodName.new(ast: ast) # used in more than one place, is this okay?
+      self.walk(args, instructions)
+      instructions << Instructions::BeginBody.new(ast: ast)
+      if body
+        self.walk(body, instructions)
+      else
+        instructions << Instructions::NilFromNothing.new(ast: ast)
+      end
+      instructions << Instructions::EndBody.new(ast: ast)
+      instructions << Instructions::EndDefineMethod.new(ast: ast)
     when :args
+      instructions << Instructions::BeginParameters.new(ast: ast)
+      ast.children.each { |child| self.walk(child, instructions) }
+      instructions << Instructions::EndParameters.new(ast: ast)
     when :arg
+      instructions << Instructions::RequiredParameter.new(ast: ast, name: ast.children.first)
     when :ivasgn
     when :lvasgn
     when :lvar
@@ -118,22 +189,22 @@ instructions.inject(0) do |depth, instruction|
   depth
 end
 
-# => (begin
-#      (class
-#        (const nil :User) nil
-#        (begin
-#          (send nil :attr_reader
-#            (sym :name))
-#          (def :initialize
-#            (args
-#              (arg :name))
-#            (ivasgn :@name
-#              (lvar :name)))))
-#      (lvasgn :upser
-#        (send
-#          (const nil :User) :new
-#          (str "Josh")))
-#      (send nil :puts
-#        (send
-#          (send nil :user) :name)))
+# >> (begin
+# >>   (class
+# >>     (const nil :User) nil
+# >>     (begin
+# >>       (send nil :attr_reader
+# >>         (sym :name))
+# >>       (def :initialize
+# >>         (args
+# >>           (arg :name))
+# >>         (ivasgn :@name
+# >>           (lvar :name)))))
+# >>   (lvasgn :user
+# >>     (send
+# >>       (const nil :User) :new
+# >>       (str "Josh")))
+# >>   (send nil :puts
+# >>     (send
+# >>       (lvar :user) :name)))
 
