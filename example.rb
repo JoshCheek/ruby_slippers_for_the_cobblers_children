@@ -77,8 +77,12 @@ module MyRuby
     BeginInstanceVariableAssignment = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
     EndInstanceVariableAssignment   = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
 
+    BeginLocalVariableAssignment    = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndLocalVariableAssignment      = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+
     RequiredParameter               = Class.new(Instruction).include(HasAst).include(Indentation::Indent).include(HasName)
     SetInstanceVariableName         = Class.new(Instruction).include(HasAst).include(Indentation::Indent).include(HasName)
+    SetLocalVariableName            = Class.new(Instruction).include(HasAst).include(Indentation::Indent).include(HasName)
 
     GetSymbol                       = Class.new(Instruction).include(Indentation::NoOp).include(HasAst)
     Self                            = Class.new(Instruction).include(Indentation::NoOp)
@@ -167,6 +171,11 @@ module MyRuby
       self.walk(value, instructions)
       instructions << Instructions::EndInstanceVariableAssignment.new(ast: ast)
     when :lvasgn
+      name, value = ast.children # in multiple assignment, this is not true
+      instructions << Instructions::BeginLocalVariableAssignment.new(ast: ast)
+      instructions << Instructions::SetLocalVariableName.new(ast: ast, name: name)
+      self.walk(value, instructions)
+      instructions << Instructions::EndLocalVariableAssignment.new(ast: ast)
     when :lvar
     when :str
     else
