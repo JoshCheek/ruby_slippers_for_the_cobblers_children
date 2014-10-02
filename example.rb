@@ -42,43 +42,47 @@ module MyRuby
   end
 
   module Instructions
-    BeginSequence          = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
-    EndSequence            = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+    BeginSequence                   = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndSequence                     = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
 
-    OpenClass              = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
-    CloseClass             = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+    OpenClass                       = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    CloseClass                      = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
 
-    BeginConstLookup       = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
-    EndConstLookup         = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+    BeginConstLookup                = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndConstLookup                  = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
 
-    BeginMethodCall        = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
-    EndMethodCall          = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+    BeginMethodCall                 = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndMethodCall                   = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
 
-    BeginFindReceiver      = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
-    EndFindReceiver        = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+    BeginFindReceiver               = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndFindReceiver                 = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
 
-    SetMethodName          = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    SetMethodName                   = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
 
-    BeginAddArgs           = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
-    EndAddArgs             = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+    BeginAddArgs                    = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndAddArgs                      = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
 
-    BeginAddArg            = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
-    EndAddArg              = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+    BeginAddArg                     = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndAddArg                       = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
 
-    BeginDefineMethod      = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
-    EndDefineMethod        = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+    BeginDefineMethod               = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndDefineMethod                 = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
 
-    BeginBody              = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
-    EndBody                = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+    BeginBody                       = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndBody                         = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
 
-    BeginParameters        = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
-    EndParameters          = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+    BeginParameters                 = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndParameters                   = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
 
-    RequiredParameter      = Class.new(Instruction).include(HasAst).include(Indentation::Indent).include(HasName)
+    BeginInstanceVariableAssignment = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndInstanceVariableAssignment   = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
 
-    GetSymbol              = Class.new(Instruction).include(Indentation::NoOp).include(HasAst)
-    Self                   = Class.new(Instruction).include(Indentation::NoOp)
-    ToplevelConstantLookup = Class.new(Instruction).include(Indentation::NoOp)
+    RequiredParameter               = Class.new(Instruction).include(HasAst).include(Indentation::Indent).include(HasName)
+    SetInstanceVariableName         = Class.new(Instruction).include(HasAst).include(Indentation::Indent).include(HasName)
+
+    GetSymbol                       = Class.new(Instruction).include(Indentation::NoOp).include(HasAst)
+    Self                            = Class.new(Instruction).include(Indentation::NoOp)
+    ToplevelConstantLookup          = Class.new(Instruction).include(Indentation::NoOp)
   end
 
   def self.parse(raw_code)
@@ -157,6 +161,11 @@ module MyRuby
     when :arg
       instructions << Instructions::RequiredParameter.new(ast: ast, name: ast.children.first)
     when :ivasgn
+      name, value = ast.children # in multiple assignment, this is not true
+      instructions << Instructions::BeginInstanceVariableAssignment.new(ast: ast)
+      instructions << Instructions::SetInstanceVariableName.new(ast: ast, name: name)
+      self.walk(value, instructions)
+      instructions << Instructions::EndInstanceVariableAssignment.new(ast: ast)
     when :lvasgn
     when :lvar
     when :str
