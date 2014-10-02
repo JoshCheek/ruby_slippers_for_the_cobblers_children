@@ -26,6 +26,14 @@ module MyRuby
     end
   end
 
+  module HasValue
+    attr_accessor :value
+    def initialize(options)
+      self.value = options.fetch(:value)
+      super
+    end
+  end
+
   module Indentation
     module Indent
       def indent?() true  end
@@ -88,6 +96,7 @@ module MyRuby
     Self                            = Class.new(Instruction).include(Indentation::NoOp)
     ToplevelConstantLookup          = Class.new(Instruction).include(Indentation::NoOp)
     LookupLocalVariable             = Class.new(Instruction).include(Indentation::NoOp).include(HasAst).include(HasName)
+    StringLiteral                   = Class.new(Instruction).include(Indentation::NoOp).include(HasAst).include(HasValue)
   end
 
   def self.parse(raw_code)
@@ -180,6 +189,7 @@ module MyRuby
     when :lvar
       instructions << Instructions::LookupLocalVariable.new(ast: ast, name: name)
     when :str
+      instructions << Instructions::StringLiteral.new(ast: ast, value: ast.children.first)
     else
       raise "DID NOT HANDLE #{ast.inspect}"
     end
