@@ -6,7 +6,7 @@ module MyRuby
     end
 
     def inspect
-      "#<Instruction for #{self.class.name}>"
+      "<#{self.class.name.split("::").last}>"
     end
   end
 
@@ -18,13 +18,32 @@ module MyRuby
     end
   end
 
+  module Indentation
+    module Indent
+      def indent?() true  end
+      def dedent?() false end
+    end
+    module DeDent
+      def indent?() false end
+      def dedent?() true  end
+    end
+    module NoOp
+      def indent?() false end
+      def dedent?() false end
+    end
+  end
+
   module Instructions
-    BeginSequence          = Class.new(Instruction).include(HasAst)
-    EndSequence            = Class.new(Instruction).include(HasAst)
-    OpenClass              = Class.new(Instruction).include(HasAst)
-    CloseClass             = Class.new(Instruction).include(HasAst)
-    ConstantLookup         = Class.new(Instruction).include(HasAst)
-    ToplevelConstantLookup = Class.new(Instruction)
+    BeginSequence          = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndSequence            = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+
+    OpenClass              = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    CloseClass             = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+
+    BeginConstLookup       = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    EndConstLookup         = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
+
+    ToplevelConstantLookup = Class.new(Instruction).include(Indentation::NoOp)
   end
 
   def self.parse(raw_code)
@@ -40,20 +59,28 @@ module MyRuby
     case ast.type
     when :begin
       instructions << Instructions::BeginSequence.new(ast: ast)
-      ast.children.each { |child| walk child, instructions }
+      ast.children.each { |child| self.walk(child, instructions) }
       instructions << Instructions::EndSequence.new(ast: ast)
     when :class
       instructions << Instructions::OpenClass.new(ast: ast)
       name, superclass, body = ast.children
-      walk name, instructions
+      self.walk(name, instructions)
       if superclass
-        walk superclass, instructions
+        self.walk(superclass, instructions)
       else
         instructions << Instructions::ToplevelConstantLookup.new
       end
-      walk body, instructions
+      self.walk(body, instructions)
       instructions << Instructions::CloseClass.new(ast: ast)
     when :const
+      instructions << Instructions::BeginConstLookup.new(ast: ast)
+      namespace, value = ast.children
+      if namespace
+        self.walk(namespace, instructions)
+      else
+        instructions << Instructions::ToplevelConstantLookup.new
+      end
+      instructions << Instructions::EndConstLookup.new(ast: ast)
     when :send
     when :def
     when :args
@@ -84,7 +111,16 @@ CODE
 ast          = MyRuby.parse(raw_code)
 instructions = MyRuby.walk ast
 
-puts instructions.map(&:inspect)
+instructions.inject(0) do |depth, instruction|
+  puts "  " * depth + instruction.inspect
+  if instruction.indent?
+    depth + 1
+  elsif instruction.dedent?
+    depth - 1
+  else
+    depth
+  end
+end
 
 # => (begin
 #      (class
