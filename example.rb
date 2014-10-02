@@ -87,6 +87,7 @@ module MyRuby
     GetSymbol                       = Class.new(Instruction).include(Indentation::NoOp).include(HasAst)
     Self                            = Class.new(Instruction).include(Indentation::NoOp)
     ToplevelConstantLookup          = Class.new(Instruction).include(Indentation::NoOp)
+    LookupLocalVariable             = Class.new(Instruction).include(Indentation::NoOp).include(HasAst).include(HasName)
   end
 
   def self.parse(raw_code)
@@ -177,6 +178,7 @@ module MyRuby
       self.walk(value, instructions)
       instructions << Instructions::EndLocalVariableAssignment.new(ast: ast)
     when :lvar
+      instructions << Instructions::LookupLocalVariable.new(ast: ast, name: name)
     when :str
     else
       raise "DID NOT HANDLE #{ast.inspect}"
