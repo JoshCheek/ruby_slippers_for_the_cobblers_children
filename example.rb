@@ -197,18 +197,7 @@ module MyRuby
   end
 end
 
-raw_code = <<CODE
-class User
-  attr_reader :name
-  def initialize(name)
-    @name = name
-  end
-end
-
-user = User.new("Josh")
-puts user.name
-CODE
-
+raw_code     = File.read File.expand_path('../input.rb', __FILE__)
 ast          = MyRuby.parse(raw_code)
 instructions = MyRuby.walk ast
 
