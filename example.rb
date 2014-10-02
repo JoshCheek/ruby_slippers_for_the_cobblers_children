@@ -65,7 +65,7 @@ module MyRuby
     BeginFindReceiver               = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
     EndFindReceiver                 = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
 
-    SetMethodName                   = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
+    SetMethodName                   = Class.new(Instruction).include(HasAst).include(Indentation::NoOp)
 
     BeginAddArgs                    = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
     EndAddArgs                      = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
@@ -88,9 +88,9 @@ module MyRuby
     BeginLocalVariableAssignment    = Class.new(Instruction).include(HasAst).include(Indentation::Indent)
     EndLocalVariableAssignment      = Class.new(Instruction).include(HasAst).include(Indentation::DeDent)
 
-    RequiredParameter               = Class.new(Instruction).include(HasAst).include(Indentation::Indent).include(HasName)
-    SetInstanceVariableName         = Class.new(Instruction).include(HasAst).include(Indentation::Indent).include(HasName)
-    SetLocalVariableName            = Class.new(Instruction).include(HasAst).include(Indentation::Indent).include(HasName)
+    RequiredParameter               = Class.new(Instruction).include(HasAst).include(Indentation::NoOp).include(HasName)
+    SetInstanceVariableName         = Class.new(Instruction).include(HasAst).include(Indentation::NoOp).include(HasName)
+    SetLocalVariableName            = Class.new(Instruction).include(HasAst).include(Indentation::NoOp).include(HasName)
 
     GetSymbol                       = Class.new(Instruction).include(Indentation::NoOp).include(HasAst)
     Self                            = Class.new(Instruction).include(Indentation::NoOp)
