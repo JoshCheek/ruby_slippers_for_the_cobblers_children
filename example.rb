@@ -112,14 +112,10 @@ ast          = MyRuby.parse(raw_code)
 instructions = MyRuby.walk ast
 
 instructions.inject(0) do |depth, instruction|
+  depth -= 1 if instruction.dedent?
   puts "  " * depth + instruction.inspect
-  if instruction.indent?
-    depth + 1
-  elsif instruction.dedent?
-    depth - 1
-  else
-    depth
-  end
+  depth += 1 if instruction.indent?
+  depth
 end
 
 # => (begin
