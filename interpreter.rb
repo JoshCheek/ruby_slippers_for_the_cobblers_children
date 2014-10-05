@@ -33,7 +33,7 @@ class Interpreter
       rb_Object      = world.add_object RbClass, name: :Object,      klass: nil, superclass: rb_BasicObject
       rb_Class       = world.add_object RbClass, name: :Class,       klass: nil, superclass: rb_Object
 
-      world.toplevel_const = rb_Object
+      world.toplevel_namespace = rb_Object
 
       rb_BasicObject.klass = rb_Class
       rb_Object.klass      = rb_Class
@@ -48,7 +48,7 @@ class Interpreter
       rb_main = world.add_object RbObject, klass: rb_Object
       toplevel_binding = RbBinding.new ast:         nil,
                                        parent:      nil,
-                                       constant:    world.toplevel_const,
+                                       constant:    world.toplevel_namespace,
                                        self_object: rb_main
 
       world.push toplevel_binding
@@ -63,7 +63,7 @@ class Interpreter
       world
     end
 
-    attr_accessor :toplevel_const, :objects, :singletons
+    attr_accessor :toplevel_namespace, :objects, :singletons
 
     def initialize
       self.stack             = []
@@ -76,7 +76,7 @@ class Interpreter
       current_scope.self_object
     end
 
-    def current_constant
+    def current_namespace
       current_scope.constant
     end
 
@@ -180,29 +180,27 @@ class Interpreter
     parser.parse buffer
   end
 
-  # TODO: rename current_constant -> current_namespace
-  #       toplevel_constant -> toplevel_namespace
   def eval_ast(ast)
     case ast.type
     when :begin
       world.push RbBinding.new(ast:         ast,
                                parent:      world.current_scope,
-                               constant:    world.current_constant,
+                               constant:    world.current_namespace,
                                self_object: world.current_object)
       ast.children.each { |child| eval_ast child }
       world.pop
     when :class
       # target is (const nil :User)
       target, superclass, body = ast.children
-      superclass ||= world.toplevel_const
+      superclass ||= world.toplevel_namespace
       new_class_name = target.children.last
-      namespace      = world.current_constant
+      namespace      = world.current_namespace
       if namespace.has_constant? new_class_name
         klass = namespace.get_constant new_class_name
       else
         klass = RbClass.new name:       new_class_name,
                             superclass: superclass,
-                            klass:      world.toplevel_const.get_constant(:Class),
+                            klass:      world.toplevel_namespace.get_constant(:Class),
                             superclass: superclass,
                             object_id:  world.objects.size
         namespace.add_constant new_class_name, klass
@@ -222,9 +220,9 @@ class Interpreter
       method = RbBinding.new ast:         ast,
                              signature:   signature,
                              parent:      nil,
-                             constant:    world.current_constant,
+                             constant:    world.current_namespace,
                              self_object: world.singleton(:nil)
-      world.current_constant.method_table[method_name] = method
+      world.current_namespace.method_table[method_name] = method
 #          (def :initialize
 #            (args
 #              (arg :name))
@@ -253,7 +251,7 @@ class Interpreter
     "#{world.objects.map(&:last).map { |o| "  #{o.inspect}\n" }.join}"
   end
 
-  def inspect_const_tree(const=world.toplevel_const, depth=1, already_seen=[])
+  def inspect_const_tree(const=world.toplevel_namespace, depth=1, already_seen=[])
     return '' if already_seen.include? const
     already_seen << const
     padding = ('  ' * depth)
