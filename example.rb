@@ -27,6 +27,7 @@ end
 interpreter = Interpreter.new
 # p interpreter.parse(code)
 interpreter.eval code#, visitor
+puts "-----"
 puts interpreter.pretty_inspect
 
 # (begin

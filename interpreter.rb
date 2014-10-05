@@ -12,7 +12,8 @@ class Interpreter
 
     # prob should be something more like https://github.com/JoshCheek/bindable_block/blob/aea3b9bbdcaf9e9f5d938b05578827ca5d480bdc/lib/bindable_block/arg_aligner.rb
     def locals_for(values)
-      Hash[values.zip(arglist)]
+      argnames = arglist.map(&:last)
+      Hash[argnames.zip(values)]
     end
   end
 
@@ -28,7 +29,22 @@ class Interpreter
     end
 
     def inspect
-      "#<RbBinding ast:#{!!ast} parent:#{!!parent} constant:#{constant.inspect} self:#{self_object.inspect}>"
+      ast_inspected = !ast ? nil : ast.kind_of?(Proc) ? 'proc' : "(#{ast.type}...)"
+      "#<RbBinding ast:#{ast_inspected} parent:#{!!parent} constant:#{constant.inspect} self:#{self_object.inspect} local_vars=#{local_vars.inspect}>"
+    end
+
+    def set_local(name, val)
+      local_vars[name] = val
+    end
+
+    def get_local(name)
+      local_vars.fetch(name) {
+        if parent
+          parent.get_local(name)
+        else
+          raise "NO LOCAL! #{name.inspect}"
+        end
+      }
     end
   end
 
@@ -60,7 +76,6 @@ class Interpreter
       singletons.fetch name
     end
 
-    # is this really just "Class#allocate" ?
     def add_object(type, attrs)
       id = self.current_object_id
       self.current_object_id += 1
@@ -104,6 +119,14 @@ class Interpreter
       self.ivars         = {}
       self.object_id     = object_id
       self.internal_vars = {}
+    end
+
+    def set_ivar(name, value)
+      ivars[name] = value
+    end
+
+    def get_ivar(name)
+      ivars[name]
     end
 
     def set_internal(key, value)
@@ -220,6 +243,18 @@ class Interpreter
       self_object: rb_nil
     )
 
+    # Class
+    rb_Class.def_method :allocate, RbBinding.new(
+      local_vars:  {},
+      signature:   Signature.new([]), # these will be set in binding
+      ast:         lambda { |world, bnd|
+        world.add_object(RbObject, klass: bnd.self_object)
+      },
+      parent:      rb_nil,
+      constant:    rb_nil,
+      self_object: rb_nil
+    )
+
     # Symbol
     rb_Symbol = world.add_object RbClass, klass: rb_Class, superclass: rb_Object, name: :Symbol
     world.toplevel_namespace.add_constant :Symbol, rb_Symbol
@@ -232,16 +267,36 @@ class Interpreter
       self_object: rb_nil
     )
 
+    # String
+    rb_String = world.add_object RbClass, klass: rb_Class, superclass: rb_Object, name: :String
+    world.toplevel_namespace.add_constant :String, rb_String
+    rb_Object.def_method :inspect, RbBinding.new(
+      local_vars:  {},
+      signature:   Signature.new([]), # these will be set in binding
+      ast:         lambda { |world, binding| binding.self_object.get_internal(:value).to_s },
+      parent:      rb_nil,
+      constant:    rb_nil,
+      self_object: rb_nil
+    )
+
     # init the world
     rb_Object.def_method :instance_variable_get, RbBinding.new(
       local_vars:  {},
-      signature:   Signature.new([:req, :ivar_name]), # these will be set in binding
+      signature:   Signature.new([[:req, :ivar_name]]), # these will be set in binding
       ast:         lambda { |world, binding| binding.self_object.get_ivar binding.get_local(:ivar_name) },
       parent:      rb_nil,
       constant:    rb_nil,
       self_object: rb_nil
     )
 
+    rb_Object.def_method :puts, RbBinding.new(
+      local_vars:  {},
+      signature:   Signature.new([[:rest, :strings_for_now]]),
+      ast:         lambda { |world, binding| ::Kernel.puts "PRINTED INTERNALLY: #{binding.get_local(:strings_for_now).inspect}"; rb_nil },
+      parent:      rb_nil,
+      constant:    rb_nil,
+      self_object: rb_nil
+    )
     eval File.read(File.expand_path('../init.rb', __FILE__))
   end
 
@@ -260,8 +315,8 @@ class Interpreter
 
   def eval_ast(ast)
     # to allow for interop between parsed code and internal code
-    return ast.call(world) if ast.kind_of? Proc
-    return world.singleton(:nil)
+    return ast.call(world, world.current_scope) if ast.kind_of? Proc
+    return world.singleton(:nil)                if ast.nil?
 
     case ast.type
     when :begin
@@ -269,8 +324,10 @@ class Interpreter
                                parent:      world.current_scope,
                                constant:    world.current_namespace,
                                self_object: world.current_object)
-      ast.children.each { |child| eval_ast child }
+      return_val = nil
+      ast.children.each { |child| return_val = eval_ast child }
       world.pop
+      return_val
     when :class
       # target is (const nil :User)
       target, superclass, body = ast.children
@@ -291,18 +348,13 @@ class Interpreter
                                parent:      nil,
                                constant:    klass,
                                self_object: klass
-      eval_ast(body)
+      result = eval_ast(body)
       world.pop
     when :send
-      if ast.children.size != 3
-        require "pry"
-        binding.pry
-      end
-
-      get_target, message, get_arg = ast.children
+      get_target, message, *arg_getters = ast.children
       target = get_target ? eval_ast(get_target) : world.current_scope.self_object
-      arg    = eval_ast(get_arg)
-      send_message target, message, [arg]
+      args   = arg_getters.map { |arg_getter| eval_ast arg_getter }
+      send_message target, message, args
     when :def
       method_name, args, body = ast.children
       signature = eval_ast(args)
@@ -313,20 +365,43 @@ class Interpreter
                              self_object: world.singleton(:nil)
       world.current_namespace.def_method method_name, method
       method_name
-#          (def :initialize
-#            (args
-#              (arg :name))
-#            (ivasgn :@name
-#              (lvar :name)))))
     when :args
       args = ast.children
-      Signature.new args.map { |type, name| [:req, name] } # obviously bullshit
+      Signature.new(args.map { |arg| eval_ast arg })
     when :lvasgn
       name, value_code = ast.children
       value = eval_ast(value_code)
       world.current_scope.set_local name, value
+      value
     when :sym
       world.get_symbol(ast.children.first)
+    when :str
+      if ast.children.size != 1
+        require "pry"
+        binding.pry
+      end
+      rb_String = world.toplevel_namespace.get_constant(:String)
+      string    = world.add_object RbObject, klass: rb_String
+      value     = ast.children.first
+      string.set_internal :value, value
+      value
+    when :const
+      namespace, name = ast.children
+      namespace ||= world.toplevel_namespace
+      namespace.get_constant name
+    when :lvar
+      world.current_scope.get_local ast.children.first
+    when :arg
+      [:req, ast.children.last]
+    when :self
+      world.current_scope.self_object
+    when :ivasgn
+      name, value_ast = ast.children
+      value = eval_ast(value_ast)
+      world.current_scope.self_object.set_ivar(name, value)
+    when :ivar
+      name = ast.children.first
+      world.current_scope.self_object.get_ivar(name)
     else
       raise "DID NOT HANDLE #{ast.inspect}"
     end
@@ -353,7 +428,9 @@ class Interpreter
                             local_vars:   locals,
                             self_object:  target
     world.push binding
-    eval_ast(binding.ast)
+    result = eval_ast(binding.ast)
+    world.pop
+    result
   end
 
   def pretty_inspect
@@ -371,17 +448,17 @@ class Interpreter
     already_seen << const
     padding = ('  ' * depth)
     result  = ""
-    result << padding << const.name.to_s << "\n"
+    result << padding << '::' << const.name.to_s << "\n"
 
     const.each_method do |name, method|
-      result << padding << '  ' << name.to_s << "\n"
+      result << padding << '  #' << name.to_s << "\n"
     end
 
     const.each_constant do |name, child|
       if child.kind_of? RbClass
         result << inspect_const_tree(child, depth+1, already_seen)
       else
-        result << padding << '  ' << name.to_s << "\n"
+        result << padding << '  ::' << name.to_s << "\n"
       end
     end
 
