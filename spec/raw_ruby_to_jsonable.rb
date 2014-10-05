@@ -11,7 +11,7 @@ RSpec.describe RawRubyToJsonable do
 
   def assert_valid(json)
     case json
-    when String, Fixnum
+    when String, Fixnum, nil
       # no op
     when Array
       json.each { |element| assert_valid element }
@@ -48,6 +48,24 @@ RSpec.describe RawRubyToJsonable do
       expect(expr2['type']).to eq 'integer'
       expect(expr2['highlightings']).to eq [[2, 3]]
       expect(expr2['value']).to eq 8
+    end
+
+    example 'multiple expressions, parentheses delimiter' do
+      result = call "(9\n8)"
+      expect(result['type']).to eq 'expressions'
+      expect(result['highlightings']).to eq [[0, 5]]
+      expect(result['expressions'].size).to eq 2
+    end
+
+    example 'multiple expressions, begin/end delimiter' do
+      result = call "begin\n 1\nend"
+      expect(result['type']).to eq 'keyword_begin'
+      expect(result['highlightings']).to eq [[0, 5], [9, 12]]
+      expr, *rest = result['expressions']
+      expect(rest).to be_empty
+      expect(expr['type']).to eq 'integer'
+      expect(expr['highlightings']).to eq [[7, 8]]
+      expect(expr['value']).to eq 1
     end
   end
 

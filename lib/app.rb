@@ -4,7 +4,7 @@ require 'json'
 class RawRubyToJsonable
   # receives raw ruby code (a String)
   # return a data structure that can be directly converted into json
-  # meaning String, Array, Hash, Fixnum, Float
+  # meaning String, Array, Hash, Fixnum, Float, nil
   def self.call(raw_code)
     new(raw_code).call
   end
@@ -33,6 +33,8 @@ class RawRubyToJsonable
   def translate(ast)
     highlightings = []
     case ast.type
+
+    # eg "1"
     when :int
       raise if ast.children.size > 1
       expr = ast.loc.expression
@@ -41,10 +43,21 @@ class RawRubyToJsonable
        'highlightings' => highlightings,
        'value'         => ast.children.first
       }
+    # eg "1;2" and "(1;2)"
     when :begin
       expr = ast.loc.expression
       highlightings << [expr.begin_pos, expr.end_pos]
       {'type'          => 'expressions',
+       'highlightings' => highlightings,
+       'expressions'   => ast.children.map { |child| translate child }
+      }
+    # eg "begin;1;2;end"
+    when :kwbegin
+      kwbegin = ast.loc.begin
+      highlightings << [kwbegin.begin_pos, kwbegin.end_pos]
+      kwend = ast.loc.end
+      highlightings << [kwend.begin_pos, kwend.end_pos]
+      {'type'          => 'keyword_begin',
        'highlightings' => highlightings,
        'expressions'   => ast.children.map { |child| translate child }
       }
