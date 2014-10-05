@@ -20,6 +20,8 @@ end
 interpreter = Interpreter.new
 interpreter.eval code#, visitor
 
+interpreter.print_world($stdout)
+
 # => (begin
 #      (class
 #        (const nil :User) nil
