@@ -1,0 +1,1 @@
+main = asText "Hello World"
