@@ -14,8 +14,7 @@ class RawRubyToJsonable
   end
 
   def call
-    ast = parse(raw_code)
-    ast.inspect
+    translate parse raw_code
   end
 
   private
@@ -29,6 +28,22 @@ class RawRubyToJsonable
     builder.emit_file_line_as_literals = false
     parser                             = Parser::CurrentRuby.new builder
     parser.parse buffer
+  end
+
+  def translate(ast)
+    highlightings = []
+    case ast.type
+    when :int
+      raise if ast.children.size > 1
+      expr = ast.loc.expression
+      highlightings << [expr.begin_pos, expr.end_pos]
+      {'type'          => 'integer',
+       'highlightings' => highlightings,
+       'value'         => ast.children.first
+      }
+    else
+      raise "No case for #{ast.inspect}"
+    end
   end
 end
 
