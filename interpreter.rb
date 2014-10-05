@@ -1,21 +1,29 @@
 require 'parser/current'    # => true
 
 class Interpreter
+
+  # -> _, _=_, *_, _:_, _:, **_ { }.parameters.map &:first
+  # # => [:req, :opt, :rest, :keyreq, :key, :keyrest]
   class Signature
     attr_accessor :arglist
     def initialize(arglist)
       self.arglist = arglist
     end
+
+    # prob should be something more like https://github.com/JoshCheek/bindable_block/blob/aea3b9bbdcaf9e9f5d938b05578827ca5d480bdc/lib/bindable_block/arg_aligner.rb
+    def locals_for(values)
+      Hash[values.zip(arglist)]
+    end
   end
 
   class RbBinding
     attr_accessor :ast, :parent, :constant, :self_object, :local_vars, :signature
-    def initialize(ast: nil, signature: Signature.new([]), parent:, constant:, self_object:)
+    def initialize(ast: nil, local_vars:{}, signature: Signature.new([]), parent:, constant:, self_object:)
       self.ast         = ast
       self.parent      = parent
       self.constant    = constant
       self.signature   = signature
-      self.local_vars  = {}
+      self.local_vars  = local_vars
       self.self_object = self_object
     end
 
@@ -25,48 +33,11 @@ class Interpreter
   end
 
   class World
-    def self.default
-      world = new
-
-      # toplevel infrastructure
-      rb_BasicObject = world.add_object RbClass, name: :BasicObject, klass: nil, superclass: nil
-      rb_Object      = world.add_object RbClass, name: :Object,      klass: nil, superclass: rb_BasicObject
-      rb_Class       = world.add_object RbClass, name: :Class,       klass: nil, superclass: rb_Object
-
-      world.toplevel_namespace = rb_Object
-
-      rb_BasicObject.klass = rb_Class
-      rb_Object.klass      = rb_Class
-      rb_Class.klass       = rb_Class
-
-      rb_NilClass = world.add_object RbClass,  klass: rb_Class, superclass: rb_Object, name: :NilClass
-      rb_nil      = world.add_object RbObject, klass: rb_NilClass
-      world.add_singleton :nil, rb_nil
-      rb_BasicObject.superclass = rb_NilClass
-
-      # main/toplevel_binding
-      rb_main = world.add_object RbObject, klass: rb_Object
-      toplevel_binding = RbBinding.new ast:         nil,
-                                       parent:      nil,
-                                       constant:    world.toplevel_namespace,
-                                       self_object: rb_main
-
-      world.push toplevel_binding
-
-      # namespacing
-      rb_Object.add_constant :Object           , rb_Object
-      rb_Object.add_constant :Class            , rb_Class
-      rb_Object.add_constant :BasicObject      , rb_BasicObject
-      rb_Object.add_constant :NilClass         , rb_NilClass
-      rb_Object.add_constant :TOPLEVEL_BINDING , toplevel_binding
-
-      world
-    end
-
-    attr_accessor :toplevel_namespace, :objects, :singletons
+    attr_accessor :toplevel_namespace, :objects, :singletons, :symbols
 
     def initialize
       self.stack             = []
+      self.symbols           = {}
       self.objects           = {}
       self.singletons        = {}
       self.current_object_id = 0
@@ -84,14 +55,26 @@ class Interpreter
       raise "already set!" if singletons[name]
       singletons[name] = obj
     end
+
     def singleton(name)
       singletons.fetch name
     end
 
+    # is this really just "Class#allocate" ?
     def add_object(type, attrs)
       id = self.current_object_id
       self.current_object_id += 1
       objects[id] = type.new(attrs.merge object_id: id)
+    end
+
+    def get_symbol(name)
+      value = symbols[name]
+      return value if value
+      symbol_class      = toplevel_namespace.get_constant(:Symbol)
+      symbol            = add_object RbObject, klass: symbol_class
+      symbols[name] = symbol
+      symbol.set_internal :value, name
+      symbol
     end
 
     def current_scope
@@ -111,19 +94,24 @@ class Interpreter
     end
 
     protected
-    attr_accessor :current_object_id, :stack
+    attr_accessor :current_object_id, :stack, :symbols
   end
 
   class RbObject
-    attr_accessor :object_id, :klass, :instance_variable_table
+    attr_accessor :object_id, :klass, :ivars, :internal_vars
     def initialize(klass:, object_id:)
-      self.klass                   = klass
-      self.instance_variable_table = {}
-      self.object_id               = object_id
+      self.klass         = klass
+      self.ivars         = {}
+      self.object_id     = object_id
+      self.internal_vars = {}
     end
-    def inspect
-      ivars = instance_variable_table.map { |name, value| "#{name}=#{value.inspect}" }.join(' ')
-      "#<#{klass.name}:#{object_id}#{' ' unless ivars.empty?}#{ivars}>"
+
+    def set_internal(key, value)
+      internal_vars[key] = value
+    end
+
+    def get_internal(key)
+      internal_vars.fetch(key)
     end
   end
 
@@ -137,11 +125,28 @@ class Interpreter
       super(keywords)
     end
 
+    def has_method?(name)
+      method_table.key? name
+    end
+
+    def def_method(name, method)
+      method_table[name] = method
+    end
+
+    def get_method(name)
+      method_table.fetch name
+    end
+
+    def each_method(&block)
+      method_table.each(&block)
+    end
+
     def inspect
       name.to_s
     end
 
     def add_constant(name, value)
+      raise "Already assigned #{name.inspect}" if has_constant? name # technically not correct behaviour, but I'm tired and making a lot of mistakes
       constants[name] = value
     end
 
@@ -162,9 +167,82 @@ class Interpreter
     attr_accessor :constants
   end
 
+
   attr_accessor :world
   def initialize
-    self.world = World.default
+    self.world = World.new
+
+    # toplevel infrastructure
+    rb_BasicObject = world.add_object RbClass, name: :BasicObject, klass: nil, superclass: nil
+    rb_Object      = world.add_object RbClass, name: :Object,      klass: nil, superclass: rb_BasicObject
+    rb_Class       = world.add_object RbClass, name: :Class,       klass: nil, superclass: rb_Object
+
+    rb_BasicObject.klass = rb_Class
+    rb_Object.klass      = rb_Class
+    rb_Class.klass       = rb_Class
+
+    world.toplevel_namespace = rb_Object
+    world.toplevel_namespace.add_constant :Object      , rb_Object
+    world.toplevel_namespace.add_constant :Class       , rb_Class
+    world.toplevel_namespace.add_constant :BasicObject , rb_BasicObject
+
+    rb_NilClass = world.add_object RbClass,  klass: rb_Class, superclass: rb_Object, name: :NilClass
+    rb_nil      = world.add_object RbObject, klass: rb_NilClass
+    world.add_singleton :nil, rb_nil
+    rb_BasicObject.superclass = rb_NilClass
+    world.toplevel_namespace.add_constant :NilClass, rb_NilClass
+
+    # main/toplevel_binding
+    rb_main = world.add_object RbObject, klass: rb_Object
+    toplevel_binding = RbBinding.new ast:         nil,
+                                     parent:      nil,
+                                     constant:    world.toplevel_namespace,
+                                     self_object: rb_main
+
+    world.push toplevel_binding
+    rb_Object.add_constant :TOPLEVEL_BINDING, toplevel_binding
+
+    # Object
+    rb_Object.def_method :inspect, RbBinding.new(
+      local_vars:  {},
+      signature:   Signature.new([]), # these will be set in binding
+      ast:         lambda { |world, binding|
+        s = binding.self_object
+        if binding.klass.has_method?(:inspect) # should actually use respond_to
+          send_message s, :inspect, []
+        else
+          inspected_ivars = s.ivars.map { |name, value| "#{name}=#{value.inspect}" }.join(' ')
+          "#<#{s.klass.name}:#{s.object_id}#{' ' unless s.ivars.empty?}#{inspected_ivars}>"
+        end
+      },
+      parent:      rb_nil,
+      constant:    rb_nil,
+      self_object: rb_nil
+    )
+
+    # Symbol
+    rb_Symbol = world.add_object RbClass, klass: rb_Class, superclass: rb_Object, name: :Symbol
+    world.toplevel_namespace.add_constant :Symbol, rb_Symbol
+    rb_Object.def_method :inspect, RbBinding.new(
+      local_vars:  {},
+      signature:   Signature.new([]), # these will be set in binding
+      ast:         lambda { |world, binding| binding.self_object.get_internal(:value).to_s },
+      parent:      rb_nil,
+      constant:    rb_nil,
+      self_object: rb_nil
+    )
+
+    # init the world
+    rb_Object.def_method :instance_variable_get, RbBinding.new(
+      local_vars:  {},
+      signature:   Signature.new([:req, :ivar_name]), # these will be set in binding
+      ast:         lambda { |world, binding| binding.self_object.get_ivar binding.get_local(:ivar_name) },
+      parent:      rb_nil,
+      constant:    rb_nil,
+      self_object: rb_nil
+    )
+
+    eval File.read(File.expand_path('../init.rb', __FILE__))
   end
 
   def eval(raw_code)
@@ -181,6 +259,10 @@ class Interpreter
   end
 
   def eval_ast(ast)
+    # to allow for interop between parsed code and internal code
+    return ast.call(world) if ast.kind_of? Proc
+    return world.singleton(:nil)
+
     case ast.type
     when :begin
       world.push RbBinding.new(ast:         ast,
@@ -211,18 +293,26 @@ class Interpreter
                                self_object: klass
       eval_ast(body)
       world.pop
-    when :const
-      raise 'implement me'
     when :send
+      if ast.children.size != 3
+        require "pry"
+        binding.pry
+      end
+
+      get_target, message, get_arg = ast.children
+      target = get_target ? eval_ast(get_target) : world.current_scope.self_object
+      arg    = eval_ast(get_arg)
+      send_message target, message, [arg]
     when :def
       method_name, args, body = ast.children
       signature = eval_ast(args)
-      method = RbBinding.new ast:         ast,
+      method = RbBinding.new ast:         body, # conflation of ast: thing that tells me where in the source I came from, vs here, it's "thing I want to execute"
                              signature:   signature,
                              parent:      nil,
                              constant:    world.current_namespace,
                              self_object: world.singleton(:nil)
-      world.current_namespace.method_table[method_name] = method
+      world.current_namespace.def_method method_name, method
+      method_name
 #          (def :initialize
 #            (args
 #              (arg :name))
@@ -231,14 +321,39 @@ class Interpreter
     when :args
       args = ast.children
       Signature.new args.map { |type, name| [:req, name] } # obviously bullshit
-    when :arg
-    when :ivasgn
     when :lvasgn
-    when :lvar
-    when :str
+      name, value_code = ast.children
+      value = eval_ast(value_code)
+      world.current_scope.set_local name, value
+    when :sym
+      world.get_symbol(ast.children.first)
     else
       raise "DID NOT HANDLE #{ast.inspect}"
     end
+  end
+
+  def send_message(target, message, args)
+    ancestor = target.klass
+    until !ancestor || ancestor.has_method?(message)
+      break if RbClass === ancestor
+      ancestor = ancestor.superclass
+    end
+
+    unless ancestor.has_method? message
+      require "pry"
+      binding.pry
+    end
+
+    method  = ancestor.get_method(message)
+    locals  = method.signature.locals_for(args)
+    binding = RbBinding.new ast:          method.ast,
+                            signature:    method.signature,
+                            parent:       method.parent,
+                            constant:     target.klass,
+                            local_vars:   locals,
+                            self_object:  target
+    world.push binding
+    eval_ast(binding.ast)
   end
 
   def pretty_inspect
@@ -257,6 +372,11 @@ class Interpreter
     padding = ('  ' * depth)
     result  = ""
     result << padding << const.name.to_s << "\n"
+
+    const.each_method do |name, method|
+      result << padding << '  ' << name.to_s << "\n"
+    end
+
     const.each_constant do |name, child|
       if child.kind_of? RbClass
         result << inspect_const_tree(child, depth+1, already_seen)
@@ -264,6 +384,7 @@ class Interpreter
         result << padding << '  ' << name.to_s << "\n"
       end
     end
+
     result
   end
 end
