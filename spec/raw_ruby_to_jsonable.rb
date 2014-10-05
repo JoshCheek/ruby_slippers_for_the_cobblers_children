@@ -33,12 +33,12 @@ RSpec.describe RawRubyToJsonable do
       expect(result['value']).to eq 1
     end
 
-    example 'multiple expressions, no delimiter' do
+    example 'multiple expressions, no bookends, newline delimited' do
       result = call "9\n8"
       expect(result['type']).to eq 'expressions'
       expect(result['highlightings']).to eq [[0, 3]]
 
-      expr1, expr2, *rest = result['expressions']
+      expr1, expr2, *rest = result['children']
       expect(rest).to be_empty
 
       expect(expr1['type']).to eq 'integer'
@@ -50,22 +50,37 @@ RSpec.describe RawRubyToJsonable do
       expect(expr2['value']).to eq 8
     end
 
-    example 'multiple expressions, parentheses delimiter' do
+    example 'multiple expressions, parentheses bookends, newline delimited' do
       result = call "(9\n8)"
       expect(result['type']).to eq 'expressions'
       expect(result['highlightings']).to eq [[0, 5]]
-      expect(result['expressions'].size).to eq 2
+      expect(result['children'].size).to eq 2
     end
 
-    example 'multiple expressions, begin/end delimiter' do
+    example 'multiple expressions, begin/end bookends, newline delimited' do
       result = call "begin\n 1\nend"
       expect(result['type']).to eq 'keyword_begin'
       expect(result['highlightings']).to eq [[0, 5], [9, 12]]
-      expr, *rest = result['expressions']
+      expr, *rest = result['children']
       expect(rest).to be_empty
       expect(expr['type']).to eq 'integer'
       expect(expr['highlightings']).to eq [[7, 8]]
       expect(expr['value']).to eq 1
+    end
+
+    example 'semicolon delimited' do
+      result = call "1;2"
+      expect(result['type']).to eq 'expressions'
+      expect(result['highlightings']).to eq [[0, 3]]
+      expect(result['children'].size).to eq 2
+
+      result = call "(1;2)"
+      expect(result['type']).to eq 'expressions'
+      expect(result['children'].size).to eq 2
+
+      result = call "begin;1;end"
+      expect(result['type']).to eq 'keyword_begin'
+      expect(result['children'].size).to eq 1
     end
   end
 

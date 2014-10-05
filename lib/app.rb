@@ -49,7 +49,7 @@ class RawRubyToJsonable
       highlightings << [expr.begin_pos, expr.end_pos]
       {'type'          => 'expressions',
        'highlightings' => highlightings,
-       'expressions'   => ast.children.map { |child| translate child }
+       'children'      => ast.children.map { |child| translate child }
       }
     # eg "begin;1;2;end"
     when :kwbegin
@@ -59,7 +59,7 @@ class RawRubyToJsonable
       highlightings << [kwend.begin_pos, kwend.end_pos]
       {'type'          => 'keyword_begin',
        'highlightings' => highlightings,
-       'expressions'   => ast.children.map { |child| translate child }
+       'children'      => ast.children.map { |child| translate child }
       }
     else
       raise "No case for #{ast.inspect}"
