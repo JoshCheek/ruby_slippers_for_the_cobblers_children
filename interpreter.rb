@@ -1,12 +1,21 @@
 require 'parser/current'    # => true
 
 class Interpreter
+  class Signature
+    attr_accessor :arglist
+    def initialize(arglist)
+      self.arglist = arglist
+    end
+  end
+
   class RbBinding
-    attr_accessor :ast, :parent, :constant, :self_object
-    def initialize(ast: nil, parent:, constant:, self_object:)
+    attr_accessor :ast, :parent, :constant, :self_object, :local_vars, :signature
+    def initialize(ast: nil, signature: Signature.new([]), parent:, constant:, self_object:)
       self.ast         = ast
       self.parent      = parent
       self.constant    = constant
+      self.signature   = signature
+      self.local_vars  = {}
       self.self_object = self_object
     end
 
@@ -19,6 +28,7 @@ class Interpreter
     def self.default
       world          = new
 
+      # classes
       rb_BasicObject = RbClass.new name:       :BasicObject,
                                    superclass: nil,
                                    klass:      nil,
@@ -39,32 +49,51 @@ class Interpreter
       rb_Object.klass      = rb_Class
       world.toplevel_const = rb_Object
 
+      rb_NilClass = RbClass.new name:       :NilClass,
+                                superclass: rb_Object,
+                                klass:      Class,
+                                object_id:  3
+
+      # special objects
       rb_main              = RbObject.new klass:        rb_Object,
-                                          object_id:    3 # we'll deal with singleton stuff later
+                                          object_id:    4 # we'll deal with singleton stuff later
+
+      rb_nil               = RbObject.new klass:        rb_NilClass,
+                                          object_id:    5
 
       toplevel_binding     = RbBinding.new ast:         nil,
                                            parent:      nil,
                                            constant:    world.toplevel_const,
                                            self_object: rb_main
 
+      world.singletons[:nil] = rb_nil
+      world.stack.push toplevel_binding
+
+      # constants
+      rb_Object.constants[:Class]            = rb_Class
       rb_Object.constants[:Object]           = rb_Object
-      rb_Object.constants[:BasicObject]      = rb_Object
+      rb_Object.constants[:BasicObject]      = rb_BasicObject
+      rb_Object.constants[:NilClass]         = rb_NilClass
       rb_Object.constants[:TOPLEVEL_BINDING] = toplevel_binding
 
-      world.objects[rb_BasicObject.object_id] = rb_BasicObject
-      world.objects[rb_Object     .object_id] = rb_Object
-      world.objects[rb_Class      .object_id] = rb_Class
-      world.objects[rb_main       .object_id] = rb_main
+      # adding objects
+      world.objects[toplevel_binding .object_id] = toplevel_binding
+      world.objects[rb_BasicObject   .object_id] = rb_BasicObject
+      world.objects[rb_Object        .object_id] = rb_Object
+      world.objects[rb_Class         .object_id] = rb_Class
+      world.objects[rb_NilClass      .object_id] = rb_NilClass
+      world.objects[rb_main          .object_id] = rb_main
+      world.objects[rb_nil           .object_id] = rb_nil
 
-      world.stack.push toplevel_binding
       world
     end
 
-    attr_accessor :stack, :toplevel_const, :objects
+    attr_accessor :stack, :toplevel_const, :objects, :singletons
 
     def initialize
-      self.stack   = []
-      self.objects = {}
+      self.stack      = []
+      self.objects    = {}
+      self.singletons = {}
     end
 
     def current_scope
@@ -78,13 +107,17 @@ class Interpreter
     def current_constant
       current_scope.constant
     end
+
+    def singleton(name)
+      singletons.fetch name
+    end
   end
 
   class RbObject
     attr_accessor :object_id, :klass, :instance_variable_table
-    def initialize(klass:, instance_variable_table: {}, object_id:)
+    def initialize(klass:, object_id:)
       self.klass                   = klass
-      self.instance_variable_table = instance_variable_table
+      self.instance_variable_table = {}
       self.object_id               = object_id
     end
     def inspect
@@ -125,6 +158,8 @@ class Interpreter
     parser.parse buffer
   end
 
+  # TODO: rename current_constant -> current_namespace
+  #       toplevel_constant -> toplevel_namespace
   def eval_ast(ast)
     case ast.type
     when :begin
@@ -139,7 +174,7 @@ class Interpreter
       target, superclass, body = ast.children
       superclass ||= world.toplevel_const
       new_class_name = target.children.last
-      namespace      = world.current_constant # obviously flawed
+      namespace      = world.current_constant
       if namespace.constants[new_class_name]
         klass = namespace[new_class_name]
       else
@@ -157,9 +192,25 @@ class Interpreter
       eval_ast(body)
       world.stack.pop
     when :const
+      raise 'implement me'
     when :send
     when :def
+      method_name, args, body = ast.children
+      signature = eval_ast(args)
+      method = RbBinding.new ast:         ast,
+                             signature:   signature,
+                             parent:      nil,
+                             constant:    world.current_constant,
+                             self_object: world.singleton(:nil)
+      world.current_constant.method_table[method_name] = method
+#          (def :initialize
+#            (args
+#              (arg :name))
+#            (ivasgn :@name
+#              (lvar :name)))))
     when :args
+      args = ast.children
+      Signature.new args.map { |type, name| [:req, name] } # obviously bullshit
     when :arg
     when :ivasgn
     when :lvasgn
