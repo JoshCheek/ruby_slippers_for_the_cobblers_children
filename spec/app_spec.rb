@@ -15,7 +15,7 @@ RSpec.describe App do
     JSON.load(response.body)
   end
 
-  it 'does something if the code has a syntax error' do
+  it 'returns a 400 BAD REQUEST if the code has a syntax error' do
     response = post '/', '1+'
     expect(response).to be_bad_request
     expect(response.content_type).to include 'json'
