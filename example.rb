@@ -2,8 +2,15 @@ require_relative 'interpreter'
 
 code = <<CODE
 class User
-  attr_reader :name
   def initialize(name)
+    self.name = name
+  end
+
+  def name
+    @name
+  end
+
+  def name=(name)
     @name = name
   end
 end
@@ -18,26 +25,32 @@ end
 
 
 interpreter = Interpreter.new
+# p interpreter.parse(code)
 interpreter.eval code#, visitor
-
 puts interpreter.pretty_inspect
 
-# => (begin
-#      (class
-#        (const nil :User) nil
-#        (begin
-#          (send nil :attr_reader
-#            (sym :name))
-#          (def :initialize
-#            (args
-#              (arg :name))
-#            (ivasgn :@name
-#              (lvar :name)))))
-#      (lvasgn :upser
-#        (send
-#          (const nil :User) :new
-#          (str "Josh")))
-#      (send nil :puts
-#        (send
-#          (send nil :user) :name)))
-
+# (begin
+#   (class
+#     (const nil :User) nil
+#     (begin
+#       (def :initialize
+#         (args
+#           (arg :name))
+#         (send
+#           (self) :name=
+#           (lvar :name)))
+#       (def :name
+#         (args)
+#         (ivar :@name))
+#       (def :name=
+#         (args
+#           (arg :name))
+#         (ivasgn :@name
+#           (lvar :name)))))
+#   (lvasgn :user
+#     (send
+#       (const nil :User) :new
+#       (str "Josh")))
+#   (send nil :puts
+#     (send
+#       (lvar :user) :name)))
