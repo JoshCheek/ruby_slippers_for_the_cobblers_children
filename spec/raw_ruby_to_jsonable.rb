@@ -21,7 +21,7 @@ RSpec.describe RawRubyToJsonable do
         assert_valid v
       end
     else
-      raise "Unknown type: #{json.inspect}"
+      raise "#{json.inspect} does not appear to be a JSON type"
     end
   end
 
@@ -86,7 +86,49 @@ RSpec.describe RawRubyToJsonable do
 
   'set and get local variable'
   'integer literals'
+  'symbol literals' # type/highlightings/value
   'class definitions'
   'module definitions'
   # idk, look at SiB for a start
+
+  context 'send', t:true do
+    example 'with no receiver' do
+      result = call 'load'
+      expect(result['type']).to eq 'send'
+      expect(result['highlightings']).to eq [[0, 4]]
+      expect(result['target']).to eq nil
+      expect(result['message']).to eq 'load'
+      expect(result['args']).to be_empty
+    end
+
+    example 'without args' do
+      result = call '1.even?'
+      expect(result['type']).to eq 'send'
+      expect(result['highlightings']).to eq [[0, 7]]
+
+      expect(result['target']['value']).to eq 1
+      expect(result['message']).to eq 'even?'
+      expect(result['args']).to be_empty
+    end
+
+    example 'with args' do
+      result = call '1.a 2, 3'
+      expect(result['type']).to eq 'send'
+      expect(result['highlightings']).to eq [[0, 8]]
+
+      expect(result['target']['value']).to eq 1
+      expect(result['message']).to eq 'a'
+      expect(result['args'].map { |a| a['value'] }).to eq [2, 3]
+    end
+
+    example 'with operator' do
+      result = call '1 % 2'
+      expect(result['type']).to eq 'send'
+      expect(result['highlightings']).to eq [[0, 5]]
+
+      expect(result['target']['value']).to eq 1
+      expect(result['message']).to eq '%'
+      expect(result['args'].map { |a| a['value'] }).to eq [2]
+    end
+  end
 end

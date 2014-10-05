@@ -31,9 +31,10 @@ class RawRubyToJsonable
   end
 
   def translate(ast)
+    return nil if ast.nil?
+
     highlightings = []
     case ast.type
-
     # eg "1"
     when :int
       raise if ast.children.size > 1
@@ -60,6 +61,15 @@ class RawRubyToJsonable
       {'type'          => 'keyword_begin',
        'highlightings' => highlightings,
        'children'      => ast.children.map { |child| translate child }
+      }
+    when :send
+      highlightings << [ast.loc.expression.begin_pos, ast.loc.expression.end_pos]
+      target, message, *args = ast.children
+      {'type'          => 'send',
+       'highlightings' => highlightings,
+       'target'        => translate(target),
+       'message'       => message.to_s,
+       'args'          => args.map { |arg| translate arg },
       }
     else
       raise "No case for #{ast.inspect}"
