@@ -26,78 +26,50 @@ class Interpreter
 
   class World
     def self.default
-      world          = new
+      world = new
 
-      # classes
-      rb_BasicObject = RbClass.new name:       :BasicObject,
-                                   superclass: nil,
-                                   klass:      nil,
-                                   object_id:  0
+      # toplevel infrastructure
+      rb_BasicObject = world.add_object RbClass, name: :BasicObject, klass: nil, superclass: nil
+      rb_Object      = world.add_object RbClass, name: :Object,      klass: nil, superclass: rb_BasicObject
+      rb_Class       = world.add_object RbClass, name: :Class,       klass: nil, superclass: rb_Object
 
-      rb_Object      = RbClass.new name:       :Object,
-                                   superclass: rb_BasicObject,
-                                   klass:      nil,
-                                   object_id:  1
-
-      rb_Class       = RbClass.new name:       :Class,
-                                   superclass: rb_Object,
-                                   klass:      nil,
-                                   object_id:  2
-
-      rb_Class.klass       = rb_Class
-      rb_BasicObject.klass = rb_Class
-      rb_Object.klass      = rb_Class
       world.toplevel_const = rb_Object
 
-      rb_NilClass = RbClass.new name:       :NilClass,
-                                superclass: rb_Object,
-                                klass:      Class,
-                                object_id:  3
+      rb_BasicObject.klass = rb_Class
+      rb_Object.klass      = rb_Class
+      rb_Class.klass       = rb_Class
 
-      # special objects
-      rb_main              = RbObject.new klass:        rb_Object,
-                                          object_id:    4 # we'll deal with singleton stuff later
+      rb_NilClass = world.add_object RbClass,  klass: rb_Class, superclass: rb_Object, name: :NilClass
+      rb_nil      = world.add_object RbObject, klass: rb_NilClass
+      world.add_singleton :nil, rb_nil
+      rb_BasicObject.superclass = rb_NilClass
 
-      rb_nil               = RbObject.new klass:        rb_NilClass,
-                                          object_id:    5
+      # main/toplevel_binding
+      rb_main = world.add_object RbObject, klass: rb_Object
+      toplevel_binding = RbBinding.new ast:         nil,
+                                       parent:      nil,
+                                       constant:    world.toplevel_const,
+                                       self_object: rb_main
 
-      toplevel_binding     = RbBinding.new ast:         nil,
-                                           parent:      nil,
-                                           constant:    world.toplevel_const,
-                                           self_object: rb_main
+      world.push toplevel_binding
 
-      world.singletons[:nil] = rb_nil
-      world.stack.push toplevel_binding
-
-      # constants
-      rb_Object.constants[:Class]            = rb_Class
-      rb_Object.constants[:Object]           = rb_Object
-      rb_Object.constants[:BasicObject]      = rb_BasicObject
-      rb_Object.constants[:NilClass]         = rb_NilClass
-      rb_Object.constants[:TOPLEVEL_BINDING] = toplevel_binding
-
-      # adding objects
-      world.objects[toplevel_binding .object_id] = toplevel_binding
-      world.objects[rb_BasicObject   .object_id] = rb_BasicObject
-      world.objects[rb_Object        .object_id] = rb_Object
-      world.objects[rb_Class         .object_id] = rb_Class
-      world.objects[rb_NilClass      .object_id] = rb_NilClass
-      world.objects[rb_main          .object_id] = rb_main
-      world.objects[rb_nil           .object_id] = rb_nil
+      # namespacing
+      rb_Object.add_constant :Object           , rb_Object
+      rb_Object.add_constant :Class            , rb_Class
+      rb_Object.add_constant :BasicObject      , rb_BasicObject
+      rb_Object.add_constant :NilClass         , rb_NilClass
+      rb_Object.add_constant :TOPLEVEL_BINDING , toplevel_binding
 
       world
     end
 
-    attr_accessor :stack, :toplevel_const, :objects, :singletons
+    attr_accessor :toplevel_const, :objects, :singletons
 
     def initialize
-      self.stack      = []
-      self.objects    = {}
-      self.singletons = {}
-    end
-
-    def current_scope
-      stack.last
+      self.stack             = []
+      self.objects           = {}
+      self.singletons        = {}
+      self.current_object_id = 0
     end
 
     def current_object
@@ -108,9 +80,38 @@ class Interpreter
       current_scope.constant
     end
 
+    def add_singleton(name, obj)
+      raise "already set!" if singletons[name]
+      singletons[name] = obj
+    end
     def singleton(name)
       singletons.fetch name
     end
+
+    def add_object(type, attrs)
+      id = self.current_object_id
+      self.current_object_id += 1
+      objects[id] = type.new(attrs.merge object_id: id)
+    end
+
+    def current_scope
+      stack.last
+    end
+
+    def push(binding)
+      stack.push binding
+    end
+
+    def pop
+      stack.pop
+    end
+
+    def each_stack(&block)
+      stack.each(&block)
+    end
+
+    protected
+    attr_accessor :current_object_id, :stack
   end
 
   class RbObject
@@ -127,7 +128,7 @@ class Interpreter
   end
 
   class RbClass < RbObject
-    attr_accessor :name, :superclass, :method_table, :constants
+    attr_accessor :name, :superclass, :method_table
     def initialize(name: , superclass:, **keywords)
       self.name         = name
       self.superclass   = superclass
@@ -135,9 +136,30 @@ class Interpreter
       self.constants    = {}
       super(keywords)
     end
+
     def inspect
       name.to_s
     end
+
+    def add_constant(name, value)
+      constants[name] = value
+    end
+
+    def get_constant(name)
+      constants.fetch name
+    end
+
+    def has_constant?(name)
+      !!constants[name]
+    end
+
+    def each_constant(&block)
+      constants.each(&block)
+    end
+
+    private
+
+    attr_accessor :constants
   end
 
   attr_accessor :world
@@ -163,34 +185,34 @@ class Interpreter
   def eval_ast(ast)
     case ast.type
     when :begin
-      world.stack.push RbBinding.new(ast:         ast,
-                                     parent:      world.current_scope,
-                                     constant:    world.current_constant,
-                                     self_object: world.current_object)
+      world.push RbBinding.new(ast:         ast,
+                               parent:      world.current_scope,
+                               constant:    world.current_constant,
+                               self_object: world.current_object)
       ast.children.each { |child| eval_ast child }
-      world.stack.pop
+      world.pop
     when :class
       # target is (const nil :User)
       target, superclass, body = ast.children
       superclass ||= world.toplevel_const
       new_class_name = target.children.last
       namespace      = world.current_constant
-      if namespace.constants[new_class_name]
-        klass = namespace[new_class_name]
+      if namespace.has_constant? new_class_name
+        klass = namespace.get_constant new_class_name
       else
         klass = RbClass.new name:       new_class_name,
                             superclass: superclass,
-                            klass:      world.toplevel_const.constants[:Class],
+                            klass:      world.toplevel_const.get_constant(:Class),
                             superclass: superclass,
                             object_id:  world.objects.size
-        namespace.constants[new_class_name] = klass
+        namespace.add_constant new_class_name, klass
       end
-      world.stack.push RbBinding.new(ast:         body,
-                                     parent:      nil,
-                                     constant:    klass,
-                                     self_object: klass)
+      world.push RbBinding.new ast:         body,
+                               parent:      nil,
+                               constant:    klass,
+                               self_object: klass
       eval_ast(body)
-      world.stack.pop
+      world.pop
     when :const
       raise 'implement me'
     when :send
@@ -226,7 +248,7 @@ class Interpreter
     "#{inspect_const_tree}"\
     "\n"\
     "STACK:\n"\
-    "#{world.stack.map { |frame| "  #{frame.inspect}\n" }.join}\n"\
+    "#{world.each_stack.map { |frame| "  #{frame.inspect}\n" }.join}\n"\
     "OBJECTS:\n"\
     "#{world.objects.map(&:last).map { |o| "  #{o.inspect}\n" }.join}"
   end
@@ -237,7 +259,7 @@ class Interpreter
     padding = ('  ' * depth)
     result  = ""
     result << padding << const.name.to_s << "\n"
-    const.constants.each do |name, child|
+    const.each_constant do |name, child|
       if child.kind_of? RbClass
         result << inspect_const_tree(child, depth+1, already_seen)
       else
