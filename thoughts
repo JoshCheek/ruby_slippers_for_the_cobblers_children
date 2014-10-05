@@ -1,0 +1,29 @@
+integrate with moi (prob rename that, since everyone gets it suggested to them, apparently)
+subscription types:
+  make content that is served by us
+  make content that is powered by us but branded with your stuffs - probably based on how many people your content reaches
+  we have our own product powered by it, subscription to that product
+  some sort of free product to give back to the community and illustrate the value of the paid product
+contribute to the people who made it possible (namely whitequark right now, but could maybe contribute to the rspec team and the rack team. idk, look at what gems we're using)
+figure out how to deal with ownership / licensing / money
+if it makes a sufficient amount of money
+  I'll hire someone to perform my teaching responsibilities
+  I'll work on whatever I feel is important
+  Sometimes this will be teaching, sometimes oss, sometimes this
+  w/e it is that I am compelled to do
+places to grow:
+  if the interpreter got sufficiently capable, we could use it as an in-browser alternative to Opal (since Opal only has one instance... a pretty serious design flaw, imo)
+  can integrate with SiB. Instead of Open3, we just instantiate a new Ruby Interpreter and run it that way
+  Can evaluate code, then, on the client-side instead of needing to ship it up to the server and send it to eval.in
+  Add games:
+    The self game
+    Where will Ruby go next?
+Competencies
+  Reasonable rendering
+  Reasonable navigating (e.g. granularity, show me only code executing in my file, etc)
+  Saving a user's files
+  A local version so the user can see across files and such
+  Ability to display in the code editor what the browser is currently interpreting
+  This is nuts, but Rails integration so that we can use it after the first 6 weeks
+  Fake file system so we can use it in SalesEngine
+  Lessons that make use of it :P
