@@ -25,14 +25,32 @@ RSpec.describe RawRubyToJsonable do
     end
   end
 
-  example 'single expression' do
-    result = call '1'
-    expect(result['type']).to eq 'integer'
-    expect(result['highlightings']).to eq [[0, 1]]
-    expect(result['value']).to eq 1
+  context 'single and multiple expressions' do
+    example 'single expression is just the expression type' do
+      result = call '1'
+      expect(result['type']).to eq 'integer'
+      expect(result['highlightings']).to eq [[0, 1]]
+      expect(result['value']).to eq 1
+    end
+
+    example 'multiple expressions, no delimiter' do
+      result = call "9\n8"
+      expect(result['type']).to eq 'expressions'
+      expect(result['highlightings']).to eq [[0, 3]]
+
+      expr1, expr2, *rest = result['expressions']
+      expect(rest).to be_empty
+
+      expect(expr1['type']).to eq 'integer'
+      expect(expr1['highlightings']).to eq [[0, 1]]
+      expect(expr1['value']).to eq 9
+
+      expect(expr2['type']).to eq 'integer'
+      expect(expr2['highlightings']).to eq [[2, 3]]
+      expect(expr2['value']).to eq 8
+    end
   end
 
-  'multiple expressions'
   'set and get local variable'
   'integer literals'
   'class definitions'

@@ -41,6 +41,13 @@ class RawRubyToJsonable
        'highlightings' => highlightings,
        'value'         => ast.children.first
       }
+    when :begin
+      expr = ast.loc.expression
+      highlightings << [expr.begin_pos, expr.end_pos]
+      {'type'          => 'expressions',
+       'highlightings' => highlightings,
+       'expressions'   => ast.children.map { |child| translate child }
+      }
     else
       raise "No case for #{ast.inspect}"
     end
