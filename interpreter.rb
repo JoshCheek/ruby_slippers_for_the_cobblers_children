@@ -221,17 +221,30 @@ class Interpreter
     end
   end
 
-  def print_world(stream)
-    stream.puts "CONSTANTS"
-    stream.puts world.toplevel_const.inspect
-    stream.puts
+  def pretty_inspect
+    "CONSTANTS:\n"\
+    "#{inspect_const_tree}"\
+    "\n"\
+    "STACK:\n"\
+    "#{world.stack.map { |frame| "  #{frame.inspect}\n" }.join}\n"\
+    "OBJECTS:\n"\
+    "#{world.objects.map(&:last).map { |o| "  #{o.inspect}\n" }.join}"
+  end
 
-    stream.puts "STACK:"
-    world.stack.each { |frame| stream.puts "  #{frame.inspect}" }
-    stream.puts ""
-
-    stream.puts "OBJECTS:"
-    world.objects.each { |id, o| stream.puts "  #{o.inspect}" }
+  def inspect_const_tree(const=world.toplevel_const, depth=1, already_seen=[])
+    return '' if already_seen.include? const
+    already_seen << const
+    padding = ('  ' * depth)
+    result  = ""
+    result << padding << const.name.to_s << "\n"
+    const.constants.each do |name, child|
+      if child.kind_of? RbClass
+        result << inspect_const_tree(child, depth+1, already_seen)
+      else
+        result << padding << '  ' << name.to_s << "\n"
+      end
+    end
+    result
   end
 end
 

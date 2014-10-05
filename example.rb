@@ -20,7 +20,7 @@ end
 interpreter = Interpreter.new
 interpreter.eval code#, visitor
 
-interpreter.print_world($stdout)
+puts interpreter.pretty_inspect
 
 # => (begin
 #      (class
