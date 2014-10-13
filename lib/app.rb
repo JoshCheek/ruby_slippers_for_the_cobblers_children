@@ -73,6 +73,11 @@ class RawRubyToJsonable
       {'type'     => 'interpolated_string',
        'segments' => ast.children.map { |child| translate child }
       }
+    # e.g. `echo hello`
+    when :xstr
+      {'type'     => 'executable_string',
+       'segments' => ast.children.map { |child| translate child }
+      }
     # e.g. "true"
     when :true
       assert_children ast, 0

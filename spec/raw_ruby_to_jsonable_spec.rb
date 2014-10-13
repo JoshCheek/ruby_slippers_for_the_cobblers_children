@@ -154,6 +154,16 @@ RSpec.describe RawRubyToJsonable do
     end
   end
 
+  context 'executable strings' do
+    example 'backticks' do
+      result = call '`a`'
+      expect(result['type']).to eq 'executable_string'
+      expect(result['segments'].size).to eq 1
+      is_string! result['segments'][0], "a"
+    end
+    # TODO: What is heredoc with executable string?
+  end
+
 
   context 'single and multiple expressions' do
     example 'single expression is just the expression type' do
