@@ -36,41 +36,36 @@ class RawRubyToJsonable
     case ast.type
     # eg "1"
     when :int
-      raise if ast.children.size > 1
-      expr = ast.loc.expression
-      {'type'          => 'integer',
-       'value'         => ast.children.first.to_s
+      {'type'  => 'integer',
+       'value' => ast.children[0].to_s
       }
     # e.g. "1.0"
     when :float
-      {'type'          => 'float',
-       'value'         => ast.children[0].to_s}
+      {'type'  => 'float',
+       'value' => ast.children[0].to_s}
     # eg ":abc"
     when :sym
-      { 'type'         => 'symbol',
-        'value'        => ast.children[0].to_s
+      {'type'  => 'symbol',
+       'value' => ast.children[0].to_s
       }
     # e.g. "true"
     when :true
-      {'type'          => 'true'}
+      {'type' => 'true'}
     # e.g. "false"
     when :false
-      {'type'          => 'false'}
+      {'type' => 'false'}
     # e.g. "nil"
     when :nil
-      {'type'          => 'nil'}
+      {'type' => 'nil'}
     # eg "1;2" and "(1;2)"
     when :begin
-      expr = ast.loc.expression
-      {'type'          => 'expressions',
-       'children'      => ast.children.map { |child| translate child }
+      {'type'     => 'expressions',
+       'children' => ast.children.map { |child| translate child }
       }
     # eg "begin;1;2;end"
     when :kwbegin
-      kwbegin = ast.loc.begin
-      kwend = ast.loc.end
-      {'type'          => 'keyword_begin',
-       'children'      => ast.children.map { |child| translate child }
+      {'type'     => 'keyword_begin',
+       'children' => ast.children.map { |child| translate child }
       }
     # eg "a.b()"
     #    "b()"
@@ -78,21 +73,21 @@ class RawRubyToJsonable
     #    a % b
     when :send
       target, message, *args = ast.children
-      {'type'          => 'send',
-       'target'        => translate(target),
-       'message'       => message.to_s,
-       'args'          => args.map { |arg| translate arg },
+      {'type'    => 'send',
+       'target'  => translate(target),
+       'message' => message.to_s,
+       'args'    => args.map { |arg| translate arg },
       }
     # eg "val = 1"
     when :lvasgn
-      { 'type'         => 'assign_local_variable',
-        'name'         => ast.children[0].to_s,
-        'value'        => translate(ast.children[1]),
+      { 'type'  => 'assign_local_variable',
+        'name'  => ast.children[0].to_s,
+        'value' => translate(ast.children[1]),
       }
     # eg "val = 1; val" NOTE: if you do not set the local first, then it becomes a send instead (ie parser is aware of the local)
     when :lvar
-      { 'type'         => 'lookup_local_variable',
-        'name'         => ast.children[0].to_s,
+      { 'type' => 'lookup_local_variable',
+        'name' => ast.children[0].to_s,
       }
     else
       raise "No case for #{ast.inspect}"
