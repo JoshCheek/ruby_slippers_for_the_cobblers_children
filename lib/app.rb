@@ -30,32 +30,44 @@ class RawRubyToJsonable
     parser.parse buffer
   end
 
+  def assert_children(ast, n)
+    num_children = ast.children.size
+    return if num_children == n
+    raise "Wrong number of children: Expected:#{n.inspect}, Actual:#{num_children.inspect} in #{ast.inspect}"
+  end
+
   def translate(ast)
     return nil if ast.nil?
 
     case ast.type
     # eg "1"
     when :int
+      assert_children ast, 1
       {'type'  => 'integer',
        'value' => ast.children[0].to_s
       }
     # e.g. "1.0"
     when :float
+      assert_children ast, 1
       {'type'  => 'float',
        'value' => ast.children[0].to_s}
     # eg ":abc"
     when :sym
+      assert_children ast, 1
       {'type'  => 'symbol',
        'value' => ast.children[0].to_s
       }
     # e.g. "true"
     when :true
+      assert_children ast, 0
       {'type' => 'true'}
     # e.g. "false"
     when :false
+      assert_children ast, 0
       {'type' => 'false'}
     # e.g. "nil"
     when :nil
+      assert_children ast, 0
       {'type' => 'nil'}
     # eg "1;2" and "(1;2)"
     when :begin
@@ -80,12 +92,14 @@ class RawRubyToJsonable
       }
     # eg "val = 1"
     when :lvasgn
+      assert_children ast, 2
       { 'type'  => 'assign_local_variable',
         'name'  => ast.children[0].to_s,
         'value' => translate(ast.children[1]),
       }
     # eg "val = 1; val" NOTE: if you do not set the local first, then it becomes a send instead (ie parser is aware of the local)
     when :lvar
+      assert_children ast, 1
       { 'type' => 'lookup_local_variable',
         'name' => ast.children[0].to_s,
       }
