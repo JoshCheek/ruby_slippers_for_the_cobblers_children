@@ -57,6 +57,11 @@ class RawRubyToJsonable
       {'type'  => 'symbol',
        'value' => ast.children[0].to_s
       }
+    # e.g. ':"a#{1}b"'
+    when :dsym
+      {'type'     => 'interpolated_symbol',
+       'segments' => ast.children.map { |child| translate child }
+      }
     # e.g. "'abc'"
     when :str
       assert_children ast, 1

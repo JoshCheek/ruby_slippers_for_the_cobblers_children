@@ -52,6 +52,16 @@ RSpec.describe RawRubyToJsonable do
     expect(result['value']).to eq expected_value
   end
 
+  def parses_symbol!(code, expected_value)
+    is_symbol! call(code), expected_value
+  end
+
+  def is_symbol!(result, expected_value)
+    expect(result['type']).to eq 'symbol'
+    expect(result['value']).to eq expected_value
+  end
+
+
 
   example 'true literal' do
     expect(call('true')['type']).to eq 'true'
@@ -123,6 +133,28 @@ RSpec.describe RawRubyToJsonable do
     end
   end
 
+  context 'symbol literals' do
+    example 'without quotes' do
+      parses_symbol! ':abc', 'abc'
+    end
+    example 'with quotes' do
+      parses_symbol! ':"a b\tc"', "a b\tc"
+    end
+    example 'interpolation' do
+      result = call ':"a#{1}b"'
+      expect(result['type']).to eq 'interpolated_symbol'
+      expect(result['segments'].size).to eq 3
+
+      a, exprs, b = result['segments']
+      is_string! a, 'a'
+      is_string! b, 'b'
+
+      expect(exprs['children'].size).to eq 1
+      is_int! exprs['children'][0], '1'
+    end
+  end
+
+
   context 'single and multiple expressions' do
     example 'single expression is just the expression type' do
       result = call '1'
@@ -188,20 +220,6 @@ RSpec.describe RawRubyToJsonable do
     expect(get['name']).to eq 'a'
   end
 
-
-  context 'symbol literals' do
-    example 'without quotes' do
-      result = call ':abc'
-      expect(result['type']).to eq 'symbol'
-      expect(result['value']).to eq 'abc'
-    end
-
-    example 'with quotes' do
-      result = call ':"a b\tc"'
-      expect(result['type']).to eq 'symbol'
-      expect(result['value']).to eq "a b\tc"
-    end
-  end
 
   'class definitions'
   'module definitions'
