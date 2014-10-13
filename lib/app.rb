@@ -39,7 +39,7 @@ class RawRubyToJsonable
       raise if ast.children.size > 1
       expr = ast.loc.expression
       {'type'          => 'integer',
-       'value'         => ast.children.first
+       'value'         => ast.children.first.to_s
       }
     # eg "1;2" and "(1;2)"
     when :begin

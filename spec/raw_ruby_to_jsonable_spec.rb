@@ -29,7 +29,7 @@ RSpec.describe RawRubyToJsonable do
     example 'single expression is just the expression type' do
       result = call '1'
       expect(result['type']).to eq 'integer'
-      expect(result['value']).to eq 1
+      expect(result['value']).to eq '1'
     end
 
     example 'multiple expressions, no bookends, newline delimited' do
@@ -40,10 +40,10 @@ RSpec.describe RawRubyToJsonable do
       expect(rest).to be_empty
 
       expect(expr1['type']).to eq 'integer'
-      expect(expr1['value']).to eq 9
+      expect(expr1['value']).to eq '9'
 
       expect(expr2['type']).to eq 'integer'
-      expect(expr2['value']).to eq 8
+      expect(expr2['value']).to eq '8'
     end
 
     example 'multiple expressions, parentheses bookends, newline delimited' do
@@ -58,7 +58,7 @@ RSpec.describe RawRubyToJsonable do
       expr, *rest = result['children']
       expect(rest).to be_empty
       expect(expr['type']).to eq 'integer'
-      expect(expr['value']).to eq 1
+      expect(expr['value']).to eq '1'
     end
 
     example 'semicolon delimited' do
@@ -84,13 +84,27 @@ RSpec.describe RawRubyToJsonable do
 
     val = set['value']
     expect(val['type']).to eq 'integer'
-    expect(val['value']).to eq 1
+    expect(val['value']).to eq '1'
 
     expect(get['type']).to eq 'lookup_local_variable'
     expect(get['name']).to eq 'a'
   end
 
-  'integer literals'
+  describe 'integer literals' do
+    def assert_int(code, expected_value)
+      result = call code
+      expect(result['type']).to eq 'integer'
+      expect(result['value']).to eq expected_value
+    end
+
+    example('Fixnum')         { assert_int '1', '1' }
+    example('Bignum')         { assert_int '111222333444555666777888999', '111222333444555666777888999' }
+    example('underscores')    { assert_int '1_2_3', '123' }
+    example('binary literal') { assert_int '0b101', '5' }
+    example('octal literal')  { assert_int '0101',  '65' }
+    example('hex literal')    { assert_int '0x101', '257' }
+  end
+
   'symbol literals' # type/highlightings/value
   'class definitions'
   'module definitions'
@@ -109,7 +123,7 @@ RSpec.describe RawRubyToJsonable do
       result = call '1.even?'
       expect(result['type']).to eq 'send'
 
-      expect(result['target']['value']).to eq 1
+      expect(result['target']['value']).to eq '1'
       expect(result['message']).to eq 'even?'
       expect(result['args']).to be_empty
     end
@@ -118,18 +132,18 @@ RSpec.describe RawRubyToJsonable do
       result = call '1.a 2, 3'
       expect(result['type']).to eq 'send'
 
-      expect(result['target']['value']).to eq 1
+      expect(result['target']['value']).to eq '1'
       expect(result['message']).to eq 'a'
-      expect(result['args'].map { |a| a['value'] }).to eq [2, 3]
+      expect(result['args'].map { |a| a['value'] }).to eq ['2', '3']
     end
 
     example 'with operator' do
       result = call '1 % 2'
       expect(result['type']).to eq 'send'
 
-      expect(result['target']['value']).to eq 1
+      expect(result['target']['value']).to eq '1'
       expect(result['message']).to eq '%'
-      expect(result['args'].map { |a| a['value'] }).to eq [2]
+      expect(result['args'].map { |a| a['value'] }).to eq ['2']
     end
   end
 end
