@@ -41,6 +41,11 @@ class RawRubyToJsonable
       {'type'          => 'integer',
        'value'         => ast.children.first.to_s
       }
+    # eg ":abc"
+    when :sym
+      { 'type'         => 'symbol',
+        'value'         => ast.children[0].to_s
+      }
     # eg "1;2" and "(1;2)"
     when :begin
       expr = ast.loc.expression
@@ -54,6 +59,10 @@ class RawRubyToJsonable
       {'type'          => 'keyword_begin',
        'children'      => ast.children.map { |child| translate child }
       }
+    # eg "a.b()"
+    #    "b()"
+    #    "a.b"
+    #    a % b
     when :send
       target, message, *args = ast.children
       {'type'          => 'send',
@@ -61,11 +70,13 @@ class RawRubyToJsonable
        'message'       => message.to_s,
        'args'          => args.map { |arg| translate arg },
       }
+    # eg "val = 1"
     when :lvasgn
       { 'type'         => 'assign_local_variable',
         'name'         => ast.children[0].to_s,
         'value'        => translate(ast.children[1]),
       }
+    # eg "val = 1; val" NOTE: if you do not set the local first, then it becomes a send instead (ie parser is aware of the local)
     when :lvar
       { 'type'         => 'lookup_local_variable',
         'name'         => ast.children[0].to_s,

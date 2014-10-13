@@ -105,7 +105,20 @@ RSpec.describe RawRubyToJsonable do
     example('hex literal')    { assert_int '0x101', '257' }
   end
 
-  'symbol literals' # type/highlightings/value
+  context 'symbol literals' do
+    example 'without quotes' do
+      result = call ':abc'
+      expect(result['type']).to eq 'symbol'
+      expect(result['value']).to eq 'abc'
+    end
+
+    example 'with quotes' do
+      result = call ':"a b\tc"'
+      expect(result['type']).to eq 'symbol'
+      expect(result['value']).to eq "a b\tc"
+    end
+  end
+
   'class definitions'
   'module definitions'
   # idk, look at SiB for a start
