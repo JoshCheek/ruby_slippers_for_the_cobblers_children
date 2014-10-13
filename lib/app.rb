@@ -33,40 +33,30 @@ class RawRubyToJsonable
   def translate(ast)
     return nil if ast.nil?
 
-    highlightings = []
     case ast.type
     # eg "1"
     when :int
       raise if ast.children.size > 1
       expr = ast.loc.expression
-      highlightings << [expr.begin_pos, expr.end_pos]
       {'type'          => 'integer',
-       'highlightings' => highlightings,
        'value'         => ast.children.first
       }
     # eg "1;2" and "(1;2)"
     when :begin
       expr = ast.loc.expression
-      highlightings << [expr.begin_pos, expr.end_pos]
       {'type'          => 'expressions',
-       'highlightings' => highlightings,
        'children'      => ast.children.map { |child| translate child }
       }
     # eg "begin;1;2;end"
     when :kwbegin
       kwbegin = ast.loc.begin
-      highlightings << [kwbegin.begin_pos, kwbegin.end_pos]
       kwend = ast.loc.end
-      highlightings << [kwend.begin_pos, kwend.end_pos]
       {'type'          => 'keyword_begin',
-       'highlightings' => highlightings,
        'children'      => ast.children.map { |child| translate child }
       }
     when :send
-      highlightings << [ast.loc.expression.begin_pos, ast.loc.expression.end_pos]
       target, message, *args = ast.children
       {'type'          => 'send',
-       'highlightings' => highlightings,
        'target'        => translate(target),
        'message'       => message.to_s,
        'args'          => args.map { |arg| translate arg },

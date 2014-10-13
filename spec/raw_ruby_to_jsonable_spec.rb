@@ -29,49 +29,41 @@ RSpec.describe RawRubyToJsonable do
     example 'single expression is just the expression type' do
       result = call '1'
       expect(result['type']).to eq 'integer'
-      expect(result['highlightings']).to eq [[0, 1]]
       expect(result['value']).to eq 1
     end
 
     example 'multiple expressions, no bookends, newline delimited' do
       result = call "9\n8"
       expect(result['type']).to eq 'expressions'
-      expect(result['highlightings']).to eq [[0, 3]]
 
       expr1, expr2, *rest = result['children']
       expect(rest).to be_empty
 
       expect(expr1['type']).to eq 'integer'
-      expect(expr1['highlightings']).to eq [[0, 1]]
       expect(expr1['value']).to eq 9
 
       expect(expr2['type']).to eq 'integer'
-      expect(expr2['highlightings']).to eq [[2, 3]]
       expect(expr2['value']).to eq 8
     end
 
     example 'multiple expressions, parentheses bookends, newline delimited' do
       result = call "(9\n8)"
       expect(result['type']).to eq 'expressions'
-      expect(result['highlightings']).to eq [[0, 5]]
       expect(result['children'].size).to eq 2
     end
 
     example 'multiple expressions, begin/end bookends, newline delimited' do
       result = call "begin\n 1\nend"
       expect(result['type']).to eq 'keyword_begin'
-      expect(result['highlightings']).to eq [[0, 5], [9, 12]]
       expr, *rest = result['children']
       expect(rest).to be_empty
       expect(expr['type']).to eq 'integer'
-      expect(expr['highlightings']).to eq [[7, 8]]
       expect(expr['value']).to eq 1
     end
 
     example 'semicolon delimited' do
       result = call "1;2"
       expect(result['type']).to eq 'expressions'
-      expect(result['highlightings']).to eq [[0, 3]]
       expect(result['children'].size).to eq 2
 
       result = call "(1;2)"
@@ -108,7 +100,6 @@ RSpec.describe RawRubyToJsonable do
     example 'with no receiver' do
       result = call 'load'
       expect(result['type']).to eq 'send'
-      expect(result['highlightings']).to eq [[0, 4]]
       expect(result['target']).to eq nil
       expect(result['message']).to eq 'load'
       expect(result['args']).to be_empty
@@ -117,7 +108,6 @@ RSpec.describe RawRubyToJsonable do
     example 'without args' do
       result = call '1.even?'
       expect(result['type']).to eq 'send'
-      expect(result['highlightings']).to eq [[0, 7]]
 
       expect(result['target']['value']).to eq 1
       expect(result['message']).to eq 'even?'
@@ -127,7 +117,6 @@ RSpec.describe RawRubyToJsonable do
     example 'with args' do
       result = call '1.a 2, 3'
       expect(result['type']).to eq 'send'
-      expect(result['highlightings']).to eq [[0, 8]]
 
       expect(result['target']['value']).to eq 1
       expect(result['message']).to eq 'a'
@@ -137,7 +126,6 @@ RSpec.describe RawRubyToJsonable do
     example 'with operator' do
       result = call '1 % 2'
       expect(result['type']).to eq 'send'
-      expect(result['highlightings']).to eq [[0, 5]]
 
       expect(result['target']['value']).to eq 1
       expect(result['message']).to eq '%'
