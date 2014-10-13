@@ -11,7 +11,7 @@ RSpec.describe RawRubyToJsonable do
 
   def assert_valid(json)
     case json
-    when String, Fixnum, nil
+    when String, Fixnum, nil, true, false
       # no op
     when Array
       json.each { |element| assert_valid element }
@@ -162,6 +162,43 @@ RSpec.describe RawRubyToJsonable do
       is_string! result['segments'][0], "a"
     end
     # TODO: What is heredoc with executable string?
+  end
+
+  context 'regular expressions' do
+    def parses_regex!(code, *args)
+      is_regex! call(code), *args
+    end
+
+    def is_regex!(result, *expected_values, options: [])
+      expect(result['type']).to eq 'regular_expression'
+      actual_values = result['segments'].map { |s| s['children'] || s }.flatten.map { |node| node['value'] }
+      expect(actual_values.size).to eq expected_values.size
+      [expected_values, actual_values].transpose.each { |expected_value, actual_value|
+        expect(actual_value).to eq expected_value
+      }
+
+      expect(result['options']['ignorecase']).to eq options.include?(:ignorecase)
+      expect(result['options']['extended']).to   eq options.include?(:extended)
+      expect(result['options']['multiline']).to  eq options.include?(:multiline)
+      # TODO: Figure out how to turn on :FIXEDENCODING, and :NOENCODING
+    end
+
+    example('slashes')                     { parses_regex! '/a/',    'a' }
+    example('%r with paired delimiters')   { parses_regex! '%r(a)',  'a' }
+    example('%r with unpaired delimiters') { parses_regex! '%r.a.',  'a' }
+    example('slashes with options')        { parses_regex! '/a/i',   'a', options: [:ignorecase] }
+    example('%r with options')             { parses_regex! '/a/i',   'a', options: [:ignorecase] }
+    example('all options')                 { parses_regex! '/a/ixm', 'a', options: [:ignorecase, :extended, :multiline] }
+
+    example 'slashes with interpolation' do
+      parses_regex! '/a#{1}b/',  'a', '1', 'b'
+      parses_regex! '/a#{1}b/i', 'a', '1', 'b', options: [:ignorecase]
+    end
+
+    example '%r with interpolation' do
+      parses_regex! '%r(a#{1}b)',  'a', '1', 'b'
+      parses_regex! '%r(a#{1}b)i', 'a', '1', 'b', options: [:ignorecase]
+    end
   end
 
 

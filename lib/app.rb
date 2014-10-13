@@ -4,7 +4,7 @@ require 'json'
 class RawRubyToJsonable
   # receives raw ruby code (a String)
   # return a data structure that can be directly converted into json
-  # meaning String, Array, Hash, Fixnum, Float, nil
+  # meaning String, Array, Hash, Fixnum, Float, nil, true, false
   def self.call(raw_code)
     new(raw_code).call
   end
@@ -120,6 +120,18 @@ class RawRubyToJsonable
       assert_children ast, 1
       { 'type' => 'lookup_local_variable',
         'name' => ast.children[0].to_s,
+      }
+    # e.g. "/a/i"
+    when :regexp
+      *segments, opts = ast.children
+      raise "Expected #{opts.inspect} to be a regopt!" unless opts.type == :regopt
+      { 'type'     => 'regular_expression',
+        'segments' => segments.map { |segment| translate segment },
+        'options'  => {
+          'ignorecase' => opts.children.include?(:i),
+          'extended'   => opts.children.include?(:x),
+          'multiline'  => opts.children.include?(:m),
+        },
       }
     else
       raise "No case for #{ast.inspect}"
