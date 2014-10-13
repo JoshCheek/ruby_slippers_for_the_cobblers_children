@@ -41,6 +41,10 @@ class RawRubyToJsonable
       {'type'          => 'integer',
        'value'         => ast.children.first.to_s
       }
+    # e.g. "1.0"
+    when :float
+      {'type'          => 'float',
+       'value'         => ast.children[0].to_s}
     # eg ":abc"
     when :sym
       { 'type'         => 'symbol',

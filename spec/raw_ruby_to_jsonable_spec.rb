@@ -52,6 +52,19 @@ RSpec.describe RawRubyToJsonable do
     example('hex literal')    { assert_int '0x101', '257' }
   end
 
+  describe 'float literals' do
+    def assert_float(code, expected_value)
+      result = call code
+      expect(result['type']).to eq 'float'
+      expect(result['value']).to eq expected_value
+    end
+
+    example('normal')              { assert_float '1.0',    '1.0' }
+    example('negative')            { assert_float '-1.0',   '-1.0' }
+    example('scientific notation') { assert_float '1.2e-3', '0.0012' }
+  end
+
+
   context 'single and multiple expressions' do
     example 'single expression is just the expression type' do
       result = call '1'
