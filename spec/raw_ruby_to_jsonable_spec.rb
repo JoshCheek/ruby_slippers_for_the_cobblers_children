@@ -114,6 +114,13 @@ RSpec.describe RawRubyToJsonable do
       expect(exprs['children'].size).to eq 1
       is_int! exprs['children'][0], '1'
     end
+
+    example 'heredoc' do
+      parses_string! "<<abc\nd\nabc", "d\n"
+      # for w/e reason, when you put a newline in a heredoc, it parses it as a dstr instead of a str
+      # parses_string! "<<abc\nd\ne\nabc",  "def"
+      # parses_string! "<<-abc\nd\ne\nabc", "def"
+    end
   end
 
   context 'single and multiple expressions' do
