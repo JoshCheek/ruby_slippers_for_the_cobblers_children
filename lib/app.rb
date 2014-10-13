@@ -40,7 +40,7 @@ class RawRubyToJsonable
     return nil if ast.nil?
 
     case ast.type
-    # eg "1"
+    # e.g. "1"
     when :int
       assert_children ast, 1
       {'type'  => 'integer',
@@ -51,12 +51,13 @@ class RawRubyToJsonable
       assert_children ast, 1
       {'type'  => 'float',
        'value' => ast.children[0].to_s}
-    # eg ":abc"
+    # e.g. ":abc"
     when :sym
       assert_children ast, 1
       {'type'  => 'symbol',
        'value' => ast.children[0].to_s
       }
+    # e.g. "'abc'"
     when :str
       assert_children ast, 1
       {'type'  => 'string',
@@ -74,20 +75,17 @@ class RawRubyToJsonable
     when :nil
       assert_children ast, 0
       {'type' => 'nil'}
-    # eg "1;2" and "(1;2)"
+    # e.g. "1;2" and "(1;2)"
     when :begin
       {'type'     => 'expressions',
        'children' => ast.children.map { |child| translate child }
       }
-    # eg "begin;1;2;end"
+    # e.g. "begin;1;2;end"
     when :kwbegin
       {'type'     => 'keyword_begin',
        'children' => ast.children.map { |child| translate child }
       }
-    # eg "a.b()"
-    #    "b()"
-    #    "a.b"
-    #    a % b
+    # e.g. "a.b(c)"
     when :send
       target, message, *args = ast.children
       {'type'    => 'send',
@@ -95,14 +93,14 @@ class RawRubyToJsonable
        'message' => message.to_s,
        'args'    => args.map { |arg| translate arg },
       }
-    # eg "val = 1"
+    # e.g. "val = 1"
     when :lvasgn
       assert_children ast, 2
       { 'type'  => 'assign_local_variable',
         'name'  => ast.children[0].to_s,
         'value' => translate(ast.children[1]),
       }
-    # eg "val = 1; val" NOTE: if you do not set the local first, then it becomes a send instead (ie parser is aware of the local)
+    # e.g. "val = 1; val" NOTE: if you do not set the local first, then it becomes a send instead (ie parser is aware of the local)
     when :lvar
       assert_children ast, 1
       { 'type' => 'lookup_local_variable',
