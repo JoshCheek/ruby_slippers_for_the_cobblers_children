@@ -25,12 +25,30 @@ RSpec.describe RawRubyToJsonable do
     end
   end
 
-  def assert_int(code, expected_value)
+  def parses_int!(code, expected_value)
     is_int! call(code), expected_value
   end
 
   def is_int!(result, expected_value)
     expect(result['type']).to eq 'integer'
+    expect(result['value']).to eq expected_value
+  end
+
+  def parses_string!(code, expected_value)
+    is_string! call(code), expected_value
+  end
+
+  def is_string!(result, expected_value)
+    expect(result['type']).to eq 'string'
+    expect(result['value']).to eq expected_value
+  end
+
+  def parses_float!(code, expected_value)
+    is_float! call(code), expected_value
+  end
+
+  def is_float!(result, expected_value)
+    expect(result['type']).to eq 'float'
     expect(result['value']).to eq expected_value
   end
 
@@ -48,56 +66,41 @@ RSpec.describe RawRubyToJsonable do
   end
 
   describe 'integer literals' do
-    example('Fixnum')          { assert_int '1',      '1' }
-    example('-Fixnum')         { assert_int '-1',     '-1' }
-    example('Bignum')          { assert_int '111222333444555666777888999', '111222333444555666777888999' }
-    example('underscores')     { assert_int '1_2_3',  '123' }
-    example('binary literal')  { assert_int '0b101',  '5' }
-    example('-binary literal') { assert_int '-0b101', '-5' }
-    example('octal literal')   { assert_int '0101',   '65' }
-    example('-octal literal')  { assert_int '-0101',  '-65' }
-    example('hex literal')     { assert_int '0x101',  '257' }
-    example('-hex literal')    { assert_int '-0x101', '-257' }
+    example('Fixnum')          { parses_int! '1',      '1' }
+    example('-Fixnum')         { parses_int! '-1',     '-1' }
+    example('Bignum')          { parses_int! '111222333444555666777888999', '111222333444555666777888999' }
+    example('underscores')     { parses_int! '1_2_3',  '123' }
+    example('binary literal')  { parses_int! '0b101',  '5' }
+    example('-binary literal') { parses_int! '-0b101', '-5' }
+    example('octal literal')   { parses_int! '0101',   '65' }
+    example('-octal literal')  { parses_int! '-0101',  '-65' }
+    example('hex literal')     { parses_int! '0x101',  '257' }
+    example('-hex literal')    { parses_int! '-0x101', '-257' }
   end
 
   describe 'float literals' do
-    def assert_float(code, expected_value)
-      result = call code
-      expect(result['type']).to eq 'float'
-      expect(result['value']).to eq expected_value
-    end
-
-    example('normal')              { assert_float '1.0',    '1.0' }
-    example('negative')            { assert_float '-1.0',   '-1.0' }
-    example('scientific notation') { assert_float '1.2e-3', '0.0012' }
+    example('normal')              { parses_float! '1.0',    '1.0' }
+    example('negative')            { parses_float! '-1.0',   '-1.0' }
+    example('scientific notation') { parses_float! '1.2e-3', '0.0012' }
   end
 
   describe 'string literals' do
-    def assert_string(code, expected_value)
-      is_string! call(code), expected_value
-    end
+    example('single quoted')         { parses_string! "'a'",    'a' }
+    example('double quoted')         { parses_string! '"a"',    'a' }
 
-    def is_string!(result, expected_value)
-      expect(result['type']).to eq 'string'
-      expect(result['value']).to eq expected_value
-    end
+    example('% paired delimiter')    { parses_string! '%(a)',   'a' }
+    example('%q paired delimiter')   { parses_string! '%q(a)',  'a' }
+    example('%Q paired delimiter')   { parses_string! '%Q(a)',  'a' }
 
-    example('single quoted')         { assert_string "'a'",    'a' }
-    example('double quoted')         { assert_string '"a"',    'a' }
+    example('% unpaired delimiter')  { parses_string! '%_a_',   'a' }
+    example('%q unpaired delimiter') { parses_string! '%q_a_',  'a' }
+    example('%Q unpaired delimiter') { parses_string! '%Q_a_',  'a' }
 
-    example('% paired delimiter')    { assert_string '%(a)',   'a' }
-    example('%q paired delimiter')   { assert_string '%q(a)',  'a' }
-    example('%Q paired delimiter')   { assert_string '%Q(a)',  'a' }
-
-    example('% unpaired delimiter')  { assert_string '%_a_',   'a' }
-    example('%q unpaired delimiter') { assert_string '%q_a_',  'a' }
-    example('%Q unpaired delimiter') { assert_string '%Q_a_',  'a' }
-
-    example('single quoted newline') { assert_string '\'\n\'',  "\\n" }
-    example('double quoted newline') { assert_string '"\n"',    "\n"  }
-    example('% newline')             { assert_string '%(\n)',   "\n"  }
-    example('%q newline')            { assert_string '%q(\n)',  "\\n" }
-    example('%Q newline')            { assert_string '%Q(\n)',  "\n"  }
+    example('single quoted newline') { parses_string! '\'\n\'',  "\\n" }
+    example('double quoted newline') { parses_string! '"\n"',    "\n"  }
+    example('% newline')             { parses_string! '%(\n)',   "\n"  }
+    example('%q newline')            { parses_string! '%q(\n)',  "\\n" }
+    example('%Q newline')            { parses_string! '%Q(\n)',  "\n"  }
 
     example 'interpolation' do
       result = call '"a#{1}b"'
