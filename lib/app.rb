@@ -57,6 +57,11 @@ class RawRubyToJsonable
       {'type'  => 'symbol',
        'value' => ast.children[0].to_s
       }
+    when :str
+      assert_children ast, 1
+      {'type'  => 'string',
+       'value' => ast.children[0].to_s
+      }
     # e.g. "true"
     when :true
       assert_children ast, 0

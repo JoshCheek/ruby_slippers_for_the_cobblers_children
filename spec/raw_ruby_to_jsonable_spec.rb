@@ -68,6 +68,31 @@ RSpec.describe RawRubyToJsonable do
     example('scientific notation') { assert_float '1.2e-3', '0.0012' }
   end
 
+  describe 'string literals' do
+    def assert_string(code, expected_value)
+      result = call code
+      expect(result['type']).to eq 'string'
+      expect(result['value']).to eq expected_value
+    end
+
+    example('single quoted')         { assert_string "'a'",    'a' }
+    example('double quoted')         { assert_string '"a"',    'a' }
+
+    example('% paired delimiter')    { assert_string '%(a)',   'a' }
+    example('%q paired delimiter')   { assert_string '%q(a)',  'a' }
+    example('%Q paired delimiter')   { assert_string '%Q(a)',  'a' }
+
+    example('% unpaired delimiter')  { assert_string '%_a_',   'a' }
+    example('%q unpaired delimiter') { assert_string '%q_a_',  'a' }
+    example('%Q unpaired delimiter') { assert_string '%Q_a_',  'a' }
+
+    example('single quoted newline') { assert_string '\'\n\'',  "\\n" }
+    example('double quoted newline') { assert_string '"\n"',    "\n"  }
+    example('% newline')             { assert_string '%(\n)',   "\n"  }
+    example('%q newline')            { assert_string '%q(\n)',  "\\n" }
+    example('%Q newline')            { assert_string '%Q(\n)',  "\n"  }
+  end
+
 
   context 'single and multiple expressions' do
     example 'single expression is just the expression type' do
