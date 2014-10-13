@@ -133,6 +133,11 @@ class RawRubyToJsonable
           'multiline'  => opts.children.include?(:m),
         },
       }
+    # e.g. [100, 200, 300]
+    when :array
+      {'type'     => 'array',
+       'elements' => ast.children.map { |child| translate child },
+      }
     else
       raise "No case for #{ast.inspect}"
     end

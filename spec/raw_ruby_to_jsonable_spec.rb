@@ -201,6 +201,23 @@ RSpec.describe RawRubyToJsonable do
     end
   end
 
+  context 'array literals' do
+    example 'empty' do
+      result = call '[]'
+      expect(result['type']).to eq 'array'
+      expect(result['elements']).to be_empty
+    end
+
+    example 'not empty' do
+      result = call '["a", 1]'
+      expect(result['type']).to eq 'array'
+      a, one = result['elements']
+      is_string! a,   "a"
+      is_int!    one, "1"
+    end
+  end
+
+
 
   context 'single and multiple expressions' do
     example 'single expression is just the expression type' do
