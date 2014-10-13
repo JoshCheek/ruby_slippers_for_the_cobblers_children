@@ -25,6 +25,33 @@ RSpec.describe RawRubyToJsonable do
     end
   end
 
+  example 'true literal' do
+    expect(call('true')['type']).to eq 'true'
+  end
+
+  example 'false literal' do
+    expect(call('false')['type']).to eq 'false'
+  end
+
+  example 'nil literal' do
+    expect(call('nil')['type']).to eq 'nil'
+  end
+
+  describe 'integer literals' do
+    def assert_int(code, expected_value)
+      result = call code
+      expect(result['type']).to eq 'integer'
+      expect(result['value']).to eq expected_value
+    end
+
+    example('Fixnum')         { assert_int '1', '1' }
+    example('Bignum')         { assert_int '111222333444555666777888999', '111222333444555666777888999' }
+    example('underscores')    { assert_int '1_2_3', '123' }
+    example('binary literal') { assert_int '0b101', '5' }
+    example('octal literal')  { assert_int '0101',  '65' }
+    example('hex literal')    { assert_int '0x101', '257' }
+  end
+
   context 'single and multiple expressions' do
     example 'single expression is just the expression type' do
       result = call '1'
@@ -90,20 +117,6 @@ RSpec.describe RawRubyToJsonable do
     expect(get['name']).to eq 'a'
   end
 
-  describe 'integer literals' do
-    def assert_int(code, expected_value)
-      result = call code
-      expect(result['type']).to eq 'integer'
-      expect(result['value']).to eq expected_value
-    end
-
-    example('Fixnum')         { assert_int '1', '1' }
-    example('Bignum')         { assert_int '111222333444555666777888999', '111222333444555666777888999' }
-    example('underscores')    { assert_int '1_2_3', '123' }
-    example('binary literal') { assert_int '0b101', '5' }
-    example('octal literal')  { assert_int '0101',  '65' }
-    example('hex literal')    { assert_int '0x101', '257' }
-  end
 
   context 'symbol literals' do
     example 'without quotes' do
@@ -117,18 +130,6 @@ RSpec.describe RawRubyToJsonable do
       expect(result['type']).to eq 'symbol'
       expect(result['value']).to eq "a b\tc"
     end
-  end
-
-  example 'true literal' do
-    expect(call('true')['type']).to eq 'true'
-  end
-
-  example 'false literal' do
-    expect(call('false')['type']).to eq 'false'
-  end
-
-  example 'nil literal' do
-    expect(call('nil')['type']).to eq 'nil'
   end
 
   'class definitions'
