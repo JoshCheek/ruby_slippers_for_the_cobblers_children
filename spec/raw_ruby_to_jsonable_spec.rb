@@ -25,6 +25,16 @@ RSpec.describe RawRubyToJsonable do
     end
   end
 
+  def assert_int(code, expected_value)
+    is_int! call(code), expected_value
+  end
+
+  def is_int!(result, expected_value)
+    expect(result['type']).to eq 'integer'
+    expect(result['value']).to eq expected_value
+  end
+
+
   example 'true literal' do
     expect(call('true')['type']).to eq 'true'
   end
@@ -38,12 +48,6 @@ RSpec.describe RawRubyToJsonable do
   end
 
   describe 'integer literals' do
-    def assert_int(code, expected_value)
-      result = call code
-      expect(result['type']).to eq 'integer'
-      expect(result['value']).to eq expected_value
-    end
-
     example('Fixnum')          { assert_int '1',      '1' }
     example('-Fixnum')         { assert_int '-1',     '-1' }
     example('Bignum')          { assert_int '111222333444555666777888999', '111222333444555666777888999' }
@@ -70,7 +74,10 @@ RSpec.describe RawRubyToJsonable do
 
   describe 'string literals' do
     def assert_string(code, expected_value)
-      result = call code
+      is_string! call(code), expected_value
+    end
+
+    def is_string!(result, expected_value)
       expect(result['type']).to eq 'string'
       expect(result['value']).to eq expected_value
     end
@@ -91,8 +98,20 @@ RSpec.describe RawRubyToJsonable do
     example('% newline')             { assert_string '%(\n)',   "\n"  }
     example('%q newline')            { assert_string '%q(\n)',  "\\n" }
     example('%Q newline')            { assert_string '%Q(\n)',  "\n"  }
-  end
 
+    example 'interpolation' do
+      result = call '"a#{1}b"'
+      expect(result['type']).to eq 'interpolated_string'
+      expect(result['segments'].size).to eq 3
+
+      a, exprs, b = result['segments']
+      is_string! a, 'a'
+      is_string! b, 'b'
+
+      expect(exprs['children'].size).to eq 1
+      is_int! exprs['children'][0], '1'
+    end
+  end
 
   context 'single and multiple expressions' do
     example 'single expression is just the expression type' do
