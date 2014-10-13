@@ -44,12 +44,16 @@ RSpec.describe RawRubyToJsonable do
       expect(result['value']).to eq expected_value
     end
 
-    example('Fixnum')         { assert_int '1', '1' }
-    example('Bignum')         { assert_int '111222333444555666777888999', '111222333444555666777888999' }
-    example('underscores')    { assert_int '1_2_3', '123' }
-    example('binary literal') { assert_int '0b101', '5' }
-    example('octal literal')  { assert_int '0101',  '65' }
-    example('hex literal')    { assert_int '0x101', '257' }
+    example('Fixnum')          { assert_int '1',      '1' }
+    example('-Fixnum')         { assert_int '-1',     '-1' }
+    example('Bignum')          { assert_int '111222333444555666777888999', '111222333444555666777888999' }
+    example('underscores')     { assert_int '1_2_3',  '123' }
+    example('binary literal')  { assert_int '0b101',  '5' }
+    example('-binary literal') { assert_int '-0b101', '-5' }
+    example('octal literal')   { assert_int '0101',   '65' }
+    example('-octal literal')  { assert_int '-0101',  '-65' }
+    example('hex literal')     { assert_int '0x101',  '257' }
+    example('-hex literal')    { assert_int '-0x101', '-257' }
   end
 
   describe 'float literals' do
