@@ -71,6 +71,15 @@ class RawRubyToJsonable
        'message'       => message.to_s,
        'args'          => args.map { |arg| translate arg },
       }
+    when :lvasgn
+      { 'type'         => 'assign_local_variable',
+        'name'         => ast.children[0].to_s,
+        'value'        => translate(ast.children[1]),
+      }
+    when :lvar
+      { 'type'         => 'lookup_local_variable',
+        'name'         => ast.children[0].to_s,
+      }
     else
       raise "No case for #{ast.inspect}"
     end

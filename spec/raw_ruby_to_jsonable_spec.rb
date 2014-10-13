@@ -84,14 +84,27 @@ RSpec.describe RawRubyToJsonable do
     end
   end
 
-  'set and get local variable'
+  example 'set and get local variable' do
+    result = call "a = 1; a"
+    set, get = result['children']
+    expect(set['type']).to eq 'assign_local_variable'
+    expect(set['name']).to eq 'a'
+
+    val = set['value']
+    expect(val['type']).to eq 'integer'
+    expect(val['value']).to eq 1
+
+    expect(get['type']).to eq 'lookup_local_variable'
+    expect(get['name']).to eq 'a'
+  end
+
   'integer literals'
   'symbol literals' # type/highlightings/value
   'class definitions'
   'module definitions'
   # idk, look at SiB for a start
 
-  context 'send', t:true do
+  context 'send' do
     example 'with no receiver' do
       result = call 'load'
       expect(result['type']).to eq 'send'
