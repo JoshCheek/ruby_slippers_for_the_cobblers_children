@@ -44,8 +44,17 @@ class RawRubyToJsonable
     # eg ":abc"
     when :sym
       { 'type'         => 'symbol',
-        'value'         => ast.children[0].to_s
+        'value'        => ast.children[0].to_s
       }
+    # e.g. "true"
+    when :true
+      {'type'          => 'true'}
+    # e.g. "false"
+    when :false
+      {'type'          => 'false'}
+    # e.g. "nil"
+    when :nil
+      {'type'          => 'nil'}
     # eg "1;2" and "(1;2)"
     when :begin
       expr = ast.loc.expression

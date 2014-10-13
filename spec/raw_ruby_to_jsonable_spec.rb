@@ -119,6 +119,18 @@ RSpec.describe RawRubyToJsonable do
     end
   end
 
+  example 'true literal' do
+    expect(call('true')['type']).to eq 'true'
+  end
+
+  example 'false literal' do
+    expect(call('false')['type']).to eq 'false'
+  end
+
+  example 'nil literal' do
+    expect(call('nil')['type']).to eq 'nil'
+  end
+
   'class definitions'
   'module definitions'
   # idk, look at SiB for a start
