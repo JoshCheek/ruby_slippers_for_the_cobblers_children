@@ -285,8 +285,78 @@ RSpec.describe RawRubyToJsonable do
   end
 
 
-  'class definitions'
-  'module definitions'
+  describe 'class definitions', t:true do
+    example 'implicit toplevel' do
+      result = call 'class A;end'
+      expect(result['type']).to eq 'class'
+      expect(result['superclass']).to eq nil
+      expect(result['body']).to eq nil
+
+      name_lookup = result['name_lookup']
+      expect(name_lookup['type']).to eq 'constant'
+      expect(name_lookup['namespace']).to eq nil
+      expect(name_lookup['name']).to eq 'A'
+    end
+
+    example 'explicit toplevel' do
+      result = call 'class ::A;end'
+      expect(result['type']).to eq 'class'
+      expect(result['superclass']).to eq nil
+      expect(result['body']).to eq nil
+
+      name_lookup = result['name_lookup']
+      expect(name_lookup['type']).to eq 'constant'
+      expect(name_lookup['namespace']).to eq 'type' => 'toplevel_constant'
+      expect(name_lookup['name']).to eq 'A'
+    end
+
+    example 'direct namespacing' do
+      result = call 'class String::A;end'
+      expect(result['type']).to eq 'class'
+      expect(result['superclass']).to eq nil
+      expect(result['body']).to eq nil
+
+      name_lookup = result['name_lookup']
+      expect(name_lookup['type']).to eq 'constant'
+      expect(name_lookup['name']).to eq 'A'
+
+      namespace = name_lookup['namespace']
+      expect(namespace['type']).to eq 'constant'
+      expect(namespace['name']).to eq 'String'
+      expect(namespace['namespace']).to eq nil
+    end
+
+    example 'inheriting' do
+      result = call 'class A < B; end'
+      expect(result['type']).to eq 'class'
+      expect(result['body']).to eq nil
+
+      name_lookup = result['name_lookup']
+      expect(name_lookup['type']).to eq 'constant'
+      expect(name_lookup['namespace']).to eq nil
+      expect(name_lookup['name']).to eq 'A'
+
+      superclass = result['superclass']
+      expect(superclass['type']).to eq 'constant'
+      expect(superclass['namespace']).to eq nil
+      expect(superclass['name']).to eq 'B'
+    end
+
+    example 'with a body' do
+      result = call 'class A; 1; end'
+      expect(result['type']).to eq 'class'
+      expect(result['superclass']).to eq nil
+
+      name_lookup = result['name_lookup']
+      expect(name_lookup['type']).to eq 'constant'
+      expect(name_lookup['namespace']).to eq nil
+      expect(name_lookup['name']).to eq 'A'
+
+      is_int! result['body'], '1'
+    end
+  end
+
+  describe 'module definitions'
   # idk, look at SiB for a start
 
   context 'send' do

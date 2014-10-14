@@ -138,6 +138,28 @@ class RawRubyToJsonable
       {'type'     => 'array',
        'elements' => ast.children.map { |child| translate child },
       }
+    # e.g. "class A; end"
+    when :class
+      # (class (const nil :A) nil nil)
+      assert_children ast, 3
+      location, superclass, body = ast.children
+
+      {'type'        => 'class',
+       'name_lookup' => translate(location),
+       'superclass'  => translate(superclass),
+       'body'        => translate(body),
+      }
+    when :const
+      assert_children ast, 2
+      namespace, name = ast.children
+      {'type'      => 'constant',
+       'namespace' => translate(namespace),
+       'name'      => name.to_s,
+      }
+    # e.g. the :: in `class ::A; end`
+    when :cbase
+      assert_children ast, 0
+      {'type' => 'toplevel_constant'}
     else
       raise "No case for #{ast.inspect}"
     end
