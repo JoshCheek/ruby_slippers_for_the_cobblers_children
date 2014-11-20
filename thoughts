@@ -65,3 +65,23 @@ Competencies
   This is nuts, but Rails integration so that we can use it after the first 6 weeks
   Fake file system so we can use it in SalesEngine
   Lessons that make use of it :P
+
+----- Some inspiration from other tools -----
+Holy shit, this doesn't even sound all that hard!
+  http://www.lambdacs.com/debugger/
+Great article with lots of links and ideas, from the authors of light-table. Haven't read it all or anything.
+  http://lighttable.com/2014/05/16/pain-we-forgot/
+Not sure, but looks like it has some interesting philisophical implications regarding how we think about software (ie thinking of it not as an app or machine)
+  http://pchiusano.blogspot.com/2013/05/the-future-of-software-end-of-apps-and.html
+UX for Bing search -- what ideas can we steal?
+  http://blogs.msdn.com/b/visualstudio/archive/2014/02/17/introducing-bing-code-search-for-c.aspx
+Example Centric programming
+  http://www.subtext-lang.org/OOPSLA04.pdf
+Omniscient debugging
+  http://www.lambdacs.com/debugger/
+Debug mode is the only mode -- discusses Bret Victor, some good looking links
+  http://gbracha.blogspot.com/2012/11/debug-mode-is-only-mode.html
+Local state is harmful -- haven't figured out its point, but I imagine this conclusion is  drawn from a deeper principle
+  http://scattered-thoughts.net/blog/2014/02/17/local-state-is-harmful/
+Wolfram Deployment API -- apparently they are doing crazy cool shit, worth checking out to get ideas... and possibly use, if it's as awesome as people imply with their hype
+  https://www.wolfram.com/universal-deployment-system/
