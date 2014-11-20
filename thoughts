@@ -1,3 +1,41 @@
+Data Structure:
+  constant namespace (pointer to Object)
+  Class
+    superclass pointer | VALUE
+    method table       | {symbol: method}
+    ivar table         | {symbol: VALUE}
+    name               | String
+    class pointer      | VALUE
+    constants          | [VALUE]
+  object space | [Object]
+  Object
+    class pointer | VALUE
+    ivar table    | {symbol: VALUE}
+  TOPLEVEL_BINDING | Stackframe
+  Stackframe
+    return location  | (??)
+    env              | Binding
+  Binding
+    self            | VALUE
+    local var table | {symbol: VALUE}
+
+bytecodes:
+  # instances
+  allocate(class)                    | Object
+  instance_variable_set(name, value) | Object
+  instance_variable_get(name)        | Object
+
+  # classes
+  create_class(superclass) | Class
+  method_set(name, method) | name (Symbol)
+
+  # methods
+  create_binding
+  create_stackframe
+  set_self
+
+
+5.8e+07 <-- make sure ruby parser thing can handle this (for object model)
 integrate with moi (prob rename that, since everyone gets it suggested to them, apparently)
 subscription types:
   make content that is served by us
