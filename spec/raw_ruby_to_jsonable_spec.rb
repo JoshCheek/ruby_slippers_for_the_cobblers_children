@@ -2,6 +2,7 @@ require 'app'
 
 RSpec.describe RawRubyToJsonable do
   # I don't know what I want yet, just playing to see
+  # probably look at SiB for a start
 
   def call(raw_code)
     json = RawRubyToJsonable.call raw_code
@@ -356,8 +357,37 @@ RSpec.describe RawRubyToJsonable do
     end
   end
 
+  context 'method definitions' do
+    example 'simple definition' do
+      pending
+      # (def :a (args) nil)
+      call 'def a; end'
+      fail
+    end
+
+    example 'singleton definition' do
+      pending
+      # (defs (self) :a (args) nil)
+      call 'def self.a; endd'
+      fail
+    end
+
+    example 'with args' do
+      pending
+      # (def :a (args (arg :b)) nil)
+      pp call 'def a(b) end'
+      fail
+    end
+
+    example 'with a body' do
+      pending
+      # (args (arg :b) (optarg :c (lvar :b))) (begin (int 1) (int 2)))
+      pp call 'def a(b, c=b) 1; 2; end'
+      fail
+    end
+  end
+
   describe 'module definitions'
-  # idk, look at SiB for a start
 
   context 'send' do
     example 'with no receiver' do
