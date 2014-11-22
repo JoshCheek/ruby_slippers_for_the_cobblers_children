@@ -449,6 +449,22 @@ RSpec.describe RawRubyToJsonable do
     end
   end
 
+  context 'variables' do
+    context 'instance variables' do
+      example 'getting' do
+        result = call '@abc' # (ivar :@abc)
+        expect(result['type']).to eq 'lookup_instance_variable'
+        expect(result['name']).to eq '@abc'
+      end
+      example 'setting' do
+        result = call '@abc = 1' # (ivasgn :@abc (int 1))
+        expect(result['type']).to eq 'assign_instance_variable'
+        expect(result['name']).to eq '@abc'
+        expect(result['value']['value']).to eq '1'
+      end
+    end
+  end
+
   context 'Acceptance tests' do
     example 'Simple example' do
       result = call <<-CODE

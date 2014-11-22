@@ -179,6 +179,18 @@ class RawRubyToJsonable
     when :self
       assert_children ast, 0
       {'type' => 'self'}
+    # e.g. @abc
+    when :ivar
+      assert_children ast, 1 # (ivar :@abc)
+      {'type' => 'lookup_instance_variable',
+       'name' => ast.children.first.to_s }
+    # e.g. @abc = 1
+    when :ivasgn
+      assert_children ast, 2 # (ivasgn :@abc (int 1))
+      {'type'  => 'assign_instance_variable',
+       'name'  => ast.children.first.to_s,
+       'value' => translate(ast.children.last),
+      }
     else
       raise "No case for #{ast.inspect}"
     end
