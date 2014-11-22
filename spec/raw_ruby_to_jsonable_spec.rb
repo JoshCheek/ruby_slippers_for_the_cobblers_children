@@ -7,7 +7,6 @@ require 'app'
 #   (int 1))
 
 # TODO:
-#   expressions.children should instead be expressions.expressions
 #   lookup_x_variable / assign_x_variable should instead be get_x_variable / set_x_variable
 
 RSpec.describe RawRubyToJsonable do
@@ -132,8 +131,8 @@ RSpec.describe RawRubyToJsonable do
       is_string! a, 'a'
       is_string! b, 'b'
 
-      expect(exprs['children'].size).to eq 1
-      is_int! exprs['children'][0], '1'
+      expect(exprs['expressions'].size).to eq 1
+      is_int! exprs['expressions'][0], '1'
     end
 
     example 'heredoc' do
@@ -152,7 +151,7 @@ RSpec.describe RawRubyToJsonable do
       parses_symbol! ':"a b\tc"', "a b\tc"
     end
     example 'interpolation' do
-      result = call ':"a#{1}b"'
+      result = call ':"a#{1}b"' # (dsym (str "a") (begin (int 1)) (str "b"))
       expect(result['type']).to eq 'interpolated_symbol'
       expect(result['segments'].size).to eq 3
 
@@ -160,8 +159,8 @@ RSpec.describe RawRubyToJsonable do
       is_string! a, 'a'
       is_string! b, 'b'
 
-      expect(exprs['children'].size).to eq 1
-      is_int! exprs['children'][0], '1'
+      expect(exprs['expressions'].size).to eq 1
+      is_int! exprs['expressions'][0], '1'
     end
   end
 
@@ -182,7 +181,7 @@ RSpec.describe RawRubyToJsonable do
 
     def is_regex!(result, *expected_values, options: [])
       expect(result['type']).to eq 'regular_expression'
-      actual_values = result['segments'].map { |s| s['children'] || s }.flatten.map { |node| node['value'] }
+      actual_values = result['segments'].map { |s| s['expressions'] || s }.flatten.map { |node| node['value'] }
       expect(actual_values.size).to eq expected_values.size
       [expected_values, actual_values].transpose.each { |expected_value, actual_value|
         expect(actual_value).to eq expected_value
@@ -241,7 +240,7 @@ RSpec.describe RawRubyToJsonable do
       result = call "9\n8"
       expect(result['type']).to eq 'expressions'
 
-      expr1, expr2, *rest = result['children']
+      expr1, expr2, *rest = result['expressions']
       expect(rest).to be_empty
 
       expect(expr1['type']).to eq 'integer'
@@ -254,13 +253,14 @@ RSpec.describe RawRubyToJsonable do
     example 'multiple expressions, parentheses bookends, newline delimited' do
       result = call "(9\n8)"
       expect(result['type']).to eq 'expressions'
-      expect(result['children'].size).to eq 2
+      expect(result['expressions'].size).to eq 2
     end
 
     example 'multiple expressions, begin/end bookends, newline delimited' do
       result = call "begin\n 1\nend"
+      pp result
       expect(result['type']).to eq 'keyword_begin'
-      expr, *rest = result['children']
+      expr, *rest = result['expressions']
       expect(rest).to be_empty
       expect(expr['type']).to eq 'integer'
       expect(expr['value']).to eq '1'
@@ -269,21 +269,21 @@ RSpec.describe RawRubyToJsonable do
     example 'semicolon delimited' do
       result = call "1;2"
       expect(result['type']).to eq 'expressions'
-      expect(result['children'].size).to eq 2
+      expect(result['expressions'].size).to eq 2
 
       result = call "(1;2)"
       expect(result['type']).to eq 'expressions'
-      expect(result['children'].size).to eq 2
+      expect(result['expressions'].size).to eq 2
 
       result = call "begin;1;end"
       expect(result['type']).to eq 'keyword_begin'
-      expect(result['children'].size).to eq 1
+      expect(result['expressions'].size).to eq 1
     end
   end
 
   example 'set and get local variable' do
     result = call "a = 1; a"
-    set, get = result['children']
+    set, get = result['expressions']
     expect(set['type']).to eq 'assign_local_variable'
     expect(set['name']).to eq 'a'
 
@@ -491,7 +491,7 @@ RSpec.describe RawRubyToJsonable do
       CODE
 
       expect(result['type']).to eq 'expressions'
-      expect(result['children'].map { |node| node['type'] })
+      expect(result['expressions'].map { |node| node['type'] })
         .to eq %w[class assign_local_variable send]
     end
   end

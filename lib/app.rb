@@ -92,13 +92,13 @@ class RawRubyToJsonable
       {'type' => 'nil'}
     # e.g. "1;2" and "(1;2)"
     when :begin
-      {'type'     => 'expressions',
-       'children' => ast.children.map { |child| translate child }
+      {'type'        => 'expressions',
+       'expressions' => ast.children.map { |child| translate child }
       }
     # e.g. "begin;1;2;end"
     when :kwbegin
-      {'type'     => 'keyword_begin',
-       'children' => ast.children.map { |child| translate child }
+      {'type'        => 'keyword_begin',
+       'expressions' => ast.children.map { |child| translate child }
       }
     # e.g. "a.b(c)"
     when :send
