@@ -6,9 +6,6 @@ require 'app'
 #   (args)
 #   (int 1))
 
-# TODO:
-#   lookup_x_variable / assign_x_variable should instead be get_x_variable / set_x_variable
-
 RSpec.describe RawRubyToJsonable do
   # I don't know what I want yet, just playing to see
   # probably look at SiB for a start
@@ -284,14 +281,14 @@ RSpec.describe RawRubyToJsonable do
   example 'set and get local variable' do
     result = call "a = 1; a"
     set, get = result['expressions']
-    expect(set['type']).to eq 'assign_local_variable'
+    expect(set['type']).to eq 'set_local_variable'
     expect(set['name']).to eq 'a'
 
     val = set['value']
     expect(val['type']).to eq 'integer'
     expect(val['value']).to eq '1'
 
-    expect(get['type']).to eq 'lookup_local_variable'
+    expect(get['type']).to eq 'get_local_variable'
     expect(get['name']).to eq 'a'
   end
 
@@ -457,12 +454,12 @@ RSpec.describe RawRubyToJsonable do
     context 'instance variables' do
       example 'getting' do
         result = call '@abc' # (ivar :@abc)
-        expect(result['type']).to eq 'lookup_instance_variable'
+        expect(result['type']).to eq 'get_instance_variable'
         expect(result['name']).to eq '@abc'
       end
       example 'setting' do
         result = call '@abc = 1' # (ivasgn :@abc (int 1))
-        expect(result['type']).to eq 'assign_instance_variable'
+        expect(result['type']).to eq 'set_instance_variable'
         expect(result['name']).to eq '@abc'
         expect(result['value']['value']).to eq '1'
       end
@@ -492,7 +489,7 @@ RSpec.describe RawRubyToJsonable do
 
       expect(result['type']).to eq 'expressions'
       expect(result['expressions'].map { |node| node['type'] })
-        .to eq %w[class assign_local_variable send]
+        .to eq %w[class set_local_variable send]
     end
   end
 end

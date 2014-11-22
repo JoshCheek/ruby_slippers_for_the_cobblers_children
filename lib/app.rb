@@ -111,14 +111,14 @@ class RawRubyToJsonable
     # e.g. "val = 1"
     when :lvasgn
       assert_children ast, 2
-      { 'type'  => 'assign_local_variable',
+      { 'type'  => 'set_local_variable',
         'name'  => ast.children[0].to_s,
         'value' => translate(ast.children[1]),
       }
     # e.g. "val = 1; val" NOTE: if you do not set the local first, then it becomes a send instead (ie parser is aware of the local)
     when :lvar
       assert_children ast, 1
-      { 'type' => 'lookup_local_variable',
+      { 'type' => 'get_local_variable',
         'name' => ast.children[0].to_s,
       }
     # e.g. "/a/i"
@@ -182,12 +182,12 @@ class RawRubyToJsonable
     # e.g. @abc
     when :ivar
       assert_children ast, 1 # (ivar :@abc)
-      {'type' => 'lookup_instance_variable',
+      {'type' => 'get_instance_variable',
        'name' => ast.children.first.to_s }
     # e.g. @abc = 1
     when :ivasgn
       assert_children ast, 2 # (ivasgn :@abc (int 1))
-      {'type'  => 'assign_instance_variable',
+      {'type'  => 'set_instance_variable',
        'name'  => ast.children.first.to_s,
        'value' => translate(ast.children.last),
       }
