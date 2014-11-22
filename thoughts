@@ -66,6 +66,9 @@ Competencies
   Fake file system so we can use it in SalesEngine
   Lessons that make use of it :P
 
+List of Rubinius bytecodes
+  http://rubini.us/doc/en/virtual-machine/instructions/
+
 ----- Some inspiration from other tools -----
 Holy shit, this doesn't even sound all that hard!
   http://www.lambdacs.com/debugger/
@@ -85,3 +88,9 @@ Local state is harmful -- haven't figured out its point, but I imagine this conc
   http://scattered-thoughts.net/blog/2014/02/17/local-state-is-harmful/
 Wolfram Deployment API -- apparently they are doing crazy cool shit, worth checking out to get ideas... and possibly use, if it's as awesome as people imply with their hype
   https://www.wolfram.com/universal-deployment-system/
+Great talk by Ryan Davis about buliding an interpreter (30 min)
+  http://www.confreaks.com/videos/2685-gogaruco2013-let-s-write-an-interpreter
+Talk about parsing expressions in Ruby -- Recommended by Ryan Davis in the above talk
+  http://confreaks.com/videos/582
+Talk about type inferrence (possibly dealing with Soft Typing) by Loren Segal, he recommended it at RubyConf 2014
+  https://www.youtube.com/watch?v=AHAONhPchKA
