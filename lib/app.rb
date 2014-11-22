@@ -149,6 +149,21 @@ class RawRubyToJsonable
        'superclass'  => translate(superclass),
        'body'        => translate(body),
       }
+    # (def :a (args (arg :b)) (int 1))
+    when :def
+      assert_children ast, 3
+      name, args, body = ast.children
+      {'type' => 'method_definition',
+       'args' => args.children.map { |arg| translate arg },
+       'body' => translate(body),
+      }
+    #
+    # (def :a (args (arg :b)) nil)
+    when :arg
+      assert_children ast, 1
+      {'type' => 'required_arg',
+       'name' => ast.children.first.to_s,
+      }
     when :const
       assert_children ast, 2
       namespace, name = ast.children

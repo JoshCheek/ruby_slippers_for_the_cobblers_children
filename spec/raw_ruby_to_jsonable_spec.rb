@@ -1,5 +1,11 @@
 require 'app'
 
+# You can test what Parser returns for some given syntax with:
+# $ ruby-parse -e 'def a() 1 end'
+# (def :a
+#   (args)
+#   (int 1))
+
 RSpec.describe RawRubyToJsonable do
   # I don't know what I want yet, just playing to see
   # probably look at SiB for a start
@@ -357,33 +363,44 @@ RSpec.describe RawRubyToJsonable do
     end
   end
 
-  context 'method definitions' do
+  context 'instance method definitions' do
     example 'simple definition' do
-      pending
       # (def :a (args) nil)
-      call 'def a; end'
-      fail
+      method_definition = call 'def a; end'
+      expect(method_definition['type']).to eq 'method_definition'
+      expect(method_definition['args']).to eq []
+      expect(method_definition['body']).to eq nil
     end
 
-    example 'singleton definition' do
-      pending
-      # (defs (self) :a (args) nil)
-      call 'def self.a; endd'
-      fail
-    end
+    context 'with args' do
+      example 'required arg' do
+        # (def :a (args (arg :b)) nil)
+        method_definition = call 'def a(b) end'
+        expect(method_definition['type']).to eq 'method_definition'
+        arg, *rest = method_definition['args']
+        expect(rest).to be_empty
 
-    example 'with args' do
-      pending
-      # (def :a (args (arg :b)) nil)
-      pp call 'def a(b) end'
-      fail
+        expect(arg['type']).to eq 'required_arg'
+        expect(arg['name']).to eq 'b'
+
+        expect(method_definition['body']).to eq nil
+      end
+
+      example 'optional arg'
+      example 'splatted args'
+      example 'required keyword arg'
+      example 'optional keyword arg'
+      example 'remaining keyword args'
+      example 'block arg'
+      example 'all together'
     end
 
     example 'with a body' do
-      pending
-      # (args (arg :b) (optarg :c (lvar :b))) (begin (int 1) (int 2)))
-      pp call 'def a(b, c=b) 1; 2; end'
-      fail
+      # (def :a (args) (int 1))
+      method_definition = call 'def a() 1 end'
+      expect(method_definition['type']).to eq 'method_definition'
+      expect(method_definition['args']).to eq []
+      expect(method_definition['body']['type']).to eq 'integer'
     end
   end
 
@@ -423,6 +440,31 @@ RSpec.describe RawRubyToJsonable do
       expect(result['target']['value']).to eq '1'
       expect(result['message']).to eq '%'
       expect(result['args'].map { |a| a['value'] }).to eq ['2']
+    end
+  end
+
+  context 'Acceptance tests' do
+    example 'Simple example' do
+      result = call <<-CODE
+        class User
+          def initialize(name)
+            self.name = name
+          end
+
+          def name
+            @name
+          end
+
+          def name=(name)
+            @name = name
+          end
+        end
+
+        user = User.new("Josh")
+        puts user.name
+      CODE
+      require "pry"
+      binding.pry
     end
   end
 end
