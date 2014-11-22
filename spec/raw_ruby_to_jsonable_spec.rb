@@ -6,6 +6,10 @@ require 'app'
 #   (args)
 #   (int 1))
 
+# TODO:
+#   expressions.children should instead be expressions.expressions
+#   lookup_x_variable / assign_x_variable should instead be get_x_variable / set_x_variable
+
 RSpec.describe RawRubyToJsonable do
   # I don't know what I want yet, just playing to see
   # probably look at SiB for a start
@@ -485,8 +489,10 @@ RSpec.describe RawRubyToJsonable do
         user = User.new("Josh")
         puts user.name
       CODE
-      require "pry"
-      binding.pry
+
+      expect(result['type']).to eq 'expressions'
+      expect(result['children'].map { |node| node['type'] })
+        .to eq %w[class assign_local_variable send]
     end
   end
 end
