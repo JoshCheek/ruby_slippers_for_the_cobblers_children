@@ -406,6 +406,12 @@ RSpec.describe RawRubyToJsonable do
 
   describe 'module definitions'
 
+  context 'keywords' do
+    example 'self' do
+      expect(call('self')['type']).to eq 'self'
+    end
+  end
+
   context 'send' do
     example 'with no receiver' do
       result = call 'load'

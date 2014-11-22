@@ -175,6 +175,9 @@ class RawRubyToJsonable
     when :cbase
       assert_children ast, 0
       {'type' => 'toplevel_constant'}
+    when :self
+      assert_children ast, 0
+      {'type' => 'self'}
     else
       raise "No case for #{ast.inspect}"
     end
