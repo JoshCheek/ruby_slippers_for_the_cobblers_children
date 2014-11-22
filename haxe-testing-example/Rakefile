@@ -1,0 +1,8 @@
+task default: :test
+
+# really, just made this to document how to run the tests
+desc 'Run tests'
+task :test do
+  sh 'haxe compile.hxml'
+  sh 'neko mytest.n'
+end
