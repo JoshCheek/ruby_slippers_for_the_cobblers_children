@@ -157,9 +157,9 @@ class RawRubyToJsonable
        'args' => args.children.map { |arg| translate arg },
        'body' => translate(body),
       }
-    #
-    # (def :a (args (arg :b)) nil)
+    # e.g. the b in `def a(b) 1 end`
     when :arg
+      # (def :a (args (arg :b)) (int 1))
       assert_children ast, 1
       {'type' => 'required_arg',
        'name' => ast.children.first.to_s,
@@ -175,6 +175,7 @@ class RawRubyToJsonable
     when :cbase
       assert_children ast, 0
       {'type' => 'toplevel_constant'}
+    # e.g. self
     when :self
       assert_children ast, 0
       {'type' => 'self'}
