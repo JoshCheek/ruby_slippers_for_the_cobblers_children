@@ -1,0 +1,38 @@
+File extension: .hx
+
+Given the file HelloWorld.hx, compile to js with `haxe -main HelloWorld -js HelloWorld.js`
+
+Compile to Java with
+  haxe -main HelloWorld -java HelloWorldJava
+  cd HelloWorldJava
+  java -cp ./HelloWorld.jar haxe.root.HelloWorld
+
+What is all this shit?
+  http://gamasutra.com/blogs/LarsDoucet/20140318/213407/Flash_is_dead_long_live_OpenFL.php
+  wonderful blog explaining the ecosystem
+  linking to relevant resources
+  suggestions for different types of use cases, etc
+  definitely read this again
+
+repl:
+  haxelib install ihx
+  $ haxelib run ihx
+
+Language docs
+  http://haxe.org/documentation/introduction/
+
+Graphics
+  HaxeFlixel tutorial
+    http://haxeflixel.com/documentation/part-ii-testing/
+  http://haxeui.org/install_openfl.jsp
+    haxelib install lime
+    haxelib run lime setup
+    lime install openfl
+  http://haxeui.org/install_haxeui.jsp
+    haxelib install haxeui
+  haxeflixel
+    http://haxeflixel.com/showcase/       examples
+    http://haxeflixel.com/demos/          more examples (with source)
+    http://haxeflixel.com/documentation/  docs
+  http://haxeflixel.com/demos/FlxNape/
+    great demos of FlxNape, a physics engine
