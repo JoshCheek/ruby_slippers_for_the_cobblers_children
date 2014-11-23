@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+$LOAD_PATH.unshift File.expand_path('../lib', __dir__)
+
+require 'app'
+
+code_snippets = if ARGV.any? then ARGV else [$stdin.read] end
+code_snippets.each do |code_snippet|
+  $stdout.puts JSON.dump RawRubyToJsonable.call code_snippet
+end

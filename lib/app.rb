@@ -1,6 +1,7 @@
 require 'parser/current'
 require 'json'
 
+# come up w/ a name for this shit and namespace it -.^
 class RawRubyToJsonable
   # receives raw ruby code (a String)
   # return a data structure that can be directly converted into json
