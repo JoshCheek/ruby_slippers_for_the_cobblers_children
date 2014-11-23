@@ -79,7 +79,7 @@ class TestInterpreter extends haxe.unit.TestCase {
     // FOR THE FUTURE
     // stdout      = StringIO.new
     // interpreter = Interpreter.new(stdout: stdout)
-    var interpreter = new Interpreter();
+    var interpreter = new RubyInterpreter();
     interpreter.addCode(json);
     interpreter.evalAll();
 
@@ -90,9 +90,9 @@ class TestInterpreter extends haxe.unit.TestCase {
     // it defined the class
     var userClass = interpreter.lookupClass('User');
     assertEquals('User', userClass.name());
-    assertEquals('[initialize,name,name=]', userClass.instanceMethods(false));
+    assertEquals('[initialize,name,name=]', Std.string(userClass.instanceMethods(false)));
 
     // it is tracking the instance
-    assertEquals(1, interpreter.lookupClass('ObjectSpace').eachObject(userClass).length);
+    assertEquals(1, interpreter.eachObject(userClass).length);
   }
 }
