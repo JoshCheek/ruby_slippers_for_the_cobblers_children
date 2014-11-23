@@ -18,7 +18,8 @@ class TestInterpreter extends haxe.unit.TestCase {
   // not sure how to get the location of this file, specifically
   public function testAacceptance1() {
     var body = sys.io.File.getContent(filepath);
-    print(body);
+    var json = haxe.Json.parse(body);
+    print(json);
     // PROCESS (in Ruby for now, I'll translate it before I go to write the test):
     //   stdout      = StringIO.new
     //   interpreter = Interpreter.new(stdout: stdout)
