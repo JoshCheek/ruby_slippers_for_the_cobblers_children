@@ -8,28 +8,91 @@ class TestInterpreter extends haxe.unit.TestCase {
   // http://api.haxe.org/
   //   language api
 
-  var filepath: String;
-
-  override public function setup() {
-    filepath = "../example-json-to-evaluate.json";
-  }
-
   // this only finds the json if you are in the current dir (e.g. via rake)
   // not sure how to get the location of this file, specifically
+  var filepath = "../example-json-to-evaluate.json";
+
+
+
+  // CODE:
+  // class User
+  //   def initialize(name)
+  //     self.name = name
+  //   end
+  //
+  //   def name
+  //     @name
+  //   end
+  //
+  //   def name=(name)
+  //     @name = name
+  //   end
+  // end
+  //
+  // user = User.new("Josh")
+  // puts user.name
+
+  // "JSON":
+  // {"type"=>"expressions",
+  //  "expressions"=>
+  //   [{"type"=>"class",
+  //     "name_lookup"=>{"type"=>"constant", "namespace"=>nil, "name"=>"User"},
+  //     "superclass"=>nil,
+  //     "body"=>
+  //      {"type"=>"expressions",
+  //       "expressions"=>
+  //        [{"type"=>"method_definition",
+  //          "args"=>[{"type"=>"required_arg", "name"=>"name"}],
+  //          "body"=>
+  //           {"type"=>"send",
+  //            "target"=>{"type"=>"self"},
+  //            "message"=>"name=",
+  //            "args"=>[{"type"=>"get_local_variable", "name"=>"name"}]}},
+  //         {"type"=>"method_definition",
+  //          "args"=>[],
+  //          "body"=>{"type"=>"get_instance_variable", "name"=>"@name"}},
+  //         {"type"=>"method_definition",
+  //          "args"=>[{"type"=>"required_arg", "name"=>"name"}],
+  //          "body"=>
+  //           {"type"=>"set_instance_variable",
+  //            "name"=>"@name",
+  //            "value"=>{"type"=>"get_local_variable", "name"=>"name"}}}]}}
+  //    ,{"type"=>"set_local_variable",
+  //     "name"=>"user",
+  //     "value"=>
+  //      {"type"=>"send",
+  //       "target"=>{"type"=>"constant", "namespace"=>nil, "name"=>"User"},
+  //       "message"=>"new",
+  //       "args"=>[{"type"=>"string", "value"=>"Josh"}]}}
+  //    ,{"type"=>"send",
+  //     "target"=>nil,
+  //     "message"=>"puts",
+  //     "args"=>
+  //      [{"type"=>"send",
+  //        "target"=>{"type"=>"get_local_variable", "name"=>"user"},
+  //        "message"=>"name",
+  //        "args"=>[]}]}]}
   public function testAacceptance1() {
     var body = sys.io.File.getContent(filepath);
     var json = haxe.Json.parse(body);
-    print(json);
-    // PROCESS (in Ruby for now, I'll translate it before I go to write the test):
-    //   stdout      = StringIO.new
-    //   interpreter = Interpreter.new(stdout: stdout)
-    //   interpreter.add_code(JSON.parse File.read filepath);
-    //   interpreter.eval_all
-    //   assert_equal "Josh", stdout.string
-    //   user_class = interpreter.lookup_class(:User).
-    //   assert_equal :User, user_class.name
-    //   assert_equal [:initialize, :name, :name=], user_class.instance_methods(false)
-    //   assert_equal 1, interpreter.lookup_class(:ObjectSpace).each_object(user_class).size
-    assertTrue(true);
+
+    // FOR THE FUTURE
+    // stdout      = StringIO.new
+    // interpreter = Interpreter.new(stdout: stdout)
+    var interpreter = new Interpreter();
+    interpreter.addCode(json);
+    interpreter.evalAll();
+
+    // the code successfully printed
+    // ... eventually switch to `assert_equal "Josh", stdout.string`
+    assertEquals("Josh\n", interpreter.printedInternally());
+
+    // it defined the class
+    var userClass = interpreter.lookupClass('User');
+    assertEquals('User', userClass.name());
+    assertEquals('[initialize,name,name=]', userClass.instanceMethods(false));
+
+    // it is tracking the instance
+    assertEquals(1, interpreter.lookupClass('ObjectSpace').eachObject(userClass).length);
   }
 }
