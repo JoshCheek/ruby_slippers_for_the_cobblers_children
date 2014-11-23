@@ -1,16 +1,10 @@
 // TODO: figure out how to actually namespace
-class RubyClass {
-  var _name:String;
+class RubyClass extends RubyObject {
+  public var name:String;
+  public var instanceMethods:Array<String>;
 
-  public function new(name:String) {
-    _name = name;
-  }
-
-  public function name():String {
-    return _name;
-  }
-
-  public function instanceMethods(includeInherited:Bool):Array<String> {
-    return ['THIS SHOULD BE THE INSTANCE METHODS'];
+  public function withName(name:String):RubyClass {
+    this.name = name;
+    return this;
   }
 }
