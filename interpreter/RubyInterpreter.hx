@@ -1,12 +1,30 @@
 // TODO: figure out how to actually namespace
 class RubyInterpreter {
+  private var ast:Dynamic;
+  //private var stack:Array<Binding>;
+  private var objectSpace:Array<RubyObject>;
+  // internally printed shit
+  // stack
+  // toplevel constant
+  // toplevel binding
+  // object space
+
   public function new() {
     // FIXME
+    this.objectSpace = [];
   }
 
-  public function addCode(code:Dynamic):Void {
-    // FIXME
+  // e.g. `{ type => string, value => Josh }`
+  public function addCode(ast:Dynamic):Void {
+    this.ast = ast;
   }
+
+  public function evalNextExpression():Void {
+    var newString:RubyString = new RubyString().withDefaults();
+    newString.value = ast.value;
+    objectSpace.push(newString);
+  }
+
 
   public function evalAll():Void {
     // FIXME
@@ -24,11 +42,7 @@ class RubyInterpreter {
     return ['THIS SHOULD BE AN ARRAY OF OBJECTS'];
   }
 
-  public function evalNextExpression():Void {
-    // FIXME
-  }
-
   public function currentExpression():RubyObject {
-    return new RubyObject().withDefaults();
+    return objectSpace[objectSpace.length - 1];
   }
 }
