@@ -19,10 +19,11 @@ class RubyInterpreter {
     this.ast = ast;
   }
 
-  public function evalNextExpression():Void {
+  public function evalNextExpression():RubyObject {
     var newString:RubyString = new RubyString().withDefaults();
     newString.value = ast.value;
     objectSpace.push(newString);
+    return currentExpression();
   }
 
 

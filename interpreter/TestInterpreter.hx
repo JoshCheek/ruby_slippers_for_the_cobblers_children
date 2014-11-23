@@ -15,7 +15,7 @@ class TestInterpreter extends haxe.unit.TestCase {
   // not sure how to get the location of this file, specifically
   var filepath = "../example-json-to-evaluate.json";
 
-  private function forCode(rawJson:String, evalType='expression'):RubyInterpreter {
+  private function forJsonCode(rawJson:String, evalType='expression'):RubyInterpreter {
     // FOR THE FUTURE
     // stdout      = StringIO.new
     // interpreter = Interpreter.new(stdout: stdout)
@@ -26,8 +26,18 @@ class TestInterpreter extends haxe.unit.TestCase {
       interpreter.evalNextExpression();
     else if(evalType == 'all')
       interpreter.evalAll();
+    else if(evalType == 'none')
+      null; // no op
 
     return interpreter;
+  }
+
+  private function forCode(rawCode:String, evalType='expression'):RubyInterpreter {
+    // this, stupidly, also depends on CWD
+    var astFor  = new sys.io.Process('../bin/ast_for', [rawCode]);
+    var rawJson = "";
+    try { rawJson += astFor.stdout.readLine(); } catch (ex:haxe.io.Eof) { /* no op */ }
+    return forJsonCode(rawJson);
   }
 
   private function assertLooksKindaSimilar<T>(a: T, b:T):Void {
@@ -36,20 +46,42 @@ class TestInterpreter extends haxe.unit.TestCase {
 
   public function testItEvaluatesAStringLiteral() {
     var rbstr       = new RubyString().withDefaults().withValue("Josh");
-    var interpreter = forCode('{"type":"string", "value":"Josh"}');
+    var interpreter = forJsonCode('{"type":"string", "value":"Josh"}');
     assertLooksKindaSimilar(rbstr, interpreter.currentExpression());
   }
 
+  public function testItSetsAndGetsLocalVariables() {
+    // { type: "expressions"
+    //   expressions: [
+    //     { type: "set_local_variable"
+    //       name: "a",
+    //       value: { "value": "b", "type": "string" },
+    //     },
+    //     { type: "string"
+    //       value: "c",
+    //     },
+    //     { type: "get_local_variable"
+    //       name: "a",
+    //     }
+    //   ],
+    // }
+    var interpreter = forCode("a = 'b'\n'c'\n a", 'none');
+    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.evalNextExpression());
+    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('c'), interpreter.evalNextExpression());
+    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.evalNextExpression());
+  }
+
+
   /**
   need to be able to eval:
+    local vars
+      get/set
     constant lookup
     class definition
     method definition
       required args
     method invocation
       with args
-    local vars
-      get/set
     ivars
       get/set
 
@@ -136,7 +168,7 @@ class TestInterpreter extends haxe.unit.TestCase {
   //        "message"=>"name",
   //        "args"=>[]}]}]}
   public function _testAacceptance1() {
-    var interpreter = forCode(sys.io.File.getContent(filepath), 'all');
+    var interpreter = forJsonCode(sys.io.File.getContent(filepath), 'all');
     var interpreter = new RubyInterpreter();
 
     // the code successfully printed
