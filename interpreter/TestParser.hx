@@ -1,5 +1,4 @@
-// https://github.com/HaxeFoundation/haxe/blob/development/std/haxe/unit/TestCase.hx
-
+using Lambda;
 
 // https://github.com/whitequark/parser/blob/master/doc/AST_FORMAT.md
 enum RubyAst {
@@ -8,30 +7,36 @@ enum RubyAst {
   False;
   Integer(value:Int);
   Float(value:Float);
-  // String(value:String);
+  String(value:String);
+  Expressions(expressions:Array<RubyAst>);
   Undefined(code:Dynamic);
 }
 
 class TestParser extends haxe.unit.TestCase {
   // how do i make a compound type?
   public function parse(rawCode:String):RubyAst {
-    var astFor     = new sys.io.Process('../bin/ast_for', [rawCode]);
-    var rawJson    = "";
+    var astFor       = new sys.io.Process('../bin/ast_for', [rawCode]);
+    var rawJson      = "";
     try { rawJson += astFor.stdout.readLine(); } catch (ex:haxe.io.Eof) { /* no op */ }
-    var json       = haxe.Json.parse(rawJson);
+    var json:Dynamic = haxe.Json.parse(rawJson);
     // trace(rawCode);
     // trace(rawJson);
     // trace(json);
-    var works = switch(json.type) {
-      case "nil"    : Nil;
-      case "true"   : True;
-      case "false"  : False;
-      case "integer": Integer(json.value);
-      case "float"  : Float(json.value);
-      // case "string" : String(json.value);
-      case _        : Undefined(json);
+    return parseJson(json);
+  }
+
+  public function parseJson(ast:Dynamic):RubyAst {
+    var rubyAst = switch(ast.type) {
+      case "nil"         : Nil;
+      case "true"        : True;
+      case "false"       : False;
+      case "integer"     : Integer(ast.value);
+      case "float"       : Float(ast.value);
+      case "string"      : String(ast.value);
+      case "expressions" : Expressions(cast(ast.expressions, Array<Dynamic>).map(parseJson)); // This was pretty rough to figure out. Would be nice to have more docs on JSON
+      case _             : Undefined(ast);
     }
-    return works;
+    return rubyAst;
   }
 
   public function assertParses(rubyCode:String, expected:RubyAst, ?c:haxe.PosInfos) {
@@ -50,9 +55,17 @@ class TestParser extends haxe.unit.TestCase {
     assertParses('-12.34', Float(-12.34));
   }
 
-  //TODO: Complex and Rational
+  //TODO: Complex and Rational, __FILE__
 
   public function testString() {
-    // assertParses("'abc'", String("abc"));
+    assertParses("'abc'", String("abc"));
   }
+
+  public function testExpressions() {
+    assertParses('1;1', Expressions([Integer(1), Integer(1)]));
+  }
+
+  // public function testLocalVar() {
+  //   assertParses("a=1;a",
+  // }
 }
