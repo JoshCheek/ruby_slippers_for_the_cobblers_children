@@ -65,7 +65,5 @@ class TestParser extends haxe.unit.TestCase {
     assertParses('1;1', Expressions([Integer(1), Integer(1)]));
   }
 
-  // public function testLocalVar() {
-  //   assertParses("a=1;a",
-  // }
+  // UP NEXT: set local, get local, send, name lookup, constant, class, method def
 }
