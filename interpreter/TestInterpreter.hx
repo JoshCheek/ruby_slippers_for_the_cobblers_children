@@ -23,7 +23,7 @@ class TestInterpreter extends haxe.unit.TestCase {
     interpreter.addCode(haxe.Json.parse(rawJson));
 
     if(evalType == 'expression')
-      interpreter.evalNextExpression();
+      interpreter.drain();
     else if(evalType == 'all')
       interpreter.evalAll();
     else if(evalType == 'none')
@@ -101,9 +101,6 @@ class TestInterpreter extends haxe.unit.TestCase {
       #puts <-- for now
       TOPLEVEL_BINDING
     String
-    Binding
-      self
-      local vars
   */
 
 
