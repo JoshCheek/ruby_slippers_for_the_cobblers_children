@@ -37,7 +37,7 @@ class TestInterpreter extends haxe.unit.TestCase {
     var astFor  = new sys.io.Process('../bin/ast_for', [rawCode]);
     var rawJson = "";
     try { rawJson += astFor.stdout.readLine(); } catch (ex:haxe.io.Eof) { /* no op */ }
-    return forJsonCode(rawJson);
+    return forJsonCode(rawJson, evalType);
   }
 
   private function assertLooksKindaSimilar<T>(a: T, b:T):Void {
@@ -51,19 +51,19 @@ class TestInterpreter extends haxe.unit.TestCase {
   }
 
   public function testItSetsAndGetsLocalVariables() {
-    // { type: "expressions"
+    // { type: "expressions",
     //   expressions: [
-    //     { type: "set_local_variable"
+    //     { type: "set_local_variable",
     //       name: "a",
-    //       value: { "value": "b", "type": "string" },
+    //       value: { "value": "b", "type": "string" }
     //     },
-    //     { type: "string"
-    //       value: "c",
+    //     { type: "string",
+    //       value: "c"
     //     },
-    //     { type: "get_local_variable"
-    //       name: "a",
+    //     { type: "get_local_variable",
+    //       name: "a"
     //     }
-    //   ],
+    //   ]
     // }
     var interpreter = forCode("a = 'b'\n'c'\n a", 'none');
     assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.evalNextExpression());
