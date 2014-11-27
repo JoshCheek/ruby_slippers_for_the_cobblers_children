@@ -108,26 +108,7 @@ class TestInterpreter extends haxe.unit.TestCase {
 
 
 
-  /** CODE:
-    class User
-      def initialize(name)
-        self.name = name
-      end
-
-      def name
-        @name
-      end
-
-      def name=(name)
-        @name = name
-      end
-    end
-
-    user = User.new("Josh")
-    puts user.name
-  */
-
-  // "JSON":
+  // The json structure:
   // {"type"=>"expressions",
   //  "expressions"=>
   //   [{"type"=>"class",
@@ -168,8 +149,25 @@ class TestInterpreter extends haxe.unit.TestCase {
   //        "message"=>"name",
   //        "args"=>[]}]}]}
   public function _testAacceptance1() {
-    var interpreter = forJsonCode(sys.io.File.getContent(filepath), 'all');
-    var interpreter = new RubyInterpreter();
+    var interpreter = forCode('
+      class User
+        def initialize(name)
+          self.name = name
+        end
+
+        def name
+          @name
+        end
+
+        def name=(name)
+          @name = name
+        end
+      end
+
+      user = User.new("Josh")
+      puts user.name'
+      , 'all'
+    );
 
     // the code successfully printed
     // ... eventually switch to `assert_equal "Josh", stdout.string`
