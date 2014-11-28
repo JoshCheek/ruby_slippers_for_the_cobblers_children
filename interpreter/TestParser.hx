@@ -10,6 +10,7 @@ enum RubyAst {
   Nil;
   True;
   False;
+  Self;
   Integer(value:Int);
   Float(value:Float);
   String(value:String);
@@ -17,6 +18,8 @@ enum RubyAst {
   Undefined(code:Dynamic);
   SetLocalVariable(name:String, value:RubyAst);
   GetLocalVariable(name:String);
+  SetInstanceVariable(name:String, value:RubyAst);
+  GetInstanceVariable(name:String);
   Send(target:RubyAst, message:String, args:Array<RubyAst>);
   Constant(namespace:RubyAst, name:String);
   RClass(nameLookup:RubyAst, superclass:RubyAst, body:RubyAst);
@@ -44,12 +47,15 @@ class TestParser extends haxe.unit.TestCase {
       case "nil"                : Nil;
       case "true"               : True;
       case "false"              : False;
+      case "self"               : Self;
       case "integer"            : Integer(ast.value);
       case "float"              : Float(ast.value);
       case "string"             : String(ast.value);
       case "expressions"        : Expressions(parseJsonArray(ast.expressions));
       case "set_local_variable" : SetLocalVariable(ast.name, parseJson(ast.value));
       case "get_local_variable" : GetLocalVariable(ast.name);
+      case "set_instance_variable" : SetInstanceVariable(ast.name, parseJson(ast.value));
+      case "get_instance_variable" : GetInstanceVariable(ast.name);
       case "send"               : Send(parseJson(ast.target), ast.message, parseJsonArray(ast.args));
       case "constant"           : Constant(parseJson(ast.namespace), ast.name);
       case "class"              : RClass(parseJson(ast.name_lookup), parseJson(ast.superclass), parseJson(ast.body));
@@ -148,7 +154,59 @@ class TestParser extends haxe.unit.TestCase {
   }
 
 
-  public function _testCurrent() {
+  // need to parse Self
+  public function testCurrent() {
+    assertParses('self', Self);
+    assertParses("@a", GetInstanceVariable("@a"));
+    assertParses("@a=true", SetInstanceVariable("@a", True));
+    assertParses('
+      class User
+        def initialize(name)
+          self.name = name
+        end
+
+        def name
+          @name
+        end
+
+        def name=(name)
+          @name = name
+        end
+      end
+
+      user = User.new("Josh")
+      puts user.name',
+      Expressions([
+        RClass(
+          Constant(Nil, "User"),
+          Nil,
+          Expressions([
+            MethodDefinition(
+              "initialize",
+              [RequiredArg("name")],
+              Send(Self, "name=", [GetLocalVariable("name")])
+            ),
+            MethodDefinition(
+              "name",
+              [],
+              GetInstanceVariable("@name")
+            ),
+            MethodDefinition(
+              "name=",
+              [RequiredArg("name")],
+              SetInstanceVariable("@name", GetLocalVariable("name"))
+            ),
+          ])
+        ),
+
+        SetLocalVariable(
+          "user",
+          Send(Constant(Nil, "User"), "new", [String("Josh")])
+        ),
+
+        Send(Nil, "puts", [Send(GetLocalVariable("user"), "name", [])]),
+      ])
+    );
   }
 
 }
