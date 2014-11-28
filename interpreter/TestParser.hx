@@ -77,9 +77,11 @@ class TestParser extends haxe.unit.TestCase {
           # Rational
         # String
           'abc'
-        # locals
-          a = 1
-          a
+      # locals
+        a = 1
+        a
+      # sending messages
+        true.something(false)
       ",
       Expressions([
         // literals
@@ -105,21 +107,15 @@ class TestParser extends haxe.unit.TestCase {
         // locals
           SetLocalVariable("a", Integer(1)),
           GetLocalVariable("a"),
+        // sending messages
+        Send(True, "something", [False])
       ])
     );
   }
 
 
-// { "type": "send"
-//   "target": {"type": "false"},
-//   "message": "something",
-//   "args": [{"type": "true"}],
-// }
-  public function testCurrent() {
-    // send, name lookup, constant, class, method def
-    assertParses('true.something(false)',
-        Send(True, "something", [False])
-      );
+  public function _testCurrent() {
+    // name lookup, constant, class, method def
   }
 
 }
