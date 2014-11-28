@@ -71,6 +71,9 @@ class TestParser extends haxe.unit.TestCase {
           # Rational
         # String
           'abc'
+        # locals
+          a = 1
+          a
       ",
       Expressions([
         // literals
@@ -93,29 +96,15 @@ class TestParser extends haxe.unit.TestCase {
               // TODO
           // String
             String("abc"),
+        // locals
+          SetLocalVariable("a", Integer(1)),
+          GetLocalVariable("a"),
       ])
     );
   }
 
 
-// { "type": "expressions",
-//   "expressions": [
-//     { "type": "set_local_variable",
-//       "name": "a",
-//       "value": {"value": "1", "type": "integer"},
-//     },
-//     { "type": "get_local_variable"
-//       "name": "a",
-//     }
-//   ],
-// }
-  public function testCurrent() {
-    assertParses("a=1", SetLocalVariable("a", Integer(1)));
-    assertParses("a=1; a", Expressions([
-      SetLocalVariable("a", Integer(1)),
-      GetLocalVariable("a"),
-    ]));
-
+  public function _testCurrent() {
     // send, name lookup, constant, class, method def
   }
 
