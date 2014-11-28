@@ -293,7 +293,7 @@ RSpec.describe RawRubyToJsonable do
   end
 
 
-  describe 'class definitions', t:true do
+  describe 'class definitions' do
     example 'implicit toplevel' do
       result = call 'class A;end'
       expect(result['type']).to eq 'class'
@@ -369,6 +369,7 @@ RSpec.describe RawRubyToJsonable do
       # (def :a (args) nil)
       method_definition = call 'def a; end'
       expect(method_definition['type']).to eq 'method_definition'
+      expect(method_definition['name']).to eq 'a'
       expect(method_definition['args']).to eq []
       expect(method_definition['body']).to eq nil
     end

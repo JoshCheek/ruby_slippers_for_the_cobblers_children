@@ -20,6 +20,8 @@ enum RubyAst {
   Send(target:RubyAst, message:String, args:Array<RubyAst>);
   Constant(namespace:RubyAst, name:String);
   RClass(nameLookup:RubyAst, superclass:RubyAst, body:RubyAst);
+  MethodDefinition(name:String, args:Array<RubyAst>, body:RubyAst);
+  RequiredArg(name:String);
 }
 
 class TestParser extends haxe.unit.TestCase {
@@ -51,6 +53,8 @@ class TestParser extends haxe.unit.TestCase {
       case "send"               : Send(parseJson(ast.target), ast.message, parseJsonArray(ast.args));
       case "constant"           : Constant(parseJson(ast.namespace), ast.name);
       case "class"              : RClass(parseJson(ast.name_lookup), parseJson(ast.superclass), parseJson(ast.body));
+      case "method_definition"  : MethodDefinition(ast.name, parseJsonArray(ast.args), parseJson(ast.body));
+      case "required_arg"       : RequiredArg(ast.name);
       case _                    : Undefined(ast);
     }
     return rubyAst;
@@ -136,7 +140,24 @@ class TestParser extends haxe.unit.TestCase {
 
 
   public function testCurrent() {
-    assertTrue(true);
+    assertParses("def bland_method; end",
+      MethodDefinition("bland_method", [], Nil)
+    );
+
+    // { "type": "method_definition",
+    //   "name": "method_with_args_and_body",
+    //   "args": [{"type": "required_arg", "name": "arg"}],
+    //   "body": {"type": "true"},
+    // }
+    assertParses("def method_with_args_and_body(arg)
+                    true
+                  end",
+                  MethodDefinition(
+                    "method_with_args_and_body",
+                    [RequiredArg("arg")],
+                    True
+                  )
+                 );
   }
 
 }

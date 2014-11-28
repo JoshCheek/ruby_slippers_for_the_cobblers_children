@@ -155,6 +155,7 @@ class RawRubyToJsonable
       assert_children ast, 3
       name, args, body = ast.children
       {'type' => 'method_definition',
+       'name' => name.to_s,
        'args' => args.children.map { |arg| translate arg },
        'body' => translate(body),
       }
