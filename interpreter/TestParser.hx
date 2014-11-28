@@ -44,24 +44,24 @@ class TestParser extends haxe.unit.TestCase {
     if(ast == null) return Nil;
 
     var rubyAst = switch(ast.type) {
-      case "nil"                : Nil;
-      case "true"               : True;
-      case "false"              : False;
-      case "self"               : Self;
-      case "integer"            : Integer(ast.value);
-      case "float"              : Float(ast.value);
-      case "string"             : String(ast.value);
-      case "expressions"        : Expressions(parseJsonArray(ast.expressions));
-      case "set_local_variable" : SetLocalVariable(ast.name, parseJson(ast.value));
-      case "get_local_variable" : GetLocalVariable(ast.name);
+      case "nil"                   : Nil;
+      case "true"                  : True;
+      case "false"                 : False;
+      case "self"                  : Self;
+      case "integer"               : Integer(ast.value);
+      case "float"                 : Float(ast.value);
+      case "string"                : String(ast.value);
+      case "expressions"           : Expressions(parseJsonArray(ast.expressions));
+      case "set_local_variable"    : SetLocalVariable(ast.name, parseJson(ast.value));
+      case "get_local_variable"    : GetLocalVariable(ast.name);
       case "set_instance_variable" : SetInstanceVariable(ast.name, parseJson(ast.value));
       case "get_instance_variable" : GetInstanceVariable(ast.name);
-      case "send"               : Send(parseJson(ast.target), ast.message, parseJsonArray(ast.args));
-      case "constant"           : Constant(parseJson(ast.namespace), ast.name);
-      case "class"              : RClass(parseJson(ast.name_lookup), parseJson(ast.superclass), parseJson(ast.body));
-      case "method_definition"  : MethodDefinition(ast.name, parseJsonArray(ast.args), parseJson(ast.body));
-      case "required_arg"       : RequiredArg(ast.name);
-      case _                    : Undefined(ast);
+      case "send"                  : Send(parseJson(ast.target), ast.message, parseJsonArray(ast.args));
+      case "constant"              : Constant(parseJson(ast.namespace), ast.name);
+      case "class"                 : RClass(parseJson(ast.name_lookup), parseJson(ast.superclass), parseJson(ast.body));
+      case "method_definition"     : MethodDefinition(ast.name, parseJsonArray(ast.args), parseJson(ast.body));
+      case "required_arg"          : RequiredArg(ast.name);
+      case _                       : Undefined(ast);
     }
     return rubyAst;
   }
@@ -82,6 +82,7 @@ class TestParser extends haxe.unit.TestCase {
           nil
           true
           false
+          self
         # Numeric
           # Integer
             1
@@ -97,6 +98,8 @@ class TestParser extends haxe.unit.TestCase {
         a = 1
         a
         A
+        @a = 1
+        @a
       # sending messages
         true.something(false)
       # class/module definitions
@@ -116,6 +119,7 @@ class TestParser extends haxe.unit.TestCase {
           Nil,
           True,
           False,
+          Self,
           // Numeric
             // Fixnum
               Integer(1),
@@ -132,6 +136,8 @@ class TestParser extends haxe.unit.TestCase {
           SetLocalVariable("a", Integer(1)),
           GetLocalVariable("a"),
           Constant(Nil, "A"), // going w/ nil b/c that's what comes in, but kinda seems like the parser should make this a CurrentNamespace node or something
+          SetInstanceVariable("@a", Integer(1)),
+          GetInstanceVariable("@a"),
         // sending messages
           Send(True, "something", [False]),
         // class/module definitions
@@ -149,62 +155,6 @@ class TestParser extends haxe.unit.TestCase {
             [RequiredArg("arg")],
             True
           ),
-      ])
-    );
-  }
-
-
-  // need to parse Self
-  public function testCurrent() {
-    assertParses('self', Self);
-    assertParses("@a", GetInstanceVariable("@a"));
-    assertParses("@a=true", SetInstanceVariable("@a", True));
-    assertParses('
-      class User
-        def initialize(name)
-          self.name = name
-        end
-
-        def name
-          @name
-        end
-
-        def name=(name)
-          @name = name
-        end
-      end
-
-      user = User.new("Josh")
-      puts user.name',
-      Expressions([
-        RClass(
-          Constant(Nil, "User"),
-          Nil,
-          Expressions([
-            MethodDefinition(
-              "initialize",
-              [RequiredArg("name")],
-              Send(Self, "name=", [GetLocalVariable("name")])
-            ),
-            MethodDefinition(
-              "name",
-              [],
-              GetInstanceVariable("@name")
-            ),
-            MethodDefinition(
-              "name=",
-              [RequiredArg("name")],
-              SetInstanceVariable("@name", GetLocalVariable("name"))
-            ),
-          ])
-        ),
-
-        SetLocalVariable(
-          "user",
-          Send(Constant(Nil, "User"), "new", [String("Josh")])
-        ),
-
-        Send(Nil, "puts", [Send(GetLocalVariable("user"), "name", [])]),
       ])
     );
   }
