@@ -1,5 +1,10 @@
 using Lambda;
 
+// TODO: Write a blog about parsing JSON in Haxe
+// it doesn't seem to have good examples out there,
+// and it took a while to figure this stuff out,
+// probably people would appreciate it.
+
 // https://github.com/whitequark/parser/blob/master/doc/AST_FORMAT.md
 enum RubyAst {
   Nil;
@@ -33,7 +38,7 @@ class TestParser extends haxe.unit.TestCase {
       case "integer"     : Integer(ast.value);
       case "float"       : Float(ast.value);
       case "string"      : String(ast.value);
-      case "expressions" : Expressions(cast(ast.expressions, Array<Dynamic>).map(parseJson)); // This was pretty rough to figure out. Would be nice to have more docs on JSON
+      case "expressions" : Expressions(cast(ast.expressions, Array<Dynamic>).map(parseJson));
       case _             : Undefined(ast);
     }
     return rubyAst;
@@ -43,26 +48,49 @@ class TestParser extends haxe.unit.TestCase {
     assertEquals(Std.string(expected), Std.string(parse(rubyCode)));
   }
 
-  public function testNil()     assertParses("nil", Nil);
-  public function testTrue()    assertParses("true", True);
-  public function testFalse()   assertParses("false", False);
-  public function testInteger() {
-    assertParses("1",    Integer(1));
-    assertParses("-123", Integer(-123));
-  }
-  public function testFloat() {
-    // assertParses('1.0',    Float(1.0)); //FIXME: gets cast to Int b/c of confusion on types >.<
-    assertParses('-12.34', Float(-12.34));
-  }
-
-  //TODO: Complex and Rational, __FILE__
-
-  public function testString() {
-    assertParses("'abc'", String("abc"));
-  }
-
-  public function testExpressions() {
-    assertParses('1;1', Expressions([Integer(1), Integer(1)]));
+  // because integration tests are so expensive, consolidate them into one large test
+  public function testAll() {
+    assertParses("
+      # literals
+        # special objects
+          nil
+          true
+          false
+        # Numeric
+          # Integer
+            1
+            -123
+          # Bignum
+          # Float
+            -12.34
+          # Complex
+          # Rational
+        # String
+          'abc'
+      ",
+      Expressions([
+        // literals
+          // special objects
+          Nil,
+          True,
+          False,
+          // Numeric
+            // Fixnum
+              Integer(1),
+              Integer(-123),
+            // Bignum
+              // TODO
+            // Float
+              // 1.0 ->  Float(1.0) FIXME: gets cast to Int b/c of confusion on types >.<
+              Float(-12.34),
+            // Complex
+              // TODO
+            // Rational
+              // TODO
+          // String
+            String("abc"),
+      ])
+    );
   }
 
   // UP NEXT: set local, get local, send, name lookup, constant, class, method def
