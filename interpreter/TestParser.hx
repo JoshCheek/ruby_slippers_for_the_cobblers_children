@@ -18,6 +18,8 @@ enum RubyAst {
   SetLocalVariable(name:String, value:RubyAst);
   GetLocalVariable(name:String);
   Send(target:RubyAst, message:String, args:Array<RubyAst>);
+  Constant(namespace:RubyAst, name:String);
+  RClass(nameLookup:RubyAst, superclass:RubyAst, body:RubyAst);
 }
 
 class TestParser extends haxe.unit.TestCase {
@@ -34,6 +36,8 @@ class TestParser extends haxe.unit.TestCase {
   }
 
   public function parseJson(ast:Dynamic):RubyAst {
+    if(ast == null) return Nil;
+
     var rubyAst = switch(ast.type) {
       case "nil"                : Nil;
       case "true"               : True;
@@ -45,6 +49,8 @@ class TestParser extends haxe.unit.TestCase {
       case "set_local_variable" : SetLocalVariable(ast.name, parseJson(ast.value));
       case "get_local_variable" : GetLocalVariable(ast.name);
       case "send"               : Send(parseJson(ast.target), ast.message, parseJsonArray(ast.args));
+      case "constant"           : Constant(parseJson(ast.namespace), ast.name);
+      case "class"              : RClass(parseJson(ast.name_lookup), parseJson(ast.superclass), parseJson(ast.body));
       case _                    : Undefined(ast);
     }
     return rubyAst;
@@ -77,7 +83,7 @@ class TestParser extends haxe.unit.TestCase {
           # Rational
         # String
           'abc'
-      # locals
+      # variables
         a = 1
         a
       # sending messages
@@ -104,7 +110,7 @@ class TestParser extends haxe.unit.TestCase {
               // TODO
           // String
             String("abc"),
-        // locals
+        // variables
           SetLocalVariable("a", Integer(1)),
           GetLocalVariable("a"),
         // sending messages
@@ -114,8 +120,42 @@ class TestParser extends haxe.unit.TestCase {
   }
 
 
-  public function _testCurrent() {
-    // name lookup, constant, class, method def
+  public function testCurrent() {
+    // { "type": "constant"
+    //   "namespace": null,
+    //   "name": "A",
+    // }
+    assertParses("A", Constant(Nil, "A")); // going w/ nil b/c that's what comes in, but kinda seems like the parser should make this a CurrentNamespace node or something
+
+
+    // { "type": "class",
+    //   "name_lookup": {"type": "constant", "name": "A", "namespace": null},
+    //   "superclass": null,
+    //   "body": {
+    //     "type": "class"
+    //     "name_lookup": {
+    //       "type": "constant"
+    //       "namespace": {"type": "constant", "name": "B", "namespace": null},
+    //       "name": "C",
+    //     },
+    //     "superclass": {"type": "constant", "namespace": null, "name": "D"},
+    //     "body": null,
+    //   },
+    // }
+    assertParses("class A
+                    class B::C < D
+                    end
+                  end",
+      RClass(
+        Constant(Nil, "A"),
+        Nil,
+        RClass(
+          Constant(Constant(Nil, "B"), "C"),
+          Constant(Nil, "D"),
+          Nil
+        )
+      )
+    );
   }
 
 }
