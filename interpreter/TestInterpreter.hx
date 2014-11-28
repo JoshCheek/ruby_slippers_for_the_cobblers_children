@@ -13,7 +13,7 @@ class TestInterpreter extends haxe.unit.TestCase {
   var filepath = "../example-json-to-evaluate.json";
 
   private function forCode(rawCode:String):RubyInterpreter {
-    var ast         = ParseRuby.parseCode(rawCode);
+    var ast         = ParseRuby.fromCode(rawCode);
     var interpreter = new RubyInterpreter();
     interpreter.addCode(ast);
     return interpreter;
