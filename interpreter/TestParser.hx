@@ -41,13 +41,17 @@ class TestParser extends haxe.unit.TestCase {
       case "integer"            : Integer(ast.value);
       case "float"              : Float(ast.value);
       case "string"             : String(ast.value);
-      case "expressions"        : Expressions(cast(ast.expressions, Array<Dynamic>).map(parseJson));
+      case "expressions"        : Expressions(parseJsonArray(ast.expressions));
       case "set_local_variable" : SetLocalVariable(ast.name, parseJson(ast.value));
       case "get_local_variable" : GetLocalVariable(ast.name);
-      case "send"               : Send(parseJson(ast.target), ast.message, cast(ast.args, Array<Dynamic>).map(parseJson));
+      case "send"               : Send(parseJson(ast.target), ast.message, parseJsonArray(ast.args));
       case _                    : Undefined(ast);
     }
     return rubyAst;
+  }
+
+  private function parseJsonArray(array:Array<Dynamic>):Array<RubyAst> {
+    return array.map(parseJson);
   }
 
   public function assertParses(rubyCode:String, expected:RubyAst, ?c:haxe.PosInfos) {
