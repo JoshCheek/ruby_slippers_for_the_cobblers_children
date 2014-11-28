@@ -17,6 +17,7 @@ enum RubyAst {
   Undefined(code:Dynamic);
   SetLocalVariable(name:String, value:RubyAst);
   GetLocalVariable(name:String);
+  Send(target:RubyAst, message:String, args:Array<RubyAst>);
 }
 
 class TestParser extends haxe.unit.TestCase {
@@ -43,6 +44,7 @@ class TestParser extends haxe.unit.TestCase {
       case "expressions"        : Expressions(cast(ast.expressions, Array<Dynamic>).map(parseJson));
       case "set_local_variable" : SetLocalVariable(ast.name, parseJson(ast.value));
       case "get_local_variable" : GetLocalVariable(ast.name);
+      case "send"               : Send(parseJson(ast.target), ast.message, cast(ast.args, Array<Dynamic>).map(parseJson));
       case _                    : Undefined(ast);
     }
     return rubyAst;
@@ -104,8 +106,16 @@ class TestParser extends haxe.unit.TestCase {
   }
 
 
-  public function _testCurrent() {
+// { "type": "send"
+//   "target": {"type": "false"},
+//   "message": "something",
+//   "args": [{"type": "true"}],
+// }
+  public function testCurrent() {
     // send, name lookup, constant, class, method def
+    assertParses('true.something(false)',
+        Send(True, "something", [False])
+      );
   }
 
 }
