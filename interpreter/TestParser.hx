@@ -86,8 +86,14 @@ class TestParser extends haxe.unit.TestCase {
       # variables
         a = 1
         a
+        A
       # sending messages
         true.something(false)
+      # class/module definitions
+        class A
+          class B::C < D
+          end
+        end
       ",
       Expressions([
         // literals
@@ -113,49 +119,24 @@ class TestParser extends haxe.unit.TestCase {
         // variables
           SetLocalVariable("a", Integer(1)),
           GetLocalVariable("a"),
+          Constant(Nil, "A"), // going w/ nil b/c that's what comes in, but kinda seems like the parser should make this a CurrentNamespace node or something
         // sending messages
-        Send(True, "something", [False])
+        Send(True, "something", [False]),
+        // class/module definitions
+        RClass(Constant(Nil, "A"),
+               Nil,
+               RClass(Constant(Constant(Nil, "B"), "C"),
+                      Constant(Nil, "D"),
+                      Nil
+               )
+        )
       ])
     );
   }
 
 
   public function testCurrent() {
-    // { "type": "constant"
-    //   "namespace": null,
-    //   "name": "A",
-    // }
-    assertParses("A", Constant(Nil, "A")); // going w/ nil b/c that's what comes in, but kinda seems like the parser should make this a CurrentNamespace node or something
-
-
-    // { "type": "class",
-    //   "name_lookup": {"type": "constant", "name": "A", "namespace": null},
-    //   "superclass": null,
-    //   "body": {
-    //     "type": "class"
-    //     "name_lookup": {
-    //       "type": "constant"
-    //       "namespace": {"type": "constant", "name": "B", "namespace": null},
-    //       "name": "C",
-    //     },
-    //     "superclass": {"type": "constant", "namespace": null, "name": "D"},
-    //     "body": null,
-    //   },
-    // }
-    assertParses("class A
-                    class B::C < D
-                    end
-                  end",
-      RClass(
-        Constant(Nil, "A"),
-        Nil,
-        RClass(
-          Constant(Constant(Nil, "B"), "C"),
-          Constant(Nil, "D"),
-          Nil
-        )
-      )
-    );
+    assertTrue(true);
   }
 
 }
