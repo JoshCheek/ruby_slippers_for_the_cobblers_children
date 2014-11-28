@@ -15,6 +15,8 @@ enum RubyAst {
   String(value:String);
   Expressions(expressions:Array<RubyAst>);
   Undefined(code:Dynamic);
+  SetLocalVariable(name:String, value:RubyAst);
+  GetLocalVariable(name:String);
 }
 
 class TestParser extends haxe.unit.TestCase {
@@ -32,14 +34,16 @@ class TestParser extends haxe.unit.TestCase {
 
   public function parseJson(ast:Dynamic):RubyAst {
     var rubyAst = switch(ast.type) {
-      case "nil"         : Nil;
-      case "true"        : True;
-      case "false"       : False;
-      case "integer"     : Integer(ast.value);
-      case "float"       : Float(ast.value);
-      case "string"      : String(ast.value);
-      case "expressions" : Expressions(cast(ast.expressions, Array<Dynamic>).map(parseJson));
-      case _             : Undefined(ast);
+      case "nil"                : Nil;
+      case "true"               : True;
+      case "false"              : False;
+      case "integer"            : Integer(ast.value);
+      case "float"              : Float(ast.value);
+      case "string"             : String(ast.value);
+      case "expressions"        : Expressions(cast(ast.expressions, Array<Dynamic>).map(parseJson));
+      case "set_local_variable" : SetLocalVariable(ast.name, parseJson(ast.value));
+      case "get_local_variable" : GetLocalVariable(ast.name);
+      case _                    : Undefined(ast);
     }
     return rubyAst;
   }
@@ -93,5 +97,26 @@ class TestParser extends haxe.unit.TestCase {
     );
   }
 
-  // UP NEXT: set local, get local, send, name lookup, constant, class, method def
+
+// { "type": "expressions",
+//   "expressions": [
+//     { "type": "set_local_variable",
+//       "name": "a",
+//       "value": {"value": "1", "type": "integer"},
+//     },
+//     { "type": "get_local_variable"
+//       "name": "a",
+//     }
+//   ],
+// }
+  public function testCurrent() {
+    assertParses("a=1", SetLocalVariable("a", Integer(1)));
+    assertParses("a=1; a", Expressions([
+      SetLocalVariable("a", Integer(1)),
+      GetLocalVariable("a"),
+    ]));
+
+    // send, name lookup, constant, class, method def
+  }
+
 }
