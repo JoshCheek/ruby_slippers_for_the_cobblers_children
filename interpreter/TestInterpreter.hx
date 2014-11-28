@@ -1,6 +1,3 @@
-// in case I get annoyed and try to write my own test suite >.<
-// var a = function(x) { return x + 1; };
-
 class TestInterpreter extends haxe.unit.TestCase {
   // https://github.com/JoshCheek/ruby_object_model_viewer/tree/5204eb089329b387353da0c25016328c55fba369/haxe-testing-example
   //   simple example of a test suite
@@ -15,38 +12,26 @@ class TestInterpreter extends haxe.unit.TestCase {
   // not sure how to get the location of this file, specifically
   var filepath = "../example-json-to-evaluate.json";
 
-  private function forJsonCode(rawJson:String, evalType='expression'):RubyInterpreter {
-    // FOR THE FUTURE
-    // stdout      = StringIO.new
-    // interpreter = Interpreter.new(stdout: stdout)
+  private function forCode(rawCode:String):RubyInterpreter {
+    var ast         = ParseRuby.parseCode(rawCode);
     var interpreter = new RubyInterpreter();
-    interpreter.addCode(haxe.Json.parse(rawJson));
-
-    if(evalType == 'expression')
-      interpreter.drain();
-    else if(evalType == 'all')
-      interpreter.evalAll();
-    else if(evalType == 'none')
-      null; // no op
-
+    interpreter.addCode(ast);
     return interpreter;
-  }
-
-  private function forCode(rawCode:String, evalType='expression'):RubyInterpreter {
-    // this, stupidly, also depends on CWD
-    var astFor  = new sys.io.Process('../bin/ast_for', [rawCode]);
-    var rawJson = "";
-    try { rawJson += astFor.stdout.readLine(); } catch (ex:haxe.io.Eof) { /* no op */ }
-    return forJsonCode(rawJson, evalType);
   }
 
   private function assertLooksKindaSimilar<T>(a: T, b:T):Void {
     assertEquals(Std.string(a), Std.string(b));
   }
 
+  public function testItsCurrentExpressionIsNilByDefault() {
+    // TODO: What does this look like?
+    assertTrue(true);
+  }
+
   public function testItEvaluatesAStringLiteral() {
-    var rbstr       = new RubyString().withDefaults().withValue("Josh");
-    var interpreter = forJsonCode('{"type":"string", "value":"Josh"}');
+    var rbstr       = new RubyString().withValue("Josh").withDefaults();
+    var interpreter = forCode('"Josh"');
+    interpreter.drain();
     assertLooksKindaSimilar(rbstr, interpreter.currentExpression());
   }
 
@@ -65,10 +50,10 @@ class TestInterpreter extends haxe.unit.TestCase {
     //     }
     //   ]
     // }
-    var interpreter = forCode("a = 'b'\n'c'\n a", 'none');
-    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.evalNextExpression());
-    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('c'), interpreter.evalNextExpression());
-    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.evalNextExpression());
+    var interpreter = forCode("a = 'b'\n'c'\n a");
+    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.drain());
+    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('c'), interpreter.drain());
+    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.drain());
   }
 
 
@@ -163,8 +148,9 @@ class TestInterpreter extends haxe.unit.TestCase {
 
       user = User.new("Josh")
       puts user.name'
-      , 'all'
     );
+
+    interpreter.drainAll();
 
     // the code successfully printed
     // ... eventually switch to `assert_equal "Josh", stdout.string`

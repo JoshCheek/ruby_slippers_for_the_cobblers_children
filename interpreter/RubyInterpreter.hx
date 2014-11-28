@@ -5,7 +5,7 @@ class RubyInterpreter {
   private var objectSpace:Array<RubyObject>;
   private var _currentExpression:RubyObject;
   // to think about: pass state instead of being void?
-  private var workToDo:Array<Void -> RubyObject>;
+  private var workToDo:List<Void -> RubyObject>;
 
   // internally printed shit
   // stack
@@ -15,6 +15,7 @@ class RubyInterpreter {
 
   public function new() {
     var toplevelBinding = new RubyBinding();
+    workToDo            = new List();
     stack               = [toplevelBinding];
     objectSpace         = [];
   }
@@ -27,41 +28,41 @@ class RubyInterpreter {
 
   public function drain() {
     _currentExpression = workToDo.pop()();
+    return _currentExpression;
   }
 
-  public function fillFrom(ast) {
-    if(ast.type == 'expressions') {
-      var expressions:Array<Dynamic> = ast.expressions;
-      trace(expressions);
-      for(expr in expressions.reverse().iterator()) {
-        fillFrom(expr);
-      };
-    } else if(ast.type == 'string') {
-      drain.push(function() {
-        var newString:RubyString = new RubyString().withDefaults();
-        newString.value = ast.value;
-        return newString;
-      });
-
-    } else if (ast.type == 'set_local_variable') {
-      workToDo.push(function() {
-        var obj = currentExpression();
-        currentBinding().local_vars[ast.name] = obj;
-        return obj;
-      });
-      fillFrom(ast.value);
-
-    } else if (ast.type == 'get_local_variable') {
-      workToDo.push(function() {
-        return currentBinding().local_vars[ast.name];
-      });
+  public function fillFrom(ast:RubyAst) {
+    switch(ast) {
+      case Expressions(expressions):
+        for(expr in reverseIterator(expressions)) {
+          fillFrom(expr);
+        };
+      case String(value):
+        workToDo.push(function() {
+          var newString:RubyString = new RubyString().withDefaults();
+          newString.value = value;
+          return newString;
+        });
+      case SetLocalVariable(name, value):
+        workToDo.push(function() {
+          var obj = currentExpression();
+          currentBinding().local_vars[name] = obj;
+          return obj;
+        });
+        fillFrom(value);
+      case GetLocalVariable(name):
+        workToDo.push(function() {
+          return currentBinding().local_vars[name];
+        });
+      case _:
+        // TODO: once we handle more cases, probably raise on this
     }
 
     // return currentExpression();
   }
 
 
-  public function evalAll():Void {
+  public function drainAll():Void {
     // FIXME
   }
 
@@ -83,5 +84,13 @@ class RubyInterpreter {
 
   public function currentBinding():RubyBinding {
     return stack[0]; // FIXME
+  }
+
+  private function reverseIterator<T>(iterable:Iterable<T>) {
+    var reversed = new List<T>();
+    for(element in iterable.iterator()) {
+      reversed.push(element);
+    }
+    return reversed.iterator();
   }
 }
