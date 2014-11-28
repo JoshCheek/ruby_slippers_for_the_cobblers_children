@@ -98,6 +98,11 @@ class TestParser extends haxe.unit.TestCase {
           class B::C < D
           end
         end
+      # method definitions
+        def bland_method; end
+        def method_with_args_and_body(arg)
+          true
+        end
       ",
       Expressions([
         // literals
@@ -110,14 +115,11 @@ class TestParser extends haxe.unit.TestCase {
               Integer(1),
               Integer(-123),
             // Bignum
-              // TODO
             // Float
               // 1.0 ->  Float(1.0) FIXME: gets cast to Int b/c of confusion on types >.<
               Float(-12.34),
             // Complex
-              // TODO
             // Rational
-              // TODO
           // String
             String("abc"),
         // variables
@@ -125,39 +127,28 @@ class TestParser extends haxe.unit.TestCase {
           GetLocalVariable("a"),
           Constant(Nil, "A"), // going w/ nil b/c that's what comes in, but kinda seems like the parser should make this a CurrentNamespace node or something
         // sending messages
-        Send(True, "something", [False]),
+          Send(True, "something", [False]),
         // class/module definitions
-        RClass(Constant(Nil, "A"),
-               Nil,
-               RClass(Constant(Constant(Nil, "B"), "C"),
-                      Constant(Nil, "D"),
-                      Nil
-               )
-        )
+          RClass(Constant(Nil, "A"),
+                 Nil,
+                 RClass(Constant(Constant(Nil, "B"), "C"),
+                        Constant(Nil, "D"),
+                        Nil
+                 )
+          ),
+        // method definitions
+          MethodDefinition("bland_method", [], Nil),
+          MethodDefinition(
+            "method_with_args_and_body",
+            [RequiredArg("arg")],
+            True
+          ),
       ])
     );
   }
 
 
-  public function testCurrent() {
-    assertParses("def bland_method; end",
-      MethodDefinition("bland_method", [], Nil)
-    );
-
-    // { "type": "method_definition",
-    //   "name": "method_with_args_and_body",
-    //   "args": [{"type": "required_arg", "name": "arg"}],
-    //   "body": {"type": "true"},
-    // }
-    assertParses("def method_with_args_and_body(arg)
-                    true
-                  end",
-                  MethodDefinition(
-                    "method_with_args_and_body",
-                    [RequiredArg("arg")],
-                    True
-                  )
-                 );
+  public function _testCurrent() {
   }
 
 }
