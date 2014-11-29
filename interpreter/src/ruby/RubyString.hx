@@ -1,3 +1,5 @@
+package ruby;
+
 class RubyString extends RubyObject {
   public var value:String;
 

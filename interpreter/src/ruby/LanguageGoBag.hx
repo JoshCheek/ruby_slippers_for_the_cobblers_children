@@ -1,3 +1,5 @@
+package ruby;
+
 class LanguageGoBag {
   public static function zip<A, B>(left:Iterable<A>, right:Iterable<B>):Iterable<{l: A, r: B}> {
     var zipped = new List();

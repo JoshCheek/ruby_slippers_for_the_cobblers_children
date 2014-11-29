@@ -1,3 +1,5 @@
+package ruby;
+
 // https://github.com/whitequark/parser/blob/master/doc/AST_FORMAT.md
 enum RubyAst {
   Nil;

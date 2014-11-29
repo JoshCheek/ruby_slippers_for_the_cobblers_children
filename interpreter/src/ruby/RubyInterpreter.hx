@@ -1,4 +1,5 @@
-// TODO: figure out how to actually namespace
+package ruby;
+
 class RubyInterpreter {
   private var stack:Array<RubyBinding>;
   private var objectSpace:Array<RubyObject>;

@@ -1,9 +1,11 @@
+package;
+
 using Lambda;
 
 class TestParser extends haxe.unit.TestCase {
-  public function assertParses(rubyCode:String, expected:RubyAst, ?c:haxe.PosInfos) {
+  public function assertParses(rubyCode:String, expected:ruby.RubyAst, ?c:haxe.PosInfos) {
     assertEquals(Std.string(expected),
-                 Std.string( ParseRuby.fromCode(rubyCode) )
+                 Std.string( ruby.ParseRuby.fromCode(rubyCode) )
                 );
   }
 

@@ -1,3 +1,5 @@
+package ruby;
+
 class RubyObject {
   public var klass             : RubyClass;
   public var instanceVariables : haxe.ds.StringMap<RubyObject>;

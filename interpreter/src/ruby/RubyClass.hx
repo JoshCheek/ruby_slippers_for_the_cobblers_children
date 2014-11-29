@@ -1,4 +1,5 @@
-// TODO: figure out how to actually namespace
+package ruby;
+
 class RubyClass extends RubyObject {
   public var name            : String;
   public var constants       : haxe.ds.StringMap<RubyObject>;

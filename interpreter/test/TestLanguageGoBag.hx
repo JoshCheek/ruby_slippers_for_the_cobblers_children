@@ -1,4 +1,6 @@
-using LanguageGoBag;
+package;
+
+using ruby.LanguageGoBag;
 using Lambda;
 
 class TestLanguageGoBag extends haxe.unit.TestCase {

@@ -1,3 +1,4 @@
 -neko runtests.n
 -main RunTests
 -cp src
+-cp test

@@ -1,3 +1,5 @@
+package;
+
 class RunTests {
   static function main() {
     var r = new haxe.unit.TestRunner();

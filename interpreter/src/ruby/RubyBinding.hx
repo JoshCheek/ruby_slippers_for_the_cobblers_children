@@ -1,3 +1,5 @@
+package ruby;
+
 class RubyBinding extends RubyObject {
   public var self      : RubyObject;
   public var defTarget : RubyClass;
