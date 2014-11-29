@@ -1,6 +1,5 @@
 // TODO: figure out how to actually namespace
 class RubyInterpreter {
-  private var ast:Dynamic;
   private var stack:Array<RubyBinding>;
   private var objectSpace:Array<RubyObject>;
   private var _currentExpression:RubyObject;
@@ -22,7 +21,6 @@ class RubyInterpreter {
 
   // e.g. `{ type => string, value => Josh }`
   public function addCode(ast:Dynamic):Void {
-    this.ast = ast;
     fillFrom(ast);
   }
 
@@ -62,8 +60,14 @@ class RubyInterpreter {
   }
 
 
-  public function drainAll():Void {
-    // FIXME
+  public function hasWorkLeft():Bool {
+    return workToDo.length != 0;
+  }
+
+  public function drainAll():Array<RubyObject> {
+    var drained = [];
+    while(hasWorkLeft()) drained.push(drain());
+    return drained;
   }
 
   public function printedInternally():String {

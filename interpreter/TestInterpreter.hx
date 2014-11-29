@@ -1,3 +1,5 @@
+using LanguageGoBag;
+
 class TestInterpreter extends haxe.unit.TestCase {
   // https://github.com/JoshCheek/ruby_object_model_viewer/tree/5204eb089329b387353da0c25016328c55fba369/haxe-testing-example
   //   simple example of a test suite
@@ -35,6 +37,17 @@ class TestInterpreter extends haxe.unit.TestCase {
     assertLooksKindaSimilar(rbstr, interpreter.currentExpression());
   }
 
+  private function rStrs(strs:Array<String>):Array<RubyObject> {
+    return strs.map(function(str) return new RubyString().withDefaults().withValue(str));
+  }
+
+  private function assertDrains(interpreter, objects:Array<RubyObject>) {
+    var drained:Array<RubyObject> = interpreter.drainAll();
+    for(pair in objects.zip(drained).iterator())
+      assertLooksKindaSimilar(pair.l, pair.r);
+    assertEquals(objects.length, drained.length);
+  }
+
   public function testItSetsAndGetsLocalVariables() {
     var interpreter = forCode("var1 = 'b'
                                'c'
@@ -44,16 +57,7 @@ class TestInterpreter extends haxe.unit.TestCase {
                                var2
                                var1
                               ");
-    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.drain());
-    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.drain());
-    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('c'), interpreter.drain());
-    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.drain());
-    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('d'), interpreter.drain());
-    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('d'), interpreter.drain());
-    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('e'), interpreter.drain());
-    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('e'), interpreter.drain());
-    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('d'), interpreter.drain());
-    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('e'), interpreter.drain());
+    assertDrains(interpreter, rStrs(['b', 'b', 'c', 'b', 'd', 'd', 'e', 'e', 'd', 'e']));
   }
 
 
