@@ -35,6 +35,20 @@ bytecodes:
   set_self
 
 
+Bootstrapping
+  once it's sufficiently competent
+  could have it parse
+    racc   http://rubygems.org/gems/racc
+    parser http://rubygems.org/gems/parser
+    ast    http://rubygems.org/gems/ast
+  and provide these each as a single gemname.ast.json file
+  which it could then evaluate (assuming none of them require dynamic parsing, themselves)
+  then it would have the ability to parse code without needing to call to the server / invoke the binary
+
+  What all goes into a file system?
+    if we can mock the file system, ie FakeFS, then we could straight ship gems and stdlib/core as Ruby files
+    if we can do this sufficiently, we can provide a truly matrixed environment, such that most gems and such will have no idea and just work
+
 5.8e+07 <-- make sure ruby parser thing can handle this (for object model)
 integrate with moi (prob rename that, since everyone gets it suggested to them, apparently)
 subscription types:
@@ -68,6 +82,10 @@ Competencies
 
 List of Rubinius bytecodes
   http://rubini.us/doc/en/virtual-machine/instructions/
+
+Ruby Ast to html
+  read in an ast
+  spit out an html diagram of how the code gets parsed
 
 ----- Some inspiration from other tools -----
 Holy shit, this doesn't even sound all that hard!
