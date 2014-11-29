@@ -60,6 +60,16 @@ class TestInterpreter extends haxe.unit.TestCase {
     assertDrains(interpreter, rStrs(['b', 'b', 'c', 'b', 'd', 'd', 'e', 'e', 'd', 'e']));
   }
 
+  public function testClasses() {
+    var interpreter = forCode("
+      class A
+      end
+    ");
+    assertDrains(interpreter, [
+      new RubyClass().withName("A").withDefaults()
+    ]);
+  }
+
 
   /**
   need to be able to eval:

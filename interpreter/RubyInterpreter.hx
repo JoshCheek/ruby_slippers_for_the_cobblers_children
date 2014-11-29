@@ -52,6 +52,16 @@ class RubyInterpreter {
         workToDo.push(function() {
           return currentBinding().local_vars[name];
         });
+      case RClass(Constant(Nil, name), superclassAst, body):
+        var klass = toplevelNamespace.getConstant(name);
+        if(null == klass) {
+          klass = new RubyClass().withName(name).withDefaults();
+          toplevelNamespace.setConstant(name, klass);
+        }
+        pushStack(new Env({self: klass, defTarget: klass});
+        var returnValue = eval(body);
+        return popStack();
+
       case _:
         // TODO: once we handle more cases, probably raise on this
     }
