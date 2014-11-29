@@ -36,11 +36,24 @@ class TestInterpreter extends haxe.unit.TestCase {
   }
 
   public function testItSetsAndGetsLocalVariables() {
-    var interpreter = forCode("a = 'b'\n'c'\n a");
+    var interpreter = forCode("var1 = 'b'
+                               'c'
+                               var1
+                               var2 = 'd'
+                               var1 = 'e'
+                               var2
+                               var1
+                              ");
     assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.drain());
     assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.drain());
     assertLooksKindaSimilar(new RubyString().withDefaults().withValue('c'), interpreter.drain());
     assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.drain());
+    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('d'), interpreter.drain());
+    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('d'), interpreter.drain());
+    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('e'), interpreter.drain());
+    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('e'), interpreter.drain());
+    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('d'), interpreter.drain());
+    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('e'), interpreter.drain());
   }
 
 
