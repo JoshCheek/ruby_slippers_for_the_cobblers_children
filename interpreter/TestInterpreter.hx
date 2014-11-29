@@ -36,21 +36,8 @@ class TestInterpreter extends haxe.unit.TestCase {
   }
 
   public function testItSetsAndGetsLocalVariables() {
-    // { type: "expressions",
-    //   expressions: [
-    //     { type: "set_local_variable",
-    //       name: "a",
-    //       value: { "value": "b", "type": "string" }
-    //     },
-    //     { type: "string",
-    //       value: "c"
-    //     },
-    //     { type: "get_local_variable",
-    //       name: "a"
-    //     }
-    //   ]
-    // }
     var interpreter = forCode("a = 'b'\n'c'\n a");
+    assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.drain());
     assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.drain());
     assertLooksKindaSimilar(new RubyString().withDefaults().withValue('c'), interpreter.drain());
     assertLooksKindaSimilar(new RubyString().withDefaults().withValue('b'), interpreter.drain());
