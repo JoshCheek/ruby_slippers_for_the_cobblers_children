@@ -1,4 +1,3 @@
-translate the JSON immediately to data structures that can be reasoned about in the type system
-merge the changes we were working on
-finish local vars / multiple expressions
-namespace under src/ like someone who knows what they're doing
+experiment with object model represented as records instead of classes (see experiments dir)
+implement nil
+push more on that acceptance test.
