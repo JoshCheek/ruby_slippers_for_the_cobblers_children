@@ -1,17 +1,14 @@
 // TODO: figure out how to actually namespace
 class RubyClass extends RubyObject {
-  public var constants:haxe.ds.StringMap<RubyObject>;
-  public var name:String;
-  public var instanceMethods:Array<String>;
+  public var name            : String;
+  public var constants       : haxe.ds.StringMap<RubyObject>;
+  public var instanceMethods : haxe.ds.StringMap<RubyAst>;
 
-  public function new() {
-    super();
-    constants = new haxe.ds.StringMap();
-  }
-
-  public function withName(name:String):RubyClass {
-    this.name = name;
-    return this;
+  public function new(name) {
+    super(this); // FIXME: should only be one Class
+    this.name            = name;
+    this.constants       = new haxe.ds.StringMap();
+    this.instanceMethods = new haxe.ds.StringMap();
   }
 
   public function getConstant(name:String):RubyObject {

@@ -7,20 +7,12 @@ class RubyInterpreter {
   private var workToDo:List<Void -> RubyObject>;
   private var _toplevelNamespace:RubyClass;
 
-  // internally printed shit
-  // stack
-  // toplevel constant
-  // toplevel binding
-  // object space
-
   public function new() {
     workToDo            = new List();
     objectSpace         = [];
-    _toplevelNamespace  = new RubyClass().withName('Object').withDefaults();
-    var toplevelBinding = new RubyBinding({
-      self:      new RubyObject().withDefaults(),
-      defTarget: toplevelNamespace()
-    });
+    _toplevelNamespace  = new RubyClass('Object');
+    var main            = new RubyObject(_toplevelNamespace);
+    var toplevelBinding = new RubyBinding(main, _toplevelNamespace);
     stack               = [toplevelBinding];
   }
 
@@ -42,20 +34,18 @@ class RubyInterpreter {
         };
       case String(value):
         workToDo.push(function() {
-          var newString:RubyString = new RubyString().withDefaults();
-          newString.value = value;
-          return newString;
+          return new RubyString(value);
         });
       case SetLocalVariable(name, value):
         workToDo.push(function() {
           var obj = currentExpression();
-          currentBinding().local_vars[name] = obj;
+          currentBinding().localVars.set(name, obj);
           return obj;
         });
         fillFrom(value);
       case GetLocalVariable(name):
         workToDo.push(function() {
-          return currentBinding().local_vars[name];
+          return currentBinding().localVars.get(name);
         });
       case RClass(Constant(Nil, name), superclassAst, body):
         workToDo.push(function() {
@@ -66,10 +56,10 @@ class RubyInterpreter {
         workToDo.push(function() {
           var klass = toplevelNamespace().getConstant(name);
           if(null == klass) {
-            klass = new RubyClass().withName(name).withDefaults();
+            klass = new RubyClass(name);
             toplevelNamespace().setConstant(name, klass);
           }
-          stack.push(new RubyBinding({self: cast(klass, RubyClass), defTarget: cast(klass, RubyClass)}));
+          stack.push(new RubyBinding(klass, cast(klass, RubyClass)));
           return currentExpression(); // FIXME
         });
 
@@ -97,7 +87,7 @@ class RubyInterpreter {
   }
 
   public function lookupClass(name:String):RubyClass {
-    return new RubyClass().withDefaults().withName('THIS SHOULD BE A CLASS');
+    return new RubyClass('THIS SHOULD BE A CLASS');
   }
 
   public function eachObject(userClass:RubyClass):Array<String> {
@@ -112,6 +102,7 @@ class RubyInterpreter {
     return stack[0]; // FIXME
   }
 
+  // move to go bag?
   private function reverseIterator<T>(iterable:Iterable<T>) {
     var reversed = new List<T>();
     for(element in iterable.iterator()) {

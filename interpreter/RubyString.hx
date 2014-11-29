@@ -1,8 +1,8 @@
 class RubyString extends RubyObject {
   public var value:String;
 
-  public function withValue(value:String) {
+  public function new(value) {
     this.value = value;
-    return this;
+    super(new RubyClass('SomeFuckingClass'));
   }
 }

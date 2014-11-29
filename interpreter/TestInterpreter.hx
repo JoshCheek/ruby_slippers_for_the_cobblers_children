@@ -31,17 +31,18 @@ class TestInterpreter extends haxe.unit.TestCase {
   }
 
   public function testItEvaluatesAStringLiteral() {
-    var rbstr       = new RubyString().withValue("Josh").withDefaults();
+    var rbstr       = new RubyString("Josh");
     var interpreter = forCode('"Josh"');
     interpreter.drain();
-    assertLooksKindaSimilar(rbstr, interpreter.currentExpression());
+    assertLooksKindaSimilar(interpreter.currentExpression(), rbstr);
   }
 
-  private function rStrs(strs:Array<String>):Array<RubyObject> {
-    return strs.map(function(str) return new RubyString().withDefaults().withValue(str));
+  private function rStrs(strs:Array<String>):Array<RubyString> {
+    return strs.map(function(str) return new RubyString(str));
   }
 
-  private function assertDrains(interpreter, objects:Array<RubyObject>, ?pos:haxe.PosInfos) {
+  // ffs Array<Dynamic> ...I'm giving it fucking RubyString, which *is* a RubyObject!
+  private function assertDrains(interpreter, objects:Array<Dynamic>, ?pos:haxe.PosInfos) {
     var drained:Array<RubyObject> = interpreter.drainAll();
     for(pair in objects.zip(drained).iterator())
       assertLooksKindaSimilar(pair.l, pair.r, pos);
@@ -66,10 +67,7 @@ class TestInterpreter extends haxe.unit.TestCase {
       end
     ");
     interpreter.drainAll();
-    assertLooksKindaSimilar(
-      new RubyClass().withName("A").withDefaults(),
-      interpreter.toplevelNamespace().getConstant("A")
-    );
+    assertLooksKindaSimilar(interpreter.toplevelNamespace().getConstant("A"), new RubyClass("A"));
   }
 
 
