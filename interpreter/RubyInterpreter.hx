@@ -5,6 +5,7 @@ class RubyInterpreter {
   private var _currentExpression:RubyObject;
   // to think about: pass state instead of being void?
   private var workToDo:List<Void -> RubyObject>;
+  private var _toplevelNamespace:RubyClass;
 
   // internally printed shit
   // stack
@@ -13,10 +14,14 @@ class RubyInterpreter {
   // object space
 
   public function new() {
-    var toplevelBinding = new RubyBinding();
     workToDo            = new List();
-    stack               = [toplevelBinding];
     objectSpace         = [];
+    _toplevelNamespace  = new RubyClass().withName('Object').withDefaults();
+    var toplevelBinding = new RubyBinding({
+      self:      new RubyObject().withDefaults(),
+      defTarget: toplevelNamespace()
+    });
+    stack               = [toplevelBinding];
   }
 
   // e.g. `{ type => string, value => Josh }`
@@ -53,22 +58,29 @@ class RubyInterpreter {
           return currentBinding().local_vars[name];
         });
       case RClass(Constant(Nil, name), superclassAst, body):
-        var klass = toplevelNamespace.getConstant(name);
-        if(null == klass) {
-          klass = new RubyClass().withName(name).withDefaults();
-          toplevelNamespace.setConstant(name, klass);
-        }
-        pushStack(new Env({self: klass, defTarget: klass});
-        var returnValue = eval(body);
-        return popStack();
+        workToDo.push(function() {
+          stack.pop();
+          return currentExpression();
+        });
+        fillFrom(body);
+        workToDo.push(function() {
+          var klass = toplevelNamespace().getConstant(name);
+          if(null == klass) {
+            klass = new RubyClass().withName(name).withDefaults();
+            toplevelNamespace().setConstant(name, klass);
+          }
+          stack.push(new RubyBinding({self: cast(klass, RubyClass), defTarget: cast(klass, RubyClass)}));
+          return currentExpression(); // FIXME
+        });
 
       case _:
         // TODO: once we handle more cases, probably raise on this
     }
-
-    // return currentExpression();
   }
 
+  public function toplevelNamespace():RubyClass {
+    return _toplevelNamespace;
+  }
 
   public function hasWorkLeft():Bool {
     return workToDo.length != 0;

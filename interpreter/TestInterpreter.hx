@@ -21,8 +21,8 @@ class TestInterpreter extends haxe.unit.TestCase {
     return interpreter;
   }
 
-  private function assertLooksKindaSimilar<T>(a: T, b:T):Void {
-    assertEquals(Std.string(a), Std.string(b));
+  private function assertLooksKindaSimilar<T>(a: T, b:T, ?pos:haxe.PosInfos):Void {
+    assertEquals(Std.string(a), Std.string(b), pos);
   }
 
   public function testItsCurrentExpressionIsNilByDefault() {
@@ -41,11 +41,11 @@ class TestInterpreter extends haxe.unit.TestCase {
     return strs.map(function(str) return new RubyString().withDefaults().withValue(str));
   }
 
-  private function assertDrains(interpreter, objects:Array<RubyObject>) {
+  private function assertDrains(interpreter, objects:Array<RubyObject>, ?pos:haxe.PosInfos) {
     var drained:Array<RubyObject> = interpreter.drainAll();
     for(pair in objects.zip(drained).iterator())
-      assertLooksKindaSimilar(pair.l, pair.r);
-    assertEquals(objects.length, drained.length);
+      assertLooksKindaSimilar(pair.l, pair.r, pos);
+    assertEquals(objects.length, drained.length, pos);
   }
 
   public function testItSetsAndGetsLocalVariables() {
@@ -65,9 +65,11 @@ class TestInterpreter extends haxe.unit.TestCase {
       class A
       end
     ");
-    assertDrains(interpreter, [
-      new RubyClass().withName("A").withDefaults()
-    ]);
+    interpreter.drainAll();
+    assertLooksKindaSimilar(
+      new RubyClass().withName("A").withDefaults(),
+      interpreter.toplevelNamespace().getConstant("A")
+    );
   }
 
 

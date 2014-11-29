@@ -1,4 +1,13 @@
 class RubyBinding extends RubyObject {
-  // self
-  public var local_vars:Map<String, RubyObject> = new Map();
+  public var self       : RubyObject;
+  public var defTarget  : RubyClass;
+  public var local_vars : Map<String, RubyObject>;
+
+  public function new(args) {
+    local_vars = new Map();
+    self       = args.self;
+    defTarget  = args.defTarget;
+    super();
+    withDefaults();
+  }
 }
