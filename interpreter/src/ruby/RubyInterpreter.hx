@@ -1,35 +1,38 @@
 package ruby;
 
+import ruby.ds.Ast;
+import ruby.ds.objects.*;
+
 class RubyInterpreter {
-  private var stack              : Array<RubyBinding>;
-  private var objectSpace        : Array<RubyObject>;
-  private var _currentExpression : RubyObject;
-  private var workToDo           : List<Void -> RubyObject>;
-  private var _toplevelNamespace : RubyClass;
-  private var _symbols           : haxe.ds.StringMap<RubySymbol>;
-  public  var rubyNil            : RubyObject;
-  public  var rubyTrue           : RubyObject;
-  public  var rubyFalse          : RubyObject;
+  private var stack              : Array<RBinding>;
+  private var objectSpace        : Array<RObject>;
+  private var _currentExpression : RObject;
+  private var workToDo           : List<Void -> RObject>;
+  private var _toplevelNamespace : RClass;
+  private var _symbols           : haxe.ds.StringMap<RSymbol>;
+  public  var rubyNil            : RObject;
+  public  var rubyTrue           : RObject;
+  public  var rubyFalse          : RObject;
 
   // to think about: pass state instead of being void?
   public function new() {
     workToDo            = new List();
     objectSpace         = [];
-    _toplevelNamespace  = new RubyClass('Object');
-    var main            = new RubyObject(_toplevelNamespace);
-    var toplevelBinding = new RubyBinding(main, _toplevelNamespace);
+    _toplevelNamespace  = new RClass('Object');
+    var main            = new RObject(_toplevelNamespace);
+    var toplevelBinding = new RBinding(main, _toplevelNamespace);
     stack               = [toplevelBinding];
     _symbols            = new haxe.ds.StringMap();
 
-    rubyNil             = new RubyObject(_toplevelNamespace); // should be NilClass
-    rubyTrue            = new RubyObject(_toplevelNamespace); // should be TrueClass
-    rubyFalse           = new RubyObject(_toplevelNamespace); // should be FalseClass
+    rubyNil             = new RObject(_toplevelNamespace); // should be NilClass
+    rubyTrue            = new RObject(_toplevelNamespace); // should be TrueClass
+    rubyFalse           = new RObject(_toplevelNamespace); // should be FalseClass
     _currentExpression  = rubyNil;
   }
 
-  public function rubySymbol(name:String):RubySymbol {
+  public function rubySymbol(name:String):RSymbol {
     if (!_symbols.exists(name))
-      _symbols.set(name, new RubySymbol(name));
+      _symbols.set(name, new RSymbol(name));
     return _symbols.get(name);
   }
 
@@ -56,7 +59,7 @@ class RubyInterpreter {
         };
       case String(value):
         workToDo.push(function() {
-          return new RubyString(value);
+          return new RString(value);
         });
       case SetLocalVariable(name, value):
         workToDo.push(function() {
@@ -78,10 +81,10 @@ class RubyInterpreter {
         workToDo.push(function() {
           var klass = toplevelNamespace().getConstant(name);
           if(null == klass) {
-            klass = new RubyClass(name);
+            klass = new RClass(name);
             toplevelNamespace().setConstant(name, klass);
           }
-          stack.push(new RubyBinding(klass, cast(klass, RubyClass)));
+          stack.push(new RBinding(klass, cast(klass, RClass)));
           return currentExpression(); // FIXME
         });
       case Nil:
@@ -92,7 +95,7 @@ class RubyInterpreter {
         workToDo.push(function() return rubyFalse);
       case Send(target, message, argAsts):
         workToDo.push(function() {
-          var receiver:RubyObject;
+          var receiver:RObject;
 
           // find receiver
           switch(target) {
@@ -103,7 +106,7 @@ class RubyInterpreter {
           }
 
           // evaluate args
-          var args:Array<RubyObject> = []; // TODO: eval argAsts to get this
+          var args:Array<RObject> = []; // TODO: eval argAsts to get this
 
           // find method
           var methodBag = receiver.klass;
@@ -116,8 +119,8 @@ class RubyInterpreter {
           var method = methodBag.getMethod(message);
 
           // put binding onto the stack
-          var locals:haxe.ds.StringMap<RubyObject> = method.localsForArgs(args);
-          stack.push(new RubyBinding(receiver, methodBag)); // haven't tested defTarget here
+          var locals:haxe.ds.StringMap<RObject> = method.localsForArgs(args);
+          stack.push(new RBinding(receiver, methodBag)); // haven't tested defTarget here
 
           // last thing we will do is pop binding, get return value
           workToDo.push(function() {
@@ -134,7 +137,7 @@ class RubyInterpreter {
         });
       case MethodDefinition(name, args, body):
         workToDo.push(function() {
-          currentBinding().defTarget.instanceMethods.set(name, new RubyMethod(name, args, body));
+          currentBinding().defTarget.instanceMethods.set(name, new RMethod(name, args, body));
           return rubySymbol(name);
         });
       case node:
@@ -142,7 +145,7 @@ class RubyInterpreter {
     }
   }
 
-  public function toplevelNamespace():RubyClass {
+  public function toplevelNamespace():RClass {
     return _toplevelNamespace;
   }
 
@@ -150,7 +153,7 @@ class RubyInterpreter {
     return workToDo.length != 0;
   }
 
-  public function drainAll():Array<RubyObject> {
+  public function drainAll():Array<RObject> {
     var drained = [];
     while(hasWorkLeft()) drained.push(drain());
     return drained;
@@ -160,19 +163,19 @@ class RubyInterpreter {
     return 'THIS SHOULD BE PRINTED INTERNALLY';
   }
 
-  public function lookupClass(name:String):RubyClass {
-    return new RubyClass('THIS SHOULD BE A CLASS');
+  public function lookupClass(name:String):RClass {
+    return new RClass('THIS SHOULD BE A CLASS');
   }
 
-  public function eachObject(userClass:RubyClass):Array<String> {
+  public function eachObject(userClass:RClass):Array<String> {
     return ['THIS SHOULD BE AN ARRAY OF OBJECTS'];
   }
 
-  public function currentExpression():RubyObject {
+  public function currentExpression():RObject {
     return _currentExpression;
   }
 
-  public function currentBinding():RubyBinding {
+  public function currentBinding():RBinding {
     return stack[0]; // FIXME
   }
 

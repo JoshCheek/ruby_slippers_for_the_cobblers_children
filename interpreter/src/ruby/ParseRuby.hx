@@ -1,5 +1,7 @@
 package ruby;
 
+import ruby.ds.Ast;
+
 class ParseRuby {
   public static function fromCode(rawCode:String):Ast {
     var astFor       = new sys.io.Process('ast_for', [rawCode]);

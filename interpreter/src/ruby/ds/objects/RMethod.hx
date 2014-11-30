@@ -1,18 +1,18 @@
-package ruby;
+package ruby.ds.objects;
 
-class RubyMethod extends RubyObject {
+class RMethod extends RObject {
   public var name : String;
   public var args : Array<Ast>;
   public var body : Ast;
 
   public function new(name:String, args:Array<Ast>, body:Ast) {
-    super(new RubyClass("Method")); // FIXME
+    super(new RClass("Method")); // FIXME
     this.name = name;
     this.args = args;
     this.body = body;
   }
 
-  public function localsForArgs(args:Array<RubyObject>):haxe.ds.StringMap<RubyObject> {
+  public function localsForArgs(args:Array<RObject>):haxe.ds.StringMap<RObject> {
     return new haxe.ds.StringMap();
   }
 }

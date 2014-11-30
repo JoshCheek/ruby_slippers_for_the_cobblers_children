@@ -1,10 +1,10 @@
-package ruby;
+package ruby.ds.objects;
 
-class RubyClass extends RubyObject {
+class RClass extends RObject {
   public var name            : String;
-  public var constants       : haxe.ds.StringMap<RubyObject>;
-  public var instanceMethods : haxe.ds.StringMap<RubyMethod>;
-  public var superclass      : RubyClass;
+  public var constants       : haxe.ds.StringMap<RObject>;
+  public var instanceMethods : haxe.ds.StringMap<RMethod>;
+  public var superclass      : RClass;
 
   public function new(name) {
     super(this); // FIXME: should only be one Class
@@ -14,11 +14,11 @@ class RubyClass extends RubyObject {
     this.superclass      = null; // FIXME
   }
 
-  public function getConstant(name:String):RubyObject {
+  public function getConstant(name:String):RObject {
     return constants.get(name);
   }
 
-  public function setConstant(name:String, value:RubyObject):RubyObject {
+  public function setConstant(name:String, value:RObject):RObject {
     constants.set(name, value);
     return value;
   }
@@ -27,7 +27,7 @@ class RubyClass extends RubyObject {
     return instanceMethods.exists(methodName);
   }
 
-  public function getMethod(methodName:String):RubyMethod {
+  public function getMethod(methodName:String):RMethod {
     return instanceMethods.get(methodName);
   }
 }

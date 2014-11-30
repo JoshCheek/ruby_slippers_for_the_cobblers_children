@@ -1,4 +1,3 @@
-* Remove `Ruby` namespacing in the module names
 * Pull relevant helpers into the LanguageGoBag
 * can we make a SymbolTable which is haxe.ds.StringMap ?
 * faster parsing

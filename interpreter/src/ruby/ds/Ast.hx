@@ -1,4 +1,4 @@
-package ruby;
+package ruby.ds;
 
 // https://github.com/whitequark/parser/blob/master/doc/AST_FORMAT.md
 enum Ast {
