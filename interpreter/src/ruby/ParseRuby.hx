@@ -1,7 +1,7 @@
 package ruby;
 
 class ParseRuby {
-  public static function fromCode(rawCode:String):RubyAst {
+  public static function fromCode(rawCode:String):Ast {
     var astFor       = new sys.io.Process('ast_for', [rawCode]);
     var rawJson      = "";
     try { rawJson += astFor.stdout.readLine(); } catch (ex:haxe.io.Eof) { /* no op */ }
@@ -12,7 +12,7 @@ class ParseRuby {
     return fromJson(haxe.Json.parse(rawJson));
   }
 
-  public static function fromJson(ast:Dynamic):RubyAst {
+  public static function fromJson(ast:Dynamic):Ast {
     if(ast == null) return Nil;
     var rubyAst = switch(ast.type) {
       case "nil"                   : Nil;
@@ -37,7 +37,7 @@ class ParseRuby {
     return rubyAst;
   }
 
-  private static function fromJsonArray(array:Array<Dynamic>):Array<RubyAst> {
+  private static function fromJsonArray(array:Array<Dynamic>):Array<Ast> {
     return array.map(fromJson);
   }
 }

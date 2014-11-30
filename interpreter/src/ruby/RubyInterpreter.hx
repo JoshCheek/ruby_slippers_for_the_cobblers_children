@@ -48,7 +48,7 @@ class RubyInterpreter {
     return _currentExpression;
   }
 
-  public function fillFrom(ast:RubyAst) {
+  public function fillFrom(ast:Ast) {
     switch(ast) {
       case Expressions(expressions):
         for(expr in reverseIterator(expressions)) {

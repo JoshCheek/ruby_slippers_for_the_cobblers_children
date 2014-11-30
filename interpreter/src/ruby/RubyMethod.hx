@@ -2,10 +2,10 @@ package ruby;
 
 class RubyMethod extends RubyObject {
   public var name : String;
-  public var args : Array<RubyAst>;
-  public var body : RubyAst;
+  public var args : Array<Ast>;
+  public var body : Ast;
 
-  public function new(name:String, args:Array<RubyAst>, body:RubyAst) {
+  public function new(name:String, args:Array<Ast>, body:Ast) {
     super(new RubyClass("Method")); // FIXME
     this.name = name;
     this.args = args;
