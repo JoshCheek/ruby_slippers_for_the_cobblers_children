@@ -1,4 +1,3 @@
-* Pull relevant helpers into the LanguageGoBag
 * can we make a SymbolTable which is haxe.ds.StringMap ?
 * faster parsing
   * First try using http://api.haxe.org/haxe/remoting/HttpConnection.html to call the server instead of starting a new process each time

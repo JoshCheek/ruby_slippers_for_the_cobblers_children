@@ -3,6 +3,8 @@ package ruby;
 import ruby.ds.Ast;
 import ruby.ds.objects.*;
 
+using ruby.LanguageGoBag;
+
 class RubyInterpreter {
   private var stack              : Array<RBinding>;
   private var objectSpace        : Array<RObject>;
@@ -54,7 +56,7 @@ class RubyInterpreter {
   public function fillFrom(ast:Ast) {
     switch(ast) {
       case Expressions(expressions):
-        for(expr in reverseIterator(expressions)) {
+        for(expr in expressions.reverseIterator()) {
           fillFrom(expr);
         };
       case String(value):
@@ -177,14 +179,5 @@ class RubyInterpreter {
 
   public function currentBinding():RBinding {
     return stack[0]; // FIXME
-  }
-
-  // move to go bag?
-  private function reverseIterator<T>(iterable:Iterable<T>) {
-    var reversed = new List<T>();
-    for(element in iterable.iterator()) {
-      reversed.push(element);
-    }
-    return reversed.iterator();
   }
 }

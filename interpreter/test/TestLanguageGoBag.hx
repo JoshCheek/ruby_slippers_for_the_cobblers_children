@@ -8,9 +8,7 @@ class TestLanguageGoBag extends haxe.unit.TestCase {
     assertEquals(Std.string(a), Std.string(b));
   }
 
-  // it returns an iterable over the left and right iterables
-  // where it hasNext while left and right both hasNext
-  public function testCases() {
+  public function testZip() {
     // both empty
     assertLooksKindaSimilar([], [].zip([]).array());
 
@@ -27,5 +25,21 @@ class TestLanguageGoBag extends haxe.unit.TestCase {
 
     // neither empty, different lengths
     assertLooksKindaSimilar([{l: "a", r: 1}], ["a"].zip([1, 2]).array());
+  }
+
+  public function testReverseIterator() {
+    // empty
+    var pre = [];
+    var post = [];
+    for(e in pre.reverseIterator()) post.push(e);
+    assertLooksKindaSimilar([], pre);
+    assertLooksKindaSimilar([], post);
+
+    // a few items
+    var pre  = ['a', 'b', 'c'];
+    var post = [];
+    for(e in pre.reverseIterator()) post.push(e);
+    assertLooksKindaSimilar(['a', 'b', 'c'], pre);  // no change
+    assertLooksKindaSimilar(['c', 'b', 'a'], post); // reversed
   }
 }
