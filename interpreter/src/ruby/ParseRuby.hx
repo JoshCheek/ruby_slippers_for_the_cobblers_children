@@ -4,6 +4,27 @@ import ruby.ds.Ast;
 
 class ParseRuby {
   public static function fromCode(rawCode:String):Ast {
+    return usingServer(rawCode);
+  }
+
+  public static function usingServer(rawCode:String):Ast {
+    var port   = "";
+    if(Sys.environment().exists("RUBY_PARSER_PORT"))
+      port = Sys.environment().get("RUBY_PARSER_PORT");
+    else
+      port = '3003';
+    var parser = new haxe.Http('http://localhost:$port');
+    parser.setPostData(rawCode);
+    var rawJson = "";
+    parser.onData   = function(jsonResult) rawJson += jsonResult;
+    parser.onError  = function(message) trace("HTTP ERROR: " + message);
+    parser.onStatus = function(status) { };
+    parser.request(true);
+    return fromRawJson(rawJson);
+  }
+
+  // loading the bin for each request was just taking annoyingly long
+  public static function usingBinary(rawCode:String):Ast {
     var astFor       = new sys.io.Process('ast_for', [rawCode]);
     var rawJson      = "";
     try { rawJson += astFor.stdout.readLine(); } catch (ex:haxe.io.Eof) { /* no op */ }
