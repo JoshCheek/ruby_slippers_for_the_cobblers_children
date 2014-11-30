@@ -18,10 +18,6 @@ class TestInterpreter extends haxe.unit.TestCase {
   // http://api.haxe.org/
   //   language api
 
-  // this only finds the json if you are in the current dir (e.g. via rake)
-  // not sure how to get the location of this file, specifically
-  var filepath = "../example-json-to-evaluate.json";
-
   private function forCode(rawCode:String):RubyInterpreter {
     var ast         = ParseRuby.fromCode(rawCode);
     var interpreter = new RubyInterpreter();
@@ -33,9 +29,17 @@ class TestInterpreter extends haxe.unit.TestCase {
     assertEquals(Std.string(a), Std.string(b), pos);
   }
 
+  // we're ignoring fixnums and symbols for now
+  public function testSpecialConstants() {
+    var interpreter = forCode("nil\ntrue\nfalse\n");
+    assertEquals(interpreter.rubyNil,   interpreter.drain());
+    assertEquals(interpreter.rubyTrue,  interpreter.drain());
+    assertEquals(interpreter.rubyFalse, interpreter.drain());
+  }
+
   public function testItsCurrentExpressionIsNilByDefault() {
-    // TODO: What does this look like?
-    assertTrue(true);
+    var interpreter = new RubyInterpreter();
+    assertEquals(interpreter.rubyNil, interpreter.currentExpression());
   }
 
   public function testItEvaluatesAStringLiteral() {

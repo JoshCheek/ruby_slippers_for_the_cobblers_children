@@ -1,13 +1,16 @@
 package ruby;
 
 class RubyInterpreter {
-  private var stack:Array<RubyBinding>;
-  private var objectSpace:Array<RubyObject>;
-  private var _currentExpression:RubyObject;
-  // to think about: pass state instead of being void?
-  private var workToDo:List<Void -> RubyObject>;
-  private var _toplevelNamespace:RubyClass;
+  private var stack              : Array<RubyBinding>;
+  private var objectSpace        : Array<RubyObject>;
+  private var _currentExpression : RubyObject;
+  private var workToDo           : List<Void -> RubyObject>;
+  private var _toplevelNamespace : RubyClass;
+  public  var rubyNil            : RubyObject;
+  public  var rubyTrue           : RubyObject;
+  public  var rubyFalse          : RubyObject;
 
+  // to think about: pass state instead of being void?
   public function new() {
     workToDo            = new List();
     objectSpace         = [];
@@ -15,15 +18,22 @@ class RubyInterpreter {
     var main            = new RubyObject(_toplevelNamespace);
     var toplevelBinding = new RubyBinding(main, _toplevelNamespace);
     stack               = [toplevelBinding];
+
+    rubyNil             = new RubyObject(_toplevelNamespace); // should be NilClass
+    rubyTrue            = new RubyObject(_toplevelNamespace); // should be TrueClass
+    rubyFalse           = new RubyObject(_toplevelNamespace); // should be FalseClass
+    _currentExpression  = rubyNil;
   }
 
-  // e.g. `{ type => string, value => Josh }`
   public function addCode(ast:Dynamic):Void {
     fillFrom(ast);
   }
 
   public function drain() {
-    _currentExpression = workToDo.pop()();
+    var work = workToDo.pop();
+    if(work == null)
+      throw "Can't drain, b/c there's no work to do (is the AST case handled?)";
+    _currentExpression = work();
     return _currentExpression;
   }
 
@@ -63,7 +73,12 @@ class RubyInterpreter {
           stack.push(new RubyBinding(klass, cast(klass, RubyClass)));
           return currentExpression(); // FIXME
         });
-
+      case Nil:
+        workToDo.push(function() return rubyNil);
+      case True:
+        workToDo.push(function() return rubyTrue);
+      case False:
+        workToDo.push(function() return rubyFalse);
       case _:
         // TODO: once we handle more cases, probably raise on this
     }
