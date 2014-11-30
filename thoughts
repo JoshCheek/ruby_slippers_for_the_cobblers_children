@@ -87,6 +87,16 @@ Ruby Ast to html
   read in an ast
   spit out an html diagram of how the code gets parsed
 
+Group reading a book about game development (JEG)
+  hoping to use some of these ideas to make this fun for students to work in
+  https://groups.google.com/forum/#!topic/game-maker-study-group/TwGr9AQ_eQk
+
+User experience
+  https://en.wikipedia.org/wiki/Seven_stages_of_action
+    The 7 stages of action
+  http://drhaswell.com/index.php/2012/08/book-review-the-design-of-everyday-things/
+    Short summary of best points in the Design of Every Day Things
+
 ----- Some inspiration from other tools -----
 Holy shit, this doesn't even sound all that hard!
   http://www.lambdacs.com/debugger/
