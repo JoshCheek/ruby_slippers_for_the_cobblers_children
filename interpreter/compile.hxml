@@ -1,4 +1,0 @@
--neko runtests.n
--main ruby.RunTests
--cp src
--cp test
