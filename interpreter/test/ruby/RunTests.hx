@@ -1,4 +1,4 @@
-package;
+package ruby;
 
 class RunTests {
   static function main() {

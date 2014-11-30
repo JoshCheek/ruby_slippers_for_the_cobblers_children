@@ -1,4 +1,4 @@
-package;
+package ruby;
 import ruby.ds.Ast;
 using Lambda;
 

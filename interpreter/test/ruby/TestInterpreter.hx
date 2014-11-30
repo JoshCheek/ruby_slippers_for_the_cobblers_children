@@ -1,7 +1,5 @@
-package;
+package ruby;
 
-import ruby.ParseRuby;
-import ruby.RubyInterpreter;
 import ruby.ds.objects.RString;
 import ruby.ds.objects.RObject;
 import ruby.ds.objects.RClass;

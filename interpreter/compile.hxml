@@ -1,4 +1,4 @@
 -neko runtests.n
--main RunTests
+-main ruby.RunTests
 -cp src
 -cp test

@@ -1,4 +1,4 @@
-package;
+package ruby;
 
 using ruby.LanguageGoBag;
 using Lambda;
