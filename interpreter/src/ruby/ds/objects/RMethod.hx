@@ -12,7 +12,7 @@ class RMethod extends RObject {
     this.body = body;
   }
 
-  public function localsForArgs(args:Array<RObject>):haxe.ds.StringMap<RObject> {
-    return new haxe.ds.StringMap();
+  public function localsForArgs(args:Array<RObject>):InternalMap<RObject> {
+    return new InternalMap();
   }
 }

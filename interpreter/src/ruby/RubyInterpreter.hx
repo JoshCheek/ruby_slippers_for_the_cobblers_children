@@ -1,6 +1,7 @@
 package ruby;
 
 import ruby.ds.Ast;
+import ruby.ds.InternalMap;
 import ruby.ds.objects.*;
 
 using ruby.LanguageGoBag;
@@ -11,7 +12,7 @@ class RubyInterpreter {
   private var _currentExpression : RObject;
   private var workToDo           : List<Void -> RObject>;
   private var _toplevelNamespace : RClass;
-  private var _symbols           : haxe.ds.StringMap<RSymbol>;
+  private var _symbols           : InternalMap<RSymbol>;
   public  var rubyNil            : RObject;
   public  var rubyTrue           : RObject;
   public  var rubyFalse          : RObject;
@@ -24,7 +25,7 @@ class RubyInterpreter {
     var main            = new RObject(_toplevelNamespace);
     var toplevelBinding = new RBinding(main, _toplevelNamespace);
     stack               = [toplevelBinding];
-    _symbols            = new haxe.ds.StringMap();
+    _symbols            = new InternalMap();
 
     rubyNil             = new RObject(_toplevelNamespace); // should be NilClass
     rubyTrue            = new RObject(_toplevelNamespace); // should be TrueClass
@@ -121,7 +122,7 @@ class RubyInterpreter {
           var method = methodBag.getMethod(message);
 
           // put binding onto the stack
-          var locals:haxe.ds.StringMap<RObject> = method.localsForArgs(args);
+          var locals:InternalMap<RObject> = method.localsForArgs(args);
           stack.push(new RBinding(receiver, methodBag)); // haven't tested defTarget here
 
           // last thing we will do is pop binding, get return value

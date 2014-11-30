@@ -1,4 +1,3 @@
-* can we make a SymbolTable which is haxe.ds.StringMap ?
 * faster parsing
   * First try using http://api.haxe.org/haxe/remoting/HttpConnection.html to call the server instead of starting a new process each time
   * If that's still not good enough, declare all code samples in one place and use fixtures to access them so that we can limit the # of calls to ast_for
