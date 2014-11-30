@@ -82,20 +82,6 @@ class TestInterpreter extends haxe.unit.TestCase {
     assertLooksKindaSimilar(interpreter.toplevelNamespace().getConstant("A"), new RClass("A"));
   }
 
-  // { "type": "expressions"
-  //   "expressions": [
-  //     { "type": "method_definition"
-  //       "name": "m",
-  //       "args": [],
-  //       "body": { "type": "true" },
-  //     },
-  //     { "type": "send"
-  //       "target": null,
-  //       "message": "m",
-  //       "args": [],
-  //     }
-  //   ],
-  // }
   public function testInstanceMethods() {
     var interpreter = forCode("
       # toplevel method is defined on Object
@@ -110,80 +96,6 @@ class TestInterpreter extends haxe.unit.TestCase {
     assertEquals(interpreter.rubyTrue,        interpreter.drain());
   }
 
-
-  /**
-  need to be able to eval:
-    local vars
-      get/set
-    constant lookup
-    class definition
-    method definition
-      required args
-    method invocation
-      with args
-    ivars
-      get/set
-
-  need:
-    track internal printing
-    stack
-
-  classes:
-    name
-    namespace
-
-  objects:
-    main
-
-  necessary classes:
-    Object
-      #puts <-- for now
-      TOPLEVEL_BINDING
-    String
-  */
-
-
-
-  // The json structure:
-  // {"type"=>"expressions",
-  //  "expressions"=>
-  //   [{"type"=>"class",
-  //     "name_lookup"=>{"type"=>"constant", "namespace"=>nil, "name"=>"User"},
-  //     "superclass"=>nil,
-  //     "body"=>
-  //      {"type"=>"expressions",
-  //       "expressions"=>
-  //        [{"type"=>"method_definition",
-  //          "args"=>[{"type"=>"required_arg", "name"=>"name"}],
-  //          "body"=>
-  //           {"type"=>"send",
-  //            "target"=>{"type"=>"self"},
-  //            "message"=>"name=",
-  //            "args"=>[{"type"=>"get_local_variable", "name"=>"name"}]}},
-  //         {"type"=>"method_definition",
-  //          "args"=>[],
-  //          "body"=>{"type"=>"get_instance_variable", "name"=>"@name"}},
-  //         {"type"=>"method_definition",
-  //          "args"=>[{"type"=>"required_arg", "name"=>"name"}],
-  //          "body"=>
-  //           {"type"=>"set_instance_variable",
-  //            "name"=>"@name",
-  //            "value"=>{"type"=>"get_local_variable", "name"=>"name"}}}]}}
-  //    ,{"type"=>"set_local_variable",
-  //     "name"=>"user",
-  //     "value"=>
-  //      {"type"=>"send",
-  //       "target"=>{"type"=>"constant", "namespace"=>nil, "name"=>"User"},
-  //       "message"=>"new",
-  //       "args"=>[{"type"=>"string", "value"=>"Josh"}]}}
-  //    ,{"type"=>"send",
-  //     "target"=>nil,
-  //     "message"=>"puts",
-  //     "args"=>
-  //      [{"type"=>"send",
-  //        "target"=>{"type"=>"get_local_variable", "name"=>"user"},
-  //        "message"=>"name",
-  //        "args"=>[]}]}]}
   public function _testAacceptance1() {
     var interpreter = forCode('
       class User
@@ -206,16 +118,16 @@ class TestInterpreter extends haxe.unit.TestCase {
 
     interpreter.drainAll();
 
-    // the code successfully printed
-    // ... eventually switch to `assert_equal "Josh", stdout.string`
-    assertEquals("Josh\n", interpreter.printedInternally());
+    // // the code successfully printed
+    // // ... eventually switch to `assert_equal "Josh", stdout.string`
+    // assertEquals("Josh\n", interpreter.printedInternally());
 
-    // it defined the class
-    var userClass = interpreter.lookupClass('User');
-    assertEquals('User', userClass.name);
-    assertEquals('[initialize,name,name=]', Std.string(userClass.instanceMethods));
+    // // it defined the class
+    // var userClass = interpreter.lookupClass('User');
+    // assertEquals('User', userClass.name);
+    // assertEquals('[initialize,name,name=]', Std.string(userClass.instanceMethods));
 
-    // it is tracking the instance
-    assertEquals(1, interpreter.eachObject(userClass).length);
+    // // it is tracking the instance
+    // assertEquals(1, interpreter.eachObject(userClass).length);
   }
 }

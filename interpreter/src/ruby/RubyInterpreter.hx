@@ -33,6 +33,28 @@ class RubyInterpreter {
     _currentExpression  = rubyNil;
   }
 
+  public function toplevelNamespace():RClass {
+    return _toplevelNamespace;
+  }
+
+  public function hasWorkLeft():Bool {
+    return workToDo.length != 0;
+  }
+
+  public function drainAll():Array<RObject> {
+    var drained = [];
+    while(hasWorkLeft()) drained.push(drain());
+    return drained;
+  }
+
+  public function currentExpression():RObject {
+    return _currentExpression;
+  }
+
+  public function currentBinding():RBinding {
+    return stack[0]; // FIXME
+  }
+
   public function rubySymbol(name:String):RSymbol {
     if (!_symbols.exists(name))
       _symbols.set(name, new RSymbol(name));
@@ -146,39 +168,5 @@ class RubyInterpreter {
       case node:
         throw "Unrecognized node: " + Std.string(node);
     }
-  }
-
-  public function toplevelNamespace():RClass {
-    return _toplevelNamespace;
-  }
-
-  public function hasWorkLeft():Bool {
-    return workToDo.length != 0;
-  }
-
-  public function drainAll():Array<RObject> {
-    var drained = [];
-    while(hasWorkLeft()) drained.push(drain());
-    return drained;
-  }
-
-  public function printedInternally():String {
-    return 'THIS SHOULD BE PRINTED INTERNALLY';
-  }
-
-  public function lookupClass(name:String):RClass {
-    return new RClass('THIS SHOULD BE A CLASS');
-  }
-
-  public function eachObject(userClass:RClass):Array<String> {
-    return ['THIS SHOULD BE AN ARRAY OF OBJECTS'];
-  }
-
-  public function currentExpression():RObject {
-    return _currentExpression;
-  }
-
-  public function currentBinding():RBinding {
-    return stack[0]; // FIXME
   }
 }
