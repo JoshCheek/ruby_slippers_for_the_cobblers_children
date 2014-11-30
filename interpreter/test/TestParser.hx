@@ -76,12 +76,12 @@ class TestParser extends haxe.unit.TestCase {
         // sending messages
           Send(True, "something", [False]),
         // class/module definitions
-          RClass(Constant(Nil, "A"),
-                 Nil,
-                 RClass(Constant(Constant(Nil, "B"), "C"),
-                        Constant(Nil, "D"),
-                        Nil
-                 )
+          Class(Constant(Nil, "A"),
+                Nil,
+                Class(Constant(Constant(Nil, "B"), "C"),
+                      Constant(Nil, "D"),
+                      Nil
+                )
           ),
         // method definitions
           MethodDefinition("bland_method", [], Nil),

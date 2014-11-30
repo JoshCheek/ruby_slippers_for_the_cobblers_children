@@ -69,7 +69,7 @@ class RubyInterpreter {
         workToDo.push(function() {
           return currentBinding().localVars.get(name);
         });
-      case RClass(Constant(Nil, name), superclassAst, body):
+      case Class(Constant(Nil, name), superclassAst, body):
         workToDo.push(function() {
           stack.pop();
           return currentExpression();

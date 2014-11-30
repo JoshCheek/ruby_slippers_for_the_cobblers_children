@@ -17,7 +17,7 @@ enum RubyAst {
   GetInstanceVariable(name:String);
   Send(target:RubyAst, message:String, args:Array<RubyAst>);
   Constant(namespace:RubyAst, name:String);
-  RClass(nameLookup:RubyAst, superclass:RubyAst, body:RubyAst);
+  Class(nameLookup:RubyAst, superclass:RubyAst, body:RubyAst);
   MethodDefinition(name:String, args:Array<RubyAst>, body:RubyAst);
   RequiredArg(name:String);
 }

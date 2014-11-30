@@ -29,7 +29,7 @@ class ParseRuby {
       case "get_instance_variable" : GetInstanceVariable(ast.name);
       case "send"                  : Send(fromJson(ast.target), ast.message, fromJsonArray(ast.args));
       case "constant"              : Constant(fromJson(ast.namespace), ast.name);
-      case "class"                 : RClass(fromJson(ast.name_lookup), fromJson(ast.superclass), fromJson(ast.body));
+      case "class"                 : Class(fromJson(ast.name_lookup), fromJson(ast.superclass), fromJson(ast.body));
       case "method_definition"     : MethodDefinition(ast.name, fromJsonArray(ast.args), fromJson(ast.body));
       case "required_arg"          : RequiredArg(ast.name);
       case _                       : Undefined(ast);
