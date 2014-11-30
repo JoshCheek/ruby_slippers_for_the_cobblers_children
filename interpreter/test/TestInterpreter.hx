@@ -82,6 +82,34 @@ class TestInterpreter extends haxe.unit.TestCase {
     assertLooksKindaSimilar(interpreter.toplevelNamespace().getConstant("A"), new RubyClass("A"));
   }
 
+  // { "type": "expressions"
+  //   "expressions": [
+  //     { "type": "method_definition"
+  //       "name": "m",
+  //       "args": [],
+  //       "body": { "type": "true" },
+  //     },
+  //     { "type": "send"
+  //       "target": null,
+  //       "message": "m",
+  //       "args": [],
+  //     }
+  //   ],
+  // }
+  public function testInstanceMethods() {
+    var interpreter = forCode("
+      # toplevel method is defined on Object
+      def m
+        true
+      end
+      m
+    ");
+    assertEquals(interpreter.drain(), interpreter.rubySymbol("m"));
+    assertEquals(interpreter.rubyNil,         interpreter.drain()); // b/c the send doesn't result in a new currentValue
+    assertEquals(interpreter.rubyTrue,        interpreter.drain());
+    assertEquals(interpreter.rubyTrue,        interpreter.drain());
+  }
+
 
   /**
   need to be able to eval:

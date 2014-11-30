@@ -6,6 +6,7 @@ class RubyInterpreter {
   private var _currentExpression : RubyObject;
   private var workToDo           : List<Void -> RubyObject>;
   private var _toplevelNamespace : RubyClass;
+  private var _symbols           : haxe.ds.StringMap<RubySymbol>;
   public  var rubyNil            : RubyObject;
   public  var rubyTrue           : RubyObject;
   public  var rubyFalse          : RubyObject;
@@ -18,6 +19,7 @@ class RubyInterpreter {
     var main            = new RubyObject(_toplevelNamespace);
     var toplevelBinding = new RubyBinding(main, _toplevelNamespace);
     stack               = [toplevelBinding];
+    _symbols            = new haxe.ds.StringMap();
 
     rubyNil             = new RubyObject(_toplevelNamespace); // should be NilClass
     rubyTrue            = new RubyObject(_toplevelNamespace); // should be TrueClass
@@ -25,10 +27,19 @@ class RubyInterpreter {
     _currentExpression  = rubyNil;
   }
 
+  public function rubySymbol(name:String):RubySymbol {
+    if (!_symbols.exists(name))
+      _symbols.set(name, new RubySymbol(name));
+    return _symbols.get(name);
+  }
+
   public function addCode(ast:Dynamic):Void {
     fillFrom(ast);
   }
 
+  // does it make more sense to return a enum that can either be the resulting expression
+  // or some value representing a set of work that we are in the middle of, and will ultimately result in an expression
+  // e.g. the method lookup algorithm, represented as a value?
   public function drain() {
     var work = workToDo.pop();
     if(work == null)
@@ -79,8 +90,55 @@ class RubyInterpreter {
         workToDo.push(function() return rubyTrue);
       case False:
         workToDo.push(function() return rubyFalse);
-      case _:
-        // TODO: once we handle more cases, probably raise on this
+      case Send(target, message, argAsts):
+        workToDo.push(function() {
+          var receiver:RubyObject;
+
+          // find receiver
+          switch(target) {
+            case Nil:
+              receiver = currentBinding().self;
+            case _:
+              throw "Handle the case when the receiver is not null";
+          }
+
+          // evaluate args
+          var args:Array<RubyObject> = []; // TODO: eval argAsts to get this
+
+          // find method
+          var methodBag = receiver.klass;
+          while(methodBag != null && !methodBag.hasMethod(message))
+            methodBag = methodBag.superclass;
+
+          if(methodBag == null)
+            throw "Could not find the method on " + Std.string(receiver); // eventually handle method_midding and nomethod errror
+
+          var method = methodBag.getMethod(message);
+
+          // put binding onto the stack
+          var locals:haxe.ds.StringMap<RubyObject> = method.localsForArgs(args);
+          stack.push(new RubyBinding(receiver, methodBag)); // haven't tested defTarget here
+
+          // last thing we will do is pop binding, get return value
+          workToDo.push(function() {
+            var returnValue = currentExpression();
+            stack.pop();
+            return returnValue;
+          });
+
+          // next thing we will do is evaluate the method
+          fillFrom(method.body);
+
+          // maybe switch over to returning an enum instead of an object
+          return rubyNil;
+        });
+      case MethodDefinition(name, args, body):
+        workToDo.push(function() {
+          currentBinding().defTarget.instanceMethods.set(name, new RubyMethod(name, args, body));
+          return rubySymbol(name);
+        });
+      case node:
+        throw "Unrecognized node: " + Std.string(node);
     }
   }
 
