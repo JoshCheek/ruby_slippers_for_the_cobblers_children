@@ -1,7 +1,7 @@
 # pick a default port if user hasn't
 ENV['RUBY_PARSER_PORT'] ||= '3003'
 
-# set pat
+# set PATH
 parser_bin_dir = File.expand_path('parser/bin', __dir__)
 ENV['PATH'] = "#{parser_bin_dir}:#{ENV['PATH']}"
 
