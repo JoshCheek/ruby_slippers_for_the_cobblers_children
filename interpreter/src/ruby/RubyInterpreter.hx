@@ -22,26 +22,14 @@ class RubyInterpreter {
     this.world = world;
   }
 
-  // TODO: delete this, just use fillFrom
-  public function addCode(ast:Dynamic):Void {
-    fillFrom(ast);
-  }
-
-  // TODO: try making this a local function (check the compiled code to make sure it's not constantly reallocating functions)
-  public function fill(work:Void->RObject):Void {
-    world.workToDo.push(work);
-  }
-
   public function drainAll():Array<RObject> {
     var drained = [];
-    while(hasWorkLeft()) drained.push(drain());
+    while(!isDrained()) drained.push(drain());
     return drained;
   }
 
-  // TODO: rename isDrained
-  public function hasWorkLeft():Bool {
-    return world.workToDo.length != 0;
-  }
+  public function isDrained():Bool
+    return world.workToDo.length == 0;
 
   // does it make more sense to return a enum that can either be the resulting expression
   // or some value representing a set of work that we are in the middle of, and will ultimately result in an expression
@@ -53,6 +41,10 @@ class RubyInterpreter {
     world.currentExpression = work();
     return world.currentExpression;
   }
+
+
+  private inline function fill(work:Void->RObject):Void
+    world.workToDo.push(work);
 
   public function fillFrom(ast:Ast) {
     switch(ast) {

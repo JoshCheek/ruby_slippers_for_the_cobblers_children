@@ -21,7 +21,7 @@ class TestInterpreter extends haxe.unit.TestCase {
   private function forCode(rawCode:String):RubyInterpreter {
     var ast         = ParseRuby.fromCode(rawCode);
     var interpreter = RubyInterpreter.fromBootstrap();
-    interpreter.addCode(ast);
+    interpreter.fillFrom(ast);
     return interpreter;
   }
 
