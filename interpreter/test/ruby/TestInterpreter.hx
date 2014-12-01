@@ -33,9 +33,9 @@ class TestInterpreter extends haxe.unit.TestCase {
   public function testSpecialConstants() {
     var interpreter = forCode("nil\ntrue\nfalse\n");
     var world       = interpreter.world;
-    assertEquals(world.rubyNil,   interpreter.drain());
-    assertEquals(world.rubyTrue,  interpreter.drain());
-    assertEquals(world.rubyFalse, interpreter.drain());
+    assertEquals(world.rubyNil,   interpreter.drainExpression());
+    assertEquals(world.rubyTrue,  interpreter.drainExpression());
+    assertEquals(world.rubyFalse, interpreter.drainExpression());
   }
 
   // maybe this goes on a world bootstrap test?
@@ -53,7 +53,7 @@ class TestInterpreter extends haxe.unit.TestCase {
       ivars: new InternalMap(),
       value: "Josh",
     }
-    interpreter.drain();
+    interpreter.drainExpression();
     assertLooksKindaSimilar(interpreter.currentExpression(), rbstr);
   }
 
@@ -112,10 +112,10 @@ class TestInterpreter extends haxe.unit.TestCase {
       m
     ");
     var world = interpreter.world;
-    assertEquals(interpreter.drain(), interpreter.intern("m"));
-    assertEquals(world.rubyNil,       interpreter.drain()); // b/c the send doesn't result in a new currentValue
-    assertEquals(world.rubyTrue,      interpreter.drain());
-    assertEquals(world.rubyTrue,      interpreter.drain());
+    assertEquals(interpreter.drainExpression(), interpreter.intern("m"));
+    assertEquals(world.rubyNil,                 interpreter.drainExpression()); // b/c the send doesn't result in a new currentValue
+    assertEquals(world.rubyTrue,                interpreter.drainExpression());
+    assertEquals(world.rubyTrue,                interpreter.drainExpression());
   }
 
   public function _testAacceptance1() {

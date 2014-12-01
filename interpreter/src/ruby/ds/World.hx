@@ -13,5 +13,7 @@ typedef World = {
   public var rubyFalse          : RObject;
   public var klassClass         : RClass;
   public var objectClass        : RClass;
-  public var workToDo           : List<Void -> RObject>; // does this really belong?
+
+  // does this really belong in World?
+  public var workToDo           : List<Void -> EvaluationState>;
 }

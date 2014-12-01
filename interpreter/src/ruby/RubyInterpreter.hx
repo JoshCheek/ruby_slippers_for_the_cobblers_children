@@ -22,29 +22,35 @@ class RubyInterpreter {
     this.world = world;
   }
 
+  // drains all, returning the list of expressions it saw
   public function drainAll():Array<RObject> {
     var drained = [];
-    while(!isDrained()) drained.push(drain());
+    while(!isDrained()) drained.push(drainExpression());
     return drained;
   }
 
+  // TODO: take into consideration the current evaluation
   public function isDrained():Bool
     return world.workToDo.length == 0;
 
-  // does it make more sense to return a enum that can either be the resulting expression
-  // or some value representing a set of work that we are in the middle of, and will ultimately result in an expression
-  // e.g. the method lookup algorithm, represented as a value?
-  public function drain() {
-    var work = world.workToDo.pop();
-    if(work == null)
-      throw "Can't drain, b/c there's no work to do (is the AST case handled?)";
-    world.currentExpression = work();
-    return world.currentExpression;
+  public var currentEvaluation:ruby.ds.EvaluationState = PullFromWorkQueue;
+  public function drainExpression():RObject {
+    // can we pattern match in if statements? that'd be nice
+    switch(currentEvaluation) {
+      case PullFromWorkQueue:
+        var work = world.workToDo.pop();
+        if(work == null) throw "Can't drain, b/c there's no work to do (is the AST case handled?)";
+        currentEvaluation = work();
+        drainExpression();
+      case Finished(value):
+        currentEvaluation       = PullFromWorkQueue;
+        world.currentExpression = value;
+    }
+    return currentExpression();
   }
 
-
-  public function fillFrom(ast:Ast) {
-    inline function fill(work:Void->RObject)
+  public function fillFrom(ast:Ast):Void {
+    inline function fill(work:Void->ruby.ds.EvaluationState)
       world.workToDo.push(work);
 
     switch(ast) {
@@ -55,23 +61,23 @@ class RubyInterpreter {
       case String(value):
         fill(function() {
           var string:RString = {value: value, klass: world.objectClass, ivars: new InternalMap()};
-          return string;
+          return Finished(string);
         });
       case SetLocalVariable(name, value):
         fill(function() {
           var obj = currentExpression();
           currentBinding().lvars.set(name, obj);
-          return obj;
+          return Finished(obj);
         });
         fillFrom(value);
       case GetLocalVariable(name):
         fill(function() {
-          return currentBinding().lvars.get(name);
+          return Finished(currentBinding().lvars.get(name));
         });
       case Class(Constant(Nil, name), superclassAst, body):
         fill(function() {
           world.stack.pop();
-          return currentExpression();
+          return Finished(currentExpression());
         });
         fillFrom(body);
         fill(function() {
@@ -94,14 +100,14 @@ class RubyInterpreter {
             self:      klass,
             defTarget: klass,
           }
-          return currentExpression(); // FIXME
+          return Finished(currentExpression()); // FIXME
         });
       case Nil:
-        fill(function() return world.rubyNil);
+        fill(function() return Finished(world.rubyNil));
       case True:
-        fill(function() return world.rubyTrue);
+        fill(function() return Finished(world.rubyTrue));
       case False:
-        fill(function() return world.rubyFalse);
+        fill(function() return Finished(world.rubyFalse));
       case Send(target, message, argAsts):
         fill(function() {
           var receiver:RObject;
@@ -144,14 +150,14 @@ class RubyInterpreter {
           fill(function() {
             var returnValue = currentExpression();
             world.stack.pop();
-            return returnValue;
+            return Finished(returnValue);
           });
 
           // next thing we will do is evaluate the method
           fillFrom(method.body);
 
           // maybe switch over to returning an enum instead of an object
-          return world.rubyNil;
+          return Finished(world.rubyNil);
         });
       case MethodDefinition(name, args, body):
         fill(function() {
@@ -164,7 +170,7 @@ class RubyInterpreter {
           }
 
           currentBinding().defTarget.imeths.set(name, method);
-          return intern(name);
+          return Finished(intern(name));
         });
       case node:
         throw "Unrecognized node: " + Std.string(node);
