@@ -1,10 +1,6 @@
 package ruby.ds.objects;
 
-class RString extends RObject {
+typedef RString = {
+  > RObject,
   public var value:String;
-
-  // public function new(value) {
-  //   this.value = value;
-  //   super(new RClass('SomeFuckingClass'));
-  // }
 }
