@@ -4,15 +4,17 @@ import ruby.ds.Ast;
 
 class ParseRuby {
   public static function fromCode(rawCode:String):Ast {
+    // using server, b/c loading the bin for each request was just taking annoyingly long
     return usingServer(rawCode);
   }
 
   public static function usingServer(rawCode:String):Ast {
-    var port   = "";
-    if(Sys.environment().exists("RUBY_PARSER_PORT"))
-      port = Sys.environment().get("RUBY_PARSER_PORT");
+    var envVarName = "RUBY_PARSER_PORT";
+    var port       = "";
+    if(Sys.environment().exists(envVarName))
+      port = Sys.environment().get(envVarName);
     else
-      port = '3003';
+      throw 'Need to set the port to find the server in env var $envVarName';
     var parser = new haxe.Http('http://localhost:$port');
     parser.setPostData(rawCode);
     var rawJson = "";
@@ -23,7 +25,8 @@ class ParseRuby {
     return fromRawJson(rawJson);
   }
 
-  // loading the bin for each request was just taking annoyingly long
+  // no tests hit this, maybe can delete it at some point
+  // it's an old implementation detail
   public static function usingBinary(rawCode:String):Ast {
     var astFor       = new sys.io.Process('ast_for', [rawCode]);
     var rawJson      = "";

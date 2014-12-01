@@ -255,7 +255,6 @@ RSpec.describe RawRubyToJsonable do
 
     example 'multiple expressions, begin/end bookends, newline delimited' do
       result = call "begin\n 1\nend"
-      pp result
       expect(result['type']).to eq 'keyword_begin'
       expr, *rest = result['expressions']
       expect(rest).to be_empty
