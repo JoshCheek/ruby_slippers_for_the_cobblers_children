@@ -43,10 +43,10 @@ class RubyInterpreter {
 
   public function rubySymbol(name:String):RSymbol {
     if (!world.symbols.exists(name)) {
-      var symbol               = new RSymbol();
-      symbol.klass             = toplevelNamespace();
-      symbol.instanceVariables = new InternalMap();
-      symbol.name              = name;
+      var symbol   = new RSymbol();
+      symbol.klass = toplevelNamespace();
+      symbol.ivars = new InternalMap();
+      symbol.name  = name;
       world.symbols.set(name, symbol);
     }
     return world.symbols.get(name);
@@ -79,10 +79,10 @@ class RubyInterpreter {
         };
       case String(value):
         fill(function() {
-          var string               = new RString();
-          string.klass             = world.objectClass;
-          string.instanceVariables = new InternalMap();
-          string.value             = value;
+          var string   = new RString();
+          string.klass = world.objectClass;
+          string.ivars = new InternalMap();
+          string.value = value;
           return string;
         });
       case SetLocalVariable(name, value):
@@ -109,17 +109,17 @@ class RubyInterpreter {
             klass                       = _klass; // Fuck you
             _klass.name                 = name;
             _klass.klass                = world.klassClass;
-            _klass.instanceVariables    = new InternalMap();
+            _klass.ivars                = new InternalMap();
             _klass.instanceMethods      = new InternalMap();
             _klass.constants            = new InternalMap();
             _klass.superclass           = world.objectClass;
             toplevelNamespace().setConstant(name, klass);
           }
-          var binding               = new RBinding();
-          binding.klass             = world.objectClass; // TODO: should be Binding (unless we want these to be internal until asked for, like in MRI)
-          binding.instanceVariables = new InternalMap();
-          binding.self              = klass;
-          binding.defTarget         = cast(klass, RClass);
+          var binding       = new RBinding();
+          binding.klass     = world.objectClass; // TODO: should be Binding (unless we want these to be internal until asked for, like in MRI)
+          binding.ivars     = new InternalMap();
+          binding.self      = klass;
+          binding.defTarget = cast(klass, RClass);
           return currentExpression(); // FIXME
         });
       case Nil:
@@ -156,12 +156,12 @@ class RubyInterpreter {
           // put binding onto the stack
           var locals:InternalMap<RObject> = method.localsForArgs(args);
 
-          var binding               = new RBinding();
-          binding.klass             = world.objectClass;
-          binding.instanceVariables = new InternalMap();
-          binding.self              = receiver;
-          binding.defTarget         = methodBag;
-          binding.lvars             = new InternalMap();
+          var binding       = new RBinding();
+          binding.klass     = world.objectClass;
+          binding.ivars     = new InternalMap();
+          binding.self      = receiver;
+          binding.defTarget = methodBag;
+          binding.lvars     = new InternalMap();
 
           world.stack.push(binding); // haven't tested defTarget here
 
@@ -180,12 +180,12 @@ class RubyInterpreter {
         });
       case MethodDefinition(name, args, body):
         fill(function() {
-          var method               = new RMethod();
-          method.klass             = world.objectClass; // TODO WRONG
-          method.instanceVariables = new InternalMap();
-          method.name              = name;
-          method.args              = args;
-          method.body              = body;
+          var method   = new RMethod();
+          method.klass = world.objectClass; // TODO WRONG
+          method.ivars = new InternalMap();
+          method.name  = name;
+          method.args  = args;
+          method.body  = body;
 
           currentBinding().defTarget.instanceMethods.set(name, method);
           return rubySymbol(name);
