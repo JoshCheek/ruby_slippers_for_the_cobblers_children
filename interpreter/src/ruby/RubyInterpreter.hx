@@ -75,6 +75,10 @@ class RubyInterpreter {
     return methodBag.imeths.exists(name);
   }
 
+  public function localsForArgs(meth:RMethod, args:Array<RObject>):InternalMap<RObject> {
+    return new InternalMap(); // FIXME
+  }
+
   public function getConstant(namespace:RClass, name:String):RObject {
     return namespace.constants.get(name);
   }
@@ -171,7 +175,7 @@ class RubyInterpreter {
           var method = getMethod(methodBag, message);
 
           // put binding onto the stack
-          var locals:InternalMap<RObject> = method.localsForArgs(args);
+          var locals:InternalMap<RObject> = localsForArgs(method, args);
 
           var binding       = new RBinding();
           binding.klass     = world.objectClass;
