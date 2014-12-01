@@ -36,7 +36,7 @@ class WorldDomination {
     toplevelBinding.instanceVariables = new InternalMap();
     toplevelBinding.self              = main;
     toplevelBinding.defTarget         = objectClass;
-    toplevelBinding.localVars         = new InternalMap();
+    toplevelBinding.lvars             = new InternalMap();
 
     // special constants
     var rubyNil                 = new RObject();

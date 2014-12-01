@@ -88,13 +88,13 @@ class RubyInterpreter {
       case SetLocalVariable(name, value):
         fill(function() {
           var obj = currentExpression();
-          currentBinding().localVars.set(name, obj);
+          currentBinding().lvars.set(name, obj);
           return obj;
         });
         fillFrom(value);
       case GetLocalVariable(name):
         fill(function() {
-          return currentBinding().localVars.get(name);
+          return currentBinding().lvars.get(name);
         });
       case Class(Constant(Nil, name), superclassAst, body):
         fill(function() {
@@ -161,7 +161,7 @@ class RubyInterpreter {
           binding.instanceVariables = new InternalMap();
           binding.self              = receiver;
           binding.defTarget         = methodBag;
-          binding.localVars         = new InternalMap();
+          binding.lvars             = new InternalMap();
 
           world.stack.push(binding); // haven't tested defTarget here
 
