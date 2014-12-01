@@ -6,7 +6,11 @@ this will render into JavaScript or Flash
 and be executed in the browser,
 so it can interpret a user's code.
 
-* To run tests `rake interpreter:test`
+To run the tests
+----------------
+
+* First start the parser server: `$ rake parser:server:start`
+* Then run the tests: `rake interpreter:test`
 
 Some haxe notes
 ---------------

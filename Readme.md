@@ -33,6 +33,12 @@ Prioritized TODO
   This will allow us to see intermediate steps in the algorithms the interpreter is doing (e.g. method lookup).
 * Interpreter: have all instantiation go through one spot so we have access to the correct classes and such.
 * Interpreter: `ruby.RubyInterpreter` is redundant, just rename it to `ruby.Interpreter`?
+* Interpreter: Break the parser tests back out. They were consolidated into one big test b/c it was too expensive to run the binary that many times, but now that it's using the server, it is much faster.
+* Interpreter: Better tests on class with methods.
+* Interpreter: Instance variable get/set
+* Interpreter: Methods can take ordinal arguments
+* Interpreter: provide a `puts` statement
+* Rendering: ...uhm... play around a bit, I guess
 
 Unprioritized TODO
 ------------------
