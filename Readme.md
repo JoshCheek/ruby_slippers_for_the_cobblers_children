@@ -33,7 +33,6 @@ Prioritized TODO
   * have all instantiation go through one spot so we have access to the correct classes and such.
   * switch fillFrom to use an enum indicating the type of return value is an expression, or some state in a larger algorithm
 
-
 Unprioritized TODO
 ------------------
 
@@ -54,25 +53,27 @@ Unprioritized TODO
 Future TODO / To think about
 ----------------------------
 
-* Ability to display in the code editor what the browser is currently interpreting (e.g. highlighting current expression)
-* Bootstrap the parser
-  * If we could do this, then we wouldn't need the server
-  * Would need to implement the C-level Rack lib, which looks to be about 800 LOC, and then just parse the runtime
-  * Would need some way to represent the file system.
-  * Deps for Parser: (parser, racc, ast)
-  * Deps for RubyParser: (ruby_parser, racc, sexp_processor), these look much smaller
-  * Might be worth including the original Ruby source code with the JSON ast. e.g.
+* Parser
+  * Bootstraping
+    * If we could do this, then we wouldn't need the server
+    * Would need to implement the C-level Rack lib, which looks to be about 800 LOC, and then just parse the runtime
+    * Would need some way to represent the file system.
+    * Deps for Parser: (parser, racc, ast)
+    * Deps for RubyParser: (ruby_parser, racc, sexp_processor), these look much smaller
+    * Might be worth including the original Ruby source code with the JSON ast. e.g.
 
-    ```json
-    {"files": [{name: "gems/some_gem/lib/some_gem.rb", body: "class SomeGem\n  def some_method\n  end\nend"}],
-     "ast":   "what we're currently serving for ast, but with file info that references the provided files"
-    }
-    ```
-  * Alternatively, if we could fake out the file system, like FakeFS, we could straight ship the file system with it.
-* Can they host it locally? Would get around the need to mock the file system
-* Choose more minified keys since certain tasks could lead to massive ASTs (e.g. parsing the parser)
-* integrate with moi (prob rename that, since everyone gets it suggested to them, apparently)
-* Can we save a user's file? e.g. so they can share with a friend, or submit a bug report?
+      ```json
+      {"files": [{name: "gems/some_gem/lib/some_gem.rb", body: "class SomeGem\n  def some_method\n  end\nend"}],
+       "ast":   "what we're currently serving for ast, but with file info that references the provided files"
+      }
+      ```
+    * Alternatively, if we could fake out the file system, like FakeFS, we could straight ship the file system with it.
+    * Can they host it locally? Would get around the need to mock the file system
+  * Choose more minified keys since certain tasks could lead to massive ASTs (e.g. parsing the parser)
+* Interpreter
+  * Would be cool if we could get [RubySpec](https://github.com/rubyspec/rubyspec) to run against it.
+  * Do we need a `Symbol` class, or can we use Haxe strings? Might be a use case for abstract classes.
+  * Figure out how to work with it as data structures (interfaces/static extensions?)
 * User Interface
   * Figure out best way to render
     * Flash (e.g. some of these Haxe libs)
@@ -81,8 +82,12 @@ Future TODO / To think about
     * WebGl
   * Ability to see what they're interested in without getting spammed (e.g. "show me only code executing in my file")
   * Talk to someone w/ UX experience, find an intuitive but comprehensive interface to navigate
-* Any way to integrate with something insane like Rails?
-* Build some content that uses it to illustrate the lesson (e.g. in Moi)
+* General
+  * Ability to display in the code editor what the browser is currently interpreting (e.g. highlighting current expression)
+  * integrate with moi (prob rename that, since everyone gets it suggested to them, apparently)
+  * Can we save a user's file? e.g. so they can share with a friend, or submit a bug report?
+  * Any way to integrate with something insane like Rails?
+  * Write content that uses it to illustrate the lesson (e.g. in Moi)
 
 
 List of notes / links that might be helpful
@@ -91,7 +96,7 @@ List of notes / links that might be helpful
   * List of [Rubinius bytecodes](http://rubini.us/doc/en/virtual-machine/instructions/)
 * Parser
 * Front end / Usability
-  * Game dev [reading group](https://groups.google.com/forum/#!topic/game-maker-study-group/TwGr9AQ_eQk),
+  * Game dev [reading group](https://groups.google.com/forum/#!topic/game-maker-study-group/TwGr9AQ_eQk) for [Challenges for Game Designers](http://www.amazon.com/dp/158450580X)
     led by JEG2. Hoping to use some of these ideas to make this fun for students to work in.
   * Short summary of best points in the [Design of Every Day Things](http://drhaswell.com/index.php/2012/08/book-review-the-design-of-everyday-things/)
   * The [7 stages of action](https://en.wikipedia.org/wiki/Seven_stages_of_action)
