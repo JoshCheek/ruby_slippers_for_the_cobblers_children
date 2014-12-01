@@ -19,7 +19,7 @@ class TestInterpreter extends haxe.unit.TestCase {
 
   private function forCode(rawCode:String):RubyInterpreter {
     var ast         = ParseRuby.fromCode(rawCode);
-    var interpreter = new RubyInterpreter();
+    var interpreter = RubyInterpreter.fromBootstrap();
     interpreter.addCode(ast);
     return interpreter;
   }
@@ -31,20 +31,24 @@ class TestInterpreter extends haxe.unit.TestCase {
   // we're ignoring fixnums and symbols for now
   public function testSpecialConstants() {
     var interpreter = forCode("nil\ntrue\nfalse\n");
-    assertEquals(interpreter.rubyNil,   interpreter.drain());
-    assertEquals(interpreter.rubyTrue,  interpreter.drain());
-    assertEquals(interpreter.rubyFalse, interpreter.drain());
+    var world       = interpreter.world;
+    assertEquals(world.rubyNil,   interpreter.drain());
+    assertEquals(world.rubyTrue,  interpreter.drain());
+    assertEquals(world.rubyFalse, interpreter.drain());
   }
 
+  // maybe this goes on a world bootstrap test?
   public function testItsCurrentExpressionIsNilByDefault() {
-    var interpreter = new RubyInterpreter();
-    assertEquals(interpreter.rubyNil, interpreter.currentExpression());
+    var interpreter = RubyInterpreter.fromBootstrap();
+    var world       = interpreter.world;
+    assertEquals(world.rubyNil, interpreter.currentExpression());
   }
 
   public function testItEvaluatesAStringLiteral() {
     var interpreter         = forCode('"Josh"');
+    var world               = interpreter.world;
     var rbstr               = new RString();
-    rbstr.klass             = interpreter.objectClass;
+    rbstr.klass             = world.objectClass;
     rbstr.instanceVariables = new InternalMap();
     rbstr.value             = "Josh";
     interpreter.drain();
@@ -68,9 +72,10 @@ class TestInterpreter extends haxe.unit.TestCase {
                                var2
                                var1
                               ");
+    var world = interpreter.world;
     var rStrs = ['b', 'b', 'c', 'b', 'd', 'd', 'e', 'e', 'd', 'e'].map(function(str) {
       var rString               = new RString();
-      rString.klass             = interpreter.objectClass;
+      rString.klass             = world.objectClass;
       rString.instanceVariables = new InternalMap();
       rString.value             = str;
       return rString;
@@ -84,14 +89,15 @@ class TestInterpreter extends haxe.unit.TestCase {
       end
     ");
     interpreter.drainAll();
+    var world = interpreter.world;
 
     var aClass               = new RClass();
     aClass.name              = "A";
-    aClass.klass             = interpreter.klassClass;
+    aClass.klass             = world.klassClass;
     aClass.instanceVariables = new InternalMap();
     aClass.instanceMethods   = new InternalMap();
     aClass.constants         = new InternalMap();
-    aClass.superclass        = interpreter.objectClass;
+    aClass.superclass        = world.objectClass;
 
     assertLooksKindaSimilar(interpreter.toplevelNamespace().getConstant("A"), aClass);
   }
@@ -104,10 +110,11 @@ class TestInterpreter extends haxe.unit.TestCase {
       end
       m
     ");
+    var world = interpreter.world;
     assertEquals(interpreter.drain(), interpreter.rubySymbol("m"));
-    assertEquals(interpreter.rubyNil,         interpreter.drain()); // b/c the send doesn't result in a new currentValue
-    assertEquals(interpreter.rubyTrue,        interpreter.drain());
-    assertEquals(interpreter.rubyTrue,        interpreter.drain());
+    assertEquals(world.rubyNil,       interpreter.drain()); // b/c the send doesn't result in a new currentValue
+    assertEquals(world.rubyTrue,      interpreter.drain());
+    assertEquals(world.rubyTrue,      interpreter.drain());
   }
 
   public function _testAacceptance1() {
