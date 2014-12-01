@@ -71,6 +71,23 @@ class RubyInterpreter {
     world.workToDo.push(work);
   }
 
+  public function hasMethod(methodBag:RClass, name:String):Bool {
+    return methodBag.imeths.exists(name);
+  }
+
+  public function getConstant(namespace:RClass, name:String):RObject {
+    return namespace.constants.get(name);
+  }
+
+  public function setConstant(namespace:RClass, name:String, object:RObject):RObject {
+    namespace.constants.set(name, object);
+    return object;
+  }
+
+  public function getMethod(methodBag:RClass, methodName:String):RMethod {
+    return methodBag.imeths.get(methodName);
+  }
+
   public function fillFrom(ast:Ast) {
     switch(ast) {
       case Expressions(expressions):
@@ -103,7 +120,7 @@ class RubyInterpreter {
         });
         fillFrom(body);
         fill(function() {
-          var klass = toplevelNamespace().getConstant(name);
+          var klass = getConstant(toplevelNamespace(), name);
           if(null == klass) {
             var _klass        = new RClass();
             klass             = _klass; // Fuck you
@@ -113,7 +130,7 @@ class RubyInterpreter {
             _klass.imeths     = new InternalMap();
             _klass.constants  = new InternalMap();
             _klass.superclass = world.objectClass;
-            toplevelNamespace().setConstant(name, klass);
+            setConstant(toplevelNamespace(), name, klass);
           }
           var binding       = new RBinding();
           binding.klass     = world.objectClass; // TODO: should be Binding (unless we want these to be internal until asked for, like in MRI)
@@ -145,13 +162,13 @@ class RubyInterpreter {
 
           // find method
           var methodBag = receiver.klass;
-          while(methodBag != null && !methodBag.hasMethod(message))
+          while(methodBag != null && !hasMethod(methodBag, message))
             methodBag = methodBag.superclass;
 
           if(methodBag == null)
             throw "Could not find the method on " + Std.string(receiver); // eventually handle method_midding and nomethod errror
 
-          var method = methodBag.getMethod(message);
+          var method = getMethod(methodBag, message);
 
           // put binding onto the stack
           var locals:InternalMap<RObject> = method.localsForArgs(args);

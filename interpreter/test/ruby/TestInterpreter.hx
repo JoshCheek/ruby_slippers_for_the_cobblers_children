@@ -91,15 +91,16 @@ class TestInterpreter extends haxe.unit.TestCase {
     interpreter.drainAll();
     var world = interpreter.world;
 
-    var aClass        = new RClass();
-    aClass.name       = "A";
-    aClass.klass      = world.klassClass;
-    aClass.ivars      = new InternalMap();
-    aClass.imeths     = new InternalMap();
-    aClass.constants  = new InternalMap();
-    aClass.superclass = world.objectClass;
+    var expected        = new RClass();
+    expected.name       = "A";
+    expected.klass      = world.klassClass;
+    expected.ivars      = new InternalMap();
+    expected.imeths     = new InternalMap();
+    expected.constants  = new InternalMap();
+    expected.superclass = world.objectClass;
 
-    assertLooksKindaSimilar(interpreter.toplevelNamespace().getConstant("A"), aClass);
+    var actual = interpreter.getConstant(interpreter.toplevelNamespace(), "A");
+    assertLooksKindaSimilar(actual, expected);
   }
 
   public function testInstanceMethods() {
