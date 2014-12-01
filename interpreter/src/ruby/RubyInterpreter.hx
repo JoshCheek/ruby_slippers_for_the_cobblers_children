@@ -6,7 +6,7 @@ import ruby.ds.World;
 import ruby.ds.objects.*;
 
 using ruby.LanguageGoBag;
-using ruby.WorldDomination;
+using ruby.WorldWorker;
 
 class RubyInterpreter {
   public var world:World;
@@ -17,10 +17,6 @@ class RubyInterpreter {
 
   public function new(world:World) {
     this.world = world;
-  }
-
-  public function toplevelNamespace():RClass {
-    return world.toplevelNamespace;
   }
 
   public function hasWorkLeft():Bool {

@@ -6,6 +6,7 @@ import ruby.ds.objects.RClass;
 import ruby.ds.InternalMap;
 
 using ruby.LanguageGoBag;
+using ruby.WorldWorker;
 
 class TestInterpreter extends haxe.unit.TestCase {
   // https://github.com/JoshCheek/ruby_object_model_viewer/tree/5204eb089329b387353da0c25016328c55fba369/haxe-testing-example
