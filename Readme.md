@@ -29,15 +29,15 @@ code manipulates this.
 Prioritized TODO
 ----------------
 
-* Interpreter
-  * have all instantiation go through one spot so we have access to the correct classes and such.
-  * switch fillFrom to use an enum indicating the type of return value is an expression, or some state in a larger algorithm
+* Interpreter: switch fillFrom to use `EvaluationState`, and get rid of the `workToDo` stack.
+  This will allow us to see intermediate steps in the algorithms the interpreter is doing (e.g. method lookup).
+* Interpreter: have all instantiation go through one spot so we have access to the correct classes and such.
+* Interpreter: `ruby.RubyInterpreter` is redundant, just rename it to `ruby.Interpreter`?
 
 Unprioritized TODO
 ------------------
 
 * Interpreter
-  * experiment with object model represented as records instead of classes (see experiments dir)
   * push more on that acceptance test.
 * Parser
   * Check out `ruby_parser`, looks much smaller than Parser, so might be easier to bootstrap,
@@ -63,7 +63,9 @@ Future TODO / To think about
     * Might be worth including the original Ruby source code with the JSON ast. e.g.
 
       ```json
-      {"files": [{name: "gems/some_gem/lib/some_gem.rb", body: "class SomeGem\n  def some_method\n  end\nend"}],
+      {"files": [{"name": "gems/some_gem/lib/some_gem.rb",
+                  "body": "class SomeGem\n  def some_method\n  end\nend"}
+                ],
        "ast":   "what we're currently serving for ast, but with file info that references the provided files"
       }
       ```
