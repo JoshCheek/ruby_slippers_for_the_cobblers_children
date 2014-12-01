@@ -1,5 +1,10 @@
 // Compile with:
 //   $ haxe -main LocalVsInlineFunctions.hx -js LocalVsInlineFunctions.js
+//
+// local functions
+//   http://haxe.org/manual/expression-function.html
+// inline functions
+//   http://haxe.org/manual/lf-inline-constructor.html
 
 class LocalVsInlineFunctions {
 
