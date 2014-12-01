@@ -43,10 +43,10 @@ class RubyInterpreter {
   }
 
 
-  private inline function fill(work:Void->RObject):Void
-    world.workToDo.push(work);
-
   public function fillFrom(ast:Ast) {
+    inline function fill(work:Void->RObject)
+      world.workToDo.push(work);
+
     switch(ast) {
       case Expressions(expressions):
         for(expr in expressions.reverseIterator()) {
