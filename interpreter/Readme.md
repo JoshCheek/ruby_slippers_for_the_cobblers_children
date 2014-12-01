@@ -19,11 +19,13 @@ Some haxe notes
   * [My examples](https://gist.github.com/JoshCheek/a3ba5325df017f6e346e) Just lots of playing with stuff. Maybe it should move into this repo's experiments.
 * Given the file `HelloWorld.hx`
   * Compile to js with
+
     ```sh
     $ haxe -main HelloWorld -js HelloWorld.js
     $ node HelloWorld.js
     ```
   * Compile to Java with
+
     ```sh
     $ haxe -main HelloWorld -java HelloWorldJava
     $ cd HelloWorldJava
@@ -35,6 +37,7 @@ Some haxe notes
   suggestions for different types of use cases, etc
   definitely read this again
 * REPL
+
   ```sh
   $ haxelib install ihx
   $ haxelib run ihx
@@ -47,12 +50,14 @@ Some haxe notes
     * [tutorial](http://haxeflixel.com/documentation/part-ii-testing/) looks good
     * [demos of FlxNape, a physics engine](http://haxeflixel.com/demos/FlxNape/)
   * [OpenFl](http://haxeui.org/install_openfl.jsp)
+
     ```sh
     $ haxelib install lime
     $ haxelib run lime setup
     $ lime install openfl
     ```
   * [HaxeUI](http://haxeui.org/install_haxeui.jsp)
+
     ```sh
     $ haxelib install haxeui
     ```
