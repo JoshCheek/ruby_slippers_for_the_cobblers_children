@@ -47,10 +47,11 @@ class TestInterpreter extends haxe.unit.TestCase {
   public function testItEvaluatesAStringLiteral() {
     var interpreter = forCode('"Josh"');
     var world       = interpreter.world;
-    var rbstr       = new RString();
-    rbstr.klass     = world.objectClass;
-    rbstr.ivars     = new InternalMap();
-    rbstr.value     = "Josh";
+    var rbstr:RString = {
+      klass: world.objectClass,
+      ivars: new InternalMap(),
+      value: "Josh",
+    }
     interpreter.drain();
     assertLooksKindaSimilar(interpreter.currentExpression(), rbstr);
   }
@@ -74,10 +75,7 @@ class TestInterpreter extends haxe.unit.TestCase {
                               ");
     var world = interpreter.world;
     var rStrs = ['b', 'b', 'c', 'b', 'd', 'd', 'e', 'e', 'd', 'e'].map(function(str) {
-      var rString   = new RString();
-      rString.klass = world.objectClass;
-      rString.ivars = new InternalMap();
-      rString.value = str;
+      var rString = {klass: world.objectClass, ivars: new InternalMap(), value: str}
       return rString;
     });
     assertDrains(interpreter, rStrs);
@@ -91,13 +89,14 @@ class TestInterpreter extends haxe.unit.TestCase {
     interpreter.drainAll();
     var world = interpreter.world;
 
-    var expected        = new RClass();
-    expected.name       = "A";
-    expected.klass      = world.klassClass;
-    expected.ivars      = new InternalMap();
-    expected.imeths     = new InternalMap();
-    expected.constants  = new InternalMap();
-    expected.superclass = world.objectClass;
+    var expected:RClass = {
+      name:       "A",
+      klass:      world.klassClass,
+      ivars:      new InternalMap(),
+      imeths:     new InternalMap(),
+      constants:  new InternalMap(),
+      superclass: world.objectClass,
+    };
 
     var actual = interpreter.getConstant(interpreter.toplevelNamespace(), "A");
     assertLooksKindaSimilar(actual, expected);

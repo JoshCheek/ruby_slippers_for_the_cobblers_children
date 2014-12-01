@@ -43,10 +43,7 @@ class RubyInterpreter {
 
   public function rubySymbol(name:String):RSymbol {
     if (!world.symbols.exists(name)) {
-      var symbol   = new RSymbol();
-      symbol.klass = toplevelNamespace();
-      symbol.ivars = new InternalMap();
-      symbol.name  = name;
+      var symbol:RSymbol = {name: name, klass: world.objectClass, ivars: new InternalMap()};
       world.symbols.set(name, symbol);
     }
     return world.symbols.get(name);
@@ -100,10 +97,7 @@ class RubyInterpreter {
         };
       case String(value):
         fill(function() {
-          var string   = new RString();
-          string.klass = world.objectClass;
-          string.ivars = new InternalMap();
-          string.value = value;
+          var string:RString = {value: value, klass: world.objectClass, ivars: new InternalMap()};
           return string;
         });
       case SetLocalVariable(name, value):
@@ -126,21 +120,23 @@ class RubyInterpreter {
         fill(function() {
           var klass = getConstant(toplevelNamespace(), name);
           if(null == klass) {
-            var _klass        = new RClass();
-            klass             = _klass; // Fuck you
-            _klass.name       = name;
-            _klass.klass      = world.klassClass;
-            _klass.ivars      = new InternalMap();
-            _klass.imeths     = new InternalMap();
-            _klass.constants  = new InternalMap();
-            _klass.superclass = world.objectClass;
+            var _klass:RClass = {
+              name:       name,
+              klass:      world.klassClass,
+              ivars:      new InternalMap(),
+              imeths:     new InternalMap(),
+              constants:  new InternalMap(),
+              superclass: world.objectClass,
+            };
+            klass = _klass; // Fuck you
             setConstant(toplevelNamespace(), name, klass);
           }
-          var binding       = new RBinding();
-          binding.klass     = world.objectClass; // TODO: should be Binding (unless we want these to be internal until asked for, like in MRI)
-          binding.ivars     = new InternalMap();
-          binding.self      = klass;
-          binding.defTarget = cast(klass, RClass);
+          var binding = {
+            klass:     world.objectClass,
+            ivars:     new InternalMap(),
+            self:      klass,
+            defTarget: klass,
+          }
           return currentExpression(); // FIXME
         });
       case Nil:
@@ -177,12 +173,13 @@ class RubyInterpreter {
           // put binding onto the stack
           var locals:InternalMap<RObject> = localsForArgs(method, args);
 
-          var binding       = new RBinding();
-          binding.klass     = world.objectClass;
-          binding.ivars     = new InternalMap();
-          binding.self      = receiver;
-          binding.defTarget = methodBag;
-          binding.lvars     = new InternalMap();
+          var binding = {
+            klass:     world.objectClass,
+            ivars:     new InternalMap(),
+            self:      receiver,
+            defTarget: methodBag,
+            lvars:     new InternalMap(),
+          }
 
           world.stack.push(binding); // haven't tested defTarget here
 
@@ -201,12 +198,13 @@ class RubyInterpreter {
         });
       case MethodDefinition(name, args, body):
         fill(function() {
-          var method   = new RMethod();
-          method.klass = world.objectClass; // TODO WRONG
-          method.ivars = new InternalMap();
-          method.name  = name;
-          method.args  = args;
-          method.body  = body;
+          var method = {
+            klass: world.objectClass,
+            ivars: new InternalMap(),
+            name:  name,
+            args:  args,
+            body:  body,
+          }
 
           currentBinding().defTarget.imeths.set(name, method);
           return rubySymbol(name);

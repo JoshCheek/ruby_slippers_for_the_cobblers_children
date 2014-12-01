@@ -1,7 +1,8 @@
 package ruby.ds.objects;
 
-class RMethod extends RObject {
-  public var name : String;
-  public var args : Array<Ast>;
-  public var body : Ast;
+typedef RMethod = {
+  > RObject,
+  name : String,
+  args : Array<Ast>,
+  body : Ast,
 }
