@@ -7,6 +7,6 @@ details of parsing.
 
 * To get dependencies `bundle`
   * If that fails, first run `gem install bundler`
-* To run tests `rake test`
-* To start the server `rake server`
-  * You can choose your own port by setting `RUBY_PARSER_PORT` environment variable
+* To run tests `rake parser:test`
+* For server tasks `rake -T server`
+* You can choose your own port by setting `RUBY_PARSER_PORT` environment variable

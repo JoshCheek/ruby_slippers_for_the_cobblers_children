@@ -2,9 +2,11 @@ source 'https://rubygems.org'
 
 gem 'parser'
 gem 'rack'
+gem 'puma'
 
 group :test, :development do
   gem 'pry'
+  gem 'rake'
 end
 
 group :test do
