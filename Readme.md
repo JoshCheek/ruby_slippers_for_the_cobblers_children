@@ -64,8 +64,8 @@ Future TODO / To think about
   * Might be worth including the original Ruby source code with the JSON ast. e.g.
 
     ```json
-    {files: [{name: "gems/some_gem/lib/some_gem.rb", body: "class SomeGem\n  def some_method\n  end\nend"}],
-     ast:   "what we're currently serving for ast, but with file info that references the provided files"
+    {"files": [{name: "gems/some_gem/lib/some_gem.rb", body: "class SomeGem\n  def some_method\n  end\nend"}],
+     "ast":   "what we're currently serving for ast, but with file info that references the provided files"
     }
     ```
   * Alternatively, if we could fake out the file system, like FakeFS, we could straight ship the file system with it.
