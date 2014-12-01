@@ -29,17 +29,15 @@ code manipulates this.
 Prioritized TODO
 ----------------
 
-* Bundler stuff should be in toplevel
-* Clean up all these random files
-  * Put all haxe-related stuff into experimentes or notes.md
+* Interpreter
+  * have all instantiation go through one spot so we have access to the correct classes and such.
+  * switch fillFrom to use an enum indicating the type of return value is an expression, or some state in a larger algorithm
 
 
 Unprioritized TODO
 ------------------
 
 * Interpreter
-  * have all instantiation go through one spot so we have access to the correct classes and such.
-  * switch fillFrom to use an enum indicating the type of return value is an expression, or some state in a larger algorithm
   * experiment with object model represented as records instead of classes (see experiments dir)
   * push more on that acceptance test.
 * Parser
