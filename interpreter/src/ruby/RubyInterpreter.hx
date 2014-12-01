@@ -105,14 +105,14 @@ class RubyInterpreter {
         fill(function() {
           var klass = toplevelNamespace().getConstant(name);
           if(null == klass) {
-            var _klass                  = new RClass();
-            klass                       = _klass; // Fuck you
-            _klass.name                 = name;
-            _klass.klass                = world.klassClass;
-            _klass.ivars                = new InternalMap();
-            _klass.instanceMethods      = new InternalMap();
-            _klass.constants            = new InternalMap();
-            _klass.superclass           = world.objectClass;
+            var _klass        = new RClass();
+            klass             = _klass; // Fuck you
+            _klass.name       = name;
+            _klass.klass      = world.klassClass;
+            _klass.ivars      = new InternalMap();
+            _klass.imeths     = new InternalMap();
+            _klass.constants  = new InternalMap();
+            _klass.superclass = world.objectClass;
             toplevelNamespace().setConstant(name, klass);
           }
           var binding       = new RBinding();
@@ -187,7 +187,7 @@ class RubyInterpreter {
           method.args  = args;
           method.body  = body;
 
-          currentBinding().defTarget.instanceMethods.set(name, method);
+          currentBinding().defTarget.imeths.set(name, method);
           return rubySymbol(name);
         });
       case node:

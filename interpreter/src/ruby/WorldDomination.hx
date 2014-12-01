@@ -5,25 +5,25 @@ import ruby.ds.objects.*;
 class WorldDomination {
   public static function bootstrap():ruby.ds.World {
     // a whole new world
-    var workToDo                = new List();
-    var objectSpace             = [];
-    var symbols                 = new InternalMap();
+    var workToDo          = new List();
+    var objectSpace       = [];
+    var symbols           = new InternalMap();
 
     // Object / Class
-    var objectClass               = new RClass();
-    objectClass.name              = "Object";
-    objectClass.ivars             = new InternalMap();
-    objectClass.instanceMethods   = new InternalMap();
-    objectClass.constants         = new InternalMap();
+    var objectClass       = new RClass();
+    objectClass.name      = "Object";
+    objectClass.ivars     = new InternalMap();
+    objectClass.imeths    = new InternalMap();
+    objectClass.constants = new InternalMap();
 
-    var klassClass                = new RClass();
-    klassClass.name               = "Class";
-    klassClass.ivars              = new InternalMap();
-    klassClass.instanceMethods    = new InternalMap();
-    klassClass.superclass         = objectClass;
+    var klassClass        = new RClass();
+    klassClass.name       = "Class";
+    klassClass.ivars      = new InternalMap();
+    klassClass.imeths     = new InternalMap();
+    klassClass.superclass = objectClass;
 
-    klassClass.klass              = klassClass;
-    objectClass.klass             = klassClass;
+    klassClass.klass      = klassClass;
+    objectClass.klass     = klassClass;
 
     // main
     var main   = new RObject();

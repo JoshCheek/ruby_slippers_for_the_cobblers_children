@@ -91,13 +91,13 @@ class TestInterpreter extends haxe.unit.TestCase {
     interpreter.drainAll();
     var world = interpreter.world;
 
-    var aClass               = new RClass();
-    aClass.name              = "A";
-    aClass.klass             = world.klassClass;
-    aClass.ivars             = new InternalMap();
-    aClass.instanceMethods   = new InternalMap();
-    aClass.constants         = new InternalMap();
-    aClass.superclass        = world.objectClass;
+    var aClass        = new RClass();
+    aClass.name       = "A";
+    aClass.klass      = world.klassClass;
+    aClass.ivars      = new InternalMap();
+    aClass.imeths     = new InternalMap();
+    aClass.constants  = new InternalMap();
+    aClass.superclass = world.objectClass;
 
     assertLooksKindaSimilar(interpreter.toplevelNamespace().getConstant("A"), aClass);
   }
@@ -146,7 +146,7 @@ class TestInterpreter extends haxe.unit.TestCase {
     // // it defined the class
     // var userClass = interpreter.lookupClass('User');
     // assertEquals('User', userClass.name);
-    // assertEquals('[initialize,name,name=]', Std.string(userClass.instanceMethods));
+    // assertEquals('[initialize,name,name=]', Std.string(userClass.imeths));
 
     // // it is tracking the instance
     // assertEquals(1, interpreter.eachObject(userClass).length);
