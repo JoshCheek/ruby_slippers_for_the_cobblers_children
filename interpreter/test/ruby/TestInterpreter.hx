@@ -112,7 +112,7 @@ class TestInterpreter extends haxe.unit.TestCase {
       m
     ");
     var world = interpreter.world;
-    assertEquals(interpreter.drain(), interpreter.rubySymbol("m"));
+    assertEquals(interpreter.drain(), interpreter.intern("m"));
     assertEquals(world.rubyNil,       interpreter.drain()); // b/c the send doesn't result in a new currentValue
     assertEquals(world.rubyTrue,      interpreter.drain());
     assertEquals(world.rubyTrue,      interpreter.drain());

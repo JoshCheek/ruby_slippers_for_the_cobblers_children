@@ -15,12 +15,21 @@ class RubyInterpreter {
     return new RubyInterpreter(WorldDomination.bootstrap());
   }
 
+  // Does it make sense to move workToDo onto the interpreter,
+  // or some other piece fo state that wraps the world?
+  // not sure it's really part of the world (right now, at least, it's functions)
   public function new(world:World) {
     this.world = world;
   }
 
-  public function hasWorkLeft():Bool {
-    return world.workToDo.length != 0;
+  // TODO: delete this, just use fillFrom
+  public function addCode(ast:Dynamic):Void {
+    fillFrom(ast);
+  }
+
+  // TODO: try making this a local function (check the compiled code to make sure it's not constantly reallocating functions)
+  public function fill(work:Void->RObject):Void {
+    world.workToDo.push(work);
   }
 
   public function drainAll():Array<RObject> {
@@ -29,24 +38,9 @@ class RubyInterpreter {
     return drained;
   }
 
-  public function currentExpression():RObject {
-    return world.currentExpression;
-  }
-
-  public function currentBinding():RBinding {
-    return world.stack[0]; // FIXME
-  }
-
-  public function rubySymbol(name:String):RSymbol {
-    if (!world.symbols.exists(name)) {
-      var symbol:RSymbol = {name: name, klass: world.objectClass, ivars: new InternalMap()};
-      world.symbols.set(name, symbol);
-    }
-    return world.symbols.get(name);
-  }
-
-  public function addCode(ast:Dynamic):Void {
-    fillFrom(ast);
+  // TODO: rename isDrained
+  public function hasWorkLeft():Bool {
+    return world.workToDo.length != 0;
   }
 
   // does it make more sense to return a enum that can either be the resulting expression
@@ -58,31 +52,6 @@ class RubyInterpreter {
       throw "Can't drain, b/c there's no work to do (is the AST case handled?)";
     world.currentExpression = work();
     return world.currentExpression;
-  }
-
-  public function fill(work:Void->RObject):Void {
-    world.workToDo.push(work);
-  }
-
-  public function hasMethod(methodBag:RClass, name:String):Bool {
-    return methodBag.imeths.exists(name);
-  }
-
-  public function localsForArgs(meth:RMethod, args:Array<RObject>):InternalMap<RObject> {
-    return new InternalMap(); // FIXME
-  }
-
-  public function getConstant(namespace:RClass, name:String):RObject {
-    return namespace.constants.get(name);
-  }
-
-  public function setConstant(namespace:RClass, name:String, object:RObject):RObject {
-    namespace.constants.set(name, object);
-    return object;
-  }
-
-  public function getMethod(methodBag:RClass, methodName:String):RMethod {
-    return methodBag.imeths.get(methodName);
   }
 
   public function fillFrom(ast:Ast) {
@@ -203,7 +172,7 @@ class RubyInterpreter {
           }
 
           currentBinding().defTarget.imeths.set(name, method);
-          return rubySymbol(name);
+          return intern(name);
         });
       case node:
         throw "Unrecognized node: " + Std.string(node);
