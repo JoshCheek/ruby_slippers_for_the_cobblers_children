@@ -6,12 +6,13 @@ import ruby.ds.World;
 import ruby.ds.objects.*;
 
 using ruby.LanguageGoBag;
+using ruby.WorldDomination;
 
 class RubyInterpreter {
   public var world:World;
 
   public static function fromBootstrap():RubyInterpreter {
-    return new RubyInterpreter(World.bootstrap());
+    return new RubyInterpreter(WorldDomination.bootstrap());
   }
 
   public function new(world:World) {
