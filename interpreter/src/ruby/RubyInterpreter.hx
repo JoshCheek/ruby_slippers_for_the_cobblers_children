@@ -17,20 +17,61 @@ class RubyInterpreter {
   public  var rubyTrue           : RObject;
   public  var rubyFalse          : RObject;
 
+  public var klassClass  : RClass;
+  public var objectClass : RClass;
+
   // to think about: pass state instead of being void?
   public function new() {
     workToDo            = new List();
     objectSpace         = [];
-    _toplevelNamespace  = new RClass('Object');
-    var main            = new RObject(_toplevelNamespace);
-    var toplevelBinding = new RBinding(main, _toplevelNamespace);
-    stack               = [toplevelBinding];
     _symbols            = new InternalMap();
 
-    rubyNil             = new RObject(_toplevelNamespace); // should be NilClass
-    rubyTrue            = new RObject(_toplevelNamespace); // should be TrueClass
-    rubyFalse           = new RObject(_toplevelNamespace); // should be FalseClass
-    _currentExpression  = rubyNil;
+    // Object / Class
+    objectClass                   = new RClass();
+    objectClass.name              = "Object";
+    objectClass.instanceVariables = new InternalMap();
+    objectClass.instanceMethods   = new InternalMap();
+    objectClass.constants         = new InternalMap();
+
+    klassClass                    = new RClass();
+    klassClass.name               = "Class";
+    klassClass.instanceVariables  = new InternalMap();
+    klassClass.instanceMethods    = new InternalMap();
+    klassClass.superclass         = objectClass;
+
+    klassClass.klass              = klassClass;
+    objectClass.klass             = klassClass;
+    _toplevelNamespace            = objectClass;
+
+    // main
+    var main               = new RObject();
+    main.klass             = objectClass;
+    main.instanceVariables = new InternalMap();
+
+    // setup stack
+    var toplevelBinding               = new RBinding();
+    toplevelBinding.klass             = objectClass;
+    toplevelBinding.instanceVariables = new InternalMap();
+    toplevelBinding.self              = main;
+    toplevelBinding.defTarget         = _toplevelNamespace;
+    toplevelBinding.localVars         = new InternalMap();
+
+    stack                             = [toplevelBinding];
+
+    // special constants
+    rubyNil                     = new RObject();
+    rubyNil.klass               = objectClass; // should be NilClass
+    rubyNil.instanceVariables   = new InternalMap();
+
+    rubyTrue                    = new RObject();
+    rubyTrue.klass              = objectClass; // should be TrueClass
+    rubyTrue.instanceVariables  = new InternalMap();
+
+    rubyFalse                   = new RObject();
+    rubyFalse.klass             = objectClass; // should be FalseClass
+    rubyFalse.instanceVariables = new InternalMap();
+
+    _currentExpression = rubyNil;
   }
 
   public function toplevelNamespace():RClass {
@@ -56,8 +97,13 @@ class RubyInterpreter {
   }
 
   public function rubySymbol(name:String):RSymbol {
-    if (!_symbols.exists(name))
-      _symbols.set(name, new RSymbol(name));
+    if (!_symbols.exists(name)) {
+      var symbol               = new RSymbol();
+      symbol.klass             = _toplevelNamespace;
+      symbol.instanceVariables = new InternalMap();
+      symbol.name              = name;
+      _symbols.set(name, symbol);
+    }
     return _symbols.get(name);
   }
 
@@ -84,7 +130,11 @@ class RubyInterpreter {
         };
       case String(value):
         workToDo.push(function() {
-          return new RString(value);
+          var string               = new RString();
+          string.klass             = objectClass;
+          string.instanceVariables = new InternalMap();
+          string.value             = value;
+          return string;
         });
       case SetLocalVariable(name, value):
         workToDo.push(function() {
@@ -106,10 +156,21 @@ class RubyInterpreter {
         workToDo.push(function() {
           var klass = toplevelNamespace().getConstant(name);
           if(null == klass) {
-            klass = new RClass(name);
+            var _klass                  = new RClass();
+            klass                       = _klass; // Fuck you
+            _klass.name                 = name;
+            _klass.klass                = klassClass;
+            _klass.instanceVariables    = new InternalMap();
+            _klass.instanceMethods      = new InternalMap();
+            _klass.constants            = new InternalMap();
+            _klass.superclass           = objectClass;
             toplevelNamespace().setConstant(name, klass);
           }
-          stack.push(new RBinding(klass, cast(klass, RClass)));
+          var binding               = new RBinding();
+          binding.klass             = objectClass; // TODO: should be Binding (unless we want these to be internal until asked for, like in MRI)
+          binding.instanceVariables = new InternalMap();
+          binding.self              = klass;
+          binding.defTarget         = cast(klass, RClass);
           return currentExpression(); // FIXME
         });
       case Nil:
@@ -145,7 +206,15 @@ class RubyInterpreter {
 
           // put binding onto the stack
           var locals:InternalMap<RObject> = method.localsForArgs(args);
-          stack.push(new RBinding(receiver, methodBag)); // haven't tested defTarget here
+
+          var binding = new RBinding();
+          binding.klass = objectClass;
+          binding.instanceVariables = new InternalMap();
+          binding.self              = receiver;
+          binding.defTarget         = methodBag;
+          binding.localVars         = new InternalMap();
+
+          stack.push(binding); // haven't tested defTarget here
 
           // last thing we will do is pop binding, get return value
           workToDo.push(function() {
@@ -162,7 +231,14 @@ class RubyInterpreter {
         });
       case MethodDefinition(name, args, body):
         workToDo.push(function() {
-          currentBinding().defTarget.instanceMethods.set(name, new RMethod(name, args, body));
+          var method               = new RMethod();
+          method.klass             = objectClass; // TODO WRONG
+          method.instanceVariables = new InternalMap();
+          method.name              = name;
+          method.args              = args;
+          method.body              = body;
+
+          currentBinding().defTarget.instanceMethods.set(name, method);
           return rubySymbol(name);
         });
       case node:

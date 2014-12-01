@@ -3,6 +3,7 @@ package ruby;
 import ruby.ds.objects.RString;
 import ruby.ds.objects.RObject;
 import ruby.ds.objects.RClass;
+import ruby.ds.InternalMap;
 
 using ruby.LanguageGoBag;
 
@@ -41,14 +42,13 @@ class TestInterpreter extends haxe.unit.TestCase {
   }
 
   public function testItEvaluatesAStringLiteral() {
-    var rbstr       = new RString("Josh");
-    var interpreter = forCode('"Josh"');
+    var interpreter         = forCode('"Josh"');
+    var rbstr               = new RString();
+    rbstr.klass             = interpreter.objectClass;
+    rbstr.instanceVariables = new InternalMap();
+    rbstr.value             = "Josh";
     interpreter.drain();
     assertLooksKindaSimilar(interpreter.currentExpression(), rbstr);
-  }
-
-  private function rStrs(strs:Array<String>):Array<RString> {
-    return strs.map(function(str) return new RString(str));
   }
 
   // ffs Array<Dynamic> ...I'm giving it fucking RString, which *is* a RObject!
@@ -68,7 +68,14 @@ class TestInterpreter extends haxe.unit.TestCase {
                                var2
                                var1
                               ");
-    assertDrains(interpreter, rStrs(['b', 'b', 'c', 'b', 'd', 'd', 'e', 'e', 'd', 'e']));
+    var rStrs = ['b', 'b', 'c', 'b', 'd', 'd', 'e', 'e', 'd', 'e'].map(function(str) {
+      var rString               = new RString();
+      rString.klass             = interpreter.objectClass;
+      rString.instanceVariables = new InternalMap();
+      rString.value             = str;
+      return rString;
+    });
+    assertDrains(interpreter, rStrs);
   }
 
   public function testClasses() {
@@ -77,7 +84,16 @@ class TestInterpreter extends haxe.unit.TestCase {
       end
     ");
     interpreter.drainAll();
-    assertLooksKindaSimilar(interpreter.toplevelNamespace().getConstant("A"), new RClass("A"));
+
+    var aClass               = new RClass();
+    aClass.name              = "A";
+    aClass.klass             = interpreter.klassClass;
+    aClass.instanceVariables = new InternalMap();
+    aClass.instanceMethods   = new InternalMap();
+    aClass.constants         = new InternalMap();
+    aClass.superclass        = interpreter.objectClass;
+
+    assertLooksKindaSimilar(interpreter.toplevelNamespace().getConstant("A"), aClass);
   }
 
   public function testInstanceMethods() {

@@ -6,13 +6,13 @@ class RClass extends RObject {
   public var instanceMethods : InternalMap<RMethod>;
   public var superclass      : RClass;
 
-  public function new(name) {
-    super(this); // FIXME: should only be one Class
-    this.name            = name;
-    this.constants       = new InternalMap();
-    this.instanceMethods = new InternalMap();
-    this.superclass      = null; // FIXME
-  }
+  // public function new(name) {
+  //   super(this); // FIXME: should only be one Class
+  //   this.name            = name;
+  //   this.constants       = new InternalMap();
+  //   this.instanceMethods = new InternalMap();
+  //   this.superclass      = null; // FIXME
+  // }
 
   public function getConstant(name:String):RObject {
     return constants.get(name);

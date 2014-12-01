@@ -5,10 +5,10 @@ class RBinding extends RObject {
   public var defTarget : RClass;
   public var localVars : InternalMap<RObject>;
 
-  public function new(self:RObject, defTarget:RClass) {
-    this.localVars = new InternalMap();
-    this.self      = self;
-    this.defTarget = defTarget;
-    super(new RClass('Binding')); // FIXME
-  }
+  // public function new(self:RObject, defTarget:RClass) {
+  //   this.localVars = new InternalMap();
+  //   this.self      = self;
+  //   this.defTarget = defTarget;
+  //   super(new RClass('Binding')); // FIXME
+  // }
 }
