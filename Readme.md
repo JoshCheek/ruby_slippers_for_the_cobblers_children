@@ -78,6 +78,8 @@ Future TODO / To think about
     * Alternatively, if we could fake out the file system, like FakeFS, we could straight ship the file system with it.
     * Can they host it locally? Would get around the need to mock the file system
   * Choose more minified keys since certain tasks could lead to massive ASTs (e.g. parsing the parser)
+  * We could restrict syntax at the parser level (e.g. add a challenge where you are only allowed to use a subset of features
+    so that student has to learn alternate ways to handle a situation, and syntactically enforce the constraint.)
 * Interpreter
   * Would be cool if we could get [RubySpec](https://github.com/rubyspec/rubyspec) to run against it.
   * Do we need a `Symbol` class, or can we use Haxe strings? Might be a use case for abstract classes.
