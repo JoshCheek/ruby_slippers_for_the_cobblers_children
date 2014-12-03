@@ -82,6 +82,13 @@ class TestInterpreter extends haxe.unit.TestCase {
     assertDrains(interpreter, rStrs);
   }
 
+  public function testMoarLocalVars() {
+    var interpreter = forCode("a = 'x'; b = a; b");
+    var a = interpreter.drainExpression();
+    assertEquals(a, interpreter.drainExpression()); // b = a
+    assertEquals(a, interpreter.drainExpression()); // b
+  }
+
   public function testClasses() {
     var interpreter = forCode("
       class A
