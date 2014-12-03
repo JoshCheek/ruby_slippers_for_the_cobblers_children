@@ -74,6 +74,10 @@ class RubyInterpreter {
         fill(function() {
           return Finished(currentBinding().lvars.get(name));
         });
+      case Constant(Nil, name):
+        fill(function() return Finished(getConstant(world.toplevelNamespace, name)));
+      case Constant(namespace, name):
+        throw "Implement constant lookup for non-nil namespaces";
       case Class(Constant(Nil, name), superclassAst, body):
         fill(function() {
           world.stack.pop();
@@ -110,16 +114,10 @@ class RubyInterpreter {
         fill(function() return Finished(world.rubyFalse));
       case Send(target, message, argAsts):
         fill(function() {
-          var receiver:RObject;
+          var receiver:RObject = currentExpression();
+          trace("\033[31m" + Std.string(receiver) + "\033[0m");
 
           // find receiver
-          switch(target) {
-            case Nil:
-              receiver = currentBinding().self;
-            case _:
-              throw "Handle the case when the receiver is not null";
-          }
-
           // evaluate args
           var args:Array<RObject> = []; // TODO: eval argAsts to get this
 
@@ -159,6 +157,13 @@ class RubyInterpreter {
           // maybe switch over to returning an enum instead of an object
           return Finished(world.rubyNil);
         });
+
+        switch(target) {
+          case Nil:
+            fill(function() { return Finished(currentBinding().self); });
+          case _:
+            fillFrom(target);
+        }
       case MethodDefinition(name, args, body):
         fill(function() {
           var method = {

@@ -2,7 +2,7 @@ package ruby.ds;
 import ruby.ds.objects.RObject;
 
 enum EvaluationState {
-  PullFromWorkQueue;
+  PullFromWorkQueue; // misnamed
   // NotYetHandled;
   Finished(object:RObject);
   // FinishedSubEvaluation(object:RObject, rest:EvaluationState);
