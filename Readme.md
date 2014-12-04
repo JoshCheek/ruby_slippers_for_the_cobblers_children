@@ -98,6 +98,8 @@ Future TODO / To think about
   * Can we save a user's file? e.g. so they can share with a friend, or submit a bug report?
   * Any way to integrate with something insane like Rails?
   * Write content that uses it to illustrate the lesson (e.g. in Moi)
+  * Could apply interesting constraints at the parser level (e.g. "no classes", "only loca vars", etc),
+    which would require them to explore other ways of doing things that they normally wouldn't be exposed to.
 
 
 List of notes / links that might be helpful
