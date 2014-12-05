@@ -8,11 +8,11 @@ import ruby.ds.objects.*;
 using ruby.LanguageGoBag;
 using ruby.WorldWorker;
 
-class RubyInterpreter {
+class Interpreter {
   public var world:World;
 
-  public static function fromBootstrap():RubyInterpreter {
-    return new RubyInterpreter(WorldDomination.bootstrap());
+  public static function fromBootstrap():Interpreter {
+    return new Interpreter(WorldDomination.bootstrap());
   }
 
   // Does it make sense to move workToDo onto the interpreter,

@@ -18,9 +18,9 @@ class TestInterpreter extends haxe.unit.TestCase {
   // http://api.haxe.org/
   //   language api
 
-  private function forCode(rawCode:String):RubyInterpreter {
+  private function forCode(rawCode:String):Interpreter {
     var ast         = ParseRuby.fromCode(rawCode);
-    var interpreter = RubyInterpreter.fromBootstrap();
+    var interpreter = Interpreter.fromBootstrap();
     interpreter.fillFrom(ast);
     return interpreter;
   }
@@ -40,7 +40,7 @@ class TestInterpreter extends haxe.unit.TestCase {
 
   // maybe this goes on a world bootstrap test?
   public function testItsCurrentExpressionIsNilByDefault() {
-    var interpreter = RubyInterpreter.fromBootstrap();
+    var interpreter = Interpreter.fromBootstrap();
     var world       = interpreter.world;
     assertEquals(world.rubyNil, interpreter.currentExpression());
   }
