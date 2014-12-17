@@ -25,15 +25,6 @@ class ParseRuby {
     return fromRawJson(rawJson);
   }
 
-  // no tests hit this, maybe can delete it at some point
-  // it's an old implementation detail
-  public static function usingBinary(rawCode:String):Ast {
-    var astFor       = new sys.io.Process('ast_for', [rawCode]);
-    var rawJson      = "";
-    try { rawJson += astFor.stdout.readLine(); } catch (ex:haxe.io.Eof) { /* no op */ }
-    return fromRawJson(rawJson);
-  }
-
   public static function fromRawJson(rawJson:String) {
     return fromJson(haxe.Json.parse(rawJson));
   }
