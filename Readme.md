@@ -101,6 +101,15 @@ Future TODO / To think about
   * Could apply interesting constraints at the parser level (e.g. "no classes", "only loca vars", etc),
     which would require them to explore other ways of doing things that they normally wouldn't be exposed to.
 
+Game ideas
+----------
+
+* Challenges
+  * Constraints
+    * Not able to use the mouse (just have to figure out how to disable the mouse in the Ace editor)
+* Trace This Variable
+  * ie "@a was set in #initialize, from local var "a", that came from param the param that came from X.new(1)"
+
 
 List of notes / links that might be helpful
 -------------------------------------------
@@ -126,3 +135,5 @@ List of notes / links that might be helpful
 * [Video about parsing expressions in Ruby](http://confreaks.com/videos/582) Recommended by Ryan Davis in the above talk
 * [Video about type inferrence](https://www.youtube.com/watch?v=AHAONhPchKA) (possibly dealing with Soft Typing) by Loren Segal, he recommended it at RubyConf 2014
 * [Javascript programming game](http://alexnisnevich.github.io/untrusted/) A take on what it might be like to use games to teach programming
+* [Time Travel For Debugging at Rubyconf](http://confreaks.com/videos/4818-RubyConf2014-a-partial-multiverse-model-of-time-travel-for-debugging) "With only a few restrictions and side-effects we will learn how to construct and use a time machine."
+* [Codingame](http://www.codingame.com/ide/754417c54da4822e560181e9ab49be8d02ca97) Michael sent me
