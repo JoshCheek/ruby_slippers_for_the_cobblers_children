@@ -54,27 +54,27 @@ class Interpreter {
       world.workToDo.push(work);
 
     switch(ast) {
-      case Expressions(expressions):
+      case AstExpressions(expressions):
         for(expr in expressions.reverseIterator()) {
           fillFrom(expr);
         };
-      case String(value):
+      case AstString(value):
         fill(function() {
           var string:RString = {value: value, klass: world.objectClass, ivars: new InternalMap()};
           return Finished(string);
         });
-      case SetLocalVariable(name, value):
+      case AstSetLocalVariable(name, value):
         fill(function() {
           var obj = currentExpression();
           currentBinding().lvars.set(name, obj);
           return Finished(obj);
         });
         fillFrom(value);
-      case GetLocalVariable(name):
+      case AstGetLocalVariable(name):
         fill(function() {
           return Finished(currentBinding().lvars.get(name));
         });
-      case Class(Constant(Nil, name), superclassAst, body):
+      case AstClass(AstConstant(AstNil, name), superclassAst, body):
         fill(function() {
           world.stack.pop();
           return Finished(currentExpression());
@@ -102,19 +102,19 @@ class Interpreter {
           }
           return Finished(currentExpression()); // FIXME
         });
-      case Nil:
+      case AstNil:
         fill(function() return Finished(world.rubyNil));
-      case True:
+      case AstTrue:
         fill(function() return Finished(world.rubyTrue));
-      case False:
+      case AstFalse:
         fill(function() return Finished(world.rubyFalse));
-      case Send(target, message, argAsts):
+      case AstSend(target, message, argAsts):
         fill(function() {
           var receiver:RObject;
 
           // find receiver
           switch(target) {
-            case Nil:
+            case AstNil:
               receiver = currentBinding().self;
             case _:
               throw "Handle the case when the receiver is not null";
@@ -159,7 +159,7 @@ class Interpreter {
           // maybe switch over to returning an enum instead of an object
           return Finished(world.rubyNil);
         });
-      case MethodDefinition(name, args, body):
+      case AstMethodDefinition(name, args, body):
         fill(function() {
           var method = {
             klass: world.objectClass,

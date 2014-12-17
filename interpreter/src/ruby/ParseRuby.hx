@@ -39,26 +39,26 @@ class ParseRuby {
   }
 
   public static function fromJson(ast:Dynamic):Ast {
-    if(ast == null) return Nil;
+    if(ast == null) return AstNil;
     var rubyAst = switch(ast.type) {
-      case "nil"                   : Nil;
-      case "true"                  : True;
-      case "false"                 : False;
-      case "self"                  : Self;
-      case "integer"               : Integer(ast.value);
-      case "float"                 : Float(ast.value);
-      case "string"                : String(ast.value);
-      case "expressions"           : Expressions(fromJsonArray(ast.expressions));
-      case "set_local_variable"    : SetLocalVariable(ast.name, fromJson(ast.value));
-      case "get_local_variable"    : GetLocalVariable(ast.name);
-      case "set_instance_variable" : SetInstanceVariable(ast.name, fromJson(ast.value));
-      case "get_instance_variable" : GetInstanceVariable(ast.name);
-      case "send"                  : Send(fromJson(ast.target), ast.message, fromJsonArray(ast.args));
-      case "constant"              : Constant(fromJson(ast.namespace), ast.name);
-      case "class"                 : Class(fromJson(ast.name_lookup), fromJson(ast.superclass), fromJson(ast.body));
-      case "method_definition"     : MethodDefinition(ast.name, fromJsonArray(ast.args), fromJson(ast.body));
-      case "required_arg"          : RequiredArg(ast.name);
-      case _                       : Undefined(ast);
+      case "nil"                   : AstNil;
+      case "true"                  : AstTrue;
+      case "false"                 : AstFalse;
+      case "self"                  : AstSelf;
+      case "integer"               : AstInteger(ast.value);
+      case "float"                 : AstFloat(ast.value);
+      case "string"                : AstString(ast.value);
+      case "expressions"           : AstExpressions(fromJsonArray(ast.expressions));
+      case "set_local_variable"    : AstSetLocalVariable(ast.name, fromJson(ast.value));
+      case "get_local_variable"    : AstGetLocalVariable(ast.name);
+      case "set_instance_variable" : AstSetInstanceVariable(ast.name, fromJson(ast.value));
+      case "get_instance_variable" : AstGetInstanceVariable(ast.name);
+      case "send"                  : AstSend(fromJson(ast.target), ast.message, fromJsonArray(ast.args));
+      case "constant"              : AstConstant(fromJson(ast.namespace), ast.name);
+      case "class"                 : AstClass(fromJson(ast.name_lookup), fromJson(ast.superclass), fromJson(ast.body));
+      case "method_definition"     : AstMethodDefinition(ast.name, fromJsonArray(ast.args), fromJson(ast.body));
+      case "required_arg"          : AstRequiredArg(ast.name);
+      case _                       : AstUndefined(ast);
     }
     return rubyAst;
   }

@@ -2,22 +2,22 @@ package ruby.ds;
 
 // https://github.com/whitequark/parser/blob/master/doc/AST_FORMAT.md
 enum Ast {
-  Nil;
-  True;
-  False;
-  Self;
-  Integer(value:Int);
-  Float(value:Float);
-  String(value:String);
-  Expressions(expressions:Array<Ast>);
-  Undefined(code:Dynamic);
-  SetLocalVariable(name:String, value:Ast);
-  GetLocalVariable(name:String);
-  SetInstanceVariable(name:String, value:Ast);
-  GetInstanceVariable(name:String);
-  Send(target:Ast, message:String, args:Array<Ast>);
-  Constant(namespace:Ast, name:String);
-  Class(nameLookup:Ast, superclass:Ast, body:Ast);
-  MethodDefinition(name:String, args:Array<Ast>, body:Ast);
-  RequiredArg(name:String);
+  AstNil;
+  AstTrue;
+  AstFalse;
+  AstSelf;
+  AstInteger(value:Int);
+  AstFloat(value:Float);
+  AstString(value:String);
+  AstExpressions(expressions:Array<Ast>);
+  AstUndefined(code:Dynamic);
+  AstSetLocalVariable(name:String, value:Ast);
+  AstGetLocalVariable(name:String);
+  AstSetInstanceVariable(name:String, value:Ast);
+  AstGetInstanceVariable(name:String);
+  AstSend(target:Ast, message:String, args:Array<Ast>);
+  AstConstant(namespace:Ast, name:String);
+  AstClass(nameLookup:Ast, superclass:Ast, body:Ast);
+  AstMethodDefinition(name:String, args:Array<Ast>, body:Ast);
+  AstRequiredArg(name:String);
 }

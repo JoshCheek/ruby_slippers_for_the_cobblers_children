@@ -48,47 +48,47 @@ class TestParser extends haxe.unit.TestCase {
           true
         end
       ",
-      Expressions([
+      AstExpressions([
         // literals
           // special objects
-          Nil,
-          True,
-          False,
-          Self,
+          AstNil,
+          AstTrue,
+          AstFalse,
+          AstSelf,
           // Numeric
             // Fixnum
-              Integer(1),
-              Integer(-123),
+              AstInteger(1),
+              AstInteger(-123),
             // Bignum
             // Float
               // 1.0 ->  Float(1.0) FIXME: gets cast to Int b/c of confusion on types >.<
-              Float(-12.34),
+              AstFloat(-12.34),
             // Complex
             // Rational
           // String
-            String("abc"),
+            AstString("abc"),
         // variables
-          SetLocalVariable("a", Integer(1)),
-          GetLocalVariable("a"),
-          Constant(Nil, "A"), // going w/ nil b/c that's what comes in, but kinda seems like the parser should make this a CurrentNamespace node or something
-          SetInstanceVariable("@a", Integer(1)),
-          GetInstanceVariable("@a"),
+          AstSetLocalVariable("a", AstInteger(1)),
+          AstGetLocalVariable("a"),
+          AstConstant(AstNil, "A"), // going w/ nil b/c that's what comes in, but kinda seems like the parser should make this a CurrentNamespace node or something
+          AstSetInstanceVariable("@a", AstInteger(1)),
+          AstGetInstanceVariable("@a"),
         // sending messages
-          Send(True, "something", [False]),
+          AstSend(AstTrue, "something", [AstFalse]),
         // class/module definitions
-          Class(Constant(Nil, "A"),
-                Nil,
-                Class(Constant(Constant(Nil, "B"), "C"),
-                      Constant(Nil, "D"),
-                      Nil
+          AstClass(AstConstant(AstNil, "A"),
+                AstNil,
+                AstClass(AstConstant(AstConstant(AstNil, "B"), "C"),
+                      AstConstant(AstNil, "D"),
+                      AstNil
                 )
           ),
         // method definitions
-          MethodDefinition("bland_method", [], Nil),
-          MethodDefinition(
+          AstMethodDefinition("bland_method", [], AstNil),
+          AstMethodDefinition(
             "method_with_args_and_body",
-            [RequiredArg("arg")],
-            True
+            [AstRequiredArg("arg")],
+            AstTrue
           ),
       ])
     );
