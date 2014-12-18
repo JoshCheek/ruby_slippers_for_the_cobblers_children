@@ -10,8 +10,8 @@ RSpec.describe ParseServer::RawRubyToJsonable do
   # I don't know what I want yet, just playing to see
   # probably look at SiB for a start
 
-  def call(raw_code)
-    json = ParseServer::RawRubyToJsonable.call raw_code
+  def call(raw_code, options={})
+    json = ParseServer::RawRubyToJsonable.call raw_code, options
     assert_valid json
     json
   end
@@ -71,7 +71,11 @@ RSpec.describe ParseServer::RawRubyToJsonable do
 
 
   example 'true literal' do
-    expect(call('true')['type']).to eq 'true'
+    node = call 'true', filename: 'f.rb'
+    expect(node['type']).to eq 'true'
+    expect(node['filename']).to eq 'f.rb'
+    expect(node['begin']).to eq 0
+    expect(node['end']).to eq 4
   end
 
   example 'false literal' do

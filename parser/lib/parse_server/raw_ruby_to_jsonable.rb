@@ -4,24 +4,25 @@ module ParseServer
     # receives raw ruby code (a String)
     # return a data structure that can be directly converted into json
     # meaning String, Array, Hash, Fixnum, Float, nil, true, false
-    def self.call(raw_code)
-      new(raw_code).call
+    def self.call(raw_code, options={})
+      new(raw_code, options).call
     end
 
-    def initialize(raw_code)
+    def initialize(raw_code, filename: '(eval)')
       self.raw_code = raw_code
+      self.filename = filename
     end
 
     def call
-      translate parse raw_code
+      translate parse(raw_code, filename)
     end
 
     private
 
-    attr_accessor :raw_code
+    attr_accessor :raw_code, :filename
 
-    def parse(raw_code)
-      buffer                             = Parser::Source::Buffer.new('something')
+    def parse(raw_code, file)
+      buffer                             = Parser::Source::Buffer.new(filename)
       buffer.source                      = raw_code
       builder                            = Parser::Builders::Default.new
       builder.emit_file_line_as_literals = false
@@ -33,6 +34,14 @@ module ParseServer
       num_children = ast.children.size
       return if num_children == n
       raise "Wrong number of children: Expected:#{n.inspect}, Actual:#{num_children.inspect} in #{ast.inspect}"
+    end
+
+    def location_hash(ast)
+      expression = ast.location.expression
+      { 'filename' => expression.source_buffer.name,
+        'begin'    => expression.begin_pos,
+        'end'      => expression.end_pos,
+      }
     end
 
     def translate(ast)
@@ -80,7 +89,7 @@ module ParseServer
       # e.g. "true"
       when :true
         assert_children ast, 0
-        {'type' => 'true'}
+        {'type' => 'true'}.merge(location_hash(ast))
       # e.g. "false"
       when :false
         assert_children ast, 0
