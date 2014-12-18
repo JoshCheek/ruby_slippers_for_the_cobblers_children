@@ -1,4 +1,4 @@
-require 'app'
+require 'parse_server'
 
 # You can test what Parser returns for some given syntax with:
 # $ ruby-parse -e 'def a() 1 end'
@@ -6,12 +6,12 @@ require 'app'
 #   (args)
 #   (int 1))
 
-RSpec.describe RawRubyToJsonable do
+RSpec.describe ParseServer::RawRubyToJsonable do
   # I don't know what I want yet, just playing to see
   # probably look at SiB for a start
 
   def call(raw_code)
-    json = RawRubyToJsonable.call raw_code
+    json = ParseServer::RawRubyToJsonable.call raw_code
     assert_valid json
     json
   end

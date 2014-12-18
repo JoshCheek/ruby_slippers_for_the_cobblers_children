@@ -1,11 +1,11 @@
-require 'app'
+require 'parse_server'
 require 'rack/test'
 
-RSpec.describe App do
+RSpec.describe ParseServer::App do
   include Rack::Test::Methods
 
   def app
-    App.new
+    ParseServer::App.new
   end
 
   it 'parses the code with RawRubyToJsonable and returns a json object representing it' do
