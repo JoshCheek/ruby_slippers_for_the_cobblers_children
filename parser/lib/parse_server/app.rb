@@ -12,11 +12,11 @@ module ParseServer
     end
 
     def call
-      [200, headers, JSON.dump(ast)]
+      [200, headers, [JSON.dump(ast)]]
     rescue Parser::SyntaxError
-      [400, headers, JSON.dump(name:      'SyntaxError',
-                               message:   $!.message,
-                               backtrace: $!.backtrace)
+      [400, headers, [JSON.dump(name:      'SyntaxError',
+                                message:   $!.message,
+                                backtrace: $!.backtrace)]
       ]
     end
 
