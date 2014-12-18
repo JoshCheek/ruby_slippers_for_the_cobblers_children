@@ -51,14 +51,17 @@ module ParseServer
       # e.g. "1"
       when :int
         assert_children ast, 1
-        { type:  :integer,
-          value: ast.children[0].to_s
+        { type:     :integer,
+          value:    ast.children[0].to_s,
+          location: location_hash(ast),
         }
       # e.g. "1.0"
       when :float
         assert_children ast, 1
-        { type:  :float,
-          value: ast.children[0].to_s}
+        { type:     :float,
+          value:    ast.children[0].to_s,
+          location: location_hash(ast),
+        }
       # e.g. ":abc"
       when :sym
         assert_children ast, 1
@@ -73,13 +76,15 @@ module ParseServer
       # e.g. "'abc'"
       when :str
         assert_children ast, 1
-        { type:  :string,
-          value: ast.children[0].to_s
+        { type:     :string,
+          value:    ast.children[0].to_s,
+          location: location_hash(ast),
         }
       # e.g. "%(a#{1}b)"
       when :dstr
         { type:     :interpolated_string,
-          segments: ast.children.map { |child| translate child }
+          segments: ast.children.map { |child| translate child },
+          location: location_hash(ast),
         }
       # e.g. `echo hello`
       when :xstr
@@ -97,7 +102,7 @@ module ParseServer
       # e.g. "nil"
       when :nil
         assert_children ast, 0
-        { type: :nil }
+        { type: :nil, location: location_hash(ast) }
       # e.g. "1;2" and "(1;2)"
       when :begin
         { type:        :expressions,

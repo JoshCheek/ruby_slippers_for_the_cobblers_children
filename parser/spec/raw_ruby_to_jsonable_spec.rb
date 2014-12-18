@@ -102,7 +102,9 @@ RSpec.describe ParseServer::RawRubyToJsonable do
   end
 
   example 'nil literal' do
-    expect(call('nil')[:type]).to eq :nil
+    standard_assertions call('nil', filename: 'somefile.rb'),
+      type: :nil,
+      location: ['somefile.rb', 0, 3]
   end
 
   describe 'integer literals' do
@@ -116,15 +118,24 @@ RSpec.describe ParseServer::RawRubyToJsonable do
     example('-octal literal')  { parses_int! '-0101',  '-65' }
     example('hex literal')     { parses_int! '0x101',  '257' }
     example('-hex literal')    { parses_int! '-0x101', '-257' }
+    specify 'have a location' do
+      standard_assertions call('123', filename: 'f.rb'), location: ['f.rb', 0, 3]
+    end
   end
 
   describe 'float literals' do
     example('normal')              { parses_float! '1.0',    '1.0' }
     example('negative')            { parses_float! '-1.0',   '-1.0' }
     example('scientific notation') { parses_float! '1.2e-3', '0.0012' }
+    specify 'have a location' do
+      standard_assertions call('1.23', filename: 'f.rb'), location: ['f.rb', 0, 4]
+    end
   end
 
   describe 'string literals' do
+    specify 'have a location' do
+      standard_assertions call('"abc"', filename: 'f.rb'), location: ['f.rb', 0, 5]
+    end
     example('single quoted')         { parses_string! "'a'",    'a' }
     example('double quoted')         { parses_string! '"a"',    'a' }
 
@@ -143,8 +154,8 @@ RSpec.describe ParseServer::RawRubyToJsonable do
     example('%Q newline')            { parses_string! '%Q(\n)',  "\n"  }
 
     example 'interpolation' do
-      result = call '"a#{1}b"'
-      expect(result[:type]).to eq :interpolated_string
+      result = call '"a#{1}b"', filename: 'f.rb'
+      standard_assertions result, type: :interpolated_string, location: ['f.rb', 0, 8]
       expect(result[:segments].size).to eq 3
 
       a, exprs, b = result[:segments]
