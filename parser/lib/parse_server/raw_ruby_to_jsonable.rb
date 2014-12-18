@@ -93,7 +93,7 @@ module ParseServer
       # e.g. "false"
       when :false
         assert_children ast, 0
-        { type: :false}
+        { type: :false, location: location_hash(ast) }
       # e.g. "nil"
       when :nil
         assert_children ast, 0

@@ -68,18 +68,37 @@ RSpec.describe ParseServer::RawRubyToJsonable do
     expect(result[:value]).to eq expected_value
   end
 
+  def has_standard_location!(node, filename, begin_pos, end_pos)
+    expect(node[:location][:filename]).to eq filename
+    expect(node[:location][:begin]).to eq begin_pos
+    expect(node[:location][:end]).to eq end_pos
+  end
 
+  def standard_assertions(node, assertions)
+    assertions.each do |k, v|
+      case k
+      when :type
+        expect(node[:type]).to eq v
+      when :location
+        location = node.fetch(:location) { raise KeyError, ":location not in #{node.keys.inspect}" }
+        filename, begin_pos, end_pos = v
+        expect(location[:filename]).to eq filename
+        expect(location[:begin]).to    eq begin_pos
+        expect(location[:end]).to      eq end_pos
+      end
+    end
+  end
 
   example 'true literal' do
-    node = call 'true', filename: 'f.rb'
-    expect(node[:type]).to eq :true
-    expect(node[:location][:filename]).to eq 'f.rb'
-    expect(node[:location][:begin]).to eq 0
-    expect(node[:location][:end]).to eq 4
+    standard_assertions call('true', filename: 'f.rb'),
+      type:     :true,
+      location: ['f.rb', 0, 4]
   end
 
   example 'false literal' do
-    expect(call('false')[:type]).to eq :false
+    standard_assertions call('false', filename: 'g.rb'),
+      type:     :false,
+      location: ['g.rb', 0, 5]
   end
 
   example 'nil literal' do
