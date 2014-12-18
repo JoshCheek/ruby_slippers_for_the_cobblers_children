@@ -3,11 +3,15 @@ require 'json'
 module ParseServer
   class App
     def self.call(rack_env)
-      new.call(rack_env)
+      new(rack_env).call
     end
 
-    def call(rack_env)
-      body   = rack_env['rack.input'].read
+    def initialize(rack_env)
+      @rack_env = rack_env
+    end
+
+    def call
+      body   = @rack_env['rack.input'].read
       status = 200
       begin
         json   = RawRubyToJsonable.call(body)

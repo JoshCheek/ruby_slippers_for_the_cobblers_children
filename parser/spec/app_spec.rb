@@ -5,7 +5,7 @@ RSpec.describe ParseServer::App do
   include Rack::Test::Methods
 
   def app
-    ParseServer::App.new
+    ParseServer::App
   end
 
   it 'parses the code with RawRubyToJsonable and returns a json object representing it' do
