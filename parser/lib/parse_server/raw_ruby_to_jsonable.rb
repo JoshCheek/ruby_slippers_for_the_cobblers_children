@@ -89,7 +89,7 @@ module ParseServer
       # e.g. "true"
       when :true
         assert_children ast, 0
-        {'type' => 'true'}.merge(location_hash(ast))
+        {'type' => 'true', 'location' => location_hash(ast)}
       # e.g. "false"
       when :false
         assert_children ast, 0

@@ -73,9 +73,9 @@ RSpec.describe ParseServer::RawRubyToJsonable do
   example 'true literal' do
     node = call 'true', filename: 'f.rb'
     expect(node['type']).to eq 'true'
-    expect(node['filename']).to eq 'f.rb'
-    expect(node['begin']).to eq 0
-    expect(node['end']).to eq 4
+    expect(node['location']['filename']).to eq 'f.rb'
+    expect(node['location']['begin']).to eq 0
+    expect(node['location']['end']).to eq 4
   end
 
   example 'false literal' do
