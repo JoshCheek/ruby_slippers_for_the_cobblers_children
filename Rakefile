@@ -54,6 +54,6 @@ namespace :parser do
     task(:status) { puma 'status' }
 
     desc 'Run the server in this process'
-    task(:run) { sh 'rackup parser/config.ru' }
+    task(:run) { sh "rackup parser/config.ru -p #{ENV.fetch 'RUBY_PARSER_PORT'}" }
   end
 end
