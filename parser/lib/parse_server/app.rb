@@ -7,19 +7,27 @@ module ParseServer
     end
 
     def initialize(rack_env)
-      @rack_env = rack_env
+      @request = Rack::Request.new(rack_env)
+      @status  = 200
     end
 
     def call
-      body   = @rack_env['rack.input'].read
-      status = 200
-      begin
-        json   = RawRubyToJsonable.call(body)
-      rescue Parser::SyntaxError
-        status = 400
-        json   = {name: 'SyntaxError', message: $!.message, backtrace: $!.backtrace}
-      end
-      [status, {'Content-Type' => 'application/json; charset=utf-8'}, [JSON.dump(json)]]
+      [200, headers, JSON.dump(ast)]
+    rescue Parser::SyntaxError
+      [400, headers, JSON.dump(name:      'SyntaxError',
+                               message:   $!.message,
+                               backtrace: $!.backtrace)
+      ]
+    end
+
+    private
+
+    def headers
+      {'Content-Type' => 'application/json; charset=utf-8'}
+    end
+
+    def ast
+      RawRubyToJsonable.call(@request[:code] || @request.body.read)
     end
   end
 end

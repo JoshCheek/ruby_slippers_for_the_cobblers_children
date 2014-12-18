@@ -8,8 +8,18 @@ RSpec.describe ParseServer::App do
     ParseServer::App
   end
 
+  it 'can receive the code in the body or a "code" param' do
+    asserter = lambda do |response|
+      json = JSON.load(response.body)
+      expect(json.fetch('type')).to eq 'integer'
+      expect(json.fetch('value')).to eq '1'
+    end
+    asserter.call post('/', code: '1')
+    asserter.call post('/', '1')
+  end
+
   it 'parses the code with RawRubyToJsonable and returns a json object representing it' do
-    response = post '/', '1+1'
+    response = post '/', code: '1+1'
     expect(response).to be_ok
     expect(response.content_type).to include 'json'
     JSON.load(response.body)
