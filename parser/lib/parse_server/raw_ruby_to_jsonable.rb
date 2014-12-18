@@ -65,13 +65,15 @@ module ParseServer
       # e.g. ":abc"
       when :sym
         assert_children ast, 1
-        { type:  :symbol,
-          value: ast.children[0].to_s
+        { type:     :symbol,
+          value:    ast.children[0].to_s,
+          location: location_hash(ast),
         }
       # e.g. ':"a#{1}b"'
       when :dsym
         { type:     :interpolated_symbol,
-          segments: ast.children.map { |child| translate child }
+          segments: ast.children.map { |child| translate child },
+          location: location_hash(ast),
         }
       # e.g. "'abc'"
       when :str
@@ -89,7 +91,8 @@ module ParseServer
       # e.g. `echo hello`
       when :xstr
         { type:     :executable_string,
-          segments: ast.children.map { |child| translate child }
+          segments: ast.children.map { |child| translate child },
+          location: location_hash(ast),
         }
       # e.g. "true"
       when :true
@@ -106,39 +109,45 @@ module ParseServer
       # e.g. "1;2" and "(1;2)"
       when :begin
         { type:        :expressions,
-          expressions: ast.children.map { |child| translate child }
+          expressions: ast.children.map { |child| translate child },
+          location:    location_hash(ast),
         }
       # e.g. "begin;1;2;end"
       when :kwbegin
         { type:        :keyword_begin,
-          expressions: ast.children.map { |child| translate child }
+          expressions: ast.children.map { |child| translate child },
+          location:    location_hash(ast),
         }
       # e.g. "a.b(c)"
       when :send
         target, message, *args = ast.children
-        { type:    :send,
-          target:  translate(target),
-          message: message.to_s,
-          args:    args.map { |arg| translate arg },
+        { type:     :send,
+          target:   translate(target),
+          message:  message.to_s,
+          args:     args.map { |arg| translate arg },
+          location: location_hash(ast),
         }
       # e.g. "val = 1"
       when :lvasgn
         assert_children ast, 2
-        { type:  :set_local_variable,
-          name:  ast.children[0].to_s,
-          value: translate(ast.children[1]),
+        { type:     :set_local_variable,
+          name:     ast.children[0].to_s,
+          value:    translate(ast.children[1]),
+          location: location_hash(ast),
         }
       # e.g. "val = 1; val" NOTE: if you do not set the local first, then it becomes a send instead (ie parser is aware of the local)
       when :lvar
         assert_children ast, 1
-        { type: :get_local_variable,
-          name: ast.children[0].to_s,
+        { type:     :get_local_variable,
+          name:     ast.children[0].to_s,
+          location: location_hash(ast),
         }
       # e.g. "/a/i"
       when :regexp
         *segments, opts = ast.children
         raise "Expected #{opts.inspect} to be a regopt!" unless opts.type == :regopt
         { type:     :regular_expression,
+          location: location_hash(ast),
           segments: segments.map { |segment| translate segment },
           options:  {
             ignorecase: opts.children.include?(:i),
@@ -150,6 +159,7 @@ module ParseServer
       when :array
         { type:     :array,
           elements: ast.children.map { |child| translate child },
+          location: location_hash(ast),
         }
       # e.g. "class A; end"
       when :class
@@ -161,22 +171,25 @@ module ParseServer
           name_lookup:translate(location),
           superclass: translate(superclass),
           body:       translate(body),
+          location:   location_hash(ast),
         }
       # (def :a (args (arg :b)) (int 1))
       when :def
         assert_children ast, 3
         name, args, body = ast.children
-        { type: :method_definition,
-          name: name.to_s,
-          args: args.children.map { |arg| translate arg },
-          body: translate(body),
+        { type:     :method_definition,
+          name:     name.to_s,
+          args:     args.children.map { |arg| translate arg },
+          body:     translate(body),
+          location: location_hash(ast),
         }
       # e.g. the b in `def a(b) 1 end`
       when :arg
         # (def :a (args (arg :b)) (int 1))
         assert_children ast, 1
-        { type: :required_arg,
-          name: ast.children.first.to_s,
+        { type:     :required_arg,
+          name:     ast.children.first.to_s,
+          location: location_hash(ast),
         }
       when :const
         assert_children ast, 2
@@ -184,26 +197,34 @@ module ParseServer
         { type:      :constant,
           namespace: translate(namespace),
           name:      name.to_s,
+          location:  location_hash(ast),
         }
       # e.g. the :: in `class ::A; end`
       when :cbase
         assert_children ast, 0
-        { type: :toplevel_constant}
+        { type:     :toplevel_constant,
+          location: location_hash(ast),
+        }
       # e.g. self
       when :self
         assert_children ast, 0
-        { type: :self}
+        { type:     :self,
+          location: location_hash(ast),
+        }
       # e.g. @abc
       when :ivar
         assert_children ast, 1 # (ivar :@abc)
-        { type: :get_instance_variable,
-          name: ast.children.first.to_s }
+        { type:     :get_instance_variable,
+          name:     ast.children.first.to_s,
+          location: location_hash(ast),
+        }
       # e.g. @abc = 1
       when :ivasgn
         assert_children ast, 2 # (ivasgn :@abc (int 1))
-        { type:  :set_instance_variable,
-          name:  ast.children.first.to_s,
-          value: translate(ast.children.last),
+        { type:     :set_instance_variable,
+          name:     ast.children.first.to_s,
+          value:    translate(ast.children.last),
+          location: location_hash(ast),
         }
       else
         raise "No case for #{ast.inspect}"
