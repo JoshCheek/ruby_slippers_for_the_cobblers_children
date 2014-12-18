@@ -18,13 +18,13 @@ RSpec.describe ParseServer::RawRubyToJsonable do
 
   def assert_valid(json)
     case json
-    when String, Fixnum, nil, true, false
+    when String, Symbol, Fixnum, nil, true, false
       # no op
     when Array
       json.each { |element| assert_valid element }
     when Hash
       json.each do |k, v|
-        raise unless k.kind_of? String
+        raise unless k.kind_of?(String) || k.kind_of?(Symbol)
         assert_valid v
       end
     else
@@ -37,8 +37,8 @@ RSpec.describe ParseServer::RawRubyToJsonable do
   end
 
   def is_int!(result, expected_value)
-    expect(result['type']).to eq 'integer'
-    expect(result['value']).to eq expected_value
+    expect(result[:type]).to eq :integer
+    expect(result[:value]).to eq expected_value
   end
 
   def parses_string!(code, expected_value)
@@ -46,8 +46,8 @@ RSpec.describe ParseServer::RawRubyToJsonable do
   end
 
   def is_string!(result, expected_value)
-    expect(result['type']).to eq 'string'
-    expect(result['value']).to eq expected_value
+    expect(result[:type]).to eq :string
+    expect(result[:value]).to eq expected_value
   end
 
   def parses_float!(code, expected_value)
@@ -55,8 +55,8 @@ RSpec.describe ParseServer::RawRubyToJsonable do
   end
 
   def is_float!(result, expected_value)
-    expect(result['type']).to eq 'float'
-    expect(result['value']).to eq expected_value
+    expect(result[:type]).to eq :float
+    expect(result[:value]).to eq expected_value
   end
 
   def parses_symbol!(code, expected_value)
@@ -64,26 +64,26 @@ RSpec.describe ParseServer::RawRubyToJsonable do
   end
 
   def is_symbol!(result, expected_value)
-    expect(result['type']).to eq 'symbol'
-    expect(result['value']).to eq expected_value
+    expect(result[:type]).to eq :symbol
+    expect(result[:value]).to eq expected_value
   end
 
 
 
   example 'true literal' do
     node = call 'true', filename: 'f.rb'
-    expect(node['type']).to eq 'true'
-    expect(node['location']['filename']).to eq 'f.rb'
-    expect(node['location']['begin']).to eq 0
-    expect(node['location']['end']).to eq 4
+    expect(node[:type]).to eq :true
+    expect(node[:location][:filename]).to eq 'f.rb'
+    expect(node[:location][:begin]).to eq 0
+    expect(node[:location][:end]).to eq 4
   end
 
   example 'false literal' do
-    expect(call('false')['type']).to eq 'false'
+    expect(call('false')[:type]).to eq :false
   end
 
   example 'nil literal' do
-    expect(call('nil')['type']).to eq 'nil'
+    expect(call('nil')[:type]).to eq :nil
   end
 
   describe 'integer literals' do
@@ -125,15 +125,15 @@ RSpec.describe ParseServer::RawRubyToJsonable do
 
     example 'interpolation' do
       result = call '"a#{1}b"'
-      expect(result['type']).to eq 'interpolated_string'
-      expect(result['segments'].size).to eq 3
+      expect(result[:type]).to eq :interpolated_string
+      expect(result[:segments].size).to eq 3
 
-      a, exprs, b = result['segments']
+      a, exprs, b = result[:segments]
       is_string! a, 'a'
       is_string! b, 'b'
 
-      expect(exprs['expressions'].size).to eq 1
-      is_int! exprs['expressions'][0], '1'
+      expect(exprs[:expressions].size).to eq 1
+      is_int! exprs[:expressions][0], '1'
     end
 
     example 'heredoc' do
@@ -153,24 +153,24 @@ RSpec.describe ParseServer::RawRubyToJsonable do
     end
     example 'interpolation' do
       result = call ':"a#{1}b"' # (dsym (str "a") (begin (int 1)) (str "b"))
-      expect(result['type']).to eq 'interpolated_symbol'
-      expect(result['segments'].size).to eq 3
+      expect(result[:type]).to eq :interpolated_symbol
+      expect(result[:segments].size).to eq 3
 
-      a, exprs, b = result['segments']
+      a, exprs, b = result[:segments]
       is_string! a, 'a'
       is_string! b, 'b'
 
-      expect(exprs['expressions'].size).to eq 1
-      is_int! exprs['expressions'][0], '1'
+      expect(exprs[:expressions].size).to eq 1
+      is_int! exprs[:expressions][0], '1'
     end
   end
 
   context 'executable strings' do
     example 'backticks' do
       result = call '`a`'
-      expect(result['type']).to eq 'executable_string'
-      expect(result['segments'].size).to eq 1
-      is_string! result['segments'][0], "a"
+      expect(result[:type]).to eq :executable_string
+      expect(result[:segments].size).to eq 1
+      is_string! result[:segments][0], "a"
     end
     # TODO: What is heredoc with executable string?
   end
@@ -181,16 +181,16 @@ RSpec.describe ParseServer::RawRubyToJsonable do
     end
 
     def is_regex!(result, *expected_values, options: [])
-      expect(result['type']).to eq 'regular_expression'
-      actual_values = result['segments'].map { |s| s['expressions'] || s }.flatten.map { |node| node['value'] }
+      expect(result[:type]).to eq :regular_expression
+      actual_values = result[:segments].map { |s| s[:expressions] || s }.flatten.map { |node| node[:value] }
       expect(actual_values.size).to eq expected_values.size
       [expected_values, actual_values].transpose.each { |expected_value, actual_value|
         expect(actual_value).to eq expected_value
       }
 
-      expect(result['options']['ignorecase']).to eq options.include?(:ignorecase)
-      expect(result['options']['extended']).to   eq options.include?(:extended)
-      expect(result['options']['multiline']).to  eq options.include?(:multiline)
+      expect(result[:options][:ignorecase]).to eq options.include?(:ignorecase)
+      expect(result[:options][:extended]).to   eq options.include?(:extended)
+      expect(result[:options][:multiline]).to  eq options.include?(:multiline)
       # TODO: Figure out how to turn on :FIXEDENCODING, and :NOENCODING
     end
 
@@ -215,14 +215,14 @@ RSpec.describe ParseServer::RawRubyToJsonable do
   context 'array literals' do
     example 'empty' do
       result = call '[]'
-      expect(result['type']).to eq 'array'
-      expect(result['elements']).to be_empty
+      expect(result[:type]).to eq :array
+      expect(result[:elements]).to be_empty
     end
 
     example 'not empty' do
       result = call '["a", 1]'
-      expect(result['type']).to eq 'array'
-      a, one = result['elements']
+      expect(result[:type]).to eq :array
+      a, one = result[:elements]
       is_string! a,   "a"
       is_int!    one, "1"
     end
@@ -233,137 +233,137 @@ RSpec.describe ParseServer::RawRubyToJsonable do
   context 'single and multiple expressions' do
     example 'single expression is just the expression type' do
       result = call '1'
-      expect(result['type']).to eq 'integer'
-      expect(result['value']).to eq '1'
+      expect(result[:type]).to eq :integer
+      expect(result[:value]).to eq '1'
     end
 
     example 'multiple expressions, no bookends, newline delimited' do
       result = call "9\n8"
-      expect(result['type']).to eq 'expressions'
+      expect(result[:type]).to eq :expressions
 
-      expr1, expr2, *rest = result['expressions']
+      expr1, expr2, *rest = result[:expressions]
       expect(rest).to be_empty
 
-      expect(expr1['type']).to eq 'integer'
-      expect(expr1['value']).to eq '9'
+      expect(expr1[:type]).to eq :integer
+      expect(expr1[:value]).to eq '9'
 
-      expect(expr2['type']).to eq 'integer'
-      expect(expr2['value']).to eq '8'
+      expect(expr2[:type]).to eq :integer
+      expect(expr2[:value]).to eq '8'
     end
 
     example 'multiple expressions, parentheses bookends, newline delimited' do
       result = call "(9\n8)"
-      expect(result['type']).to eq 'expressions'
-      expect(result['expressions'].size).to eq 2
+      expect(result[:type]).to eq :expressions
+      expect(result[:expressions].size).to eq 2
     end
 
     example 'multiple expressions, begin/end bookends, newline delimited' do
       result = call "begin\n 1\nend"
-      expect(result['type']).to eq 'keyword_begin'
-      expr, *rest = result['expressions']
+      expect(result[:type]).to eq :keyword_begin
+      expr, *rest = result[:expressions]
       expect(rest).to be_empty
-      expect(expr['type']).to eq 'integer'
-      expect(expr['value']).to eq '1'
+      expect(expr[:type]).to eq :integer
+      expect(expr[:value]).to eq '1'
     end
 
     example 'semicolon delimited' do
       result = call "1;2"
-      expect(result['type']).to eq 'expressions'
-      expect(result['expressions'].size).to eq 2
+      expect(result[:type]).to eq :expressions
+      expect(result[:expressions].size).to eq 2
 
       result = call "(1;2)"
-      expect(result['type']).to eq 'expressions'
-      expect(result['expressions'].size).to eq 2
+      expect(result[:type]).to eq :expressions
+      expect(result[:expressions].size).to eq 2
 
       result = call "begin;1;end"
-      expect(result['type']).to eq 'keyword_begin'
-      expect(result['expressions'].size).to eq 1
+      expect(result[:type]).to eq :keyword_begin
+      expect(result[:expressions].size).to eq 1
     end
   end
 
   example 'set and get local variable' do
     result = call "a = 1; a"
-    set, get = result['expressions']
-    expect(set['type']).to eq 'set_local_variable'
-    expect(set['name']).to eq 'a'
+    set, get = result[:expressions]
+    expect(set[:type]).to eq :set_local_variable
+    expect(set[:name]).to eq 'a'
 
-    val = set['value']
-    expect(val['type']).to eq 'integer'
-    expect(val['value']).to eq '1'
+    val = set[:value]
+    expect(val[:type]).to eq :integer
+    expect(val[:value]).to eq '1'
 
-    expect(get['type']).to eq 'get_local_variable'
-    expect(get['name']).to eq 'a'
+    expect(get[:type]).to eq :get_local_variable
+    expect(get[:name]).to eq 'a'
   end
 
 
   describe 'class definitions' do
     example 'implicit toplevel' do
       result = call 'class A;end'
-      expect(result['type']).to eq 'class'
-      expect(result['superclass']).to eq nil
-      expect(result['body']).to eq nil
+      expect(result[:type]).to eq :class
+      expect(result[:superclass]).to eq nil
+      expect(result[:body]).to eq nil
 
-      name_lookup = result['name_lookup']
-      expect(name_lookup['type']).to eq 'constant'
-      expect(name_lookup['namespace']).to eq nil
-      expect(name_lookup['name']).to eq 'A'
+      name_lookup = result[:name_lookup]
+      expect(name_lookup[:type]).to eq :constant
+      expect(name_lookup[:namespace]).to eq nil
+      expect(name_lookup[:name]).to eq 'A'
     end
 
     example 'explicit toplevel' do
       result = call 'class ::A;end'
-      expect(result['type']).to eq 'class'
-      expect(result['superclass']).to eq nil
-      expect(result['body']).to eq nil
+      expect(result[:type]).to eq :class
+      expect(result[:superclass]).to eq nil
+      expect(result[:body]).to eq nil
 
-      name_lookup = result['name_lookup']
-      expect(name_lookup['type']).to eq 'constant'
-      expect(name_lookup['namespace']).to eq 'type' => 'toplevel_constant'
-      expect(name_lookup['name']).to eq 'A'
+      name_lookup = result[:name_lookup]
+      expect(name_lookup[:type]).to eq :constant
+      expect(name_lookup[:namespace][:type]).to eq :toplevel_constant
+      expect(name_lookup[:name]).to eq 'A'
     end
 
     example 'direct namespacing' do
       result = call 'class String::A;end'
-      expect(result['type']).to eq 'class'
-      expect(result['superclass']).to eq nil
-      expect(result['body']).to eq nil
+      expect(result[:type]).to eq :class
+      expect(result[:superclass]).to eq nil
+      expect(result[:body]).to eq nil
 
-      name_lookup = result['name_lookup']
-      expect(name_lookup['type']).to eq 'constant'
-      expect(name_lookup['name']).to eq 'A'
+      name_lookup = result[:name_lookup]
+      expect(name_lookup[:type]).to eq :constant
+      expect(name_lookup[:name]).to eq 'A'
 
-      namespace = name_lookup['namespace']
-      expect(namespace['type']).to eq 'constant'
-      expect(namespace['name']).to eq 'String'
-      expect(namespace['namespace']).to eq nil
+      namespace = name_lookup[:namespace]
+      expect(namespace[:type]).to eq :constant
+      expect(namespace[:name]).to eq 'String'
+      expect(namespace[:namespace]).to eq nil
     end
 
     example 'inheriting' do
       result = call 'class A < B; end'
-      expect(result['type']).to eq 'class'
-      expect(result['body']).to eq nil
+      expect(result[:type]).to eq :class
+      expect(result[:body]).to eq nil
 
-      name_lookup = result['name_lookup']
-      expect(name_lookup['type']).to eq 'constant'
-      expect(name_lookup['namespace']).to eq nil
-      expect(name_lookup['name']).to eq 'A'
+      name_lookup = result[:name_lookup]
+      expect(name_lookup[:type]).to eq :constant
+      expect(name_lookup[:namespace]).to eq nil
+      expect(name_lookup[:name]).to eq 'A'
 
-      superclass = result['superclass']
-      expect(superclass['type']).to eq 'constant'
-      expect(superclass['namespace']).to eq nil
-      expect(superclass['name']).to eq 'B'
+      superclass = result[:superclass]
+      expect(superclass[:type]).to eq :constant
+      expect(superclass[:namespace]).to eq nil
+      expect(superclass[:name]).to eq 'B'
     end
 
     example 'with a body' do
       result = call 'class A; 1; end'
-      expect(result['type']).to eq 'class'
-      expect(result['superclass']).to eq nil
+      expect(result[:type]).to eq :class
+      expect(result[:superclass]).to eq nil
 
-      name_lookup = result['name_lookup']
-      expect(name_lookup['type']).to eq 'constant'
-      expect(name_lookup['namespace']).to eq nil
-      expect(name_lookup['name']).to eq 'A'
+      name_lookup = result[:name_lookup]
+      expect(name_lookup[:type]).to eq :constant
+      expect(name_lookup[:namespace]).to eq nil
+      expect(name_lookup[:name]).to eq 'A'
 
-      is_int! result['body'], '1'
+      is_int! result[:body], '1'
     end
   end
 
@@ -371,22 +371,22 @@ RSpec.describe ParseServer::RawRubyToJsonable do
     example 'simple definition' do
       # (def :a (args) nil)
       method_definition = call 'def a; end'
-      expect(method_definition['type']).to eq 'method_definition'
-      expect(method_definition['name']).to eq 'a'
-      expect(method_definition['args']).to eq []
-      expect(method_definition['body']).to eq nil
+      expect(method_definition[:type]).to eq :method_definition
+      expect(method_definition[:name]).to eq 'a'
+      expect(method_definition[:args]).to eq []
+      expect(method_definition[:body]).to eq nil
     end
 
     context 'with args' do
       example 'required arg' do
         # (def :a (args (arg :b)) nil)
         method_definition = call 'def a(b) end'
-        expect(method_definition['type']).to eq 'method_definition'
-        arg, *rest = method_definition['args']
+        expect(method_definition[:type]).to eq :method_definition
+        arg, *rest = method_definition[:args]
         expect(rest).to be_empty
 
-        expect(arg['type']).to eq 'required_arg'
-        expect(arg['name']).to eq 'b'
+        expect(arg[:type]).to eq :required_arg
+        expect(arg[:name]).to eq 'b'
 
         expect(method_definition['body']).to eq nil
       end
@@ -403,9 +403,9 @@ RSpec.describe ParseServer::RawRubyToJsonable do
     example 'with a body' do
       # (def :a (args) (int 1))
       method_definition = call 'def a() 1 end'
-      expect(method_definition['type']).to eq 'method_definition'
-      expect(method_definition['args']).to eq []
-      expect(method_definition['body']['type']).to eq 'integer'
+      expect(method_definition[:type]).to eq :method_definition
+      expect(method_definition[:args]).to eq []
+      expect(method_definition[:body][:type]).to eq :integer
     end
   end
 
@@ -413,44 +413,44 @@ RSpec.describe ParseServer::RawRubyToJsonable do
 
   context 'keywords' do
     example 'self' do
-      expect(call('self')['type']).to eq 'self'
+      expect(call('self')[:type]).to eq :self
     end
   end
 
   context 'send' do
     example 'with no receiver' do
       result = call 'load'
-      expect(result['type']).to eq 'send'
-      expect(result['target']).to eq nil
-      expect(result['message']).to eq 'load'
-      expect(result['args']).to be_empty
+      expect(result[:type]).to eq :send
+      expect(result[:target]).to eq nil
+      expect(result[:message]).to eq 'load'
+      expect(result[:args]).to be_empty
     end
 
     example 'without args' do
       result = call '1.even?'
-      expect(result['type']).to eq 'send'
+      expect(result[:type]).to eq :send
 
-      expect(result['target']['value']).to eq '1'
-      expect(result['message']).to eq 'even?'
-      expect(result['args']).to be_empty
+      expect(result[:target][:value]).to eq '1'
+      expect(result[:message]).to eq 'even?'
+      expect(result[:args]).to be_empty
     end
 
     example 'with args' do
       result = call '1.a 2, 3'
-      expect(result['type']).to eq 'send'
+      expect(result[:type]).to eq :send
 
-      expect(result['target']['value']).to eq '1'
-      expect(result['message']).to eq 'a'
-      expect(result['args'].map { |a| a['value'] }).to eq ['2', '3']
+      expect(result[:target][:value]).to eq '1'
+      expect(result[:message]).to eq 'a'
+      expect(result[:args].map { |a| a[:value] }).to eq ['2', '3']
     end
 
     example 'with operator' do
       result = call '1 % 2'
-      expect(result['type']).to eq 'send'
+      expect(result[:type]).to eq :send
 
-      expect(result['target']['value']).to eq '1'
-      expect(result['message']).to eq '%'
-      expect(result['args'].map { |a| a['value'] }).to eq ['2']
+      expect(result[:target][:value]).to eq '1'
+      expect(result[:message]).to eq '%'
+      expect(result[:args].map { |a| a[:value] }).to eq ['2']
     end
   end
 
@@ -458,14 +458,14 @@ RSpec.describe ParseServer::RawRubyToJsonable do
     context 'instance variables' do
       example 'getting' do
         result = call '@abc' # (ivar :@abc)
-        expect(result['type']).to eq 'get_instance_variable'
-        expect(result['name']).to eq '@abc'
+        expect(result[:type]).to eq :get_instance_variable
+        expect(result[:name]).to eq '@abc'
       end
       example 'setting' do
         result = call '@abc = 1' # (ivasgn :@abc (int 1))
-        expect(result['type']).to eq 'set_instance_variable'
-        expect(result['name']).to eq '@abc'
-        expect(result['value']['value']).to eq '1'
+        expect(result[:type]).to eq :set_instance_variable
+        expect(result[:name]).to eq '@abc'
+        expect(result[:value][:value]).to eq '1'
       end
     end
   end
@@ -491,9 +491,9 @@ RSpec.describe ParseServer::RawRubyToJsonable do
         puts user.name
       CODE
 
-      expect(result['type']).to eq 'expressions'
-      expect(result['expressions'].map { |node| node['type'] })
-        .to eq %w[class set_local_variable send]
+      expect(result[:type]).to eq :expressions
+      expect(result[:expressions].map { |node| node[:type] })
+        .to eq [:class, :set_local_variable, :send]
     end
   end
 end
