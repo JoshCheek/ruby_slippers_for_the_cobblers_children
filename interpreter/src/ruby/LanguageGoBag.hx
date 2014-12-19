@@ -25,7 +25,7 @@ class LanguageGoBag {
     return zipped;
   }
 
-  public static function fromEnd<T>(iterable:Iterable<T>):Iterable<T> {
+  public static function fromEnd<T>(iterable:Iterable<T>):List<T> {
     var reversed = new List<T>();
     for(element in iterable.iterator())
       reversed.push(element);
