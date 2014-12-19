@@ -25,25 +25,11 @@ class LanguageGoBag {
     return zipped;
   }
 
-  // I don't really get how to use this language well.
-  // wouldn't it make more sense for the for/in to take
-  // an iterable and call .iterable() on it?
-  //
-  // Then we could manipulate iterable objects, passing in to
-  // the for/in at whatever point we want, with no implication
-  // that we should be working directly with iterators.
-  // Or Iterators should be iterable in that they could have
-  //   public function iterator() return this;
-  //
-  // Maybe it would be possible to write these all with macros
-  // such that we have the feel of Ruby iterators, which are
-  // actually pretty fkn good, IMO, but with the performance
-  // of inlining or w/e
-  public static function reverseIterator<T>(iterable:Iterable<T>) {
+  public static function reverseIterator<T>(iterable:Iterable<T>):Iterable<T> {
     var reversed = new List<T>();
     for(element in iterable.iterator())
       reversed.push(element);
-    return reversed.iterator();
+    return reversed;
   }
 
 }

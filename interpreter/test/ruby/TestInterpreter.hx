@@ -9,30 +9,25 @@ using ruby.LanguageGoBag;
 using ruby.WorldWorker;
 
 class TestInterpreter extends ruby.support.TestCase {
-  // https://github.com/JoshCheek/ruby_object_model_viewer/tree/5204eb089329b387353da0c25016328c55fba369/haxe-testing-example
-  //   simple example of a test suite
-  //
-  // http://api.haxe.org/haxe/unit/index.html
-  //   test suite api
-  //
-  // http://api.haxe.org/
-  //   language api
-
-  // we're ignoring fixnums and symbols for now
-  public function testSpecialConstants() {
-    var interpreter = forCode("nil\ntrue\nfalse\n");
-    var world       = interpreter.world;
-    assertEquals(world.rubyNil,   interpreter.drainExpression());
-    assertEquals(world.rubyTrue,  interpreter.drainExpression());
-    assertEquals(world.rubyFalse, interpreter.drainExpression());
-  }
-
-  // maybe this goes on a world bootstrap test?
   public function testItsCurrentExpressionIsNilByDefault() {
-    var interpreter = Interpreter.fromBootstrap();
-    var world       = interpreter.world;
     assertEquals(world.rubyNil, interpreter.currentExpression());
   }
+
+  public function testInterpretsSingleExpression() {
+    addCode("true");
+    rAssertEq(world.rubyTrue, interpreter.nextExpression());
+  }
+
+  // we're ignoring fixnums and symbols for now
+  public function _testSpecialConstants() {
+    addCode("nil\ntrue\nfalse\n");
+    rAssertEq(world.rubyTrue,   interpreter.nextExpression());
+    // rEqual(world.rubyTrue,  interpreter.nextExpression());
+    // rEqual(world.rubyFalse, interpreter.nextExpression());
+  }
+
+  /*
+  // maybe this goes on a world bootstrap test?
 
   public function testItEvaluatesAStringLiteral() {
     var interpreter = forCode('"Josh"');
@@ -148,4 +143,5 @@ class TestInterpreter extends ruby.support.TestCase {
     // // it is tracking the instance
     // assertEquals(1, interpreter.eachObject(userClass).length);
   }
+  */
 }

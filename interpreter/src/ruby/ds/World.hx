@@ -16,4 +16,5 @@ typedef World = {
 
   // does this really belong in World?
   public var workToDo           : List<Void -> EvaluationState>;
+  public var currentEvaluation  : EvaluationState;
 }

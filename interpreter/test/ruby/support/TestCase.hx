@@ -1,7 +1,19 @@
 package ruby.support;
+import ruby.WorldDomination;
+import ruby.Interpreter;
+import ruby.ds.World;
 import ruby.ds.objects.*;
 
 class TestCase extends haxe.unit.TestCase {
+  public var world:World;
+  public var interpreter:Interpreter;
+
+  public function new() {
+    super();
+    world       = ruby.WorldDomination.bootstrap();
+    interpreter = new Interpreter(world);
+  }
+
   public function rInspect(obj:RObject):String {
     var klass = switch(obj) {
       case {klass: k}: k;
@@ -12,10 +24,10 @@ class TestCase extends haxe.unit.TestCase {
       var tmp:Dynamic = obj;
       var objClass:RClass = tmp;
       return objClass.name;
-    } else if(klass.name == 'Object') {
-      return "#<" + obj.klass.name + ">";
     } else {
-      return "" + obj; // :D
+      return "#<" + obj.klass.name + ">";
+    // } else {
+    //   return "" + obj; // :D
     }
   }
 
@@ -33,15 +45,13 @@ class TestCase extends haxe.unit.TestCase {
     throw currentTest;
   }
 
-  private function forCode(rawCode:String):Interpreter {
-    var ast         = ParseRuby.fromCode(rawCode);
-    var interpreter = Interpreter.fromBootstrap();
-    interpreter.fillFrom(ast);
-    return interpreter;
-  }
-
   private function assertLooksKindaSimilar<T>(a: T, b:T, ?pos:haxe.PosInfos):Void {
     assertEquals(Std.string(a), Std.string(b), pos);
+  }
+
+  public function addCode(rawCode:String) {
+    var ast = ParseRuby.fromCode(rawCode);
+    world.currentEvaluation = Unevaluated(ast); // TODO: what if there is a current evaluation underway?
   }
 
 }

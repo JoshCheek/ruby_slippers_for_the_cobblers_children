@@ -44,9 +44,33 @@ class WorldDomination {
     };
 
     // special constants (classes are wrong)
-    var rubyNil   = {klass: objectClass, ivars: new InternalMap()};
-    var rubyTrue  = {klass: objectClass, ivars: new InternalMap()};
-    var rubyFalse = {klass: objectClass, ivars: new InternalMap()};
+    var trueClass:RClass = {
+      name:       "TrueClass",
+      klass:      klassClass,
+      superclass: objectClass,
+      ivars:      new InternalMap(),
+      imeths:     new InternalMap(),
+      constants:  new InternalMap(),
+    };
+    var falseClass:RClass = {
+      name:       "FalseClass",
+      klass:      klassClass,
+      superclass: objectClass,
+      ivars:      new InternalMap(),
+      imeths:     new InternalMap(),
+      constants:  new InternalMap(),
+    };
+    var nilClass:RClass = {
+      name:       "NilClass",
+      klass:      klassClass,
+      superclass: objectClass,
+      ivars:      new InternalMap(),
+      imeths:     new InternalMap(),
+      constants:  new InternalMap(),
+    };
+    var rubyNil   = {klass: nilClass,   ivars: new InternalMap()};
+    var rubyTrue  = {klass: trueClass,  ivars: new InternalMap()};
+    var rubyFalse = {klass: falseClass, ivars: new InternalMap()};
 
     return {
       stack             : [toplevelBinding],
@@ -55,6 +79,7 @@ class WorldDomination {
       symbols           : symbols,
       toplevelNamespace : objectClass,
       currentExpression : rubyNil,
+      currentEvaluation : Finished,
 
       rubyNil           : rubyNil,
       rubyTrue          : rubyTrue,
