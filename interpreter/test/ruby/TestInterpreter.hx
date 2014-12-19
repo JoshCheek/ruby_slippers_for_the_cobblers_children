@@ -9,7 +9,7 @@ using ruby.LanguageGoBag;
 using ruby.WorldWorker;
 
 class TestInterpreter extends ruby.support.TestCase {
-  public function testItsCurrentExpressionIsNilByDefault() {
+  public function _testItsCurrentExpressionIsNilByDefault() {
     assertEquals(world.rubyNil, interpreter.currentExpression());
   }
 
@@ -18,15 +18,23 @@ class TestInterpreter extends ruby.support.TestCase {
     rAssertEq(world.rubyTrue, interpreter.nextExpression());
   }
 
-  // we're ignoring fixnums and symbols for now
-  public function _testSpecialConstants() {
-    addCode("nil\ntrue\nfalse\n");
-    rAssertEq(world.rubyTrue,   interpreter.nextExpression());
-    // rEqual(world.rubyTrue,  interpreter.nextExpression());
-    // rEqual(world.rubyFalse, interpreter.nextExpression());
+  public function testInterpretsMultipleExpressions() {
+    addCode("nil\ntrue");
+    rAssertEq(world.rubyNil, interpreter.nextExpression());
+    rAssertEq(world.rubyTrue, interpreter.nextExpression());
   }
 
-  /*
+  // public function testRaisesIfAskedForExpressionAfterFinished() {
+
+  // we're ignoring fixnums and symbols for now
+  public function testSpecialConstants() {
+    addCode("nil\ntrue\nfalse\n");
+    rAssertEq(world.rubyNil,   interpreter.nextExpression());
+    rAssertEq(world.rubyTrue,  interpreter.nextExpression());
+    rAssertEq(world.rubyFalse, interpreter.nextExpression());
+  }
+
+  /* ----- OLD TESTS THAT NEED TO BE REIMPLEMENTED -----
   // maybe this goes on a world bootstrap test?
 
   public function testItEvaluatesAStringLiteral() {

@@ -51,7 +51,7 @@ class TestCase extends haxe.unit.TestCase {
 
   public function addCode(rawCode:String) {
     var ast = ParseRuby.fromCode(rawCode);
-    world.currentEvaluation = Unevaluated(ast); // TODO: what if there is a current evaluation underway?
+    interpreter.addCode(ast);
   }
 
 }
