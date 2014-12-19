@@ -13,7 +13,7 @@ using Lambda;
 // can we shorten some of these fkn names?
 // getting annoying to type/read -.-
 class Interpreter {
-  public var world:World;
+  public  var world:World;
   private var _evaluationFinished:Bool;
 
   // TODO: move currentEvaluation back to Interpreter?
@@ -22,39 +22,35 @@ class Interpreter {
     this._evaluationFinished = false;
   }
 
+  // sets code to be evaluated
   public function addCode(code:Ast) {
-    setEval(EvaluationList(
-              Unevaluated(code),
-              world.currentEvaluation
-            ));
+    var list = EvaluationList(Unevaluated(code), world.currentEvaluation);
+    setEval(list);
   }
 
-  // FIXME: not correctly stopping
+  // evaluates until it finds an expression
   public function nextExpression() {
     do nextEvaluation() while(!evaluationFinished());
     return world.currentExpression;
   }
 
+  // iterate evaluation
   public function nextEvaluation() {
     var e = getEval();
-    // trace("NEXT EVALUATION CALLED, evaluation: " + e);
     return setEval(continueEvaluating(getEval()));
   }
 
   // ----- PRIVATE -----
 
+  // updates current evaluation, updates current expression if relevant;
   private function setEval(evaluation:EvaluationState):EvaluationState {
-    // trace("CALLED SETEVAL, WITH: " + evaluation);
     switch(evaluation) {
       case Evaluated(obj):
         world.currentExpression = obj;
-        // trace("EVALUATION **IS** FINISHED");
         _evaluationFinished = true;
       case EvaluationList(subEvaluation, _):
         setEval(subEvaluation);
-        // trace("EVALUATION **IS** FINISHED");
       case _:
-        // trace("EVALUATION **ISNOT** FINISHED");
         _evaluationFinished = false;
     }
     world.currentEvaluation = evaluation;
@@ -87,28 +83,19 @@ class Interpreter {
 
   private function astToEvaluation(ast:Ast):EvaluationState {
     switch(ast) {
-      case AstFalse:
-        return Evaluated(world.rubyFalse);
-      case AstTrue:
-        return Evaluated(world.rubyTrue);
-      case AstNil:
-        return Evaluated(world.rubyNil);
-      case AstExpressions(expressions):
-        if(expressions.length == 0) {
-          return Evaluated(world.rubyNil);
-        } else if(expressions.length == 1) {
-          return EvaluationList(
-             astToEvaluation(expressions[0]),
-             EvaluationListEnd
-           );
-        } else {
-           return expressions
-                    .fromEnd()
-                    .fold(function(subAst, list) {
-                            return EvaluationList(astToEvaluation(subAst), list);
-                          }, EvaluationListEnd
-                    );
-        }
+      case AstFalse: return Evaluated(world.rubyFalse);
+      case AstTrue:  return Evaluated(world.rubyTrue);
+      case AstNil:   return Evaluated(world.rubyNil);
+      case AstExpressions(exprs):
+        return
+          if(exprs.length == 0)      Evaluated(world.rubyNil);
+          else if(exprs.length == 1) EvaluationList(astToEvaluation(exprs[0]), EvaluationListEnd);
+          else                       exprs
+                                       .fromEnd()
+                                       .fold(
+                                         function(el, lst) return EvaluationList(astToEvaluation(el), lst),
+                                         EvaluationListEnd
+                                       );
       case _:
         throw "Unhandled: " + ast;
     }
