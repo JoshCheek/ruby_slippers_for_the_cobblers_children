@@ -2,7 +2,7 @@ package ruby;
 import ruby.ds.Ast;
 using Lambda;
 
-class TestParser extends haxe.unit.TestCase {
+class TestParser extends ruby.support.TestCase {
   public function assertParses(rubyCode:String, expected:Ast, ?c:haxe.PosInfos) {
     assertEquals(Std.string(expected),
                  Std.string( ruby.ParseRuby.fromCode(rubyCode) )

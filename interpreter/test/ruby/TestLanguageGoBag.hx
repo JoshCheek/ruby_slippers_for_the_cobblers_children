@@ -3,11 +3,7 @@ package ruby;
 using ruby.LanguageGoBag;
 using Lambda;
 
-class TestLanguageGoBag extends haxe.unit.TestCase {
-  private function assertLooksKindaSimilar<T>(a: T, b:T):Void {
-    assertEquals(Std.string(a), Std.string(b));
-  }
-
+class TestLanguageGoBag extends ruby.support.TestCase {
   public function testZip() {
     // both empty
     assertLooksKindaSimilar([], [].zip([]).array());

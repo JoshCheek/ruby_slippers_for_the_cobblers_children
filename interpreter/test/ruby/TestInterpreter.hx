@@ -8,7 +8,7 @@ import ruby.ds.InternalMap;
 using ruby.LanguageGoBag;
 using ruby.WorldWorker;
 
-class TestInterpreter extends haxe.unit.TestCase {
+class TestInterpreter extends ruby.support.TestCase {
   // https://github.com/JoshCheek/ruby_object_model_viewer/tree/5204eb089329b387353da0c25016328c55fba369/haxe-testing-example
   //   simple example of a test suite
   //
@@ -17,17 +17,6 @@ class TestInterpreter extends haxe.unit.TestCase {
   //
   // http://api.haxe.org/
   //   language api
-
-  private function forCode(rawCode:String):Interpreter {
-    var ast         = ParseRuby.fromCode(rawCode);
-    var interpreter = Interpreter.fromBootstrap();
-    interpreter.fillFrom(ast);
-    return interpreter;
-  }
-
-  private function assertLooksKindaSimilar<T>(a: T, b:T, ?pos:haxe.PosInfos):Void {
-    assertEquals(Std.string(a), Std.string(b), pos);
-  }
 
   // we're ignoring fixnums and symbols for now
   public function testSpecialConstants() {
