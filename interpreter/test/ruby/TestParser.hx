@@ -75,7 +75,7 @@ class TestParser extends ruby.support.TestCase {
   }
 
   // method definitions
-  public function testAll() {
+  public function testMethodDefinitions() {
     assertParses("
       def bland_method; end
       def method_with_args_and_body(arg)
