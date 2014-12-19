@@ -103,7 +103,7 @@ class Interpreter {
            );
         } else {
            return expressions
-                    .reverseIterator()
+                    .fromEnd()
                     .fold(function(subAst, list) {
                             return EvaluationList(astToEvaluation(subAst), list);
                           }, EvaluationListEnd

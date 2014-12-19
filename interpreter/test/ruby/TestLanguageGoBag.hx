@@ -23,19 +23,28 @@ class TestLanguageGoBag extends ruby.support.TestCase {
     assertLooksKindaSimilar([{l: "a", r: 1}], ["a"].zip([1, 2]).array());
   }
 
-  public function testReverseIterator() {
+  public function testFromEnd() {
     // empty
     var pre = [];
     var post = [];
-    for(e in pre.reverseIterator()) post.push(e);
+    for(e in pre.fromEnd()) post.push(e);
     assertLooksKindaSimilar([], pre);
     assertLooksKindaSimilar([], post);
 
     // a few items
     var pre  = ['a', 'b', 'c'];
     var post = [];
-    for(e in pre.reverseIterator()) post.push(e);
+    for(e in pre.fromEnd()) post.push(e);
     assertLooksKindaSimilar(['a', 'b', 'c'], pre);  // no change
     assertLooksKindaSimilar(['c', 'b', 'a'], post); // reversed
+
+    // compatible with Lambda
+    var pre = [5, 4, 3];
+    var post = pre.fromEnd().map(function(n) return n*2);
+    var expected = new List();
+    expected.add(6);
+    expected.add(8);
+    expected.add(10);
+    assertLooksKindaSimilar(expected, post);
   }
 }
