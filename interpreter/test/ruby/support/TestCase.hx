@@ -6,6 +6,8 @@ import ruby.ds.Errors;
 import ruby.ds.objects.*;
 import haxe.PosInfos;
 
+using ruby.LanguageGoBag;
+
 class TestCase extends haxe.unit.TestCase {
   public var world:ruby.World;
   public var interpreter:Interpreter;
@@ -79,6 +81,20 @@ class TestCase extends haxe.unit.TestCase {
     try { fn(); } catch(e:Errors) return;
     currentTest.success  = false;
     currentTest.error    = "Expected " + Errors + " to be thrown";
+    currentTest.posInfos = c;
+    throw currentTest;
+  }
+
+  function assertNextExpressions(expected:Array<RObject>, ?c:PosInfos) {
+    currentTest.done = true;
+    var actual:Array<RObject> = [];
+    while(interpreter.isUnfinished) {
+      actual.push(interpreter.nextExpression());
+    };
+    for(pair in expected.zip(actual)) rAssertEq(pair.l, pair.r);
+    if(expected.length <= actual.length) return
+    currentTest.success  = false;
+    currentTest.error    = "Expected at least " + expected.length + " expressions, but there were " + actual.length;
     currentTest.posInfos = c;
     throw currentTest;
   }

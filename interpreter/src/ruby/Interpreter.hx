@@ -19,14 +19,17 @@ class Interpreter {
   // TODO: move currentEvaluation back to Interpreter?
   public function new(world:ruby.ds.World) {
     this.world               = new ruby.World(world); // not sure if I actually like this or not
-    this._evaluationFinished = false;
+    this._evaluationFinished = false; // TODO: RENAME
     this.currentEvaluation   = Finished;
   }
 
   // sets code to be evaluated
   public function addCode(code:Ast) {
-    var list = EvaluationList(Unevaluated(code), currentEvaluation);
-    setEval(list);
+    switch(currentEvaluation) {
+      case Finished: // no op
+      case _: throw "Can't add code when the interpreter is not in a finished state (idk if that's forever, just makes sense right now)";
+    }
+    setEval(Unevaluated(code));
   }
 
   // evaluates until it finds an expression
@@ -41,7 +44,19 @@ class Interpreter {
     return setEval(continueEvaluating(getEval()));
   }
 
+  public var isUnfinished(get, never):Bool;
+
   // ----- PRIVATE -----
+
+  function get_isUnfinished() {
+    switch(getEval()) {
+      // the terminals
+      case Finished|Evaluated(_)|EvaluationList(ListEnd):
+        return false;
+      case _:
+        return true;
+    }
+  }
 
   // updates current evaluation, updates current expression if relevant;
   private function setEval(evaluation:EvaluationState):EvaluationState {
@@ -49,8 +64,8 @@ class Interpreter {
       case Evaluated(obj):
         world.currentExpression = obj;
         _evaluationFinished = true; // TODO: this name is terrible! there's a Finished value in EvaluationState, but we're actually talking about when an evaluation resolves to an object that a user could see
-      case EvaluationList(subEvaluation, _):
-        setEval(subEvaluation);
+      case EvaluationList(Cons(crnt, _)):
+        setEval(crnt); // child might have finished (FIXME: we're doing 2 responsibilities here, setting eval and setting currentExpression, which is why lines like this are necessary and confusing)
       case _:
         _evaluationFinished = false;
     }
@@ -68,16 +83,13 @@ class Interpreter {
 
   private function continueEvaluating(toEval:EvaluationState) {
     switch(toEval) {
-      case Unevaluated(ast):                                  return astToEvaluation(ast);
-      case EvaluationList(Evaluated(obj), EvaluationListEnd): return Evaluated(obj);
-      case EvaluationList(Evaluated(obj), rest):              return rest;
-      case EvaluationList(current, rest):                     return EvaluationList(continueEvaluating(current), rest);
-      case EvaluationListEnd:
-        // should see we are about to end, and return prev expression
-        // I think... or maybe it should return Evaluated(world.rubyNil), not sure. Can we find a test for it?
-        throw "Reached EvaluationListEnd, which should not happen!";
-      case Evaluated(_) | Finished:
-        throw new NothingToEvaluateError("Check before evaluating!");
+      case Unevaluated(ast):                              return astToEvaluation(ast);
+      case EvaluationList(Cons(Evaluated(obj), ListEnd)): return Evaluated(obj);
+      case EvaluationList(Cons(Evaluated(obj), rest)):    return EvaluationList(rest);
+      case EvaluationList(Cons(current, rest)):           return EvaluationList(Cons(continueEvaluating(current), rest));
+      case Evaluated(_):                                  return Finished;
+      case EvaluationList(ListEnd): throw "This shouldn't be possible!";
+      case Finished:                throw new NothingToEvaluateError("Check before evaluating!");
     }
   }
 
@@ -90,13 +102,13 @@ class Interpreter {
       case AstExpressions(exprs):
         return
           if(exprs.length == 0)      Evaluated(world.rubyNil);
-          else if(exprs.length == 1) EvaluationList(astToEvaluation(exprs[0]), EvaluationListEnd);
-          else                       exprs
+          else if(exprs.length == 1) EvaluationList(Cons(astToEvaluation(exprs[0]), ListEnd));
+          else                       EvaluationList(exprs
                                        .fromEnd()
                                        .fold(
-                                         function(el, lst) return EvaluationList(astToEvaluation(el), lst),
-                                         EvaluationListEnd
-                                       );
+                                         function(el, lst) return Cons(astToEvaluation(el), lst),
+                                         ListEnd
+                                       ));
       case _:
         throw "Unhandled: " + ast;
     }

@@ -8,8 +8,10 @@ enum EvaluationState {
   Unevaluated(ast:Ast);
   Evaluated(object:RObject);
   Finished;
+  EvaluationList(value:EvaluationListValue);
+}
 
-  // evaluation lists
-  EvaluationList(current:EvaluationState, next:EvaluationState);
-  EvaluationListEnd;
+enum EvaluationListValue {
+  Cons(current:EvaluationState, next:EvaluationListValue);
+  ListEnd;
 }
