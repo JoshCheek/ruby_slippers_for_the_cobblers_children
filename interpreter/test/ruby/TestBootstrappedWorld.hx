@@ -20,10 +20,12 @@ class TestBootstrappedWorld extends ruby.support.TestCase {
     rAssertEq(tlb.self, world.main);
     rAssertEq(tlb.defTarget, world.objectClass);
     assertTrue(tlb.lvars.empty());
+    assertInObjectSpace(tlb);
   }
 
   function testMain() {
     rAssertEq(world.objectClass, world.main.klass);
+    assertInObjectSpace(world.main);
   }
 
   /*****  SPECIAL OBJECTS  *****/
@@ -31,6 +33,9 @@ class TestBootstrappedWorld extends ruby.support.TestCase {
     assertEquals('NilClass',   world.rubyNil.klass.name);
     assertEquals('TrueClass',  world.rubyTrue.klass.name);
     assertEquals('FalseClass', world.rubyFalse.klass.name);
+    assertInObjectSpace(world.rubyNil);
+    assertInObjectSpace(world.rubyTrue);
+    assertInObjectSpace(world.rubyFalse);
   }
 
 
@@ -40,6 +45,7 @@ class TestBootstrappedWorld extends ruby.support.TestCase {
     assertEquals(world.klassClass, self.klass);
     assertEquals(superclass,       self.superclass);
     rAssertEq(self, world.toplevelNamespace.constants.get(name));
+    assertInObjectSpace(self);
   }
 
   function testClass()       assertClassDef(world.klassClass,       "Class",       world.moduleClass);
@@ -49,12 +55,6 @@ class TestBootstrappedWorld extends ruby.support.TestCase {
   function testNilClass()    assertClassDef(world.rubyNil.klass,    "NilClass",    world.objectClass);
   function testTrueClass()   assertClassDef(world.rubyTrue.klass,   "TrueClass",   world.objectClass);
   function testFalseClass()  assertClassDef(world.rubyFalse.klass,  "FalseClass",  world.objectClass);
-
-  /*****  Objects Are Tracked  *****/
-  // main
-  // TOPLEVEL_BINDING
-  // Class
-  // Object
 }
 
 /*

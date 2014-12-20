@@ -52,6 +52,15 @@ class TestCase extends haxe.unit.TestCase {
     assertEquals(Std.string(a), Std.string(b), pos);
   }
 
+  function assertInObjectSpace(obj:RObject, ?pos:haxe.PosInfos):Void {
+    currentTest.done = true;
+    for(potential in world.objectSpace)
+      if(potential == obj) return;
+    currentTest.success = false;
+    currentTest.error = "Expected "+ rInspect(obj) + " to be in ObjectSpace, but it wasn't!";
+      throw currentTest;
+  }
+
   function addCode(rawCode:String):Void {
     var ast = ParseRuby.fromCode(rawCode);
     interpreter.addCode(ast);

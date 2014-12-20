@@ -5,8 +5,8 @@ import ruby.ds.objects.*;
 class WorldDomination {
   public static function bootstrap():ruby.ds.World {
     // a whole new world
-    var objectSpace = [];
-    var symbols     = new InternalMap();
+    var objectSpace:Array<RObject> = [];
+    var symbols = new InternalMap();
 
     // Object / Class / Module
     var basicObjectClass:RClass = {
@@ -54,7 +54,7 @@ class WorldDomination {
     var main = {klass: objectClass, ivars: new InternalMap()};
 
     // setup stack
-    var toplevelBinding = {
+    var toplevelBinding:RBinding = {
       klass:     objectClass,
       ivars:     new InternalMap(),
       self:      main,
@@ -98,9 +98,23 @@ class WorldDomination {
     toplevelNamespace.constants.set(objectClass.name,      objectClass);
     toplevelNamespace.constants.set(basicObjectClass.name, basicObjectClass);
     toplevelNamespace.constants.set(nilClass.name,         nilClass);
-    toplevelNamespace.constants.set(falseClass.name,       falseClass);
     toplevelNamespace.constants.set(trueClass.name,        trueClass);
+    toplevelNamespace.constants.set(falseClass.name,       falseClass);
 
+    // Object tracking
+    objectSpace.push(toplevelBinding);
+    objectSpace.push(main);
+    objectSpace.push(rubyNil);
+    objectSpace.push(rubyTrue);
+    objectSpace.push(rubyFalse);
+
+    objectSpace.push(klassClass);
+    objectSpace.push(moduleClass);
+    objectSpace.push(objectClass);
+    objectSpace.push(basicObjectClass);
+    objectSpace.push(nilClass);
+    objectSpace.push(trueClass);
+    objectSpace.push(falseClass);
 
     return {
       stack             : [toplevelBinding],
