@@ -1,5 +1,5 @@
 package ruby.support;
-import ruby.WorldDomination;
+import ruby.Bootstrap;
 import ruby.Interpreter;
 import ruby.ds.World;
 import ruby.ds.Errors;
@@ -34,7 +34,7 @@ class TestCase extends haxe.unit.TestCase {
   }
 
   override function setup() {
-    var worldDs = ruby.WorldDomination.bootstrap();
+    var worldDs = ruby.Bootstrap.bootstrap();
     world       = new ruby.World(worldDs);
     interpreter = new Interpreter(worldDs);
   }

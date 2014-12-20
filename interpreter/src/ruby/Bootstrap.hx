@@ -2,7 +2,7 @@ package ruby;
 import ruby.ds.InternalMap;
 import ruby.ds.objects.*;
 
-class WorldDomination {
+class Bootstrap {
   public static function bootstrap():ruby.ds.World {
     // a whole new world
     var objectSpace:Array<RObject> = [];
