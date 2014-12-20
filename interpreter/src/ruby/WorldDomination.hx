@@ -96,13 +96,13 @@ class WorldDomination {
 
     // namespacing
     var toplevelNamespace = objectClass;
-    toplevelNamespace.constants.set(klassClass.name,       klassClass);
-    toplevelNamespace.constants.set(moduleClass.name,      moduleClass);
-    toplevelNamespace.constants.set(objectClass.name,      objectClass);
-    toplevelNamespace.constants.set(basicObjectClass.name, basicObjectClass);
-    toplevelNamespace.constants.set(nilClass.name,         nilClass);
-    toplevelNamespace.constants.set(trueClass.name,        trueClass);
-    toplevelNamespace.constants.set(falseClass.name,       falseClass);
+    toplevelNamespace.constants[klassClass.name]       = klassClass;
+    toplevelNamespace.constants[moduleClass.name]      = moduleClass;
+    toplevelNamespace.constants[objectClass.name]      = objectClass;
+    toplevelNamespace.constants[basicObjectClass.name] = basicObjectClass;
+    toplevelNamespace.constants[nilClass.name]         = nilClass;
+    toplevelNamespace.constants[trueClass.name]        = trueClass;
+    toplevelNamespace.constants[falseClass.name]       = falseClass;
 
     // Object tracking
     objectSpace.push(toplevelBinding);

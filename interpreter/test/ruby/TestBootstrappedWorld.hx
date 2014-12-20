@@ -44,7 +44,7 @@ class TestBootstrappedWorld extends ruby.support.TestCase {
     assertEquals(name,             self.name);
     assertEquals(world.classClass, self.klass);
     assertEquals(superclass,       self.superclass);
-    rAssertEq(self, world.toplevelNamespace.constants.get(name));
+    rAssertEq(self, world.toplevelNamespace.constants[name]);
     assertInObjectSpace(self);
   }
 

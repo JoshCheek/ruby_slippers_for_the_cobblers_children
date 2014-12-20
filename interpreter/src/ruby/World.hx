@@ -32,11 +32,11 @@ class World {
   }
 
   public inline function getConstant(namespace:RClass, name:String):RObject {
-    return namespace.constants.get(name);
+    return namespace.constants[name];
   }
 
   public inline function setConstant(namespace:RClass, name:String, object:RObject):RObject {
-    namespace.constants.set(name, object);
+    namespace.constants[name] = object;
     return object;
   }
 
