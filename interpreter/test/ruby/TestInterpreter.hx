@@ -41,21 +41,18 @@ class TestInterpreter extends ruby.support.TestCase {
     rAssertEq(world.rubyFalse, interpreter.nextExpression());
   }
 
-  /* ----- OLD TESTS THAT NEED TO BE REIMPLEMENTED -----
   // maybe this goes on a world bootstrap test?
-
   public function testItEvaluatesAStringLiteral() {
-    var interpreter = forCode('"Josh"');
-    var world       = interpreter.world;
+    addCode('"Josh"');
     var rbstr:RString = {
       klass: world.objectClass,
       ivars: new InternalMap(),
       value: "Josh",
     }
-    interpreter.drainExpression();
-    assertLooksKindaSimilar(interpreter.currentExpression(), rbstr);
+    rAssertEq(rbstr,   interpreter.nextExpression());
   }
 
+  /* ----- OLD TESTS THAT NEED TO BE REIMPLEMENTED -----
   // ffs Array<Dynamic> ...I'm giving it fucking RString, which *is* a RObject!
   private function assertDrains(interpreter, objects:Array<Dynamic>, ?pos:haxe.PosInfos) {
     var drained:Array<RObject> = interpreter.drainAll();

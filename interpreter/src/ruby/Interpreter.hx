@@ -83,9 +83,10 @@ class Interpreter {
 
   private function astToEvaluation(ast:Ast):EvaluationState {
     switch(ast) {
-      case AstFalse: return Evaluated(world.rubyFalse);
-      case AstTrue:  return Evaluated(world.rubyTrue);
-      case AstNil:   return Evaluated(world.rubyNil);
+      case AstFalse:              return Evaluated(world.rubyFalse);
+      case AstTrue:               return Evaluated(world.rubyTrue);
+      case AstNil:                return Evaluated(world.rubyNil);
+      case AstString(value):      return Evaluated(toRubyString(value));
       case AstExpressions(exprs):
         return
           if(exprs.length == 0)      Evaluated(world.rubyNil);
@@ -98,6 +99,14 @@ class Interpreter {
                                        );
       case _:
         throw "Unhandled: " + ast;
+    }
+  }
+
+
+  private function toRubyString(value:String):RString {
+    return { klass: world.objectClass,
+      ivars: new InternalMap(),
+      value: value,
     }
   }
 }
