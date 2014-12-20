@@ -88,6 +88,43 @@ class TestInterpreter extends ruby.support.TestCase {
     assertEquals(a, interpreter.drainExpression()); // b
   }
 
+  // line mode?
+  public function testInstantiation() {
+    var interpreter = forCode("
+      class A
+      end
+      A.new
+      Object.new
+    ");
+    // NOTE: could be nil b/c A's body is empty
+    interpreter.drainExpression();
+    interpreter.drainExpression();
+    interpreter.drainExpression();
+    var a      = interpreter.drainExpression();
+    var aClass = interpreter.getConstant(interpreter.toplevelNamespace(), "A");
+    assertEquals(aClass, a.klass);
+
+    var obj    = interpreter.drainExpression();
+    assertEquals(obj.klass, interpreter.world.objectClass);
+
+    // Instantiation
+    //   new
+    //     returns a RObject with klass set to self
+    //     initializes the object, passing the params
+    //   allocate
+    //     makes an RObject with the klass set
+    //   // Object#initialize
+    //   //   takes no params, does nothing
+
+  }
+
+
+  public function _testSelfWorks() {
+    var interpreter = forCode("
+        TODO!
+    ");
+  }
+
   public function testClasses() {
     var interpreter = forCode("
       class A
@@ -119,6 +156,7 @@ class TestInterpreter extends ruby.support.TestCase {
     ");
     var world = interpreter.world;
     assertEquals(interpreter.drainExpression(), interpreter.intern("m"));
+    interpreter.drainExpression();
     assertEquals(world.rubyNil,                 interpreter.drainExpression()); // b/c the send doesn't result in a new currentValue
     assertEquals(world.rubyTrue,                interpreter.drainExpression());
     assertEquals(world.rubyTrue,                interpreter.drainExpression());
