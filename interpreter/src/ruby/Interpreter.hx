@@ -3,6 +3,7 @@ package ruby;
 import ruby.ds.Ast;
 import ruby.ds.InternalMap;
 import ruby.ds.World;
+import ruby.ds.Errors;
 import ruby.ds.objects.*;
 
 using ruby.LanguageGoBag;
@@ -68,7 +69,6 @@ class Interpreter {
   private function continueEvaluating(toEval:EvaluationState) {
     switch(toEval) {
       case Unevaluated(ast):                                  return astToEvaluation(ast);
-      case Evaluated(obj):                                    return Finished;
       case EvaluationList(Evaluated(obj), EvaluationListEnd): return Evaluated(obj);
       case EvaluationList(Evaluated(obj), rest):              return rest;
       case EvaluationList(current, rest):                     return EvaluationList(continueEvaluating(current), rest);
@@ -76,8 +76,8 @@ class Interpreter {
         // should see we are about to end, and return prev expression
         // I think... or maybe it should return Evaluated(world.rubyNil), not sure. Can we find a test for it?
         throw "Reached EvaluationListEnd, which should not happen!";
-      case Finished:
-        throw "Tried to continue evaluating when there is nothing left to do!";
+      case Evaluated(_) | Finished:
+        throw new NothingToEvaluateError("Check before evaluating!");
     }
   }
 

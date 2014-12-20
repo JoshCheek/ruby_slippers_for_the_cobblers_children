@@ -4,12 +4,13 @@ import ruby.ds.objects.RString;
 import ruby.ds.objects.RObject;
 import ruby.ds.objects.RClass;
 import ruby.ds.InternalMap;
+import ruby.ds.Errors;
 
 using ruby.LanguageGoBag;
 using ruby.WorldWorker;
 
 class TestInterpreter extends ruby.support.TestCase {
-  public function _testItsCurrentExpressionIsNilByDefault() {
+  public function testItsCurrentExpressionIsNilByDefault() {
     assertEquals(world.rubyNil, interpreter.currentExpression());
   }
 
@@ -24,7 +25,13 @@ class TestInterpreter extends ruby.support.TestCase {
     rAssertEq(world.rubyTrue, interpreter.nextExpression());
   }
 
-  // public function testRaisesIfAskedForExpressionAfterFinished() {
+  public function testThrowsIfAskedForExpressionAfterFinished() {
+    assertThrows(function() interpreter.nextExpression());
+
+    addCode("true");
+    interpreter.nextExpression();
+    assertThrows(function() interpreter.nextExpression());
+  }
 
   // we're ignoring fixnums and symbols for now
   public function testSpecialConstants() {
