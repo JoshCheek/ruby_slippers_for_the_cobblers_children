@@ -5,7 +5,6 @@ import ruby.ds.objects.*;
 class WorldDomination {
   public static function bootstrap():ruby.ds.World {
     // a whole new world
-    var workToDo    = new List();
     var objectSpace = [];
     var symbols     = new InternalMap();
 
@@ -74,7 +73,6 @@ class WorldDomination {
 
     return {
       stack             : [toplevelBinding],
-      workToDo          : workToDo,
       objectSpace       : objectSpace,
       symbols           : symbols,
       toplevelNamespace : objectClass,

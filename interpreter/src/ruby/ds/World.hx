@@ -1,7 +1,7 @@
 package ruby.ds;
 import ruby.ds.objects.*;
 
-// The container of all state
+// The container of all state (actually, instructions are currently stored in the interpreter)
 typedef World = {
   public var stack              : Array<RBinding>;
   public var objectSpace        : Array<RObject>;
@@ -13,7 +13,4 @@ typedef World = {
   public var rubyFalse          : RObject;
   public var klassClass         : RClass;
   public var objectClass        : RClass;
-
-  // does this really belong in World?
-  public var workToDo           : List<Void -> EvaluationState>;
 }
