@@ -1,28 +1,9 @@
-ruby.World: Do we need all these methods still?
+Continue with interpreter
 
-binary to organize haxe notes
+Binary to organize haxe notes
   jhx, uses cln stuff + useful other binary stuff probably
   jhx repl -> haxelib run ihx
 
-Instantiation
-  Object#initialize
-    takes no params, does nothing
-  new
-    returns a RObject with klass set to self
-    initializes the object, passing the params
-  allocate
-    makes an RObject with the klass set
-
-self
-
-Instance variables
-  instance variable gets saved and looked up on self
-
-Instance Methods with explicit target
-  get invoked on self
-  when they call methods with imlicit target, self is unchanged
-  receiving ordinal params
-
-
-Object#puts <-- put it here for now
-  keeps some sort of internal queue of printed shit?
+LanguageGoBag
+  Map#length
+  Map#fetch
