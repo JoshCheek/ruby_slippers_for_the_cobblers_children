@@ -6,6 +6,10 @@ using Lambda;
 // FIXME: we are using the ruby.ds.World, not ruby.World :/
 class TestBootstrappedWorld extends ruby.support.TestCase {
   /*****  EXECUTION ENVIRONMENT  *****/
+  function testToplevelNamespaceIsObject() {
+    assertEquals(world.objectClass, world.toplevelNamespace);
+  }
+
   function testStackOnlyContsinasTOPLEVEL_BINDING() {
     assertEquals(1, world.stack.length);
     assertEquals(world.toplevelBinding, world.stack[0]);
@@ -31,11 +35,11 @@ class TestBootstrappedWorld extends ruby.support.TestCase {
 
 
   /*****  OBJECT HIERARCHY  *****/
-  // TODO: Also check they're all namespaced under the toplevel constant (Object)
   function assertClassDef(self:RClass, name:String, superclass:RClass) {
     assertEquals(name,             self.name);
     assertEquals(world.klassClass, self.klass);
     assertEquals(superclass,       self.superclass);
+    rAssertEq(self, world.toplevelNamespace.constants.get(name));
   }
 
   function testClass()       assertClassDef(world.klassClass,       "Class",       world.moduleClass);
@@ -56,5 +60,4 @@ class TestBootstrappedWorld extends ruby.support.TestCase {
 /*
  ObjectSpace tracks
    clases, symbols, instances, bindings
-
  */

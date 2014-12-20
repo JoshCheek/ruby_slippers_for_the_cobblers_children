@@ -11,6 +11,8 @@ class TestCase extends haxe.unit.TestCase {
   public var interpreter:Interpreter;
 
   function rInspect(obj:RObject):String {
+    if(obj == null) return 'Haxe null';
+
     var klass = switch(obj) {
       case {klass: k}: k;
       case _: throw "no kass here: " + obj;

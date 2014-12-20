@@ -91,6 +91,17 @@ class WorldDomination {
     var rubyTrue  = {klass: trueClass,  ivars: new InternalMap()};
     var rubyFalse = {klass: falseClass, ivars: new InternalMap()};
 
+    // namespacing
+    var toplevelNamespace = objectClass;
+    toplevelNamespace.constants.set(klassClass.name,       klassClass);
+    toplevelNamespace.constants.set(moduleClass.name,      moduleClass);
+    toplevelNamespace.constants.set(objectClass.name,      objectClass);
+    toplevelNamespace.constants.set(basicObjectClass.name, basicObjectClass);
+    toplevelNamespace.constants.set(nilClass.name,         nilClass);
+    toplevelNamespace.constants.set(falseClass.name,       falseClass);
+    toplevelNamespace.constants.set(trueClass.name,        trueClass);
+
+
     return {
       stack             : [toplevelBinding],
       objectSpace       : objectSpace,
@@ -104,7 +115,7 @@ class WorldDomination {
       rubyFalse         : rubyFalse,
       klassClass        : klassClass,
       moduleClass       : moduleClass,
-      objectClass       : objectClass,
+      objectClass       : toplevelNamespace,
       basicObjectClass  : basicObjectClass,
       toplevelBinding   : toplevelBinding,
     }
