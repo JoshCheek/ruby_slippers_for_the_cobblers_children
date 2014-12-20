@@ -94,6 +94,16 @@ class WorldDomination {
     var rubyTrue  = {klass: trueClass,  ivars: new InternalMap()};
     var rubyFalse = {klass: falseClass, ivars: new InternalMap()};
 
+    // core classes
+    var stringClass:RClass = {
+      name:       "String",
+      klass:      klassClass,
+      superclass: objectClass,
+      ivars:      new InternalMap(),
+      imeths:     new InternalMap(),
+      constants:  new InternalMap(),
+    };
+
     // namespacing
     var toplevelNamespace = objectClass;
     toplevelNamespace.constants[klassClass.name]       = klassClass;
@@ -103,6 +113,7 @@ class WorldDomination {
     toplevelNamespace.constants[nilClass.name]         = nilClass;
     toplevelNamespace.constants[trueClass.name]        = trueClass;
     toplevelNamespace.constants[falseClass.name]       = falseClass;
+    toplevelNamespace.constants[stringClass.name]      = stringClass;
 
     // Object tracking
     objectSpace.push(toplevelBinding);
@@ -118,6 +129,7 @@ class WorldDomination {
     objectSpace.push(nilClass);
     objectSpace.push(trueClass);
     objectSpace.push(falseClass);
+    objectSpace.push(stringClass);
 
     return {
       stack             : stack,
@@ -130,11 +142,13 @@ class WorldDomination {
       rubyNil           : rubyNil,
       rubyTrue          : rubyTrue,
       rubyFalse         : rubyFalse,
-      klassClass        : klassClass,
-      moduleClass       : moduleClass,
-      objectClass       : toplevelNamespace,
-      basicObjectClass  : basicObjectClass,
       toplevelBinding   : toplevelBinding,
+
+      basicObjectClass  : basicObjectClass,
+      objectClass       : toplevelNamespace,
+      moduleClass       : moduleClass,
+      klassClass        : klassClass,
+      stringClass       : stringClass,
     }
 
   }

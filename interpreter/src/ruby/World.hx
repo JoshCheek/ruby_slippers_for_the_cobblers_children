@@ -37,6 +37,7 @@ class World {
   public var         rubyFalse(get, never):RObject;
   public var          rubyTrue(get, never):RObject;
   public var        classClass(get, never):RClass;
+  public var       stringClass(get, never):RClass;
   public var       moduleClass(get, never):RClass;
   public var       objectClass(get, never):RClass;
   public var  basicObjectClass(get, never):RClass;
@@ -49,12 +50,13 @@ class World {
   function         get_rubyFalse() return world.rubyFalse;
   function          get_rubyTrue() return world.rubyTrue;
   function        get_classClass() return world.klassClass;
+  function       get_stringClass() return world.stringClass;
   function       get_moduleClass() return world.moduleClass;
   function       get_objectClass() return world.objectClass;
   function  get_basicObjectClass() return world.basicObjectClass;
   function   get_toplevelBinding() return world.toplevelBinding;
   function get_toplevelNamespace() return world.toplevelNamespace;
-  function get_currentExpression() return world.currentExpression;
 
+  function get_currentExpression()            return world.currentExpression;
   function set_currentExpression(obj:RObject) return world.currentExpression = obj;
 }

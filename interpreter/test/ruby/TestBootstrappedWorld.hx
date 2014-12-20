@@ -55,6 +55,8 @@ class TestBootstrappedWorld extends ruby.support.TestCase {
   function testNilClass()    assertClassDef(world.rubyNil.klass,    "NilClass",    world.objectClass);
   function testTrueClass()   assertClassDef(world.rubyTrue.klass,   "TrueClass",   world.objectClass);
   function testFalseClass()  assertClassDef(world.rubyFalse.klass,  "FalseClass",  world.objectClass);
+
+  function testStringClass() assertClassDef(world.stringClass, "String", world.objectClass);
 }
 
 /*
