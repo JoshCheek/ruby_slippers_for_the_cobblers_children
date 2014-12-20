@@ -1,7 +1,8 @@
-add haxe to ag/ack
+ruby.World: Do we need all these methods still?
 
 binary to organize haxe notes
-  hxn, uses cln stuff + useful other binary stuf fprobably
+  jhx, uses cln stuff + useful other binary stuff probably
+  jhx repl -> haxelib run ihx
 
 Instantiation
   Object#initialize

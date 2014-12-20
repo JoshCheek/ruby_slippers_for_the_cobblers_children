@@ -2,37 +2,37 @@ package ruby;
 
 import ruby.ds.Ast;
 import ruby.ds.InternalMap;
-import ruby.ds.World;
 import ruby.ds.Errors;
 import ruby.ds.objects.*;
 
 using ruby.LanguageGoBag;
-using ruby.WorldWorker;
 using ruby.ds.EvaluationState;
 using Lambda;
 
 // can we shorten some of these fkn names?
 // getting annoying to type/read -.-
 class Interpreter {
-  public  var world:World;
-  private var _evaluationFinished:Bool;
+  var world               : ruby.World;
+  var _evaluationFinished : Bool;
+  var currentEvaluation   : EvaluationState;
 
   // TODO: move currentEvaluation back to Interpreter?
-  public function new(world:World) {
-    this.world               = world;
+  public function new(world:ruby.ds.World) {
+    this.world               = new ruby.World(world); // not sure if I actually like this or not
     this._evaluationFinished = false;
+    this.currentEvaluation   = Finished;
   }
 
   // sets code to be evaluated
   public function addCode(code:Ast) {
-    var list = EvaluationList(Unevaluated(code), world.currentEvaluation);
+    var list = EvaluationList(Unevaluated(code), currentEvaluation);
     setEval(list);
   }
 
   // evaluates until it finds an expression
   public function nextExpression() {
     do nextEvaluation() while(!evaluationFinished());
-    return world.currentExpression;
+    return world.getCurrentExpression();
   }
 
   // iterate evaluation
@@ -47,19 +47,19 @@ class Interpreter {
   private function setEval(evaluation:EvaluationState):EvaluationState {
     switch(evaluation) {
       case Evaluated(obj):
-        world.currentExpression = obj;
+        world.setCurrentExpression(obj);
         _evaluationFinished = true;
       case EvaluationList(subEvaluation, _):
         setEval(subEvaluation);
       case _:
         _evaluationFinished = false;
     }
-    world.currentEvaluation = evaluation;
+    currentEvaluation = evaluation;
     return evaluation;
   }
 
   private function getEval():EvaluationState {
-    return world.currentEvaluation;
+    return currentEvaluation;
   }
 
   private function evaluationFinished():Bool {

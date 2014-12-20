@@ -79,7 +79,6 @@ class WorldDomination {
       symbols           : symbols,
       toplevelNamespace : objectClass,
       currentExpression : rubyNil,
-      currentEvaluation : Finished,
 
       rubyNil           : rubyNil,
       rubyTrue          : rubyTrue,

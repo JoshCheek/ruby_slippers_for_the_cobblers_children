@@ -7,11 +7,10 @@ import ruby.ds.InternalMap;
 import ruby.ds.Errors;
 
 using ruby.LanguageGoBag;
-using ruby.WorldWorker;
 
 class TestInterpreter extends ruby.support.TestCase {
   public function testItsCurrentExpressionIsNilByDefault() {
-    assertEquals(world.rubyNil, interpreter.currentExpression());
+    assertEquals(world.rubyNil, world.currentExpression);
   }
 
   public function testInterpretsSingleExpression() {
