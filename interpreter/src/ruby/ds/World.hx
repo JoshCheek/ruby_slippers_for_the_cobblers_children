@@ -13,4 +13,5 @@ typedef World = {
   public var rubyFalse          : RObject;
   public var klassClass         : RClass;
   public var objectClass        : RClass;
+  public var toplevelBinding    : RBinding;
 }

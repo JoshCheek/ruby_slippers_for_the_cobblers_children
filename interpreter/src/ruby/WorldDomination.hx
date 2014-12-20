@@ -83,6 +83,7 @@ class WorldDomination {
       rubyFalse         : rubyFalse,
       klassClass        : klassClass,
       objectClass       : objectClass,
+      toplevelBinding   : toplevelBinding,
     }
 
   }
