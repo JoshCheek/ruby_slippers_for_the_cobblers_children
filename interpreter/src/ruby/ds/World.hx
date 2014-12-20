@@ -3,7 +3,7 @@ import ruby.ds.objects.*;
 
 // The container of all state (actually, instructions are currently stored in the interpreter)
 typedef World = {
-  public var stack              : Array<RBinding>;
+  public var stack              : List<RBinding>;
   public var objectSpace        : Array<RObject>;
   public var symbols            : InternalMap<RSymbol>;
   public var currentExpression  : RObject;

@@ -7,7 +7,7 @@ import ruby.ds.objects.*;
 import haxe.PosInfos;
 
 class TestCase extends haxe.unit.TestCase {
-  public var world:World;
+  public var world:ruby.World;
   public var interpreter:Interpreter;
 
   function rInspect(obj:RObject):String {
@@ -30,8 +30,9 @@ class TestCase extends haxe.unit.TestCase {
   }
 
   override function setup() {
-    world       = ruby.WorldDomination.bootstrap();
-    interpreter = new Interpreter(world);
+    var worldDs = ruby.WorldDomination.bootstrap();
+    world       = new ruby.World(worldDs);
+    interpreter = new Interpreter(worldDs);
   }
 
   function rEqual(l:RObject, r:RObject):Bool {

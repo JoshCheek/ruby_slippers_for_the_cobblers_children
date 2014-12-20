@@ -32,7 +32,7 @@ class Interpreter {
   // evaluates until it finds an expression
   public function nextExpression() {
     do nextEvaluation() while(!evaluationFinished());
-    return world.getCurrentExpression();
+    return world.currentExpression;
   }
 
   // iterate evaluation
@@ -47,7 +47,7 @@ class Interpreter {
   private function setEval(evaluation:EvaluationState):EvaluationState {
     switch(evaluation) {
       case Evaluated(obj):
-        world.setCurrentExpression(obj);
+        world.currentExpression = obj;
         _evaluationFinished = true;
       case EvaluationList(subEvaluation, _):
         setEval(subEvaluation);

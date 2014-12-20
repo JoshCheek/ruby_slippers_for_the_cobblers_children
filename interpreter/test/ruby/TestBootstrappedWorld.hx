@@ -11,8 +11,8 @@ class TestBootstrappedWorld extends ruby.support.TestCase {
   }
 
   function testStackOnlyContsinasTOPLEVEL_BINDING() {
-    assertEquals(1, world.stack.length);
-    assertEquals(world.toplevelBinding, world.stack[0]);
+    assertEquals(1, world.stackSize);
+    assertEquals(world.toplevelBinding, world.currentBinding);
   }
 
   function testTOPLEVEL_BINDING() {
@@ -42,13 +42,13 @@ class TestBootstrappedWorld extends ruby.support.TestCase {
   /*****  OBJECT HIERARCHY  *****/
   function assertClassDef(self:RClass, name:String, superclass:RClass) {
     assertEquals(name,             self.name);
-    assertEquals(world.klassClass, self.klass);
+    assertEquals(world.classClass, self.klass);
     assertEquals(superclass,       self.superclass);
     rAssertEq(self, world.toplevelNamespace.constants.get(name));
     assertInObjectSpace(self);
   }
 
-  function testClass()       assertClassDef(world.klassClass,       "Class",       world.moduleClass);
+  function testClass()       assertClassDef(world.classClass,       "Class",       world.moduleClass);
   function testModule()      assertClassDef(world.moduleClass,      "Module",      world.objectClass);
   function testObject()      assertClassDef(world.objectClass,      "Object",      world.basicObjectClass);
   function testBasicObject() assertClassDef(world.basicObjectClass, "BasicObject", null);

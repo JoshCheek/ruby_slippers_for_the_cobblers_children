@@ -62,6 +62,9 @@ class WorldDomination {
       lvars:     new InternalMap(),
     };
 
+    var stack = new List();
+    stack.push(toplevelBinding);
+
     // special constants (classes are wrong)
     var trueClass:RClass = {
       name:       "TrueClass",
@@ -117,7 +120,7 @@ class WorldDomination {
     objectSpace.push(falseClass);
 
     return {
-      stack             : [toplevelBinding],
+      stack             : stack,
       objectSpace       : objectSpace,
       symbols           : symbols,
       toplevelNamespace : objectClass,
