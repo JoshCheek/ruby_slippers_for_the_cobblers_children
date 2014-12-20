@@ -1,7 +1,8 @@
 package ruby;
-import ruby.ds.objects.*;
 
-class Inspections extends ruby.support.TestCase {
+import ruby.ds.objects.RObject;
+
+class TestSupport extends ruby.support.TestCase {
   function assertInspects(obj:RObject, expected:String, ?pos:haxe.PosInfos) {
     assertEquals(expected, rInspect(obj));
   }
