@@ -21,29 +21,6 @@ class World {
     return world.symbols.get(name);
   }
 
-
-  // these don't even use the world
-  public inline function hasMethod(methodBag:RClass, name:String):Bool {
-    return methodBag.imeths.exists(name);
-  }
-
-  public inline function localsForArgs(meth:RMethod, args:Array<RObject>):InternalMap<RObject> {
-    return new InternalMap(); // FIXME
-  }
-
-  public inline function getConstant(namespace:RClass, name:String):RObject {
-    return namespace.constants[name];
-  }
-
-  public inline function setConstant(namespace:RClass, name:String, object:RObject):RObject {
-    namespace.constants[name] = object;
-    return object;
-  }
-
-  public inline function getMethod(methodBag:RClass, methodName:String):RMethod {
-    return methodBag.imeths.get(methodName);
-  }
-
   // faux attributes
   public var stackSize(get, never):Int;
   function get_stackSize() return world.stack.length;
