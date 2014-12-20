@@ -78,6 +78,7 @@ class WorldDomination {
       toplevelNamespace : objectClass,
       currentExpression : rubyNil,
 
+      main              : main,
       rubyNil           : rubyNil,
       rubyTrue          : rubyTrue,
       rubyFalse         : rubyFalse,

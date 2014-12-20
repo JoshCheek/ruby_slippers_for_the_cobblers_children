@@ -1,16 +1,24 @@
 package ruby;
 
+using Lambda;
+
 class TestBootstrappedWorld extends ruby.support.TestCase {
   /*****  EXECUTION ENVIRONMENT  *****/
-  function testStackStartsAtTOPLEVEL_BINDING() {
+  function testStackOnlyContsinasTOPLEVEL_BINDING() {
     assertEquals(1, world.stack.length);
-    rAssertEq(world.toplevelBinding, world.stack[0]);
+    rAssertEq(world.toplevelBinding, world.stack[0]); // FIXME: passes trivially, b/c it's based on the shitty inspection in TestCase, which renders binding as #<Object>
   }
 
-  // TOPLEVEL_BINDING's self is main
-  // TOPLEVEL_BINDING's deftarget is Object
-  // TOPLEVEL_BINDING starts with no locals
-  // main is an instance of Object
+  function testTOPLEVEL_BINDING() {
+    var tlb = world.toplevelBinding;
+    rAssertEq(tlb.self, world.main);
+    rAssertEq(tlb.defTarget, world.objectClass);
+    assertTrue(tlb.lvars.empty());
+  }
+
+  function testMain() {
+    rAssertEq(world.objectClass, world.main.klass);
+  }
 
   /*****  SPECIAL OBJECTS  *****/
   // nil's class is NilClass

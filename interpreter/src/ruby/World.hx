@@ -62,11 +62,13 @@ class World {
   }
 
   // Objects special enough to have getter methods
+  public var            main(get, never):RObject;
   public var         rubyNil(get, never):RObject;
   public var       rubyFalse(get, never):RObject;
   public var        rubyTrue(get, never):RObject;
   public var     objectClass(get, never):RClass;
   public var toplevelBinding(get, never):RBinding;
+  function            get_main() return world.main;
   function         get_rubyNil() return world.rubyNil;
   function       get_rubyFalse() return world.rubyFalse;
   function        get_rubyTrue() return world.rubyTrue;
