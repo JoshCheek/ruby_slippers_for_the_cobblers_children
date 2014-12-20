@@ -9,6 +9,8 @@ enum EvaluationState {
   Evaluated(object:RObject);
   Finished;
   EvaluationList(value:EvaluationListValue);
+  GetLocal(name:String);
+  SetLocal(name:String, value:EvaluationState);
 }
 
 enum EvaluationListValue {

@@ -66,6 +66,8 @@ class Interpreter {
         _evaluationFinished = true; // TODO: this name is terrible! there's a Finished value in EvaluationState, but we're actually talking about when an evaluation resolves to an object that a user could see
       case EvaluationList(Cons(crnt, _)):
         setEval(crnt); // child might have finished (FIXME: we're doing 2 responsibilities here, setting eval and setting currentExpression, which is why lines like this are necessary and confusing)
+      case SetLocal(_, value):
+        setEval(value);
       case _:
         _evaluationFinished = false;
     }
@@ -87,6 +89,9 @@ class Interpreter {
       case EvaluationList(Cons(Evaluated(obj), ListEnd)): return Evaluated(obj);
       case EvaluationList(Cons(Evaluated(obj), rest)):    return EvaluationList(rest);
       case EvaluationList(Cons(current, rest)):           return EvaluationList(Cons(continueEvaluating(current), rest));
+      case GetLocal(name):                                return Evaluated(world.getLocal(name));
+      case SetLocal(name, Evaluated(value)):              return Evaluated(world.setLocal(name, value));
+      case SetLocal(name, value):                         return SetLocal(name, continueEvaluating(value));
       case Evaluated(_):                                  return Finished;
       case EvaluationList(ListEnd): throw "This shouldn't be possible!";
       case Finished:                throw new NothingToEvaluateError("Check before evaluating!");
@@ -109,6 +114,8 @@ class Interpreter {
                                          function(el, lst) return Cons(astToEvaluation(el), lst),
                                          ListEnd
                                        ));
+      case AstGetLocalVariable(name):        return GetLocal(name);
+      case AstSetLocalVariable(name, value): return SetLocal(name, astToEvaluation(value));
       case _:
         throw "Unhandled: " + ast;
     }

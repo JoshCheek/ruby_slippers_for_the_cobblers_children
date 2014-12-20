@@ -19,7 +19,7 @@ class TestInterpreter extends ruby.support.TestCase {
   }
 
   function testInterpretsMultipleExpressions() {
-    addCode("nil\ntrue");
+    addCode("nil\ntrue\nfalse");
     rAssertEq(world.rubyNil, interpreter.nextExpression());
     rAssertEq(world.rubyTrue, interpreter.nextExpression());
   }
@@ -40,38 +40,30 @@ class TestInterpreter extends ruby.support.TestCase {
     rAssertEq(world.rubyFalse, interpreter.nextExpression());
   }
 
-  // maybe this goes on a world bootstrap test?
   function testItEvaluatesAStringLiteral() {
     addCode('"Josh"');
     rAssertEq(world.stringLiteral("Josh"), interpreter.nextExpression());
   }
 
-  /* ----- OLD TESTS THAT NEED TO BE REIMPLEMENTED -----
-  // ffs Array<Dynamic> ...I'm giving it fucking RString, which *is* a RObject!
-  private function assertDrains(interpreter, objects:Array<Dynamic>, ?pos:haxe.PosInfos) {
-    var drained:Array<RObject> = interpreter.drainAll();
-    for(pair in objects.zip(drained).iterator())
-      assertLooksKindaSimilar(pair.l, pair.r, pos);
-    assertEquals(objects.length, drained.length, pos);
-  }
-
   public function testItSetsAndGetsLocalVariables() {
-    var interpreter = forCode("var1 = 'b'
-                               'c'
-                               var1
-                               var2 = 'd'
-                               var1 = 'e'
-                               var2
-                               var1
-                              ");
-    var world = interpreter.world;
+    addCode("var1 = 'b'
+             'c'
+             var1
+             var2 = 'd'
+             var1 = 'e'
+             var2
+             var1
+             ");
     var rStrs = ['b', 'b', 'c', 'b', 'd', 'd', 'e', 'e', 'd', 'e'].map(function(str) {
-      var rString = {klass: world.objectClass, ivars: new InternalMap(), value: str}
-      return rString;
+      var obj:RObject = world.stringLiteral(str); // *sigh*
+      return obj;
     });
-    assertDrains(interpreter, rStrs);
+    assertNextExpressions(rStrs);
   }
 
+  //TODO: local vars with more than 1 binding
+
+  /* ----- OLD TESTS THAT NEED TO BE REIMPLEMENTED -----
   public function testMoarLocalVars() {
     var interpreter = forCode("a = 'x'; b = a; b");
     var a = interpreter.drainExpression();

@@ -31,6 +31,18 @@ class World {
     return str;
   }
 
+  public function getLocal(name:String):RObject {
+    var val = currentBinding.lvars[name];
+    if(val!=null) return val;
+    var readableKeys = [for(k in currentBinding.lvars.keys()) k];
+    throw "No local variable " + name + ", only has: " + readableKeys;
+  }
+
+  public function setLocal(name:String, value:RObject):RObject {
+    currentBinding.lvars[name] = value;
+    return value;
+  }
+
   // faux attributes
   public var stackSize(get, never):Int;
   function get_stackSize() return world.stack.length;
