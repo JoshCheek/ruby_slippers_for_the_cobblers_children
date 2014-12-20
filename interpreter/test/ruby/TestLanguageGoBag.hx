@@ -4,7 +4,7 @@ using ruby.LanguageGoBag;
 using Lambda;
 
 class TestLanguageGoBag extends ruby.support.TestCase {
-  public function testZip() {
+  function testZip() {
     // both empty
     assertLooksKindaSimilar([], [].zip([]).array());
 
@@ -23,7 +23,7 @@ class TestLanguageGoBag extends ruby.support.TestCase {
     assertLooksKindaSimilar([{l: "a", r: 1}], ["a"].zip([1, 2]).array());
   }
 
-  public function testFromEnd() {
+  function testFromEnd() {
     // empty
     var pre = [];
     var post = [];

@@ -3,36 +3,36 @@ import ruby.ds.Ast;
 using Lambda;
 
 class TestParser extends ruby.support.TestCase {
-  public function assertParses(rubyCode:String, expected:Ast, ?c:haxe.PosInfos) {
+  function assertParses(rubyCode:String, expected:Ast, ?c:haxe.PosInfos) {
     assertEquals(Std.string(expected),
                  Std.string( ruby.ParseRuby.fromCode(rubyCode) )
                 );
   }
 
   // literals
-  public function testSpecialObjects() {
+  function testSpecialObjects() {
     assertParses(    "nil;    true;    false;    self",
       AstExpressions([AstNil, AstTrue, AstFalse, AstSelf])
     );
   }
 
-  public function testIntegers() {
+  function testIntegers() {
     assertParses(               "1;             -123",
       AstExpressions([AstInteger(1), AstInteger(-123)])
     );
   }
 
-  public function testFloat() {
+  function testFloat() {
     assertParses("-12.34", AstFloat(-12.34));
     // assertParses("1.0", AstFloat(1.0)); // FIXME: it renders `AstFloat(1.0)` to string as `AstFloat(1)`
   }
 
-  public function testStrings() {
+  function testStrings() {
     assertParses("'abc'", AstString("abc"));
   }
 
   // variables
-  public function testVariables() {
+  function testVariables() {
     assertParses("
       a = 1
       a
@@ -50,12 +50,12 @@ class TestParser extends ruby.support.TestCase {
   }
 
   // sending messages
-  public function testSendingMessages() {
+  function testSendingMessages() {
     assertParses("true.something(false)", AstSend(AstTrue, "something", [AstFalse]));
   }
 
   // class and module definitions
-  public function testClassAndModuleDefinitions() {
+  function testClassAndModuleDefinitions() {
     assertParses("
       class A
         class B::C < D
@@ -75,7 +75,7 @@ class TestParser extends ruby.support.TestCase {
   }
 
   // method definitions
-  public function testMethodDefinitions() {
+  function testMethodDefinitions() {
     assertParses("
       def bland_method; end
       def method_with_args_and_body(arg)

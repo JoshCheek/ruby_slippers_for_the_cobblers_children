@@ -9,22 +9,22 @@ import ruby.ds.Errors;
 using ruby.LanguageGoBag;
 
 class TestInterpreter extends ruby.support.TestCase {
-  public function testItsCurrentExpressionIsNilByDefault() {
+  function testItsCurrentExpressionIsNilByDefault() {
     assertEquals(world.rubyNil, world.currentExpression);
   }
 
-  public function testInterpretsSingleExpression() {
+  function testInterpretsSingleExpression() {
     addCode("true");
     rAssertEq(world.rubyTrue, interpreter.nextExpression());
   }
 
-  public function testInterpretsMultipleExpressions() {
+  function testInterpretsMultipleExpressions() {
     addCode("nil\ntrue");
     rAssertEq(world.rubyNil, interpreter.nextExpression());
     rAssertEq(world.rubyTrue, interpreter.nextExpression());
   }
 
-  public function testThrowsIfAskedForExpressionAfterFinished() {
+  function testThrowsIfAskedForExpressionAfterFinished() {
     assertThrows(function() interpreter.nextExpression());
 
     addCode("true");
@@ -33,7 +33,7 @@ class TestInterpreter extends ruby.support.TestCase {
   }
 
   // we're ignoring fixnums and symbols for now
-  public function testSpecialConstants() {
+  function testSpecialConstants() {
     addCode("nil\ntrue\nfalse\n");
     rAssertEq(world.rubyNil,   interpreter.nextExpression());
     rAssertEq(world.rubyTrue,  interpreter.nextExpression());
@@ -41,7 +41,7 @@ class TestInterpreter extends ruby.support.TestCase {
   }
 
   // maybe this goes on a world bootstrap test?
-  public function testItEvaluatesAStringLiteral() {
+  function testItEvaluatesAStringLiteral() {
     addCode('"Josh"');
     rAssertEq(world.stringLiteral("Josh"), interpreter.nextExpression());
   }
