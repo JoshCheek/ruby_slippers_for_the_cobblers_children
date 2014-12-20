@@ -22,6 +22,10 @@ class TestCase extends haxe.unit.TestCase {
       var tmp:Dynamic = obj;
       var objClass:RClass = tmp;
       return objClass.name;
+    } else if(klass.name == 'String') {
+      var tmp:Dynamic = obj;
+      var objString:RString = tmp;
+      return '"'+objString.value+'"'; // will do for now
     } else {
       return "#<" + obj.klass.name + ">";
     // } else {

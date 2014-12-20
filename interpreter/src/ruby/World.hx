@@ -13,12 +13,22 @@ class World {
     this.world = world;
   }
 
-  public function intern(name:String):RSymbol {
-    if(!world.symbols.exists(name)) {
-      var symbol:RSymbol = {name: name, klass: world.objectClass, ivars: new InternalMap()};
-      world.symbols.set(name, symbol);
+  // public function intern(name:String):RSymbol {
+  //   if(!world.symbols.exists(name)) {
+  //     var symbol:RSymbol = {name: name, klass: world.objectClass, ivars: new InternalMap()};
+  //     world.symbols.set(name, symbol);
+  //   }
+  //   return world.symbols.get(name);
+  // }
+
+  public function stringLiteral(value:String):RString {
+    var str:RString = {
+      klass: stringClass, // FIXME
+      ivars: new InternalMap(),
+      value: value,
     }
-    return world.symbols.get(name);
+    objectSpace.push(str);
+    return str;
   }
 
   // faux attributes

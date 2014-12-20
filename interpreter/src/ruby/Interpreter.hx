@@ -48,7 +48,7 @@ class Interpreter {
     switch(evaluation) {
       case Evaluated(obj):
         world.currentExpression = obj;
-        _evaluationFinished = true;
+        _evaluationFinished = true; // TODO: this name is terrible! there's a Finished value in EvaluationState, but we're actually talking about when an evaluation resolves to an object that a user could see
       case EvaluationList(subEvaluation, _):
         setEval(subEvaluation);
       case _:
@@ -86,7 +86,7 @@ class Interpreter {
       case AstFalse:              return Evaluated(world.rubyFalse);
       case AstTrue:               return Evaluated(world.rubyTrue);
       case AstNil:                return Evaluated(world.rubyNil);
-      case AstString(value):      return Evaluated(toRubyString(value));
+      case AstString(value):      return Evaluated(world.stringLiteral(value));
       case AstExpressions(exprs):
         return
           if(exprs.length == 0)      Evaluated(world.rubyNil);
@@ -99,14 +99,6 @@ class Interpreter {
                                        );
       case _:
         throw "Unhandled: " + ast;
-    }
-  }
-
-
-  private function toRubyString(value:String):RString {
-    return { klass: world.objectClass,
-      ivars: new InternalMap(),
-      value: value,
     }
   }
 }

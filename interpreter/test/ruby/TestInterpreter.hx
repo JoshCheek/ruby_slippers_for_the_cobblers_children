@@ -43,12 +43,7 @@ class TestInterpreter extends ruby.support.TestCase {
   // maybe this goes on a world bootstrap test?
   public function testItEvaluatesAStringLiteral() {
     addCode('"Josh"');
-    var rbstr:RString = {
-      klass: world.objectClass,
-      ivars: new InternalMap(),
-      value: "Josh",
-    }
-    rAssertEq(rbstr,   interpreter.nextExpression());
+    rAssertEq(world.stringLiteral("Josh"), interpreter.nextExpression());
   }
 
   /* ----- OLD TESTS THAT NEED TO BE REIMPLEMENTED -----
