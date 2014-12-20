@@ -43,6 +43,29 @@ class World {
     return value;
   }
 
+  public function inspect(obj:RObject):String {
+    if(obj == null) return 'Haxe null';
+
+    var klass = switch(obj) {
+      case {klass: k}: k;
+      case _: throw "no kass here: " + obj;
+    }
+
+    if(klass.name == 'Class') {
+      var tmp:Dynamic = obj;
+      var objClass:RClass = tmp;
+      return objClass.name;
+    } else if(klass.name == 'String') {
+      var tmp:Dynamic = obj;
+      var objString:RString = tmp;
+      return '"'+objString.value+'"'; // will do for now
+    } else {
+      return "#<" + obj.klass.name + ">";
+    // } else {
+    //   return "" + obj; // :D
+    }
+  }
+
   // faux attributes
   public var stackSize(get, never):Int;
   function get_stackSize() return world.stack.length;

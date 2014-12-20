@@ -12,33 +12,14 @@ class TestCase extends haxe.unit.TestCase {
   public var world:ruby.World;
   public var interpreter:Interpreter;
 
-  function rInspect(obj:RObject):String {
-    if(obj == null) return 'Haxe null';
-
-    var klass = switch(obj) {
-      case {klass: k}: k;
-      case _: throw "no kass here: " + obj;
-    }
-
-    if(klass.name == 'Class') {
-      var tmp:Dynamic = obj;
-      var objClass:RClass = tmp;
-      return objClass.name;
-    } else if(klass.name == 'String') {
-      var tmp:Dynamic = obj;
-      var objString:RString = tmp;
-      return '"'+objString.value+'"'; // will do for now
-    } else {
-      return "#<" + obj.klass.name + ">";
-    // } else {
-    //   return "" + obj; // :D
-    }
-  }
-
   override function setup() {
     var worldDs = ruby.Bootstrap.bootstrap();
     world       = new ruby.World(worldDs);
     interpreter = new Interpreter(worldDs);
+  }
+
+  function rInspect(val:RObject):String {
+    return world.inspect(val);
   }
 
   function rEqual(l:RObject, r:RObject):Bool {
