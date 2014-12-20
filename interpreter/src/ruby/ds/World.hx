@@ -14,5 +14,7 @@ typedef World = {
   public var rubyTrue           : RObject;
   public var rubyFalse          : RObject;
   public var klassClass         : RClass;
+  public var moduleClass        : RClass;
   public var objectClass        : RClass;
+  public var basicObjectClass   : RClass;
 }

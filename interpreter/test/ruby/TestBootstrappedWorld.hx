@@ -2,11 +2,12 @@ package ruby;
 
 using Lambda;
 
+// FIXME: we are using the ruby.ds.World, not ruby.World :/
 class TestBootstrappedWorld extends ruby.support.TestCase {
   /*****  EXECUTION ENVIRONMENT  *****/
   function testStackOnlyContsinasTOPLEVEL_BINDING() {
     assertEquals(1, world.stack.length);
-    rAssertEq(world.toplevelBinding, world.stack[0]); // FIXME: passes trivially, b/c it's based on the shitty inspection in TestCase, which renders binding as #<Object>
+    assertEquals(world.toplevelBinding, world.stack[0]);
   }
 
   function testTOPLEVEL_BINDING() {
@@ -21,21 +22,63 @@ class TestBootstrappedWorld extends ruby.support.TestCase {
   }
 
   /*****  SPECIAL OBJECTS  *****/
-  // nil's class is NilClass
-  // true's class is TrueClass
-  // false's class is FalseClass
+  function testSpecialObjects() {
+    assertEquals('NilClass',   world.rubyNil.klass.name);
+    assertEquals('TrueClass',  world.rubyTrue.klass.name);
+    assertEquals('FalseClass', world.rubyFalse.klass.name);
+  }
 
 
   /*****  OBJECT HIERARCHY  *****/
-  // TODO: Also check name in these
   // TODO: Also check they're all namespaced under the toplevel constant (Object)
-  // Class's class is itself, its superclass is Module
-  // Module's class is Class, its superclass is Object
-  // Object's class is Class, its superclass is BasicObject
-  // BasicObject's class is Class, its superclass is nil
-  // NilClass's class is Class, its superclass is Object
-  // TrueClass's class is Class, its superclass is Object
-  // FalseClass's class is Class, its superclass is Object
+  function testClass() {
+    var klass = world.klassClass;
+    assertEquals("Class",           klass.name);
+    assertEquals(world.klassClass,  klass.klass);
+    assertEquals(world.moduleClass, klass.superclass);
+  }
+
+  function testModule() {
+    var module = world.moduleClass;
+    assertEquals("Module",          module.name);
+    assertEquals(world.klassClass,  module.klass);
+    assertEquals(world.objectClass, module.superclass);
+  }
+
+  function testObject() {
+    var object = world.objectClass;
+    assertEquals("Object",               object.name);
+    assertEquals(world.klassClass,       object.klass);
+    assertEquals(world.basicObjectClass, object.superclass);
+  }
+
+  function testBasicObject() {
+    var basicObject = world.basicObjectClass;
+    assertEquals("BasicObject",    basicObject.name);
+    assertEquals(world.klassClass, basicObject.klass);
+    assertEquals(null,             basicObject.superclass);
+  }
+
+  function testNilClass() {
+    var nilClass = world.rubyNil.klass;
+    assertEquals("NilClass",     nilClass.name);
+    assertEquals(world.klassClass,  nilClass.klass);
+    assertEquals(world.objectClass, nilClass.superclass);
+  }
+
+  function testTrueClass() {
+    var trueClass = world.rubyTrue.klass;
+    assertEquals("TrueClass",       trueClass.name);
+    assertEquals(world.klassClass,  trueClass.klass);
+    assertEquals(world.objectClass, trueClass.superclass);
+  }
+
+  function testFalseClass() {
+    var falseClass = world.rubyFalse.klass;
+    assertEquals("FalseClass",       falseClass.name);
+    assertEquals(world.klassClass,  falseClass.klass);
+    assertEquals(world.objectClass, falseClass.superclass);
+  }
 
   /*****  Objects Are Tracked  *****/
   // main

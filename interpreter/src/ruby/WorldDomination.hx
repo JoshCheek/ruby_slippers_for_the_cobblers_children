@@ -8,11 +8,20 @@ class WorldDomination {
     var objectSpace = [];
     var symbols     = new InternalMap();
 
-    // Object / Class
+    // Object / Class / Module
+    var basicObjectClass:RClass = {
+      name:       "BasicObject",
+      klass:      null,
+      superclass: null,
+      ivars:      new InternalMap(),
+      imeths:     new InternalMap(),
+      constants:  new InternalMap(),
+    };
+
     var objectClass:RClass = {
       name:       "Object",
       klass:      null,
-      superclass: null,
+      superclass: basicObjectClass,
       ivars:      new InternalMap(),
       imeths:     new InternalMap(),
       constants:  new InternalMap(),
@@ -27,8 +36,19 @@ class WorldDomination {
       constants:  new InternalMap(),
     };
 
-    klassClass.klass  = klassClass;
-    objectClass.klass = klassClass;
+    var moduleClass:RClass = {
+      name:       'Module',
+      klass:      klassClass,
+      superclass: objectClass,
+      ivars:      new InternalMap(),
+      imeths:     new InternalMap(),
+      constants:  new InternalMap(),
+    }
+
+    basicObjectClass.klass = klassClass;
+    objectClass.klass      = klassClass;
+    klassClass.klass       = klassClass;
+    klassClass.superclass  = moduleClass;
 
     // main
     var main = {klass: objectClass, ivars: new InternalMap()};
@@ -83,7 +103,9 @@ class WorldDomination {
       rubyTrue          : rubyTrue,
       rubyFalse         : rubyFalse,
       klassClass        : klassClass,
+      moduleClass       : moduleClass,
       objectClass       : objectClass,
+      basicObjectClass  : basicObjectClass,
       toplevelBinding   : toplevelBinding,
     }
 
