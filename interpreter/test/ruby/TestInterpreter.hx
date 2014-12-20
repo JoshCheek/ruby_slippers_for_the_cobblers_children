@@ -61,16 +61,21 @@ class TestInterpreter extends ruby.support.TestCase {
     assertNextExpressions(rStrs);
   }
 
+  public function testMoarLocalVars() {
+    addCode("a = 'x'; b = a");
+    interpreter.nextExpression();
+    interpreter.nextExpression();
+    var a = world.getLocal('a');
+    interpreter.nextExpression();
+    // TODO refute local var 'b' exists... or actually, with how Ruby works, this is nil at this point
+    interpreter.nextExpression();
+    var b = world.getLocal('b');
+    assertEquals(a, b); // a and b have ref to same obj
+  }
+
   //TODO: local vars with more than 1 binding
 
   /* ----- OLD TESTS THAT NEED TO BE REIMPLEMENTED -----
-  public function testMoarLocalVars() {
-    var interpreter = forCode("a = 'x'; b = a; b");
-    var a = interpreter.drainExpression();
-    assertEquals(a, interpreter.drainExpression()); // b = a
-    assertEquals(a, interpreter.drainExpression()); // b
-  }
-
   // line mode?
   public function testInstantiation() {
     var interpreter = forCode("
