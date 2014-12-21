@@ -45,7 +45,7 @@ class TestInterpreter extends ruby.support.TestCase {
     rAssertEq(world.stringLiteral("Josh"), interpreter.nextExpression());
   }
 
-  public function testItSetsAndGetsLocalVariables() {
+  function testItSetsAndGetsLocalVariables() {
     addCode("var1 = 'b'
              'c'
              var1
@@ -61,7 +61,7 @@ class TestInterpreter extends ruby.support.TestCase {
     assertNextExpressions(rStrs);
   }
 
-  public function testMoarLocalVars() {
+  function testMoarLocalVars() {
     addCode("a = 'x'; b = a");
     interpreter.nextExpression();
     interpreter.nextExpression();
@@ -75,25 +75,65 @@ class TestInterpreter extends ruby.support.TestCase {
 
   //TODO: local vars with more than 1 binding
 
+
+  public function testToplevelConstantLookup() {
+    addCode("Object; String");
+    rAssertEq(world.objectClass, interpreter.nextExpression());
+    rAssertEq(world.stringClass, interpreter.nextExpression());
+  }
+
+  public function _testMessageSending() {
+    addCode("'abc'.class; :abc.class");
+    interpreter.nextExpression();
+    rAssertEq(world.stringClass, interpreter.nextExpression());
+  }
+
+  public function _testInstantiation() {
+    addCode("
+      class A
+      end
+      BasicObject.new
+      String.new
+      A.new
+    ");
+    interpreter.evaluateAll();
+    var os  = world.objectSpace;
+    var a   = os[os.length - 1];
+    var str = os[os.length - 2];
+    var bo  = os[os.length - 3];
+    rAssertEq(world.toplevelNamespace.constants['A'],   a.klass);
+    rAssertEq(world.stringClass,      str.klass);
+    rAssertEq(world.basicObjectClass, bo.klass);
+    // Instantiation
+    //   new
+    //     returns a RObject with klass set to self
+    //     initializes the object, passing the params
+    //   allocate
+    //     makes an RObject with the klass set
+    //   // Object#initialize
+    //   //   takes no params, does nothing
+  }
+
+
   /* ----- OLD TESTS THAT NEED TO BE REIMPLEMENTED -----
-  // line mode?
+
+  One above does not create its own classes
   public function testInstantiation() {
-    var interpreter = forCode("
+    addCode("
       class A
       end
       A.new
       Object.new
     ");
     // NOTE: could be nil b/c A's body is empty
-    interpreter.drainExpression();
-    interpreter.drainExpression();
-    interpreter.drainExpression();
-    var a      = interpreter.drainExpression();
-    var aClass = interpreter.getConstant(interpreter.toplevelNamespace(), "A");
+    interpreter.nextExpression();
+    interpreter.nextExpression();
+    interpreter.nextExpression();
+    var a      = interpreter.nextExpression();
+    var aClass = world.toplevelNamespace.constants['A'];
     assertEquals(aClass, a.klass);
-
-    var obj    = interpreter.drainExpression();
-    assertEquals(obj.klass, interpreter.world.objectClass);
+    var obj    = interpreter.nextExpression();
+    assertEquals(world.objectClass, obj.klass);
 
     // Instantiation
     //   new
@@ -107,6 +147,9 @@ class TestInterpreter extends ruby.support.TestCase {
   }
 
 
+
+
+  // line mode?
   public function _testSelfWorks() {
     var interpreter = forCode("
         TODO!

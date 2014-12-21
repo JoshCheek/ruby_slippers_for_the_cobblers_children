@@ -46,6 +46,11 @@ class Interpreter {
 
   public var isUnfinished(get, never):Bool;
 
+  public function evaluateAll():RObject {
+    while(isUnfinished) nextEvaluation;
+    return world.currentExpression;
+  }
+
   // ----- PRIVATE -----
 
   function get_isUnfinished() {
@@ -85,7 +90,8 @@ class Interpreter {
 
   private function continueEvaluating(toEval:EvaluationState) {
     switch(toEval) {
-      case Unevaluated(ast):                              return astToEvaluation(ast);
+      // case Send(Evaluated(target), message):              throw "need to actually do shit now";
+      // case Send(target, message):                         return Send(continueEvaluating(target), message);
       case EvaluationList(Cons(Evaluated(obj), ListEnd)): return Evaluated(obj);
       case EvaluationList(Cons(Evaluated(obj), rest)):    return EvaluationList(rest);
       case EvaluationList(Cons(current, rest)):           return EvaluationList(Cons(continueEvaluating(current), rest));
@@ -93,17 +99,29 @@ class Interpreter {
       case SetLocal(name, Evaluated(value)):              return Evaluated(world.setLocal(name, value));
       case SetLocal(name, value):                         return SetLocal(name, continueEvaluating(value));
       case Evaluated(_):                                  return Finished;
-      case EvaluationList(ListEnd): throw "This shouldn't be possible!";
-      case Finished:                throw new NothingToEvaluateError("Check before evaluating!");
+      case Unevaluated(ast):                              return astToEvaluation(ast);
+      case ConstantName(Lookup(ImplicitNamespace, name)):
+        // Where is it supposed to look these up? this is one thing I don't fully understand about Ruby :/
+        return Evaluated(world.toplevelNamespace.constants[name]);
+
+      case ConstantName(Lookup(namespace, name)): throw "multiple namespaces not yet handled!";
+      case Finished:                              throw new NothingToEvaluateError("Check before evaluating!");
+
+      // fucking ADTS are stupid, even splitting out those values into their own types doesn't prevent stupid shit like this
+      case ConstantName(ImplicitNamespace): throw "This shouldn't be possible!";
+      case EvaluationList(ListEnd):         throw "This shouldn't be possible!";
     }
   }
 
   private function astToEvaluation(ast:Ast):EvaluationState {
     switch(ast) {
-      case AstFalse:              return Evaluated(world.rubyFalse);
-      case AstTrue:               return Evaluated(world.rubyTrue);
-      case AstNil:                return Evaluated(world.rubyNil);
-      case AstString(value):      return Evaluated(world.stringLiteral(value));
+      case AstSend(target, message, args): return Evaluated(world.stringLiteral("SEND NOT ACTUALL IMPLEMENTED")); // Send(astToEvaluation(target), message);
+      case AstConstant(namespace, name):   // FIXME: not handling namespace properly
+                                           return ConstantName(Lookup(ImplicitNamespace, name));
+      case AstFalse:                       return Evaluated(world.rubyFalse);
+      case AstTrue:                        return Evaluated(world.rubyTrue);
+      case AstNil:                         return Evaluated(world.rubyNil);
+      case AstString(value):               return Evaluated(world.stringLiteral(value));
       case AstExpressions(exprs):
         return
           if(exprs.length == 0)      Evaluated(world.rubyNil);
