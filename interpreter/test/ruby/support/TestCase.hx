@@ -49,6 +49,11 @@ class TestCase extends haxe.unit.TestCase {
       throw currentTest;
   }
 
+  // seems to work regardless of whether I set type to "Dynamic" or "Null<Dynamic>", not sure the difference
+  function assertNull(value:Null<Dynamic>, ?c:PosInfos) {
+    assertEquals(null, value, c);
+  }
+
   function addCode(rawCode:String):Void {
     var ast = ParseRuby.fromCode(rawCode);
     interpreter.addCode(ast);

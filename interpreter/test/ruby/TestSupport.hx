@@ -28,4 +28,10 @@ class TestSupport extends ruby.support.TestCase {
       world.rubyTrue, // list evaluates to last expression in it
     ]);
   }
+
+  function testAssertNull() {
+    assertNull(null);
+    try assertNull(1) catch(x:haxe.unit.TestStatus) return;
+    throw("Should have raised when it didn't get null!");
+  }
 }
