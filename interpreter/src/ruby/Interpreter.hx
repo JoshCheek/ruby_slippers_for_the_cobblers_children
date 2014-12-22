@@ -137,6 +137,54 @@ class GetConst {
 }
 
 
+// Class(Constant(None,A),None,None)
+class OpenClass {
+  public var ast:Ast;
+  public var binding:RBinding;
+
+  var world:ruby.World;
+  var name:String;
+  var ns:ConstNs;
+  var retVal:RObject;
+
+  // TODO: SUPERCLASS, BODY
+  public function new(ast, binding, world, name, ns) {
+    this.ast     = ast;
+    this.binding = binding;
+    this.world   = world;
+    this.name    = name;
+    this.ns      = ns;
+  }
+
+  public function step():EvaluationResult {
+    switch(ns) {
+      case Current:
+        ns = Found(binding.defTarget);
+        return step();
+      case Lookup(code):
+        throw("We don't have any tests for this yet, shouldn't be donw this path!");
+        return Push(code, binding);
+      case Found(nsClass):
+        if(nsClass.constants[name] == null) {
+          var klass:RClass = {
+            name:       name,
+            klass:      world.classClass,
+            superclass: world.objectClass,
+            ivars:      new InternalMap(),
+            imeths:     new InternalMap(),
+            constants:  new InternalMap(),
+          };
+          nsClass.constants[name] = klass;
+        }
+        return Pop(world.rubyNil); // b/c there is no body
+    }
+  }
+
+  public function returned(ns:RObject) {
+    throw "TRIED RETURNING: " + ruby.World.sinspect(ns) + " BUT WE DON'T HAVE TESTS FOR THIS YET!";
+  }
+}
+
 class Interpreter {
   private var world:ruby.World;
 
@@ -154,8 +202,10 @@ class Interpreter {
       case Exprs(expressions):   new Expressions(code, binding, expressions, world.rubyNil);
       case SetLvar(name, rhs):   new SetLocal(code, binding, name, rhs);
       case GetLvar(name):        new GetLocal(code, binding, name);
-      case Constant(None, name): new GetConst(code, binding, name, ConstNs.Current);
-      case Constant(ns, name):   new GetConst(code, binding, name, ConstNs.Lookup(ns));
+      case Constant(ns, name):   new GetConst(code, binding, name, nsFor(ns));
+      case Class(Constant(ns, name), superclass, body):
+        // Class(Constant(None,A),None,None)
+        new OpenClass(code, binding, world, name, nsFor(ns));
       case _:                  throw "Unhandled AST: " + code;
     }
     // trace("PUSHING: " + sf.ast);
@@ -202,6 +252,13 @@ class Interpreter {
   }
 
   // ----- PRIVATE -----
+  function nsFor(ns:Ast):ConstNs {
+    switch(ns) {
+      case None: return Current;
+      case _:    return Lookup(ns);
+    }
+  }
+
   // // updates current evaluation, updates current expression if relevant;
   // private function setEval(evaluation:EvaluationState):EvaluationState {
   //   switch(evaluation) {

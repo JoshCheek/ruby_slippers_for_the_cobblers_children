@@ -83,16 +83,13 @@ class TestInterpreter extends ruby.support.TestCase {
     rAssertEq(world.stringClass, interpreter.nextExpression());
   }
 
-  // public function testClassDefinition() {
-  //   pushCode("class A; end");
-  //   trace("\033[31mPRE\033[0m");
-  //   assertNull(world.toplevelNamespace.constants['A']);
-  //   trace("\033[31mMIDDLE\033[0m");
-  //   interpreter.evaluateAll();
-  //   trace("\033[31mPOST\033[0m");
-  //   // assertEquals('A', rInspect(world.toplevelNamespace.constants['A']));
-  //   // TODO: Test non-toplevel
-  // }
+  public function testClassDefinition() {
+    pushCode("class A; end");
+    assertNull(world.toplevelNamespace.constants['A']);
+    interpreter.evaluateAll();
+    assertEquals('A', rInspect(world.toplevelNamespace.constants['A']));
+    // TODO: Test non-toplevel
+  }
 
   // TODO: Test reopening the class
 
