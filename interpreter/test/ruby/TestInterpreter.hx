@@ -41,7 +41,7 @@ class TestInterpreter extends ruby.support.TestCase {
     assertNextExpressions([world.rubyNil, world.rubyTrue, world.rubyFalse]);
   }
 
-  function _testItEvaluatesAStringLiteral() {
+  function testItEvaluatesAStringLiteral() {
     pushCode('"Josh"');
     rAssertEq(world.stringLiteral("Josh"), interpreter.nextExpression());
   }
