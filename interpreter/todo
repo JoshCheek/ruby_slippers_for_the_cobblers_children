@@ -1,5 +1,7 @@
 Continue with interpreter
 
+abstraction in world for constant lookup (world.toplevelNamespace.constants['A'])
+
 Binary to organize haxe notes
   jhx, uses cln stuff + useful other binary stuff probably
   jhx repl -> haxelib run ihx
