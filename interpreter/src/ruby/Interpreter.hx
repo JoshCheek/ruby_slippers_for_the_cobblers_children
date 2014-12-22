@@ -1,6 +1,7 @@
 package ruby;
 import ruby.ds.*;
 import ruby.ds.objects.*;
+import ruby.ds.Errors;
 using ruby.LanguageGoBag;
 using Lambda;
 
@@ -78,7 +79,7 @@ class Interpreter {
 
   // returns true if this step evaluated to an expression
   public function step():Bool {
-    if(isFinished()) return false ;
+    if(isFinished()) throw new NothingToEvaluateError("Check before evaluating!");
     var frame = world.stack.first();
 
     switch(frame.step()) {

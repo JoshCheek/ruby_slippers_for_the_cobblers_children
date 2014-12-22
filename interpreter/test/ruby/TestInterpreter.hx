@@ -27,13 +27,13 @@ class TestInterpreter extends ruby.support.TestCase {
     rAssertEq(world.rubyTrue, interpreter.nextExpression());
   }
 
-  // function testThrowsIfAskedForExpressionAfterFinished() {
-  //   assertThrows(function() interpreter.nextExpression());
+  function testThrowsIfAskedForExpressionAfterFinished() {
+    assertThrows(function() interpreter.nextExpression());
 
-  //   pushCode("true");
-  //   interpreter.nextExpression();
-  //   assertThrows(function() interpreter.nextExpression());
-  // }
+    pushCode("true");
+    interpreter.nextExpression();
+    assertThrows(function() interpreter.nextExpression());
+  }
 
   // // we're ignoring fixnums and symbols for now
   // function testSpecialConstants() {
