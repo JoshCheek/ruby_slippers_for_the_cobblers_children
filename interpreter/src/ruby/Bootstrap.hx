@@ -128,11 +128,25 @@ class Bootstrap {
     objectSpace.push(falseClass);
     objectSpace.push(stringClass);
 
+    // core methods
+
+    // FIXME: Putting this here b/c it will get me further
+    // but really it goes on Kernel, which doesn't exist yet,
+    // b/c we have no modules yet
+    objectClass.imeths["class"] = {
+      klass: objectClass, // FIXME: SHOULD BE METHOD CLASS
+      ivars: new InternalMap(),
+      name: "class",
+      args: [],
+      body: ruby.ds.objects.RMethod.ExecutableType.Internal(Core.lookupClass),
+    }
+
+    // the data structure
     return {
       stack             : stack,
       objectSpace       : objectSpace,
       symbols           : symbols,
-      toplevelNamespace : objectClass,
+      toplevelNamespace : toplevelNamespace,
       currentExpression : rubyNil,
 
       main              : main,
@@ -142,7 +156,7 @@ class Bootstrap {
       toplevelBinding   : toplevelBinding,
 
       basicObjectClass  : basicObjectClass,
-      objectClass       : toplevelNamespace,
+      objectClass       : objectClass,
       moduleClass       : moduleClass,
       klassClass        : klassClass,
       stringClass       : stringClass,

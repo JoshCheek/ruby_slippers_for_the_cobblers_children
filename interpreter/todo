@@ -9,3 +9,8 @@ Binary to organize haxe notes
 LanguageGoBag
   Map#length
   Map#fetch
+
+Binding class
+
+Objects
+  lazily make the maps (e.g. constants can be null until we need to use it)

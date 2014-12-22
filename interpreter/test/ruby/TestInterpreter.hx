@@ -93,11 +93,16 @@ class TestInterpreter extends ruby.support.TestCase {
 
   // TODO: Test reopening the class
 
-  // public function _testMessageSending() {
-  //   pushCode("'abc'.class; :abc.class");
-  //   interpreter.nextExpression();
-  //   rAssertEq(world.stringClass, interpreter.nextExpression());
-  // }
+  public function testMessageSending() {
+    pushCode("'abc'.class; nil.class");
+    assertNextExpressions([
+      world.stringLiteral('abc'),
+      world.stringClass,
+      world.rubyNil,
+      world.rubyNil.klass,
+      world.rubyNil.klass,
+    ]);
+  }
 
   // public function _testInstantiation() {
   //   pushCode("
