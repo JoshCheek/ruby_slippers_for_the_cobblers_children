@@ -10,27 +10,18 @@ class TestSupport extends ruby.support.TestCase {
     assertInspects(world.stringLiteral("abc"), '"abc"');
   }
 
-  function testAssertNextExpressionsWithFewer() {
-    pushCode("true; nil; true");
-    assertNextExpressions([
-      world.rubyTrue,
-      world.rubyNil,
-      world.rubyTrue,
-    ]);
-  }
+  function testAssertNextExpressions() {
+    var ast = ParseRuby.fromCode("true; nil; true");
+    // fewer
+    interpreter.pushCode(ast);
+    assertNextExpressions([world.rubyTrue, world.rubyNil]);
 
-  function testAssertNextExpressionsWithExact() {
-    pushCode("true; nil; true");
-    assertNextExpressions([
-      world.rubyTrue,
-      world.rubyNil,
-      world.rubyTrue,
-      world.rubyTrue, // list evaluates to last expression in it
-    ]);
-  }
+    // exact (last true is b/c the list itself evaluates to the last expression in it)
+    interpreter.pushCode(ast);
+    assertNextExpressions([world.rubyTrue, world.rubyNil, world.rubyTrue, world.rubyTrue]);
 
-  function testAssertNextExpressionsWithMore() {
-    pushCode("true; nil; true");
+    // more
+    interpreter.pushCode(ast);
     try assertNextExpressions([
           world.rubyTrue,
           world.rubyNil,

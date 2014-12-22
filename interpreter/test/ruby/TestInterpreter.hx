@@ -35,18 +35,16 @@ class TestInterpreter extends ruby.support.TestCase {
     assertThrows(function() interpreter.nextExpression());
   }
 
-  // // we're ignoring fixnums and symbols for now
-  // function testSpecialConstants() {
-  //   pushCode("nil\ntrue\nfalse\n");
-  //   rAssertEq(world.rubyNil,   interpreter.nextExpression());
-  //   rAssertEq(world.rubyTrue,  interpreter.nextExpression());
-  //   rAssertEq(world.rubyFalse, interpreter.nextExpression());
-  // }
+  // we're ignoring fixnums and symbols for now
+  function testSpecialConstants() {
+    pushCode("nil\ntrue\nfalse\n");
+    assertNextExpressions([world.rubyNil, world.rubyTrue, world.rubyFalse]);
+  }
 
-  // function testItEvaluatesAStringLiteral() {
-  //   pushCode('"Josh"');
-  //   rAssertEq(world.stringLiteral("Josh"), interpreter.nextExpression());
-  // }
+  function _testItEvaluatesAStringLiteral() {
+    pushCode('"Josh"');
+    rAssertEq(world.stringLiteral("Josh"), interpreter.nextExpression());
+  }
 
   // function testItSetsAndGetsLocalVariables() {
   //   pushCode("var1 = 'b'
