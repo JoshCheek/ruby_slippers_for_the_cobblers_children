@@ -9,40 +9,47 @@ import ruby.ds.Errors;
 using ruby.LanguageGoBag;
 
 class TestInterpreter extends ruby.support.TestCase {
-  // function testInterpretsSingleExpression() {
-  //   addCode("true");
-  //   rAssertEq(world.rubyTrue, interpreter.nextExpression());
-  // }
+  function _testInterpretsSingleExpression() {
+    pushCode("true");
+    rAssertEq(world.rubyTrue, interpreter.nextExpression());
+  }
 
-  // function testInterpretsMultipleExpressions() {
-  //   addCode("nil\ntrue\nfalse");
-  //   rAssertEq(world.rubyNil, interpreter.nextExpression());
-  //   rAssertEq(world.rubyTrue, interpreter.nextExpression());
-  // }
+  function _testEvaluatingExpressionsUpdatesTheCurrentExpression() {
+    pushCode("true");
+    rAssertEq(world.rubyNil, world.currentExpression);
+    interpreter.nextExpression();
+    rAssertEq(world.rubyTrue, world.currentExpression);
+  }
+
+  function testInterpretsMultipleExpressions() {
+    pushCode("nil\ntrue\nfalse");
+    rAssertEq(world.rubyNil, interpreter.nextExpression());
+    rAssertEq(world.rubyTrue, interpreter.nextExpression());
+  }
 
   // function testThrowsIfAskedForExpressionAfterFinished() {
   //   assertThrows(function() interpreter.nextExpression());
 
-  //   addCode("true");
+  //   pushCode("true");
   //   interpreter.nextExpression();
   //   assertThrows(function() interpreter.nextExpression());
   // }
 
   // // we're ignoring fixnums and symbols for now
   // function testSpecialConstants() {
-  //   addCode("nil\ntrue\nfalse\n");
+  //   pushCode("nil\ntrue\nfalse\n");
   //   rAssertEq(world.rubyNil,   interpreter.nextExpression());
   //   rAssertEq(world.rubyTrue,  interpreter.nextExpression());
   //   rAssertEq(world.rubyFalse, interpreter.nextExpression());
   // }
 
   // function testItEvaluatesAStringLiteral() {
-  //   addCode('"Josh"');
+  //   pushCode('"Josh"');
   //   rAssertEq(world.stringLiteral("Josh"), interpreter.nextExpression());
   // }
 
   // function testItSetsAndGetsLocalVariables() {
-  //   addCode("var1 = 'b'
+  //   pushCode("var1 = 'b'
   //            'c'
   //            var1
   //            var2 = 'd'
@@ -58,7 +65,7 @@ class TestInterpreter extends ruby.support.TestCase {
   // }
 
   // function testMoarLocalVars() {
-  //   addCode("a = 'x'; b = a");
+  //   pushCode("a = 'x'; b = a");
   //   interpreter.nextExpression();
   //   interpreter.nextExpression();
   //   var a = world.getLocal('a');
@@ -73,13 +80,13 @@ class TestInterpreter extends ruby.support.TestCase {
 
 
   // public function testToplevelConstantLookup() {
-  //   addCode("Object; String");
+  //   pushCode("Object; String");
   //   rAssertEq(world.objectClass, interpreter.nextExpression());
   //   rAssertEq(world.stringClass, interpreter.nextExpression());
   // }
 
   // public function testClassDefinition() {
-  //   addCode("class A; end");
+  //   pushCode("class A; end");
   //   trace("\033[31mPRE\033[0m");
   //   assertNull(world.toplevelNamespace.constants['A']);
   //   trace("\033[31mMIDDLE\033[0m");
@@ -92,13 +99,13 @@ class TestInterpreter extends ruby.support.TestCase {
   // TODO: Test reopening the class
 
   // public function _testMessageSending() {
-  //   addCode("'abc'.class; :abc.class");
+  //   pushCode("'abc'.class; :abc.class");
   //   interpreter.nextExpression();
   //   rAssertEq(world.stringClass, interpreter.nextExpression());
   // }
 
   // public function _testInstantiation() {
-  //   addCode("
+  //   pushCode("
   //     class A
   //     end
   //     BasicObject.new
@@ -128,7 +135,7 @@ class TestInterpreter extends ruby.support.TestCase {
 
   One above does not create its own classes
   public function testInstantiation() {
-    addCode("
+    pushCode("
       class A
       end
       A.new

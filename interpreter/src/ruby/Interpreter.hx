@@ -1,16 +1,61 @@
 package ruby;
-
-import ruby.ds.Ast;
-import ruby.ds.InternalMap;
-import ruby.ds.Errors;
+import ruby.ds.*;
 import ruby.ds.objects.*;
-
 using ruby.LanguageGoBag;
-using ruby.ds.EvaluationState;
 using Lambda;
 
-// can we shorten some of these fkn names?
-// getting annoying to type/read -.-
+
+class Pending {
+  public var ast:Ast;
+  public var binding:RBinding;
+  var object:RObject;
+
+  // TODO: Can we remove some of these types:
+  public function new(ast:Ast, binding:RBinding, obj:RObject) {
+    this.ast     = ast;
+    this.binding = binding;
+    this.object  = obj;
+  }
+
+  public function step():EvaluationResult {
+    return Pop(object);
+  }
+
+  public function returned(obj:RObject):Void {
+    throw "SHOULD NEVER RETURN TO THIS NODE!";
+  }
+}
+
+// TODO: can we typedef Asts = Array<Ast>; ?? (can we put this in ruby.ds.Ast
+class Expressions {
+  public var ast:Ast;
+  public var binding:RBinding;
+
+  var expressions:Array<Ast>;
+  var result:RObject;
+  var index:Int;
+
+  public function new(ast:Ast, binding:RBinding, expressions:Array<Ast>, initialResult:RObject, index=-1) {
+    this.ast         = ast;
+    this.binding     = binding;
+    this.expressions = expressions;
+    this.result      = initialResult;
+    this.index       = index;
+  }
+
+  public function step():EvaluationResult {
+    index++;
+    if(index < expressions.length)
+      return Push(expressions[index], binding);
+    if(index == expressions.length)
+      return Pop(result);
+    else throw "THIS SHOULDN'T HAPPEN!";
+  }
+
+  public function returned(obj:RObject):Void {
+    result = obj;
+  }
+}
 class Interpreter {
   private var world:ruby.World;
 
@@ -18,26 +63,62 @@ class Interpreter {
     this.world = new ruby.World(world);
   }
 
-  public function pushCode(code:Ast) {
+  public function pushCode(code:Ast, ?binding) {
+    if(binding==null) binding = world.currentBinding;
+    var stackFrame:StackFrame = switch(code) {
+      case AstTrue:  new Pending(code, binding, world.rubyTrue);
+      case AstNil:   new Pending(code, binding, world.rubyNil);
+      case AstFalse: new Pending(code, binding, world.rubyFalse);
+      case AstExpressions(expressions):
+        new Expressions(code, binding, expressions, world.rubyNil);
+      case _: throw "Unhandled AST: " + code;
+    }
+    world.stack.push(stackFrame);
   }
 
   public function nextExpression():RObject {
-    return world.rubyNil;
+    while(!step()) {}
+    return world.currentExpression;
   }
 
-  public function step() {
+  // returns true if this step evaluated to an expression
+  public function step():Bool {
+    if(world.stack.isEmpty()) return false ;
+    var frame = world.stack.first();
+
+    switch(frame.step()) {
+      case Push(ast, binding):
+        pushCode(ast, binding);
+        return false;
+      case Pop(result):
+        world.currentExpression = result;
+        world.stack.pop();
+        if(isInProgress())
+          world.stack.last().returned(result);
+        return true;
+      case NoAction:
+        return false;
+    }
   }
+  // case Pending(obj):
+  //   world.currentExpression = obj;
+  //   world.stack.pop();
+  //   return true;
+  // case Unevaluated(ast):
+  //   frame.evaluation = toEvaluation(ast);
+  //   return false;
+  // case _: throw "UNHANDLED EVALUATION: " + frame.evaluation;
 
   public function isInProgress() {
-    return world.stackSize == 0;
+    return world.stackSize != 0;
   }
 
   public function evaluateAll():RObject {
-    return world.rubyNil;
+    while(isInProgress()) step();
+    return world.currentExpression;
   }
 
   // ----- PRIVATE -----
-
   // function get_isUnfinished() {
   //   switch(getEval()) {
   //     // the terminals

@@ -1,6 +1,6 @@
 package ruby;
 
-import ruby.ds.InternalMap;
+import ruby.ds.*;
 import ruby.ds.objects.*;
 
 
@@ -68,13 +68,12 @@ class World {
 
   // faux attributes
   public var stackSize(get, never):Int;
-  function get_stackSize() return world.stack.length;
+  function get_stackSize() return stack.length;
 
   public var currentBinding(get, never):RBinding;
   function get_currentBinding() {
-    var sf = world.stack.last();
-    if(sf == null) return toplevelBinding;
-    return sf.binding;
+    if(stack.isEmpty()) return toplevelBinding;
+    return stack.last().binding;
   }
 
   public var objectSpace(get, never):Array<RObject>;  // do I actually want to expose this directly?
@@ -82,6 +81,7 @@ class World {
 
   // Objects special enough to be properties
   public var              main(get, never):RObject;
+  public var             stack(get, never):List<StackFrame>;
   public var           rubyNil(get, never):RObject;
   public var         rubyFalse(get, never):RObject;
   public var          rubyTrue(get, never):RObject;
@@ -95,6 +95,7 @@ class World {
   public var currentExpression(get,   set):RObject;
 
   function              get_main() return world.main;
+  function             get_stack() return world.stack;
   function           get_rubyNil() return world.rubyNil;
   function         get_rubyFalse() return world.rubyFalse;
   function          get_rubyTrue() return world.rubyTrue;
