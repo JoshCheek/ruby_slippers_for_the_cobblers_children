@@ -10,7 +10,7 @@ class TestSupport extends ruby.support.TestCase {
     assertInspects(world.stringLiteral("abc"), '"abc"');
   }
 
-  function _testAssertNextExpressionsWithFewer() {
+  function testAssertNextExpressionsWithFewer() {
     pushCode("true; nil; true");
     assertNextExpressions([
       world.rubyTrue,
@@ -19,7 +19,7 @@ class TestSupport extends ruby.support.TestCase {
     ]);
   }
 
-  function _testAssertNextExpressionsWithExact() {
+  function testAssertNextExpressionsWithExact() {
     pushCode("true; nil; true");
     assertNextExpressions([
       world.rubyTrue,
@@ -27,6 +27,19 @@ class TestSupport extends ruby.support.TestCase {
       world.rubyTrue,
       world.rubyTrue, // list evaluates to last expression in it
     ]);
+  }
+
+  function testAssertNextExpressionsWithMore() {
+    pushCode("true; nil; true");
+    try assertNextExpressions([
+          world.rubyTrue,
+          world.rubyNil,
+          world.rubyTrue,
+          world.rubyTrue,
+          world.rubyTrue,
+        ])
+    catch(x:haxe.unit.TestStatus) return;
+    throw("Should have raised because we expected more expressions");
   }
 
   function testAssertNull() {
