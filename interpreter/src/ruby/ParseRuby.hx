@@ -39,7 +39,7 @@ class ParseRuby {
       case "integer"               : AstInteger(ast.value);
       case "float"                 : AstFloat(ast.value);
       case "string"                : AstString(ast.value);
-      case "expressions"           : AstExpressions(fromJsonArray(ast.expressions));
+      case "expressions"           : AstExprs(fromJsonArray(ast.expressions));
       case "set_local_variable"    : AstSetLocalVariable(ast.name, fromJson(ast.value));
       case "get_local_variable"    : AstGetLocalVariable(ast.name);
       case "set_instance_variable" : AstSetInstanceVariable(ast.name, fromJson(ast.value));

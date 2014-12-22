@@ -9,7 +9,7 @@ enum Ast {
   AstInteger(value:Int);
   AstFloat(value:Float);
   AstString(value:String);
-  AstExpressions(expressions:Array<Ast>);
+  AstExprs(expressions:Array<Ast>);
   AstUndefined(code:Dynamic);
   AstSetLocalVariable(name:String, value:Ast);
   AstGetLocalVariable(name:String);

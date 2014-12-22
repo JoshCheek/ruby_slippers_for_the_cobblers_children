@@ -12,13 +12,13 @@ class TestParser extends ruby.support.TestCase {
   // literals
   function testSpecialObjects() {
     assertParses(    "nil;    true;    false;    self",
-      AstExpressions([AstNil, AstTrue, AstFalse, AstSelf])
+      AstExprs([AstNil, AstTrue, AstFalse, AstSelf])
     );
   }
 
   function testIntegers() {
     assertParses(               "1;             -123",
-      AstExpressions([AstInteger(1), AstInteger(-123)])
+      AstExprs([AstInteger(1), AstInteger(-123)])
     );
   }
 
@@ -39,7 +39,7 @@ class TestParser extends ruby.support.TestCase {
       A
       @a = 1
       @a",
-      AstExpressions([
+      AstExprs([
         AstSetLocalVariable("a", AstInteger(1)),
         AstGetLocalVariable("a"),
         AstConstant(AstNil, "A"), // going w/ nil b/c that's what comes in, but kinda seems like the parser should make this a CurrentNamespace node or something
@@ -82,7 +82,7 @@ class TestParser extends ruby.support.TestCase {
         true
       end
       ",
-      AstExpressions([
+      AstExprs([
         AstMethodDefinition("bland_method", [], AstNil),
         AstMethodDefinition(
           "method_with_args_and_body",
