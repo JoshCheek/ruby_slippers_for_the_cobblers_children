@@ -5,28 +5,27 @@ using ruby.LanguageGoBag;
 using Lambda;
 
 
+// if we make StackFrame a superclass, can avoid a lot of duplication
 class Pending {
   public var ast:Ast;
   public var binding:RBinding;
-  var object:RObject;
-
-  // TODO: Can we remove some of these types:
-  public function new(ast:Ast, binding:RBinding, obj:RObject) {
-    this.ast     = ast;
-    this.binding = binding;
-    this.object  = obj;
+  public function new(ast, binding, eventualResult) {
+    this.ast            = ast;
+    this.binding        = binding;
+    this.eventualResult = eventualResult;
   }
 
-  public function step():EvaluationResult {
-    return Pop(object);
-  }
+  public function step():EvaluationResult
+    return Pop(eventualResult);
 
-  public function returned(obj:RObject):Void {
+  public function returned(_:RObject)
     throw "SHOULD NEVER RETURN TO THIS NODE!";
-  }
+
+  var eventualResult:RObject;
 }
 
-// TODO: can we typedef Asts = Array<Ast>; ?? (can we put this in ruby.ds.Ast
+
+// could consolidate step and returned with step(Null<RObject>)
 class Expressions {
   public var ast:Ast;
   public var binding:RBinding;
@@ -35,7 +34,7 @@ class Expressions {
   var result:RObject;
   var index:Int;
 
-  public function new(ast:Ast, binding:RBinding, expressions:Array<Ast>, initialResult:RObject, index=-1) {
+  public function new(ast, binding, expressions, initialResult, index=-1) {
     this.ast         = ast;
     this.binding     = binding;
     this.expressions = expressions;
@@ -45,17 +44,15 @@ class Expressions {
 
   public function step():EvaluationResult {
     index++;
-    if(index < expressions.length)
-      return Push(expressions[index], binding);
-    if(index == expressions.length)
-      return Pop(result);
+    if(index <  expressions.length) return Push(expressions[index], binding);
+    if(index == expressions.length) return Pop(result);
     else throw "THIS SHOULDN'T HAPPEN!";
   }
 
-  public function returned(obj:RObject):Void {
-    result = obj;
-  }
+  public function returned(obj) result = obj;
 }
+
+
 class Interpreter {
   private var world:ruby.World;
 
@@ -65,15 +62,13 @@ class Interpreter {
 
   public function pushCode(code:Ast, ?binding) {
     if(binding==null) binding = world.currentBinding;
-    var stackFrame:StackFrame = switch(code) {
-      case AstTrue:  new Pending(code, binding, world.rubyTrue);
-      case AstNil:   new Pending(code, binding, world.rubyNil);
-      case AstFalse: new Pending(code, binding, world.rubyFalse);
-      case AstExpressions(expressions):
-        new Expressions(code, binding, expressions, world.rubyNil);
-      case _: throw "Unhandled AST: " + code;
-    }
-    world.stack.push(stackFrame);
+    world.stack.push(switch(code) {
+      case AstTrue:                     new Pending(code, binding, world.rubyTrue);
+      case AstNil:                      new Pending(code, binding, world.rubyNil);
+      case AstFalse:                    new Pending(code, binding, world.rubyFalse);
+      case AstExpressions(expressions): new Expressions(code, binding, expressions, world.rubyNil);
+      case _:                           throw "Unhandled AST: " + code;
+    });
   }
 
   public function nextExpression():RObject {
@@ -83,7 +78,7 @@ class Interpreter {
 
   // returns true if this step evaluated to an expression
   public function step():Bool {
-    if(world.stack.isEmpty()) return false ;
+    if(isFinished()) return false ;
     var frame = world.stack.first();
 
     switch(frame.step()) {
@@ -93,24 +88,19 @@ class Interpreter {
       case Pop(result):
         world.currentExpression = result;
         world.stack.pop();
-        if(isInProgress())
-          world.stack.last().returned(result);
+        if(isInProgress()) world.stack.last().returned(result);
         return true;
       case NoAction:
         return false;
     }
   }
-  // case Pending(obj):
-  //   world.currentExpression = obj;
-  //   world.stack.pop();
-  //   return true;
-  // case Unevaluated(ast):
-  //   frame.evaluation = toEvaluation(ast);
-  //   return false;
-  // case _: throw "UNHANDLED EVALUATION: " + frame.evaluation;
 
   public function isInProgress() {
-    return world.stackSize != 0;
+    return !isFinished();
+  }
+
+  public function isFinished() {
+    return world.stack.isEmpty();
   }
 
   public function evaluateAll():RObject {
@@ -119,16 +109,6 @@ class Interpreter {
   }
 
   // ----- PRIVATE -----
-  // function get_isUnfinished() {
-  //   switch(getEval()) {
-  //     // the terminals
-  //     case Finished|Evaluated(_)|EvaluationList(ListEnd):
-  //       return false;
-  //     case _:
-  //       return true;
-  //   }
-  // }
-
   // // updates current evaluation, updates current expression if relevant;
   // private function setEval(evaluation:EvaluationState):EvaluationState {
   //   switch(evaluation) {
@@ -146,13 +126,6 @@ class Interpreter {
   //   return evaluation;
   // }
 
-  // private function getEval():EvaluationState {
-  //   return currentEvaluation;
-  // }
-
-  // private function evaluationFinished():Bool {
-  //   return _evaluationFinished;
-  // }
 
   // private function continueEvaluating(toEval:EvaluationState) {
   //   switch(toEval) {

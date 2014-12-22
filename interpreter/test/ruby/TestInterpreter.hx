@@ -9,12 +9,12 @@ import ruby.ds.Errors;
 using ruby.LanguageGoBag;
 
 class TestInterpreter extends ruby.support.TestCase {
-  function _testInterpretsSingleExpression() {
+  function testInterpretsSingleExpression() {
     pushCode("true");
     rAssertEq(world.rubyTrue, interpreter.nextExpression());
   }
 
-  function _testEvaluatingExpressionsUpdatesTheCurrentExpression() {
+  function testEvaluatingExpressionsUpdatesTheCurrentExpression() {
     pushCode("true");
     rAssertEq(world.rubyNil, world.currentExpression);
     interpreter.nextExpression();
