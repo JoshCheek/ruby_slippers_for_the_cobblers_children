@@ -43,7 +43,8 @@ class World {
     return value;
   }
 
-  public function inspect(obj:RObject):String {
+  // s b/c static and instance functions can't have the same name -.^
+  static public function sinspect(obj:RObject):String {
     if(obj == null) return 'Haxe null';
 
     var klass = switch(obj) {
@@ -64,6 +65,9 @@ class World {
     // } else {
     //   return "" + obj; // :D
     }
+  }
+  public function inspect(obj:RObject):String {
+    return World.sinspect(obj);
   }
 
   // faux attributes

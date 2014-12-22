@@ -46,21 +46,21 @@ class TestInterpreter extends ruby.support.TestCase {
     rAssertEq(world.stringLiteral("Josh"), interpreter.nextExpression());
   }
 
-  // function testItSetsAndGetsLocalVariables() {
-  //   pushCode("var1 = 'b'
-  //            'c'
-  //            var1
-  //            var2 = 'd'
-  //            var1 = 'e'
-  //            var2
-  //            var1
-  //            ");
-  //   var rStrs = ['b', 'b', 'c', 'b', 'd', 'd', 'e', 'e', 'd', 'e'].map(function(str) {
-  //     var obj:RObject = world.stringLiteral(str); // *sigh*
-  //     return obj;
-  //   });
-  //   assertNextExpressions(rStrs);
-  // }
+  function testItSetsAndGetsLocalVariables() {
+    pushCode("var1 = 'b'
+             'c'
+             var1
+             var2 = 'd'
+             var1 = 'e'
+             var2
+             var1
+             ");
+    var rStrs = ['b', 'b', 'c', 'b', 'd', 'd', 'e', 'e', 'd', 'e'].map(function(str) {
+      var obj:RObject = world.stringLiteral(str); // *sigh*
+      return obj;
+    });
+    assertNextExpressions(rStrs);
+  }
 
   // function testMoarLocalVars() {
   //   pushCode("a = 'x'; b = a");

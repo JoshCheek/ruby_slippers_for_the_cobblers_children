@@ -53,6 +53,50 @@ class Expressions {
   public function returned(obj) result = obj;
 }
 
+class SetLocal {
+  public var ast:Ast;
+  public var binding:RBinding;
+
+  var name:String;
+  var rhs:Ast;
+  var value:Null<RObject>;
+
+  public function new(ast, binding, name, rhs) {
+    this.ast     = ast;
+    this.binding = binding;
+    this.name    = name;
+    this.rhs     = rhs;
+    this.value   = null;
+  }
+
+  public function step():EvaluationResult {
+    if(value==null) return Push(rhs, binding);
+    binding.lvars[name] = value;
+    return Pop(value);
+  }
+
+  public function returned(obj) value = obj;
+}
+
+class GetLocal {
+  public var ast:Ast;
+  public var binding:RBinding;
+
+  var name:String;
+
+  public function new(ast, binding, name) {
+    this.ast     = ast;
+    this.binding = binding;
+    this.name    = name;
+  }
+
+  public function step():EvaluationResult {
+    return Pop(binding.lvars[name]);
+  }
+
+  public function returned(obj) throw "Should never return!";
+}
+
 
 class Interpreter {
   private var world:ruby.World;
@@ -69,7 +113,9 @@ class Interpreter {
       case False:              new Pending(code, binding, function() return world.rubyFalse);
       case String(value):      new Pending(code, binding, function() return world.stringLiteral(value));
       case Exprs(expressions): new Expressions(code, binding, expressions, world.rubyNil);
-      case _:                     throw "Unhandled AST: " + code;
+      case SetLvar(name, rhs): new SetLocal(code, binding, name, rhs);
+      case GetLvar(name):      new GetLocal(code, binding, name);
+      case _:                  throw "Unhandled AST: " + code;
     });
   }
 
@@ -90,7 +136,7 @@ class Interpreter {
       case Pop(result):
         world.currentExpression = result;
         world.stack.pop();
-        if(isInProgress()) world.stack.last().returned(result);
+        if(isInProgress()) world.stack.first().returned(result);
         return true;
       case NoAction:
         return false;
