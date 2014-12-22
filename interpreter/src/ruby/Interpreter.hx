@@ -97,6 +97,45 @@ class GetLocal {
   public function returned(obj) throw "Should never return!";
 }
 
+enum ConstNs {
+  // Toplevel; I assume at some point
+  Current;
+  Lookup(code:Ast);
+  Found(namespace:RClass);
+}
+class GetConst {
+  public var ast:Ast;
+  public var binding:RBinding;
+
+  var nsCode:Ast;
+  var name:String;
+  var ns:ConstNs;
+
+  public function new(ast, binding, name, ns) {
+    this.ast     = ast;
+    this.binding = binding;
+    this.name    = name;
+    this.ns      = ns;
+  }
+
+  public function step():EvaluationResult {
+    switch(ns) {
+      case Current:
+        ns = Found(binding.defTarget);
+        return step();
+      case Lookup(code):
+        throw("We don't have any tests for this yet, shouldn't be donw this path!");
+        return Push(code, binding);
+      case Found(nsClass):
+        return Pop(nsClass.constants[name]);
+    }
+  }
+
+  public function returned(ns:RObject) {
+    throw "TRIED RETURNING: " + ruby.World.sinspect(ns) + " BUT WE DON'T HAVE TESTS FOR THIS YET!";
+  }
+}
+
 
 class Interpreter {
   private var world:ruby.World;
@@ -107,16 +146,20 @@ class Interpreter {
 
   public function pushCode(code:Ast, ?binding) {
     if(binding==null) binding = world.currentBinding;
-    world.stack.push(switch(code) {
-      case True:               new Pending(code, binding, function() return world.rubyTrue);
-      case Nil:                new Pending(code, binding, function() return world.rubyNil);
-      case False:              new Pending(code, binding, function() return world.rubyFalse);
-      case String(value):      new Pending(code, binding, function() return world.stringLiteral(value));
-      case Exprs(expressions): new Expressions(code, binding, expressions, world.rubyNil);
-      case SetLvar(name, rhs): new SetLocal(code, binding, name, rhs);
-      case GetLvar(name):      new GetLocal(code, binding, name);
+    var sf:StackFrame = switch(code) {
+      case True:                 new Pending(code, binding, function() return world.rubyTrue);
+      case Nil:                  new Pending(code, binding, function() return world.rubyNil);
+      case False:                new Pending(code, binding, function() return world.rubyFalse);
+      case String(value):        new Pending(code, binding, function() return world.stringLiteral(value));
+      case Exprs(expressions):   new Expressions(code, binding, expressions, world.rubyNil);
+      case SetLvar(name, rhs):   new SetLocal(code, binding, name, rhs);
+      case GetLvar(name):        new GetLocal(code, binding, name);
+      case Constant(None, name): new GetConst(code, binding, name, ConstNs.Current);
+      case Constant(ns, name):   new GetConst(code, binding, name, ConstNs.Lookup(ns));
       case _:                  throw "Unhandled AST: " + code;
-    });
+    }
+    // trace("PUSHING: " + sf.ast);
+    world.stack.push(sf);
   }
 
   public function nextExpression():RObject {
@@ -128,6 +171,8 @@ class Interpreter {
   public function step():Bool {
     if(isFinished()) throw new NothingToEvaluateError("Check before evaluating!");
     var frame = world.stack.first();
+    // trace("STACK SIZE: " + world.stack.length);
+    // trace("CURRENT: " + frame.ast);
 
     switch(frame.step()) {
       case Push(ast, binding):

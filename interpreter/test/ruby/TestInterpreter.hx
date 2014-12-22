@@ -62,26 +62,26 @@ class TestInterpreter extends ruby.support.TestCase {
     assertNextExpressions(rStrs);
   }
 
-  // function testMoarLocalVars() {
-  //   pushCode("a = 'x'; b = a");
-  //   interpreter.nextExpression();
-  //   interpreter.nextExpression();
-  //   var a = world.getLocal('a');
-  //   interpreter.nextExpression();
-  //   // TODO refute local var 'b' exists... or actually, with how Ruby works, this is nil at this point
-  //   interpreter.nextExpression();
-  //   var b = world.getLocal('b');
-  //   assertEquals(a, b); // a and b have ref to same obj
-  // }
+  function testMoarLocalVars() {
+    pushCode("a = 'x'; b = a");
+    interpreter.nextExpression();
+    interpreter.nextExpression();
+    var a = world.getLocal('a');
+    interpreter.nextExpression();
+    // TODO: rAssertNil(world.getLocal('b'));
+    interpreter.nextExpression();
+    var b = world.getLocal('b');
+    assertEquals(a, b); // a and b have ref to same obj
+  }
 
-  // //TODO: local vars with more than 1 binding
+  //TODO: local vars with more than 1 binding on the stack
 
 
-  // public function testToplevelConstantLookup() {
-  //   pushCode("Object; String");
-  //   rAssertEq(world.objectClass, interpreter.nextExpression());
-  //   rAssertEq(world.stringClass, interpreter.nextExpression());
-  // }
+  public function testToplevelConstantLookup() {
+    pushCode("Object; String");
+    rAssertEq(world.objectClass, interpreter.nextExpression());
+    rAssertEq(world.stringClass, interpreter.nextExpression());
+  }
 
   // public function testClassDefinition() {
   //   pushCode("class A; end");
