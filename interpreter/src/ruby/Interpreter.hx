@@ -5,185 +5,11 @@ import ruby.ds.Errors;
 using ruby.LanguageGoBag;
 using Lambda;
 
-
-// if we make StackFrame a superclass, can avoid a lot of duplication
-class Pending {
-  public var ast:Ast;
-  public var binding:RBinding;
-
-  var eventualResult:Void->RObject;
-  public function new(ast, binding, eventualResult) {
-    this.ast            = ast;
-    this.binding        = binding;
-    this.eventualResult = eventualResult;
-  }
-
-  public function step():EvaluationResult
-    return Pop(eventualResult());
-
-  public function returned(_:RObject)
-    throw "SHOULD NEVER RETURN TO THIS NODE!";
+enum EvaluationResult {
+  Push(code:Ast, binding:RBinding);
+  Pop(returnValue:RObject);
+  NoAction;
 }
-
-
-// could consolidate step and returned with step(Null<RObject>)
-class Expressions {
-  public var ast:Ast;
-  public var binding:RBinding;
-
-  var expressions:Array<Ast>;
-  var result:RObject;
-  var index:Int;
-
-  public function new(ast, binding, expressions, initialResult, index=-1) {
-    this.ast         = ast;
-    this.binding     = binding;
-    this.expressions = expressions;
-    this.result      = initialResult;
-    this.index       = index;
-  }
-
-  public function step():EvaluationResult {
-    index++;
-    if(index <  expressions.length) return Push(expressions[index], binding);
-    if(index == expressions.length) return Pop(result);
-    else throw "THIS SHOULDN'T HAPPEN!";
-  }
-
-  public function returned(obj) result = obj;
-}
-
-class SetLocal {
-  public var ast:Ast;
-  public var binding:RBinding;
-
-  var name:String;
-  var rhs:Ast;
-  var value:Null<RObject>;
-
-  public function new(ast, binding, name, rhs) {
-    this.ast     = ast;
-    this.binding = binding;
-    this.name    = name;
-    this.rhs     = rhs;
-    this.value   = null;
-  }
-
-  public function step():EvaluationResult {
-    if(value==null) return Push(rhs, binding);
-    binding.lvars[name] = value;
-    return Pop(value);
-  }
-
-  public function returned(obj) value = obj;
-}
-
-class GetLocal {
-  public var ast:Ast;
-  public var binding:RBinding;
-
-  var name:String;
-
-  public function new(ast, binding, name) {
-    this.ast     = ast;
-    this.binding = binding;
-    this.name    = name;
-  }
-
-  public function step():EvaluationResult {
-    return Pop(binding.lvars[name]);
-  }
-
-  public function returned(obj) throw "Should never return!";
-}
-
-enum ConstNs {
-  // Toplevel; I assume at some point
-  Current;
-  Lookup(code:Ast);
-  Found(namespace:RClass);
-}
-class GetConst {
-  public var ast:Ast;
-  public var binding:RBinding;
-
-  var name:String;
-  var ns:ConstNs;
-
-  public function new(ast, binding, name, ns) {
-    this.ast     = ast;
-    this.binding = binding;
-    this.name    = name;
-    this.ns      = ns;
-  }
-
-  public function step():EvaluationResult {
-    switch(ns) {
-      case Current:
-        ns = Found(binding.defTarget);
-        return step();
-      case Lookup(code):
-        throw("We don't have any tests for this yet, shouldn't be donw this path!");
-        return Push(code, binding);
-      case Found(nsClass):
-        return Pop(nsClass.constants[name]);
-    }
-  }
-
-  public function returned(ns:RObject) {
-    throw "TRIED RETURNING: " + ruby.World.sinspect(ns) + " BUT WE DON'T HAVE TESTS FOR THIS YET!";
-  }
-}
-
-
-// Class(Constant(None,A),None,None)
-class OpenClass {
-  public var ast:Ast;
-  public var binding:RBinding;
-
-  var world:ruby.World;
-  var name:String;
-  var ns:ConstNs;
-  var retVal:RObject;
-
-  // TODO: SUPERCLASS, BODY
-  public function new(ast, binding, world, name, ns) {
-    this.ast     = ast;
-    this.binding = binding;
-    this.world   = world;
-    this.name    = name;
-    this.ns      = ns;
-  }
-
-  public function step():EvaluationResult {
-    switch(ns) {
-      case Current:
-        ns = Found(binding.defTarget);
-        return step();
-      case Lookup(code):
-        throw("We don't have any tests for this yet, shouldn't be donw this path!");
-        return Push(code, binding);
-      case Found(nsClass):
-        if(nsClass.constants[name] == null) {
-          var klass:RClass = {
-            name:       name,
-            klass:      world.classClass,
-            superclass: world.objectClass,
-            ivars:      new InternalMap(),
-            imeths:     new InternalMap(),
-            constants:  new InternalMap(),
-          };
-          nsClass.constants[name] = klass;
-        }
-        return Pop(world.rubyNil); // b/c there is no body
-    }
-  }
-
-  public function returned(ns:RObject) {
-    throw "TRIED RETURNING: " + ruby.World.sinspect(ns) + " BUT WE DON'T HAVE TESTS FOR THIS YET!";
-  }
-}
-
 
 class SendMessage {
   public var ast:Ast;
@@ -200,6 +26,7 @@ class SendMessage {
   public function new(ast, binding, world, targetCode, message, argsCode) {
     this.ast        = ast;
     this.binding    = binding;
+
     this.world      = world;
     this.targetCode = targetCode;
     this.message    = message;
@@ -272,23 +99,41 @@ class Interpreter {
 
   public function pushCode(code:Ast, ?binding) {
     if(binding==null) binding = world.currentBinding;
-    var sf:StackFrame = switch(code) {
-      case True:                 new Pending(code, binding, function() return world.rubyTrue);
-      case Nil:                  new Pending(code, binding, function() return world.rubyNil);
-      case False:                new Pending(code, binding, function() return world.rubyFalse);
-      case String(value):        new Pending(code, binding, function() return world.stringLiteral(value));
-      case Exprs(expressions):   new Expressions(code, binding, expressions, world.rubyNil);
-      case SetLvar(name, rhs):   new SetLocal(code, binding, name, rhs);
-      case GetLvar(name):        new GetLocal(code, binding, name);
-      case Constant(ns, name):   new GetConst(code, binding, name, nsFor(ns));
+    var state:ruby.ds.Interpreter.ExecutionState = switch(code) {
+      case True:                 ruby.ds.Interpreter.ExecutionState.Value(world.rubyTrue);
+      case Nil:                  ruby.ds.Interpreter.ExecutionState.Value(world.rubyNil);
+      case False:                ruby.ds.Interpreter.ExecutionState.Value(world.rubyFalse);
+      case String(value):        ruby.ds.Interpreter.ExecutionState.PendingValue(function() return world.stringLiteral(value));
+
+      case Exprs(expressions):
+        ruby.ds.Interpreter.ExecutionState.Expressions(
+          {crnt:0, expressions:expressions}
+        );
+
+      case SetLvar(name, rhs):
+        ruby.ds.Interpreter.ExecutionState.SetLocal({state: "rhs", name:name, rhs:rhs});
+      case GetLvar(name):
+        ruby.ds.Interpreter.ExecutionState.GetLocal({name:name});
+      case Constant(ns, name):
+        ruby.ds.Interpreter.ExecutionState.GetConst({state:"ns", name:name, nsCode:ns});
       case Class(Constant(ns, name), superclass, body):
-        // Class(Constant(None,A),None,None)
-        new OpenClass(code, binding, world, name, nsFor(ns));
+        ruby.ds.Interpreter.ExecutionState.OpenClass(
+            {state:"ns", name:name, nsCode:ns, ns:null, klass:null}
+        );
       case Send(target, message, args):
-        // Send(String(abc),class,[])
-        new SendMessage(code, binding, world, target, message, args);
-      case _:                  throw "Unhandled AST: " + code;
+        ruby.ds.Interpreter.ExecutionState.Send({
+          targetCode:target,
+          target:null,
+          message:message,
+          argsCode:args,
+          args:[],
+          result:null,
+        });
+      case _: throw "Unhandled AST: " + code;
     }
+
+    var sf:StackFrame = {ast:code, binding:binding, state:state};
+
     // trace("PUSHING: " + sf.ast);
     world.stack.push(sf);
   }
@@ -305,14 +150,13 @@ class Interpreter {
     // trace("STACK SIZE: " + world.stack.length);
     // trace("CURRENT: " + frame.ast);
 
-    switch(frame.step()) {
+    switch(continueExecuting(frame)) {
       case Push(ast, binding):
         pushCode(ast, binding);
         return false;
       case Pop(result):
         world.currentExpression = result;
         world.stack.pop();
-        if(isInProgress()) world.stack.first().returned(result);
         return true;
       case NoAction:
         return false;
@@ -333,10 +177,84 @@ class Interpreter {
   }
 
   // ----- PRIVATE -----
-  function nsFor(ns:Ast):ConstNs {
-    switch(ns) {
-      case None: return Current;
-      case _:    return Lookup(ns);
+  function currentExpression():RObject {
+    return world.currentExpression;
+  }
+
+  function continueExecuting(sf:StackFrame):EvaluationResult {
+    switch(sf.state) {
+    case Value(result):
+      return Pop(result);
+
+    case PendingValue(getValue):
+      return Pop(getValue());
+
+    case Expressions(state):
+      if(state.crnt < state.expressions.length) {
+        return Push(
+          state.expressions[state.crnt++],
+          sf.binding
+        );
+      }
+      if(state.crnt == state.expressions.length) {
+        return Pop(currentExpression());
+      } else {
+        throw "SHOULDN'T HAPPEN!";
+      }
+
+    case SetLocal(state={state:crntState, name:name, rhs:rhs}):
+      if(crntState == "rhs") {
+        state.state = "lhs";
+        return Push(rhs, sf.binding);
+      }
+      sf.binding.lvars[name] = currentExpression();
+      return Pop(currentExpression());
+
+    case GetLocal({name:name}):
+      return Pop(sf.binding.lvars[name]);
+
+    case GetConst({state:"ns", nsCode:None, name:name}):
+      return Pop(sf.binding.defTarget.constants[name]);
+    case GetConst(state={state:"ns", nsCode:code, name:name}):
+      state.state = 'get';
+      return Push(code, sf.binding);
+    case GetConst({state: "get", nsCode:ast, name:name}):
+      return Pop(currentExpression());
+    case GetConst({state: s}):
+      throw "Shouldn't have gotten here, what is state?: " + s;
+
+    case OpenClass(state={state:"ns", nsCode:None, name:name}):
+      state.state = "def";
+      state.ns = sf.binding.defTarget;
+      return NoAction;
+    case OpenClass(state={state:"ns", nsCode:ns, name:name}):
+      throw "No tests on this yet";
+      state.state = "get";
+      return Push(ns, sf.binding);
+    case OpenClass(state={state:"get"}):
+      throw "No tests on this yet";
+      state.state = "def";
+      var expr:Dynamic = currentExpression();
+      state.ns = expr;
+      return NoAction;
+    case OpenClass(state={state:"def", name:name, ns:ns}):
+      if(ns.constants[name] == null) {
+        var klass:RClass = {
+          name:       name,
+          klass:      world.classClass,
+          superclass: world.objectClass,
+          ivars:      new InternalMap(),
+          imeths:     new InternalMap(),
+          constants:  new InternalMap(),
+        };
+        ns.constants[name] = klass;
+      }
+      return Pop(world.rubyNil);
+    case OpenClass(_):
+      throw "Shouldn't have gotten here, what is state?: " + sf.state;
+
+    case Send(_):
+      throw "haven't moved this yet";
     }
   }
 
