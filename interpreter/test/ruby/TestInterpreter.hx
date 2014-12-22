@@ -9,78 +9,74 @@ import ruby.ds.Errors;
 using ruby.LanguageGoBag;
 
 class TestInterpreter extends ruby.support.TestCase {
-  function testItsCurrentExpressionIsNilByDefault() {
-    assertEquals(world.rubyNil, world.currentExpression);
-  }
+  // function testInterpretsSingleExpression() {
+  //   addCode("true");
+  //   rAssertEq(world.rubyTrue, interpreter.nextExpression());
+  // }
 
-  function testInterpretsSingleExpression() {
-    addCode("true");
-    rAssertEq(world.rubyTrue, interpreter.nextExpression());
-  }
+  // function testInterpretsMultipleExpressions() {
+  //   addCode("nil\ntrue\nfalse");
+  //   rAssertEq(world.rubyNil, interpreter.nextExpression());
+  //   rAssertEq(world.rubyTrue, interpreter.nextExpression());
+  // }
 
-  function testInterpretsMultipleExpressions() {
-    addCode("nil\ntrue\nfalse");
-    rAssertEq(world.rubyNil, interpreter.nextExpression());
-    rAssertEq(world.rubyTrue, interpreter.nextExpression());
-  }
+  // function testThrowsIfAskedForExpressionAfterFinished() {
+  //   assertThrows(function() interpreter.nextExpression());
 
-  function testThrowsIfAskedForExpressionAfterFinished() {
-    assertThrows(function() interpreter.nextExpression());
+  //   addCode("true");
+  //   interpreter.nextExpression();
+  //   assertThrows(function() interpreter.nextExpression());
+  // }
 
-    addCode("true");
-    interpreter.nextExpression();
-    assertThrows(function() interpreter.nextExpression());
-  }
+  // // we're ignoring fixnums and symbols for now
+  // function testSpecialConstants() {
+  //   addCode("nil\ntrue\nfalse\n");
+  //   rAssertEq(world.rubyNil,   interpreter.nextExpression());
+  //   rAssertEq(world.rubyTrue,  interpreter.nextExpression());
+  //   rAssertEq(world.rubyFalse, interpreter.nextExpression());
+  // }
 
-  // we're ignoring fixnums and symbols for now
-  function testSpecialConstants() {
-    addCode("nil\ntrue\nfalse\n");
-    rAssertEq(world.rubyNil,   interpreter.nextExpression());
-    rAssertEq(world.rubyTrue,  interpreter.nextExpression());
-    rAssertEq(world.rubyFalse, interpreter.nextExpression());
-  }
+  // function testItEvaluatesAStringLiteral() {
+  //   addCode('"Josh"');
+  //   rAssertEq(world.stringLiteral("Josh"), interpreter.nextExpression());
+  // }
 
-  function testItEvaluatesAStringLiteral() {
-    addCode('"Josh"');
-    rAssertEq(world.stringLiteral("Josh"), interpreter.nextExpression());
-  }
+  // function testItSetsAndGetsLocalVariables() {
+  //   addCode("var1 = 'b'
+  //            'c'
+  //            var1
+  //            var2 = 'd'
+  //            var1 = 'e'
+  //            var2
+  //            var1
+  //            ");
+  //   var rStrs = ['b', 'b', 'c', 'b', 'd', 'd', 'e', 'e', 'd', 'e'].map(function(str) {
+  //     var obj:RObject = world.stringLiteral(str); // *sigh*
+  //     return obj;
+  //   });
+  //   assertNextExpressions(rStrs);
+  // }
 
-  function testItSetsAndGetsLocalVariables() {
-    addCode("var1 = 'b'
-             'c'
-             var1
-             var2 = 'd'
-             var1 = 'e'
-             var2
-             var1
-             ");
-    var rStrs = ['b', 'b', 'c', 'b', 'd', 'd', 'e', 'e', 'd', 'e'].map(function(str) {
-      var obj:RObject = world.stringLiteral(str); // *sigh*
-      return obj;
-    });
-    assertNextExpressions(rStrs);
-  }
+  // function testMoarLocalVars() {
+  //   addCode("a = 'x'; b = a");
+  //   interpreter.nextExpression();
+  //   interpreter.nextExpression();
+  //   var a = world.getLocal('a');
+  //   interpreter.nextExpression();
+  //   // TODO refute local var 'b' exists... or actually, with how Ruby works, this is nil at this point
+  //   interpreter.nextExpression();
+  //   var b = world.getLocal('b');
+  //   assertEquals(a, b); // a and b have ref to same obj
+  // }
 
-  function testMoarLocalVars() {
-    addCode("a = 'x'; b = a");
-    interpreter.nextExpression();
-    interpreter.nextExpression();
-    var a = world.getLocal('a');
-    interpreter.nextExpression();
-    // TODO refute local var 'b' exists... or actually, with how Ruby works, this is nil at this point
-    interpreter.nextExpression();
-    var b = world.getLocal('b');
-    assertEquals(a, b); // a and b have ref to same obj
-  }
-
-  //TODO: local vars with more than 1 binding
+  // //TODO: local vars with more than 1 binding
 
 
-  public function testToplevelConstantLookup() {
-    addCode("Object; String");
-    rAssertEq(world.objectClass, interpreter.nextExpression());
-    rAssertEq(world.stringClass, interpreter.nextExpression());
-  }
+  // public function testToplevelConstantLookup() {
+  //   addCode("Object; String");
+  //   rAssertEq(world.objectClass, interpreter.nextExpression());
+  //   rAssertEq(world.stringClass, interpreter.nextExpression());
+  // }
 
   // public function testClassDefinition() {
   //   addCode("class A; end");
@@ -95,37 +91,37 @@ class TestInterpreter extends ruby.support.TestCase {
 
   // TODO: Test reopening the class
 
-  public function _testMessageSending() {
-    addCode("'abc'.class; :abc.class");
-    interpreter.nextExpression();
-    rAssertEq(world.stringClass, interpreter.nextExpression());
-  }
+  // public function _testMessageSending() {
+  //   addCode("'abc'.class; :abc.class");
+  //   interpreter.nextExpression();
+  //   rAssertEq(world.stringClass, interpreter.nextExpression());
+  // }
 
-  public function _testInstantiation() {
-    addCode("
-      class A
-      end
-      BasicObject.new
-      String.new
-      A.new
-    ");
-    interpreter.evaluateAll();
-    var os  = world.objectSpace;
-    var a   = os[os.length - 1];
-    var str = os[os.length - 2];
-    var bo  = os[os.length - 3];
-    rAssertEq(world.toplevelNamespace.constants['A'],   a.klass);
-    rAssertEq(world.stringClass,      str.klass);
-    rAssertEq(world.basicObjectClass, bo.klass);
-    // Instantiation
-    //   new
-    //     returns a RObject with klass set to self
-    //     initializes the object, passing the params
-    //   allocate
-    //     makes an RObject with the klass set
-    //   // Object#initialize
-    //   //   takes no params, does nothing
-  }
+  // public function _testInstantiation() {
+  //   addCode("
+  //     class A
+  //     end
+  //     BasicObject.new
+  //     String.new
+  //     A.new
+  //   ");
+  //   interpreter.evaluateAll();
+  //   var os  = world.objectSpace;
+  //   var a   = os[os.length - 1];
+  //   var str = os[os.length - 2];
+  //   var bo  = os[os.length - 3];
+  //   rAssertEq(world.toplevelNamespace.constants['A'],   a.klass);
+  //   rAssertEq(world.stringClass,      str.klass);
+  //   rAssertEq(world.basicObjectClass, bo.klass);
+  //   // Instantiation
+  //   //   new
+  //   //     returns a RObject with klass set to self
+  //   //     initializes the object, passing the params
+  //   //   allocate
+  //   //     makes an RObject with the klass set
+  //   //   // Object#initialize
+  //   //   //   takes no params, does nothing
+  // }
 
 
   /* ----- OLD TESTS THAT NEED TO BE REIMPLEMENTED -----

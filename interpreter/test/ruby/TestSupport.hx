@@ -10,8 +10,8 @@ class TestSupport extends ruby.support.TestCase {
     assertInspects(world.stringLiteral("abc"), '"abc"');
   }
 
-  function testAssertNextExpressionsWithFewer() {
-    addCode("true; nil; true");
+  function _testAssertNextExpressionsWithFewer() {
+    pushCode("true; nil; true");
     assertNextExpressions([
       world.rubyTrue,
       world.rubyNil,
@@ -19,8 +19,8 @@ class TestSupport extends ruby.support.TestCase {
     ]);
   }
 
-  function testAssertNextExpressionsWithExact() {
-    addCode("true; nil; true");
+  function _testAssertNextExpressionsWithExact() {
+    pushCode("true; nil; true");
     assertNextExpressions([
       world.rubyTrue,
       world.rubyNil,

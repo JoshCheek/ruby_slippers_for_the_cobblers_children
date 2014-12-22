@@ -3,16 +3,18 @@ package ruby;
 import ruby.ds.objects.RClass;
 using Lambda;
 
-// FIXME: we are using the ruby.ds.World, not ruby.World :/
 class TestBootstrappedWorld extends ruby.support.TestCase {
   /*****  EXECUTION ENVIRONMENT  *****/
   function testToplevelNamespaceIsObject() {
     assertEquals(world.objectClass, world.toplevelNamespace);
   }
 
-  function testStackOnlyContsinasTOPLEVEL_BINDING() {
-    assertEquals(1, world.stackSize);
-    assertEquals(world.toplevelBinding, world.currentBinding);
+  function testItsCurrentExpressionIsNilByDefault() {
+    assertEquals(world.rubyNil, world.currentExpression);
+  }
+
+  function testStackStartsEmpty() {
+    assertEquals(0, world.stackSize);
   }
 
   function testTOPLEVEL_BINDING() {

@@ -23,7 +23,7 @@ class World {
 
   public function stringLiteral(value:String):RString {
     var str:RString = {
-      klass: stringClass, // FIXME
+      klass: stringClass,
       ivars: new InternalMap(),
       value: value,
     }
@@ -71,7 +71,11 @@ class World {
   function get_stackSize() return world.stack.length;
 
   public var currentBinding(get, never):RBinding;
-  function get_currentBinding() return world.stack.last();
+  function get_currentBinding() {
+    var sf = world.stack.last();
+    if(sf == null) return toplevelBinding;
+    return sf.binding;
+  }
 
   public var objectSpace(get, never):Array<RObject>;  // do I actually want to expose this directly?
   function get_objectSpace() return world.objectSpace;

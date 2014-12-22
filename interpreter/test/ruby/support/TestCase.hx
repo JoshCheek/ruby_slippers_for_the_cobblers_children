@@ -54,9 +54,9 @@ class TestCase extends haxe.unit.TestCase {
     assertEquals(null, value, c);
   }
 
-  function addCode(rawCode:String):Void {
+  function pushCode(rawCode:String):Void {
     var ast = ParseRuby.fromCode(rawCode);
-    interpreter.addCode(ast);
+    interpreter.pushCode(ast);
   }
 
   // sigh, constantly fucking fighting this type system, and making some shitty tradeoffs.
@@ -74,7 +74,7 @@ class TestCase extends haxe.unit.TestCase {
   function assertNextExpressions(expected:Array<RObject>, ?c:PosInfos) {
     currentTest.done = true;
     var actual:Array<RObject> = [];
-    while(interpreter.isUnfinished) {
+    while(interpreter.isInProgress()) {
       actual.push(interpreter.nextExpression());
     };
     for(pair in expected.zip(actual)) rAssertEq(pair.l, pair.r);

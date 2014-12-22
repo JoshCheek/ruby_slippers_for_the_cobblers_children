@@ -50,10 +50,10 @@ class Bootstrap {
     klassClass.klass       = klassClass;
     klassClass.superclass  = moduleClass;
 
-    // main
-    var main = {klass: objectClass, ivars: new InternalMap()};
+    // initial execution context
+    var stack = new List();
+    var main  = {klass: objectClass, ivars: new InternalMap()};
 
-    // setup stack
     var toplevelBinding:RBinding = {
       klass:     objectClass,
       ivars:     new InternalMap(),
@@ -61,9 +61,6 @@ class Bootstrap {
       defTarget: objectClass,
       lvars:     new InternalMap(),
     };
-
-    var stack = new List();
-    stack.push(toplevelBinding);
 
     // special constants (classes are wrong)
     var trueClass:RClass = {
