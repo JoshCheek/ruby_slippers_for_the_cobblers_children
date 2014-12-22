@@ -64,11 +64,11 @@ class Interpreter {
   public function pushCode(code:Ast, ?binding) {
     if(binding==null) binding = world.currentBinding;
     world.stack.push(switch(code) {
-      case AstTrue:               new Pending(code, binding, function() return world.rubyTrue);
-      case AstNil:                new Pending(code, binding, function() return world.rubyNil);
-      case AstFalse:              new Pending(code, binding, function() return world.rubyFalse);
-      case AstString(value):      new Pending(code, binding, function() return world.stringLiteral(value));
-      case AstExprs(expressions): new Expressions(code, binding, expressions, world.rubyNil);
+      case True:               new Pending(code, binding, function() return world.rubyTrue);
+      case Nil:                new Pending(code, binding, function() return world.rubyNil);
+      case False:              new Pending(code, binding, function() return world.rubyFalse);
+      case String(value):      new Pending(code, binding, function() return world.stringLiteral(value));
+      case Exprs(expressions): new Expressions(code, binding, expressions, world.rubyNil);
       case _:                     throw "Unhandled AST: " + code;
     });
   }

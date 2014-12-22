@@ -12,23 +12,23 @@ class TestParser extends ruby.support.TestCase {
   // literals
   function testSpecialObjects() {
     assertParses(    "nil;    true;    false;    self",
-      AstExprs([AstNil, AstTrue, AstFalse, AstSelf])
+      Exprs([Nil, True, False, Self])
     );
   }
 
   function testIntegers() {
     assertParses(               "1;             -123",
-      AstExprs([AstInteger(1), AstInteger(-123)])
+      Exprs([Integer(1), Integer(-123)])
     );
   }
 
   function testFloat() {
-    assertParses("-12.34", AstFloat(-12.34));
-    // assertParses("1.0", AstFloat(1.0)); // FIXME: it renders `AstFloat(1.0)` to string as `AstFloat(1)`
+    assertParses("-12.34", Float(-12.34));
+    // assertParses("1.0", Float(1.0)); // FIXME: it renders `Float(1.0)` to string as `Float(1)`
   }
 
   function testStrings() {
-    assertParses("'abc'", AstString("abc"));
+    assertParses("'abc'", String("abc"));
   }
 
   // variables
@@ -39,19 +39,19 @@ class TestParser extends ruby.support.TestCase {
       A
       @a = 1
       @a",
-      AstExprs([
-        AstSetLocalVariable("a", AstInteger(1)),
-        AstGetLocalVariable("a"),
-        AstConstant(AstNil, "A"), // going w/ nil b/c that's what comes in, but kinda seems like the parser should make this a CurrentNamespace node or something
-        AstSetInstanceVariable("@a", AstInteger(1)),
-        AstGetInstanceVariable("@a"),
+      Exprs([
+        SetLocalVariable("a", Integer(1)),
+        GetLocalVariable("a"),
+        Constant(Nil, "A"), // going w/ nil b/c that's what comes in, but kinda seems like the parser should make this a CurrentNamespace node or something
+        SetInstanceVariable("@a", Integer(1)),
+        GetInstanceVariable("@a"),
       ])
     );
   }
 
   // sending messages
   function testSendingMessages() {
-    assertParses("true.something(false)", AstSend(AstTrue, "something", [AstFalse]));
+    assertParses("true.something(false)", Send(True, "something", [False]));
   }
 
   // class and module definitions
@@ -62,13 +62,13 @@ class TestParser extends ruby.support.TestCase {
         end
       end
       ",
-      AstClass(
-        AstConstant(AstNil, "A"), // name
-        AstNil,                   // superclass
-        AstClass(                 // body
-          AstConstant(AstConstant(AstNil, "B"), "C"),
-          AstConstant(AstNil, "D"),
-          AstNil
+      Class(
+        Constant(Nil, "A"), // name
+        Nil,                   // superclass
+        Class(                 // body
+          Constant(Constant(Nil, "B"), "C"),
+          Constant(Nil, "D"),
+          Nil
         )
       )
     );
@@ -82,12 +82,12 @@ class TestParser extends ruby.support.TestCase {
         true
       end
       ",
-      AstExprs([
-        AstMethodDefinition("bland_method", [], AstNil),
-        AstMethodDefinition(
+      Exprs([
+        MethodDefinition("bland_method", [], Nil),
+        MethodDefinition(
           "method_with_args_and_body",
-          [AstRequiredArg("arg")],
-          AstTrue
+          [RequiredArg("arg")],
+          True
         ),
       ])
     );
