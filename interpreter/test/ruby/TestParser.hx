@@ -40,11 +40,11 @@ class TestParser extends ruby.support.TestCase {
       @a = 1
       @a",
       Exprs([
-        SetLocalVariable("a", Integer(1)),
-        GetLocalVariable("a"),
+        SetLvar("a", Integer(1)),
+        GetLvar("a"),
         Constant(Nil, "A"), // going w/ nil b/c that's what comes in, but kinda seems like the parser should make this a CurrentNamespace node or something
-        SetInstanceVariable("@a", Integer(1)),
-        GetInstanceVariable("@a"),
+        SetIvar("@a", Integer(1)),
+        GetIvar("@a"),
       ])
     );
   }
@@ -83,8 +83,8 @@ class TestParser extends ruby.support.TestCase {
       end
       ",
       Exprs([
-        MethodDefinition("bland_method", [], Nil),
-        MethodDefinition(
+        Def("bland_method", [], Nil),
+        Def(
           "method_with_args_and_body",
           [RequiredArg("arg")],
           True

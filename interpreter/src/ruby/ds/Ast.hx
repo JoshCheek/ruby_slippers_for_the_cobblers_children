@@ -11,13 +11,13 @@ enum Ast {
   String(value:String);
   Exprs(expressions:Array<Ast>);
   Undefined(code:Dynamic);
-  SetLocalVariable(name:String, value:Ast);
-  GetLocalVariable(name:String);
-  SetInstanceVariable(name:String, value:Ast);
-  GetInstanceVariable(name:String);
+  SetLvar(name:String, value:Ast);
+  GetLvar(name:String);
+  SetIvar(name:String, value:Ast);
+  GetIvar(name:String);
   Send(target:Ast, message:String, args:Array<Ast>);
   Constant(namespace:Ast, name:String);
   Class(nameLookup:Ast, superclass:Ast, body:Ast);
-  MethodDefinition(name:String, args:Array<Ast>, body:Ast);
+  Def(name:String, args:Array<Ast>, body:Ast);
   RequiredArg(name:String);
 }
