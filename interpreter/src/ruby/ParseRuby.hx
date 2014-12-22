@@ -30,7 +30,7 @@ class ParseRuby {
   }
 
   public static function fromJson(ast:Dynamic):Ast {
-    if(ast == null) return Nil;
+    if(ast == null) return None;
     var rubyAst = switch(ast.type) {
       case "nil"                   : Nil;
       case "true"                  : True;

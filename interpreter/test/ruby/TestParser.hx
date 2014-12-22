@@ -4,9 +4,8 @@ using Lambda;
 
 class TestParser extends ruby.support.TestCase {
   function assertParses(rubyCode:String, expected:Ast, ?c:haxe.PosInfos) {
-    assertEquals(Std.string(expected),
-                 Std.string( ruby.ParseRuby.fromCode(rubyCode) )
-                );
+    var actual = ruby.ParseRuby.fromCode(rubyCode);
+    assertEquals(Std.string(expected), Std.string(actual), c);
   }
 
   // literals
@@ -42,7 +41,7 @@ class TestParser extends ruby.support.TestCase {
       Exprs([
         SetLvar("a", Integer(1)),
         GetLvar("a"),
-        Constant(Nil, "A"), // going w/ nil b/c that's what comes in, but kinda seems like the parser should make this a CurrentNamespace node or something
+        Constant(None, "A"), // going w/ nil b/c that's what comes in, but kinda seems like the parser should make this a CurrentNamespace node or something
         SetIvar("@a", Integer(1)),
         GetIvar("@a"),
       ])
@@ -63,12 +62,12 @@ class TestParser extends ruby.support.TestCase {
       end
       ",
       Class(
-        Constant(Nil, "A"), // name
-        Nil,                   // superclass
+        Constant(None, "A"), // name
+        None,                   // superclass
         Class(                 // body
-          Constant(Constant(Nil, "B"), "C"),
-          Constant(Nil, "D"),
-          Nil
+          Constant(Constant(None, "B"), "C"),
+          Constant(None, "D"),
+          None
         )
       )
     );
@@ -83,7 +82,7 @@ class TestParser extends ruby.support.TestCase {
       end
       ",
       Exprs([
-        Def("bland_method", [], Nil),
+        Def("bland_method", [], None),
         Def(
           "method_with_args_and_body",
           [RequiredArg("arg")],

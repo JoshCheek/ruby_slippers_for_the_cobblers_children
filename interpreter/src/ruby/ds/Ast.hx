@@ -2,6 +2,8 @@ package ruby.ds;
 
 // https://github.com/whitequark/parser/blob/master/doc/AST_FORMAT.md
 enum Ast {
+  None; // ie there is no ast here
+
   Nil;
   True;
   False;
