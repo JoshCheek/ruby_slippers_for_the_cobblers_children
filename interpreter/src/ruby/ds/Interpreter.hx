@@ -2,12 +2,6 @@ package ruby.ds;
 import ruby.ds.objects.RObject;
 import ruby.ds.objects.RClass;
 
-enum EvaluationResult {
-  Push(code:Ast, binding:ruby.ds.objects.RBinding);
-  Pop(returnValue:RObject);
-  NoAction;
-}
-
 
 // TODO: move StackFrame to this file
 // TODO: move stack and currentExpression onto Interpreter
@@ -32,3 +26,10 @@ enum ExecutionState {
   OpenClass(s:{state:String, name:String, nsCode:Ast, ns:RClass, klass:RClass});
   Send(s:{state:String, targetCode:Ast, target:RObject, message:String, argsCode:Array<Ast>, args:Array<RObject>});
 }
+
+enum EvaluationResult {
+  Push(newState:ExecutionState, code:Ast, binding:ruby.ds.objects.RBinding);
+  Pop(returnValue:RObject);
+  NoAction(newState:ExecutionState);
+}
+

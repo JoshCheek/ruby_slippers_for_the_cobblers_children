@@ -72,14 +72,16 @@ class Interpreter {
     // trace("CURRENT: " + frame.ast);
 
     switch(continueExecuting(frame)) {
-      case Push(ast, binding):
+      case Push(state, ast, binding):
+        frame.state = state;
         pushCode(ast, binding);
         return false;
       case Pop(result):
         world.currentExpression = result;
         state.stack.pop();
         return true;
-      case NoAction:
+      case NoAction(state):
+        frame.state = state;
         return false;
     }
   }
@@ -108,25 +110,25 @@ class Interpreter {
     // get target
       case Send(s={state:"initial", targetCode:targetCode}):
       s.state = "evaluatedTarget";
-      return Push(targetCode, sf.binding);
+      return Push(Send(s), targetCode, sf.binding);
 
     // get args
     case Send(s={state:"evaluatedTarget", args:args, argsCode:argsCode}):
       s.target = currentExpression();
       if(args.length < argsCode.length) {
         s.state = "evaluatingArgs";
-        return Push(argsCode[args.length], sf.binding);
+        return Push(Send(s), argsCode[args.length], sf.binding);
       } else {
         s.state = "evaluatedArgs";
-        return NoAction;
+        return NoAction(Send(s));
       }
     case(Send(s={state:"evaluatingArgs", args:args, argsCode:argsCode})):
       args.push(currentExpression());
       if(args.length < argsCode.length) {
-        return Push(argsCode[args.length], sf.binding);
+        return Push(Send(s), argsCode[args.length], sf.binding);
       } else {
         s.state = "evaluatedArgs";
-        return NoAction;
+        return NoAction(Send(s));
       }
     // find method
     case(Send(s={state:"evaluatedArgs", target:target, message:message, args:args})):
@@ -153,7 +155,7 @@ class Interpreter {
       // execute the method (if it is code, push it on the stack and evaluate it)
       // if it's internal, evaluate it directly
       switch(meth.body) {
-        case(Ruby(ast)):    return Push(ast, bnd);
+        case(Ruby(ast)):    return Push(Send(s), ast, bnd);
         case(Internal(fn)): return Pop(fn(bnd, world));
       }
 
@@ -169,6 +171,7 @@ class Interpreter {
     case Expressions(state):
       if(state.crnt < state.expressions.length) {
         return Push(
+          Expressions(state),
           state.expressions[state.crnt++],
           sf.binding
         );
@@ -180,8 +183,8 @@ class Interpreter {
       }
 
     case SetLocal(FindRhs(name, rhs)):
-      sf.state = SetLocal(SetLhs(name));
-      return Push(rhs, sf.binding);
+      return Push(SetLocal(SetLhs(name)), rhs, sf.binding);
+
     case SetLocal(SetLhs(name)):
       sf.binding.lvars[name] = currentExpression();
       return Pop(currentExpression());
@@ -193,7 +196,7 @@ class Interpreter {
       return Pop(sf.binding.defTarget.constants[name]);
     case GetConst(state={state:"ns", nsCode:code, name:name}):
       state.state = 'get';
-      return Push(code, sf.binding);
+      return Push(GetConst(state), code, sf.binding);
     case GetConst({state: "get", nsCode:ast, name:name}):
       return Pop(currentExpression());
     case GetConst({state: s}):
@@ -202,17 +205,17 @@ class Interpreter {
     case OpenClass(state={state:"ns", nsCode:None, name:name}):
       state.state = "def";
       state.ns = sf.binding.defTarget;
-      return NoAction;
+      return NoAction(OpenClass(state));
     case OpenClass(state={state:"ns", nsCode:ns, name:name}):
       throw "No tests on this yet";
       state.state = "get";
-      return Push(ns, sf.binding);
+      return Push(OpenClass(state), ns, sf.binding);
     case OpenClass(state={state:"get"}):
       throw "No tests on this yet";
       state.state = "def";
       var expr:Dynamic = currentExpression();
       state.ns = expr;
-      return NoAction;
+      return NoAction(OpenClass(state));
     case OpenClass(state={state:"def", name:name, ns:ns}):
       if(ns.constants[name] == null) {
         var klass:RClass = {
