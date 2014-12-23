@@ -9,12 +9,17 @@ typedef Interpreter = {
   public var stack:List<StackFrame>;
 }
 
+enum SetLocalState {
+  FindRhs(name:String, rhs:Ast);
+  SetLhs(name:String);
+}
+
 enum ExecutionState {
   Self;
   Value(obj:RObject);
   PendingValue(fn:Void->RObject);
   Expressions(s:{crnt:Int, expressions:Array<Ast>});
-  SetLocal(s:{state:String, name:String, rhs:Ast});
+  SetLocal(state:SetLocalState);
   GetLocal(s:{name:String});
   GetConst(s:{state:String, name:String, nsCode:Ast});
   OpenClass(s:{state:String, name:String, nsCode:Ast, ns:RClass, klass:RClass});

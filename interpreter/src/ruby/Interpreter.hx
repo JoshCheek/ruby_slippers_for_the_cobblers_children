@@ -54,7 +54,7 @@ class Interpreter {
         case False:                Value(world.rubyFalse);
         case String(value):        PendingValue(function() return world.stringLiteral(value));
         case Exprs(expressions):   Expressions({crnt:0, expressions:expressions});
-        case SetLvar(name, rhs):   SetLocal({state: "rhs", name:name, rhs:rhs});
+        case SetLvar(name, rhs):   SetLocal(FindRhs(name, rhs));
         case GetLvar(name):        GetLocal({name:name});
         case Constant(ns, name):   GetConst({state:"ns", name:name, nsCode:ns});
         case Send(trg, msg, args): Send({state:"initial", targetCode:trg, target:null, message:msg, argsCode:args, args:[]});
@@ -185,11 +185,10 @@ class Interpreter {
         throw "SHOULDN'T HAPPEN!";
       }
 
-    case SetLocal(state={state:crntState, name:name, rhs:rhs}):
-      if(crntState == "rhs") {
-        state.state = "lhs";
-        return Push(rhs, sf.binding);
-      }
+    case SetLocal(FindRhs(name, rhs)):
+      sf.state = SetLocal(SetLhs(name));
+      return Push(rhs, sf.binding);
+    case SetLocal(SetLhs(name)):
       sf.binding.lvars[name] = currentExpression();
       return Pop(currentExpression());
 
