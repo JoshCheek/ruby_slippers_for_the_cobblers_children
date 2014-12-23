@@ -11,85 +11,6 @@ enum EvaluationResult {
   NoAction;
 }
 
-class SendMessage {
-  public var ast:Ast;
-  public var binding:RBinding;
-
-  var world:ruby.World;
-  var targetCode:Ast; // should this be an enum like ConstNs?
-  var message:String;
-  var argsCode:Array<Ast>;
-  var target:RObject;
-  var args:Array<RObject>;
-  var returnValue:RObject;
-
-  public function new(ast, binding, world, targetCode, message, argsCode) {
-    this.ast        = ast;
-    this.binding    = binding;
-
-    this.world      = world;
-    this.targetCode = targetCode;
-    this.message    = message;
-    this.argsCode   = argsCode;
-    this.target     = null;
-    this.args       = [];
-  }
-
-  public function step():EvaluationResult {
-    // get target
-    if(target == null)
-      return Push(targetCode, binding);
-
-    // get args
-    if(args.length < argsCode.length)
-      return Push(argsCode[args.length], binding);
-
-    // return
-    if(returnValue != null)
-      return Pop(returnValue);
-
-    // find the method
-    var klass = binding.self.klass;
-    while(klass != null && klass.imeths[message] == null)
-      klass = klass.superclass;
-
-    var meth  = null;
-    if(klass == null) throw "HAVEN'T IMPLEMENTED METHOD MISSING YET!";
-    else              meth = klass.imeths[message];
-
-    // make the new binding
-    var bnd:RBinding = {
-      klass:     world.objectClass, // FIXME: should be Binding, not Object!
-      ivars:     new InternalMap(),
-      self:      target,
-      defTarget: target.klass,
-      lvars:     new InternalMap(),
-    };
-
-    // TODO: set the args in the binding
-    if(args.length > 0) throw "NEED TO SET ARGS!";
-
-    // execute the method (if it is code, push it on the stack and evaluate it)
-    // if it's internal, evaluate it directly
-    switch(meth.body) {
-      case(Ruby(ast)):    return Push(ast, bnd);
-      case(Internal(fn)): return Pop(fn(bnd));
-    }
-  }
-
-  public function returned(obj:RObject) {
-    if(target == null) {
-      target = obj;
-    } else if(args.length < argsCode.length) {
-      args.push(obj);
-    } else if(returnValue == null) {
-      returnValue = obj;
-    } else {
-      throw "SHOULDNT EVER HAPPEN! " + obj;
-    }
-  }
-}
-
 class Interpreter {
   private var world:ruby.World;
 
@@ -122,12 +43,12 @@ class Interpreter {
         );
       case Send(target, message, args):
         ruby.ds.Interpreter.ExecutionState.Send({
+          state:"initial",
           targetCode:target,
           target:null,
           message:message,
           argsCode:args,
           args:[],
-          result:null,
         });
       case _: throw "Unhandled AST: " + code;
     }
@@ -183,6 +104,59 @@ class Interpreter {
 
   function continueExecuting(sf:StackFrame):EvaluationResult {
     switch(sf.state) {
+
+    // get target
+      case Send(s={state:"initial", targetCode:targetCode}):
+      s.state = "evaluatedTarget";
+      return Push(targetCode, sf.binding);
+
+    // get args
+    case Send(s={state:"evaluatedTarget", args:args, argsCode:argsCode}):
+      s.target = currentExpression();
+      if(args.length < argsCode.length) {
+        s.state = "evaluatingArgs";
+        return Push(argsCode[args.length], sf.binding);
+      } else {
+        s.state = "evaluatedArgs";
+        return NoAction;
+      }
+    case(Send(s={state:"evaluatingArgs", args:args, argsCode:argsCode})):
+      args.push(currentExpression());
+      if(args.length < argsCode.length) {
+        return Push(argsCode[args.length], sf.binding);
+      } else {
+        s.state = "evaluatedArgs";
+        return NoAction;
+      }
+    // find method
+    case(Send(s={state:"evaluatedArgs", target:target, message:message, args:args})):
+      var klass = sf.binding.self.klass;
+      while(klass != null && klass.imeths[message] == null)
+        klass = klass.superclass;
+
+      var meth  = null;
+      if(klass == null) throw "HAVEN'T IMPLEMENTED METHOD MISSING YET!";
+      else              meth = klass.imeths[message];
+
+      // make the new binding
+      var bnd:RBinding = {
+        klass:     world.objectClass, // FIXME: should be Binding, not Object!
+        ivars:     new InternalMap(),
+        self:      target,
+        defTarget: target.klass,
+        lvars:     new InternalMap(),
+      };
+
+      // TODO: set the args in the binding
+      if(args.length > 0) throw "NEED TO SET ARGS!";
+
+      // execute the method (if it is code, push it on the stack and evaluate it)
+      // if it's internal, evaluate it directly
+      switch(meth.body) {
+        case(Ruby(ast)):    return Push(ast, bnd);
+        case(Internal(fn)): return Pop(fn(bnd));
+      }
+
     case Value(result):
       return Pop(result);
 
