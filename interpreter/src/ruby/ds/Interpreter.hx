@@ -20,6 +20,10 @@ enum SetLocalState {
   FindRhs(name:String, rhs:Ast);
   SetLhs(name:String);
 }
+enum GetConstState {
+  ResolveNs(namespace:Ast, name:String);
+  Get(name:String);
+}
 
 enum ExecutionState {
   Self;
@@ -27,9 +31,9 @@ enum ExecutionState {
   SetLocal(state:SetLocalState);
   Value(obj:RObject);
   PendingValue(fn:Void->RObject);
+  GetConst(state:GetConstState);
 
   Expressions(s:{crnt:Int, expressions:Array<Ast>});
-  GetConst(s:{state:String, name:String, nsCode:Ast});
   OpenClass(s:{state:String, name:String, nsCode:Ast, ns:RClass, klass:RClass});
   Send(s:{state:String, targetCode:Ast, target:RObject, message:String, argsCode:Array<Ast>, args:Array<RObject>});
 }

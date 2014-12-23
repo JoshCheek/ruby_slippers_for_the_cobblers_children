@@ -50,7 +50,7 @@ class Interpreter {
         case Exprs(expressions):   Expressions({crnt:0, expressions:expressions});
         case SetLvar(name, rhs):   SetLocal(FindRhs(name, rhs));
         case GetLvar(name):        GetLocal(name);
-        case Constant(ns, name):   GetConst({state:"ns", name:name, nsCode:ns});
+        case Constant(ns, name):   GetConst(ResolveNs(ns, name));
         case Send(trg, msg, args): Send({state:"initial", targetCode:trg, target:null, message:msg, argsCode:args, args:[]});
         case Class(Constant(ns, nm), superclass, body):
           OpenClass({state:"ns", name:nm, nsCode:ns, ns:null, klass:null});
@@ -192,15 +192,14 @@ class Interpreter {
     case GetLocal(name):
       return Pop(sf.binding.lvars[name]);
 
-    case GetConst({state:"ns", nsCode:None, name:name}):
-      return Pop(sf.binding.defTarget.constants[name]);
-    case GetConst(state={state:"ns", nsCode:code, name:name}):
-      state.state = 'get';
-      return Push(GetConst(state), code, sf.binding);
-    case GetConst({state: "get", nsCode:ast, name:name}):
-      return Pop(currentExpression());
-    case GetConst({state: s}):
-      throw "Shouldn't have gotten here, what is state?: " + s;
+    case GetConst(ResolveNs(None, name)):
+      return Pop(sf.binding.defTarget.constants[name]); // TODO: Can we push current namepace instead of having two weird paths through? (might not be able to b/c that would cause it to find the current ns as an intermediate expression, which could fuck up tests
+    case GetConst(ResolveNs(nsCode, name)):
+      return Push(GetConst(Get(name)), nsCode, sf.binding);
+    case GetConst(Get(name)):
+      var expr:Dynamic = currentExpression();
+      var ns:RClass = expr;
+      return Pop(ns.constants[name]);
 
     case OpenClass(state={state:"ns", nsCode:None, name:name}):
       state.state = "def";
