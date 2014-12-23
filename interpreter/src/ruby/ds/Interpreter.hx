@@ -2,6 +2,13 @@ package ruby.ds;
 import ruby.ds.objects.RObject;
 import ruby.ds.objects.RClass;
 
+enum EvaluationResult {
+  Push(code:Ast, binding:ruby.ds.objects.RBinding);
+  Pop(returnValue:RObject);
+  NoAction;
+}
+
+
 // TODO: move StackFrame to this file
 // TODO: move stack and currentExpression onto Interpreter
 typedef Interpreter = {

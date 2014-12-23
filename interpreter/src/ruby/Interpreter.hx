@@ -5,12 +5,6 @@ import ruby.ds.Errors;
 using ruby.LanguageGoBag;
 using Lambda;
 
-enum EvaluationResult {
-  Push(code:Ast, binding:RBinding);
-  Pop(returnValue:RObject);
-  NoAction;
-}
-
 class Interpreter {
   private var state:ruby.ds.Interpreter;
   private var world:ruby.World;
@@ -108,7 +102,7 @@ class Interpreter {
     return world.currentExpression;
   }
 
-  function continueExecuting(sf:StackFrame):EvaluationResult {
+  function continueExecuting(sf:StackFrame):ruby.ds.Interpreter.EvaluationResult {
     switch(sf.state) {
 
     // get target
