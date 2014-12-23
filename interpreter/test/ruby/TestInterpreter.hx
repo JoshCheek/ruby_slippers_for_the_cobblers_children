@@ -37,8 +37,8 @@ class TestInterpreter extends ruby.support.TestCase {
 
   // we're ignoring fixnums and symbols for now
   function testSpecialConstants() {
-    pushCode("nil\ntrue\nfalse\n");
-    assertNextExpressions([world.rubyNil, world.rubyTrue, world.rubyFalse]);
+    pushCode("nil\ntrue\nfalse\nself");
+    assertNextExpressions([world.rubyNil, world.rubyTrue, world.rubyFalse, world.main]);
   }
 
   function testItEvaluatesAStringLiteral() {

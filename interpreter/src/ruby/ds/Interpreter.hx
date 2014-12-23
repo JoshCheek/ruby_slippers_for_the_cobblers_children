@@ -9,6 +9,7 @@ typedef Interpreter = {
 }
 
 enum ExecutionState {
+  Self;
   Value(obj:RObject);
   PendingValue(fn:Void->RObject);
   Expressions(s:{crnt:Int, expressions:Array<Ast>});

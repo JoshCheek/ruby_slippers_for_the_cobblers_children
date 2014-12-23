@@ -50,6 +50,8 @@ class Interpreter {
           argsCode:args,
           args:[],
         });
+      case Self:
+        ruby.ds.Interpreter.ExecutionState.Self;
       case _: throw "Unhandled AST: " + code;
     }
 
@@ -156,6 +158,9 @@ class Interpreter {
         case(Ruby(ast)):    return Push(ast, bnd);
         case(Internal(fn)): return Pop(fn(bnd, world));
       }
+
+    case Self:
+      return Pop(sf.binding.self);
 
     case Value(result):
       return Pop(result);
