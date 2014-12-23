@@ -44,45 +44,25 @@ class Interpreter {
 
   public function pushCode(code:Ast, ?binding) {
     if(binding==null) binding = currentBinding;
-    var state:ruby.ds.Interpreter.ExecutionState = switch(code) {
-      case True:                 ruby.ds.Interpreter.ExecutionState.Value(world.rubyTrue);
-      case Nil:                  ruby.ds.Interpreter.ExecutionState.Value(world.rubyNil);
-      case False:                ruby.ds.Interpreter.ExecutionState.Value(world.rubyFalse);
-      case String(value):        ruby.ds.Interpreter.ExecutionState.PendingValue(function() return world.stringLiteral(value));
-
-      case Exprs(expressions):
-        ruby.ds.Interpreter.ExecutionState.Expressions(
-          {crnt:0, expressions:expressions}
-        );
-
-      case SetLvar(name, rhs):
-        ruby.ds.Interpreter.ExecutionState.SetLocal({state: "rhs", name:name, rhs:rhs});
-      case GetLvar(name):
-        ruby.ds.Interpreter.ExecutionState.GetLocal({name:name});
-      case Constant(ns, name):
-        ruby.ds.Interpreter.ExecutionState.GetConst({state:"ns", name:name, nsCode:ns});
-      case Class(Constant(ns, name), superclass, body):
-        ruby.ds.Interpreter.ExecutionState.OpenClass(
-            {state:"ns", name:name, nsCode:ns, ns:null, klass:null}
-        );
-      case Send(target, message, args):
-        ruby.ds.Interpreter.ExecutionState.Send({
-          state:"initial",
-          targetCode:target,
-          target:null,
-          message:message,
-          argsCode:args,
-          args:[],
-        });
-      case Self:
-        ruby.ds.Interpreter.ExecutionState.Self;
-      case _: throw "Unhandled AST: " + code;
-    }
-
-    var sf:StackFrame = {ast:code, binding:binding, state:state};
-
-    // trace("PUSHING: " + sf.ast);
-    this.state.stack.push(sf);
+    this.state.stack.push({
+      ast     : code,
+      binding : binding,
+      state   : switch(code) {
+        case Self:                 Self;
+        case True:                 Value(world.rubyTrue);
+        case Nil:                  Value(world.rubyNil);
+        case False:                Value(world.rubyFalse);
+        case String(value):        PendingValue(function() return world.stringLiteral(value));
+        case Exprs(expressions):   Expressions({crnt:0, expressions:expressions});
+        case SetLvar(name, rhs):   SetLocal({state: "rhs", name:name, rhs:rhs});
+        case GetLvar(name):        GetLocal({name:name});
+        case Constant(ns, name):   GetConst({state:"ns", name:name, nsCode:ns});
+        case Send(trg, msg, args): Send({state:"initial", targetCode:trg, target:null, message:msg, argsCode:args, args:[]});
+        case Class(Constant(ns, nm), superclass, body):
+          OpenClass({state:"ns", name:nm, nsCode:ns, ns:null, klass:null});
+        case _: throw "Unhandled AST: " + code;
+      }
+    });
   }
 
   public function nextExpression():RObject {

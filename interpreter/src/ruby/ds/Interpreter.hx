@@ -18,12 +18,5 @@ enum ExecutionState {
   GetLocal(s:{name:String});
   GetConst(s:{state:String, name:String, nsCode:Ast});
   OpenClass(s:{state:String, name:String, nsCode:Ast, ns:RClass, klass:RClass});
-  Send(s:{
-    state:String,
-    targetCode:Ast,
-    target:RObject,
-    message:String,
-    argsCode:Array<Ast>,
-    args:Array<RObject>,
-  });
+  Send(s:{state:String, targetCode:Ast, target:RObject, message:String, argsCode:Array<Ast>, args:Array<RObject>});
 }
