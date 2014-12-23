@@ -49,7 +49,7 @@ class Interpreter {
         case String(value):        PendingValue(function() return world.stringLiteral(value));
         case Exprs(expressions):   Expressions({crnt:0, expressions:expressions});
         case SetLvar(name, rhs):   SetLocal(FindRhs(name, rhs));
-        case GetLvar(name):        GetLocal({name:name});
+        case GetLvar(name):        GetLocal(name);
         case Constant(ns, name):   GetConst({state:"ns", name:name, nsCode:ns});
         case Send(trg, msg, args): Send({state:"initial", targetCode:trg, target:null, message:msg, argsCode:args, args:[]});
         case Class(Constant(ns, nm), superclass, body):
@@ -189,7 +189,7 @@ class Interpreter {
       sf.binding.lvars[name] = currentExpression();
       return Pop(currentExpression());
 
-    case GetLocal({name:name}):
+    case GetLocal(name):
       return Pop(sf.binding.lvars[name]);
 
     case GetConst({state:"ns", nsCode:None, name:name}):

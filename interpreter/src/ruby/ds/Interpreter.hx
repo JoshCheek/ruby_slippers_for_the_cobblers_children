@@ -6,7 +6,7 @@ import ruby.ds.objects.RBinding;
 typedef StackFrame = {
   public var ast:Ast;
   public var binding:RBinding;
-  public var state:Interpreter.ExecutionState;
+  public var state:ExecutionState;
 }
 
 // TODO: remove world, and have Interpreter be an attribute of World
@@ -23,11 +23,12 @@ enum SetLocalState {
 
 enum ExecutionState {
   Self;
+  GetLocal(name:String);
+  SetLocal(state:SetLocalState);
   Value(obj:RObject);
   PendingValue(fn:Void->RObject);
+
   Expressions(s:{crnt:Int, expressions:Array<Ast>});
-  SetLocal(state:SetLocalState);
-  GetLocal(s:{name:String});
   GetConst(s:{state:String, name:String, nsCode:Ast});
   OpenClass(s:{state:String, name:String, nsCode:Ast, ns:RClass, klass:RClass});
   Send(s:{state:String, targetCode:Ast, target:RObject, message:String, argsCode:Array<Ast>, args:Array<RObject>});
