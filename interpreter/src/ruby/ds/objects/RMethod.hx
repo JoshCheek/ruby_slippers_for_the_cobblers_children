@@ -2,7 +2,7 @@ package ruby.ds.objects;
 
 enum ExecutableType {
   Ruby(ast:Ast);
-  Internal(fn:RBinding -> RObject);
+  Internal(fn:RBinding -> ruby.World -> RObject);
 }
 
 typedef RMethod = {

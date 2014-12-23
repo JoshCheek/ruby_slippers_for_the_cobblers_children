@@ -130,7 +130,7 @@ class Interpreter {
       }
     // find method
     case(Send(s={state:"evaluatedArgs", target:target, message:message, args:args})):
-      var klass = sf.binding.self.klass;
+      var klass = target.klass;
       while(klass != null && klass.imeths[message] == null)
         klass = klass.superclass;
 
@@ -154,7 +154,7 @@ class Interpreter {
       // if it's internal, evaluate it directly
       switch(meth.body) {
         case(Ruby(ast)):    return Push(ast, bnd);
-        case(Internal(fn)): return Pop(fn(bnd));
+        case(Internal(fn)): return Pop(fn(bnd, world));
       }
 
     case Value(result):

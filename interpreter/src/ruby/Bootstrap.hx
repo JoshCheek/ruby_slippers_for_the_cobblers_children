@@ -141,6 +141,15 @@ class Bootstrap {
       body: ruby.ds.objects.RMethod.ExecutableType.Internal(Core.lookupClass),
     }
 
+    // TODO: move this into Ruby, only allocate needs to be haxe level
+    klassClass.imeths["new"] = {
+      klass: objectClass, // FIXME: SHOULD BE METHOD CLASS
+      ivars: new InternalMap(),
+      name:  "new",
+      args:  [],
+      body:  ruby.ds.objects.RMethod.ExecutableType.Internal(Core.allocate),
+    }
+
     // the data structure
     return {
       stack             : stack,

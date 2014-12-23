@@ -104,53 +104,25 @@ class TestInterpreter extends ruby.support.TestCase {
     ]);
   }
 
-  // public function _testInstantiation() {
-  //   pushCode("
-  //     class A
-  //     end
-  //     BasicObject.new
-  //     String.new
-  //     A.new
-  //   ");
-  //   interpreter.evaluateAll();
-  //   var os  = world.objectSpace;
-  //   var a   = os[os.length - 1];
-  //   var str = os[os.length - 2];
-  //   var bo  = os[os.length - 3];
-  //   rAssertEq(world.toplevelNamespace.constants['A'],   a.klass);
-  //   rAssertEq(world.stringClass,      str.klass);
-  //   rAssertEq(world.basicObjectClass, bo.klass);
-  //   // Instantiation
-  //   //   new
-  //   //     returns a RObject with klass set to self
-  //   //     initializes the object, passing the params
-  //   //   allocate
-  //   //     makes an RObject with the klass set
-  //   //   // Object#initialize
-  //   //   //   takes no params, does nothing
-  // }
+  // TODO: Test method definition
 
-
-  /* ----- OLD TESTS THAT NEED TO BE REIMPLEMENTED -----
-
-  One above does not create its own classes
   public function testInstantiation() {
-    pushCode("
-      class A
-      end
-      A.new
-      Object.new
-    ");
-    // NOTE: could be nil b/c A's body is empty
-    interpreter.nextExpression();
-    interpreter.nextExpression();
-    interpreter.nextExpression();
-    var a      = interpreter.nextExpression();
-    var aClass = world.toplevelNamespace.constants['A'];
-    assertEquals(aClass, a.klass);
-    var obj    = interpreter.nextExpression();
-    assertEquals(world.objectClass, obj.klass);
+    pushCode("class A
+              end
+              BasicObject.new
+              String.new
+              A.new
+            ");
+    interpreter.evaluateAll();
+    var os  = world.objectSpace;
+    // This is precarious: could fail if new creates additional objects :/
+    var a   = os[os.length - 1];
+    var str = os[os.length - 2];
+    var bo  = os[os.length - 3];
 
+    assertEquals(world.toplevelNamespace.constants['A'], a.klass);
+    assertEquals(world.stringClass,                      str.klass);
+    assertEquals(world.basicObjectClass,                 bo.klass);
     // Instantiation
     //   new
     //     returns a RObject with klass set to self
@@ -159,11 +131,9 @@ class TestInterpreter extends ruby.support.TestCase {
     //     makes an RObject with the klass set
     //   // Object#initialize
     //   //   takes no params, does nothing
-
   }
 
-
-
+  /* ----- OLD TESTS THAT NEED TO BE REIMPLEMENTED -----
 
   // line mode?
   public function _testSelfWorks() {
