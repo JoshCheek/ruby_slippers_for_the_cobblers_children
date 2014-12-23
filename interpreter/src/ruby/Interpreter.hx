@@ -47,7 +47,7 @@ class Interpreter {
         case Nil:                  Value(world.rubyNil);
         case False:                Value(world.rubyFalse);
         case String(value):        PendingValue(function() return world.stringLiteral(value));
-        case Exprs(expressions):   Expressions({crnt:0, expressions:expressions});
+        case Exprs(expressions):   Exprs(Crnt(0, expressions));
         case SetLvar(name, rhs):   SetLocal(FindRhs(name, rhs));
         case GetLvar(name):        GetLocal(name);
         case Constant(ns, name):   GetConst(ResolveNs(ns, name));
@@ -168,19 +168,11 @@ class Interpreter {
     case PendingValue(getValue):
       return Pop(getValue());
 
-    case Expressions(state):
-      if(state.crnt < state.expressions.length) {
-        return Push(
-          Expressions(state),
-          state.expressions[state.crnt++],
-          sf.binding
-        );
-      }
-      if(state.crnt == state.expressions.length) {
-        return Pop(currentExpression());
-      } else {
-        throw "SHOULDN'T HAPPEN!";
-      }
+    // TODO: Check out guards for pattern matching
+    // TODO: Check empty expression list. It should return nil, pretty sure this returns whatever happens to be the current expression
+    case Exprs(Crnt(i, exprs)):
+      if(i < exprs.length) return Push(Exprs(Crnt(i+1, exprs)), exprs[i], sf.binding);
+      else                 return Pop(currentExpression());
 
     case SetLocal(FindRhs(name, rhs)):
       return Push(SetLocal(SetLhs(name)), rhs, sf.binding);

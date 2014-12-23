@@ -24,7 +24,11 @@ enum GetConstState {
   ResolveNs(namespace:Ast, name:String);
   Get(name:String);
 }
+enum ExprsState {
+  Crnt(index:Int, expressions:Array<Ast>);
+}
 
+// TODO: For consistency, I'd like every one of these values to be a separate state enum
 enum ExecutionState {
   Self;
   GetLocal(name:String);
@@ -32,8 +36,8 @@ enum ExecutionState {
   Value(obj:RObject);
   PendingValue(fn:Void->RObject);
   GetConst(state:GetConstState);
+  Exprs(state:ExprsState);
 
-  Expressions(s:{crnt:Int, expressions:Array<Ast>});
   OpenClass(s:{state:String, name:String, nsCode:Ast, ns:RClass, klass:RClass});
   Send(s:{state:String, targetCode:Ast, target:RObject, message:String, argsCode:Array<Ast>, args:Array<RObject>});
 }
