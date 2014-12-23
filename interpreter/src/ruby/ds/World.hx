@@ -8,7 +8,6 @@ typedef World = {
   public var toplevelNamespace  : RClass;
 
   // interpreter state
-  public var stack              : List<StackFrame>;
   public var currentExpression  : RObject;
 
   // important objects

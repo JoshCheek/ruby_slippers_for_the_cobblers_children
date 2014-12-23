@@ -51,8 +51,7 @@ class Bootstrap {
     klassClass.superclass  = moduleClass;
 
     // initial execution context
-    var stack = new List();
-    var main  = {klass: objectClass, ivars: new InternalMap()};
+    var main = {klass: objectClass, ivars: new InternalMap()};
 
     var toplevelBinding:RBinding = {
       klass:     objectClass,
@@ -152,7 +151,6 @@ class Bootstrap {
 
     // the data structure
     return {
-      stack             : stack,
       objectSpace       : objectSpace,
       symbols           : symbols,
       toplevelNamespace : toplevelNamespace,

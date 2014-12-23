@@ -66,11 +66,11 @@ class TestInterpreter extends ruby.support.TestCase {
     pushCode("a = 'x'; b = a");
     interpreter.nextExpression();
     interpreter.nextExpression();
-    var a = world.getLocal('a');
+    var a = interpreter.getLocal('a');
     interpreter.nextExpression();
     // TODO: rAssertNil(world.getLocal('b'));
     interpreter.nextExpression();
-    var b = world.getLocal('b');
+    var b = interpreter.getLocal('b');
     assertEquals(a, b); // a and b have ref to same obj
   }
 

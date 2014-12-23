@@ -6,6 +6,7 @@ import ruby.ds.objects.RClass;
 // TODO: move stack and currentExpression onto Interpreter
 typedef Interpreter = {
   public var world:ruby.ds.World;
+  public var stack:List<StackFrame>;
 }
 
 enum ExecutionState {

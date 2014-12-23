@@ -39,18 +39,6 @@ class World {
     return str;
   }
 
-  public function getLocal(name:String):RObject {
-    var val = currentBinding.lvars[name];
-    if(val!=null) return val;
-    var readableKeys = [for(k in currentBinding.lvars.keys()) k];
-    throw "No local variable " + name + ", only has: " + readableKeys;
-  }
-
-  public function setLocal(name:String, value:RObject):RObject {
-    currentBinding.lvars[name] = value;
-    return value;
-  }
-
   // s b/c static and instance functions can't have the same name -.^
   static public function sinspect(obj:RObject):String {
     if(obj == null) return 'Haxe null';
@@ -79,21 +67,11 @@ class World {
   }
 
   // faux attributes
-  public var stackSize(get, never):Int;
-  function get_stackSize() return stack.length;
-
-  public var currentBinding(get, never):RBinding;
-  function get_currentBinding() {
-    if(stack.isEmpty()) return toplevelBinding;
-    return stack.last().binding;
-  }
-
   public var objectSpace(get, never):Array<RObject>;  // do I actually want to expose this directly?
   function get_objectSpace() return world.objectSpace;
 
   // Objects special enough to be properties
   public var              main(get, never):RObject;
-  public var             stack(get, never):List<StackFrame>;
   public var           rubyNil(get, never):RObject;
   public var         rubyFalse(get, never):RObject;
   public var          rubyTrue(get, never):RObject;
@@ -107,7 +85,6 @@ class World {
   public var currentExpression(get,   set):RObject;
 
   function              get_main() return world.main;
-  function             get_stack() return world.stack;
   function           get_rubyNil() return world.rubyNil;
   function         get_rubyFalse() return world.rubyFalse;
   function          get_rubyTrue() return world.rubyTrue;

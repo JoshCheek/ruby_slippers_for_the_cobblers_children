@@ -4,6 +4,8 @@ Interpreter:
 
 Binding class
 
+test showing that I can set a local in toplevel binding, and then access it (ie interpreter is setting up the stack correctly)
+
 -----
 
 abstraction in world for constant lookup (world.toplevelNamespace.constants['A'])

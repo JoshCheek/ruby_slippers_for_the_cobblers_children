@@ -12,14 +12,38 @@ enum EvaluationResult {
 }
 
 class Interpreter {
+  private var state:ruby.ds.Interpreter;
   private var world:ruby.World;
 
-  public function new(world:ruby.ds.World) {
-    this.world = new ruby.World(world);
+  public function new(state:ruby.ds.Interpreter) {
+    this.state = state;
+    this.world = new ruby.World(state.world);
   }
 
+  public var stackSize(get, never):Int;
+  function get_stackSize() return state.stack.length;
+
+  public var currentBinding(get, never):RBinding;
+  function get_currentBinding() {
+    if(state.stack.isEmpty()) return world.toplevelBinding;
+    return state.stack.last().binding;
+  }
+
+  public function getLocal(name:String):RObject {
+    var val = currentBinding.lvars[name];
+    if(val!=null) return val;
+    var readableKeys = [for(k in currentBinding.lvars.keys()) k];
+    throw "No local variable " + name + ", only has: " + readableKeys;
+  }
+
+  public function setLocal(name:String, value:RObject):RObject {
+    currentBinding.lvars[name] = value;
+    return value;
+  }
+
+
   public function pushCode(code:Ast, ?binding) {
-    if(binding==null) binding = world.currentBinding;
+    if(binding==null) binding = currentBinding;
     var state:ruby.ds.Interpreter.ExecutionState = switch(code) {
       case True:                 ruby.ds.Interpreter.ExecutionState.Value(world.rubyTrue);
       case Nil:                  ruby.ds.Interpreter.ExecutionState.Value(world.rubyNil);
@@ -58,7 +82,7 @@ class Interpreter {
     var sf:StackFrame = {ast:code, binding:binding, state:state};
 
     // trace("PUSHING: " + sf.ast);
-    world.stack.push(sf);
+    this.state.stack.push(sf);
   }
 
   public function nextExpression():RObject {
@@ -69,8 +93,8 @@ class Interpreter {
   // returns true if this step evaluated to an expression
   public function step():Bool {
     if(isFinished()) throw new NothingToEvaluateError("Check before evaluating!");
-    var frame = world.stack.first();
-    // trace("STACK SIZE: " + world.stack.length);
+    var frame = state.stack.first();
+    // trace("STACK SIZE: " + state.stack.length);
     // trace("CURRENT: " + frame.ast);
 
     switch(continueExecuting(frame)) {
@@ -79,7 +103,7 @@ class Interpreter {
         return false;
       case Pop(result):
         world.currentExpression = result;
-        world.stack.pop();
+        state.stack.pop();
         return true;
       case NoAction:
         return false;
@@ -91,7 +115,7 @@ class Interpreter {
   }
 
   public function isFinished() {
-    return world.stack.isEmpty();
+    return state.stack.isEmpty();
   }
 
   public function evaluateAll():RObject {

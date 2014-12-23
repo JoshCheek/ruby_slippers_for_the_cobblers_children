@@ -13,10 +13,6 @@ class TestBootstrappedWorld extends ruby.support.TestCase {
     assertEquals(world.rubyNil, world.currentExpression);
   }
 
-  function testStackStartsEmpty() {
-    assertEquals(0, world.stackSize);
-  }
-
   function testTOPLEVEL_BINDING() {
     var tlb = world.toplevelBinding;
     rAssertEq(tlb.self, world.main);
