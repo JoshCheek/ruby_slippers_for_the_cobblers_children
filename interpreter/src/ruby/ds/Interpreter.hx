@@ -1,10 +1,16 @@
 package ruby.ds;
 import ruby.ds.objects.RObject;
 import ruby.ds.objects.RClass;
+import ruby.ds.objects.RBinding;
 
+typedef StackFrame = {
+  public var ast:Ast;
+  public var binding:RBinding;
+  public var state:Interpreter.ExecutionState;
+}
 
-// TODO: move StackFrame to this file
-// TODO: move stack and currentExpression onto Interpreter
+// TODO: remove world, and have Interpreter be an attribute of World
+// ie "namespacing" chunks of related data
 typedef Interpreter = {
   public var world:ruby.ds.World;
   public var stack:List<StackFrame>;

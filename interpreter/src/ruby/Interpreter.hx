@@ -104,13 +104,13 @@ class Interpreter {
     return world.currentExpression;
   }
 
-  function continueExecuting(sf:StackFrame):ruby.ds.Interpreter.EvaluationResult {
+  function continueExecuting(sf:ruby.ds.Interpreter.StackFrame):ruby.ds.Interpreter.EvaluationResult {
     switch(sf.state) {
 
     // get target
-      case Send(s={state:"initial", targetCode:targetCode}):
+    case Send(s={state:"initial", targetCode:targetCode}):
       s.state = "evaluatedTarget";
-      return Push(Send(s), targetCode, sf.binding);
+    return Push(Send(s), targetCode, sf.binding);
 
     // get args
     case Send(s={state:"evaluatedTarget", args:args, argsCode:argsCode}):
