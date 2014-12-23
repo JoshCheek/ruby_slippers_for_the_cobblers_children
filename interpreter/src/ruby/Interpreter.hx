@@ -1,13 +1,14 @@
 package ruby;
-import ruby.ds.*;
-import ruby.ds.objects.*;
-import ruby.ds.Errors;
-using ruby.LanguageGoBag;
-using Lambda;
+import  ruby.ds.*;
+import  ruby.ds.objects.*;
+import  ruby.ds.Errors;
+import  ruby.ds.Interpreter;
+using   ruby.LanguageGoBag;
+using   Lambda;
 
 class Interpreter {
-  private var state:ruby.ds.Interpreter;
-  private var world:ruby.World;
+  private var state : ruby.ds.Interpreter;
+  private var world : ruby.World;
 
   public function new(state:ruby.ds.Interpreter) {
     this.state = state;
@@ -104,7 +105,7 @@ class Interpreter {
     return world.currentExpression;
   }
 
-  function continueExecuting(sf:ruby.ds.Interpreter.StackFrame):ruby.ds.Interpreter.EvaluationResult {
+  function continueExecuting(sf:StackFrame):EvaluationResult {
     switch(sf.state) {
 
     // get target

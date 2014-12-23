@@ -1,6 +1,8 @@
 Interpreter:
   swap all string states with enums
   move all state into the Interpreter thing
+  Interpreter#currentExpression as attr
+  create Stack class: (#push(val:T):T, #pop():T, #current:T, length:Int, isEmpty:Bool)
 
 Binding class
 
