@@ -22,14 +22,15 @@ enum EvaluationResult {
   Pop      (returnValue:RObject);
 }
 
+
 enum ExecutionState {
   // lookin good
-  SetLocal (state:SetLocalState);
-  GetConst (state:GetConstState);
-  Exprs    (state:ExprsState);
+  SetLocal  (state:SetLocalState);
+  GetConst  (state:GetConstState);
+  Exprs     (state:ExprsState);
+  OpenClass (state:OpenClassState);
 
   // in need of state:
-  OpenClass(s:{state:String, name:String, nsCode:Ast, ns:RClass, klass:RClass});
   Send(s:{state:String, targetCode:Ast, target:RObject, message:String, argsCode:Array<Ast>, args:Array<RObject>});
 
   //astate would add consistency:
@@ -48,4 +49,8 @@ enum GetConstState {
 }
 enum ExprsState {
   Crnt(index:Int, expressions:Array<Ast>);
+}
+enum OpenClassState {
+  FindNs(namespaceCode:Ast, name:String);
+  Open(namespace:RClass, name:String);
 }

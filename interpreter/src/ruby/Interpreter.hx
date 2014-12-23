@@ -53,8 +53,7 @@ class Interpreter {
         case GetLvar(name):        GetLocal(name);
         case Constant(ns, name):   GetConst(ResolveNs(ns, name));
         case Send(trg, msg, args): Send({state:"initial", targetCode:trg, target:null, message:msg, argsCode:args, args:[]});
-        case Class(Constant(ns, nm), superclass, body):
-          OpenClass({state:"ns", name:nm, nsCode:ns, ns:null, klass:null});
+        case Class(Constant(ns, nm), spr, bd): OpenClass(FindNs(ns, nm)); // FIXME
         case _: throw "Unhandled AST: " + code;
       }
     });
@@ -194,35 +193,24 @@ class Interpreter {
       var ns:RClass = expr;
       return Pop(ns.constants[name]);
 
-    case OpenClass(state={state:"ns", nsCode:None, name:name}):
-      state.state = "def";
-      state.ns = sf.binding.defTarget;
-      return NoAction(OpenClass(state));
-    case OpenClass(state={state:"ns", nsCode:ns, name:name}):
-      throw "No tests on this yet";
-      state.state = "get";
-      return Push(OpenClass(state), ns, sf.binding);
-    case OpenClass(state={state:"get"}):
-      throw "No tests on this yet";
-      state.state = "def";
-      var expr:Dynamic = currentExpression();
-      state.ns = expr;
-      return NoAction(OpenClass(state));
-    case OpenClass(state={state:"def", name:name, ns:ns}):
+    case OpenClass(FindNs(None, name)):
+      return NoAction(OpenClass(Open(sf.binding.defTarget, name)));
+    case OpenClass(Open(ns, name)):
       if(ns.constants[name] == null) {
         var klass:RClass = {
           name:       name,
           klass:      world.classClass,
-          superclass: world.objectClass,
+          superclass: world.objectClass, // FIXME
           ivars:      new InternalMap(),
           imeths:     new InternalMap(),
           constants:  new InternalMap(),
         };
         ns.constants[name] = klass;
       }
-      return Pop(world.rubyNil);
-    case OpenClass(_):
-      throw "Shouldn't have gotten here, what is state?: " + sf.state;
+      return Pop(world.rubyNil); // FIXME
+
+    case OpenClass(state):
+      throw "No tests on this yet: " + state;
 
     case Send(_):
       throw "haven't moved this yet";
