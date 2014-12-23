@@ -1,6 +1,13 @@
-Continue with interpreter
+Interpreter:
+  swap all string states with enums
+  move all state into the Interpreter thing
+
+Binding class
+
+-----
 
 abstraction in world for constant lookup (world.toplevelNamespace.constants['A'])
+abstraction in world for class creation
 
 Binary to organize haxe notes
   jhx, uses cln stuff + useful other binary stuff probably
@@ -10,7 +17,7 @@ LanguageGoBag
   Map#length
   Map#fetch
 
-Binding class
-
 Objects
   lazily make the maps (e.g. constants can be null until we need to use it)
+
+consolidate all objects into one file

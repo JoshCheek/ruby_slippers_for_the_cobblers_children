@@ -21,6 +21,14 @@ class World {
   //   return world.symbols.get(name);
   // }
 
+  public function castClass(klass:RObject):RClass {
+    var tmp:Dynamic = klass;
+    var typedClass:RClass = tmp;
+    // or should this return null if its not a class?
+    if(typedClass.imeths == null) throw("Can't cast this, it's not a class: " + inspect(klass));
+    return typedClass;
+  }
+
   public function stringLiteral(value:String):RString {
     var str:RString = {
       klass: stringClass,

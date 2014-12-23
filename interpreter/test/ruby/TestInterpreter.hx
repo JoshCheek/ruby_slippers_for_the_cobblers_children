@@ -87,7 +87,10 @@ class TestInterpreter extends ruby.support.TestCase {
     pushCode("class A; end");
     assertNull(world.toplevelNamespace.constants['A']);
     interpreter.evaluateAll();
-    assertEquals('A', rInspect(world.toplevelNamespace.constants['A']));
+    var aClass = world.toplevelNamespace.constants['A'];
+    assertEquals('A', rInspect(aClass));
+    assertEquals(world.classClass,  aClass.klass);
+    assertEquals(world.objectClass, world.castClass(aClass).superclass);
     // TODO: Test non-toplevel
   }
 
@@ -136,33 +139,6 @@ class TestInterpreter extends ruby.support.TestCase {
   /* ----- OLD TESTS THAT NEED TO BE REIMPLEMENTED -----
 
   // line mode?
-  public function _testSelfWorks() {
-    var interpreter = forCode("
-        TODO!
-    ");
-  }
-
-  public function testClasses() {
-    var interpreter = forCode("
-      class A
-      end
-    ");
-    interpreter.drainAll();
-    var world = interpreter.world;
-
-    var expected:RClass = {
-      name:       "A",
-      klass:      world.klassClass,
-      ivars:      new InternalMap(),
-      imeths:     new InternalMap(),
-      constants:  new InternalMap(),
-      superclass: world.objectClass,
-    };
-
-    var actual = interpreter.getConstant(interpreter.toplevelNamespace(), "A");
-    assertLooksKindaSimilar(actual, expected);
-  }
-
   public function testInstanceMethods() {
     var interpreter = forCode("
       # toplevel method is defined on Object
