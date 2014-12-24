@@ -10,28 +10,26 @@ class Interpreter {
   private var state : ruby.ds.Interpreter;
   private var world : ruby.World;
 
+  public var isFinished        (get, never):Bool;
+  public var isInProgress      (get, never):Bool;
+  public var stackSize         (get, never):Int;
+  public var currentBinding    (get, never):RBinding;
+  public var currentExpression (get,   set):RObject; // set becomes public, is there a private for this?
+
   public function new(state:ruby.ds.Interpreter) {
     this.state = state;
     this.world = new ruby.World(state.world);
   }
 
-  public var stackSize(get, never):Int;
-  function get_stackSize() return state.stack.length;
 
-  public var currentBinding(get, never):RBinding;
-  function get_currentBinding() {
-    if(state.stack.isEmpty()) return world.toplevelBinding;
-    return state.stack.last().binding;
-  }
-
-  public function getLocal(name:String):RObject {
+  public function getLocal(name:String):RObject { // do I actually want this public?
     var val = currentBinding.lvars[name];
     if(val!=null) return val;
     var readableKeys = [for(k in currentBinding.lvars.keys()) k];
     throw "No local variable " + name + ", only has: " + readableKeys;
   }
 
-  public function setLocal(name:String, value:RObject):RObject {
+  public function setLocal(name:String, value:RObject):RObject { // do I actually want this public?
     currentBinding.lvars[name] = value;
     return value;
   }
@@ -59,6 +57,11 @@ class Interpreter {
     });
   }
 
+  public function evaluateAll():RObject {
+    while(isInProgress) step();
+    return currentExpression;
+  }
+
   public function nextExpression():RObject {
     while(!step()) {}
     return currentExpression;
@@ -66,7 +69,7 @@ class Interpreter {
 
   // returns true if this step evaluated to an expression
   public function step():Bool {
-    if(isFinished()) throw new NothingToEvaluateError("Check before evaluating!");
+    if(isFinished) throw new NothingToEvaluateError("Check before evaluating!");
     var frame = state.stack.first();
     // trace("STACK SIZE: " + state.stack.length);
     // trace("CURRENT: " + frame.ast);
@@ -86,24 +89,14 @@ class Interpreter {
     }
   }
 
-  public function isInProgress() {
-    return !isFinished();
-  }
-
-  public function isFinished() {
-    return state.stack.isEmpty();
-  }
-
-  public function evaluateAll():RObject {
-    while(isInProgress()) step();
-    return currentExpression;
-  }
-
-  public var currentExpression(get, set):RObject; // set becomes public, is there a private for this?
-
   // ----- PRIVATE -----
-  function get_currentExpression()    return world.currentExpression;
-  function set_currentExpression(val) return world.currentExpression = val;
+
+  inline function get_isInProgress()         return !isFinished;
+  inline function get_isFinished()           return state.stack.isEmpty();
+  inline function get_currentExpression()    return world.currentExpression;
+  inline function set_currentExpression(val) return world.currentExpression = val;
+  inline function get_stackSize()            return state.stack.length;
+  inline function get_currentBinding()       return state.stack.isEmpty() ? world.toplevelBinding : state.stack.last().binding;
 
   function continueExecuting(sf:StackFrame):EvaluationResult {
     switch(sf.state) {
@@ -182,7 +175,7 @@ class Interpreter {
     InvokeMethod      -> Finished
     End
   */
-  private function evalSend(sf:StackFrame, state:SendState):EvaluationResult {
+  function evalSend(sf:StackFrame, state:SendState):EvaluationResult {
     inline function push(state, code) return Push(Send(state), code, sf.binding);
     inline function noAction(state)   return NoAction(Send(state));
 
