@@ -1,6 +1,7 @@
 class RunTests {
   static function main() {
     var r = new haxe.unit.TestRunner();
+    r.add(new TestStack());
     r.add(new ruby.TestLanguageGoBag());
     r.add(new ruby.TestParser());
     r.add(new ruby.TestSupport());

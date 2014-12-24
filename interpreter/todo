@@ -1,6 +1,3 @@
-Interpreter:
-  create Stack class: (#push(val:T):T, #pop():T, #current:T, length:Int, isEmpty:Bool)
-
 Haxe
   Check out guards for pattern matching
   Check empty expression list. It should return nil, pretty sure this returns whatever happens to be the current expression
