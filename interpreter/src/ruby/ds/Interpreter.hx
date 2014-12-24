@@ -29,6 +29,7 @@ enum ExecutionState {
   Send      (state:SendState);
   Self      (state:SelfState);
   Value     (state:ValueState);
+  Def       (state:DefState);
 }
 enum GetLocalState {
   Name(name:String);
@@ -61,4 +62,7 @@ enum SelfState {
 enum ValueState {
   Immediate(value:RObject);
   Function(fn:Void->RObject);
+}
+enum DefState {
+  Start(name:String, args:Array<Ast>, body:Ast);
 }

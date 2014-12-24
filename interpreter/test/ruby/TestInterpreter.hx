@@ -138,24 +138,24 @@ class TestInterpreter extends ruby.support.TestCase {
     //   //   takes no params, does nothing
   }
 
-  /* ----- OLD TESTS THAT NEED TO BE REIMPLEMENTED -----
-
   // line mode?
-  public function testInstanceMethods() {
-    var interpreter = forCode("
+  public function testToplevelInstanceMethods() {
+    pushCode("
       # toplevel method is defined on Object
       def m
         true
       end
       m
     ");
-    var world = interpreter.world;
-    assertEquals(interpreter.drainExpression(), interpreter.intern("m"));
-    interpreter.drainExpression();
-    assertEquals(world.rubyNil,                 interpreter.drainExpression()); // b/c the send doesn't result in a new currentValue
-    assertEquals(world.rubyTrue,                interpreter.drainExpression());
-    assertEquals(world.rubyTrue,                interpreter.drainExpression());
+    assertNextExpressions([
+      world.intern("m"),
+      world.rubyTrue,
+      world.rubyTrue
+    ]);
+    assertTrue(null != world.objectClass.imeths['m']);
   }
+
+  /* ----- OLD TESTS THAT NEED TO BE REIMPLEMENTED -----
 
   public function _testAacceptance1() {
     var interpreter = forCode('

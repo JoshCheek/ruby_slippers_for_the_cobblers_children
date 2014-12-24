@@ -14,13 +14,13 @@ class World {
     this.interpreter = new ruby.Interpreter(this, world);
   }
 
-  // public function intern(name:String):RSymbol {
-  //   if(!world.symbols.exists(name)) {
-  //     var symbol:RSymbol = {name: name, klass: world.objectClass, ivars: new InternalMap()};
-  //     world.symbols.set(name, symbol);
-  //   }
-  //   return world.symbols.get(name);
-  // }
+  public function intern(name:String):RSymbol {
+    if(!world.symbols.exists(name)) {
+      var symbol:RSymbol = {name: name, klass: world.objectClass, ivars: new InternalMap()};
+      world.symbols.set(name, symbol);
+    }
+    return world.symbols.get(name);
+  }
 
   public function castClass(klass:RObject):RClass {
     var tmp:Dynamic = klass;

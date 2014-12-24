@@ -41,16 +41,17 @@ class Interpreter {
       ast     : code,
       binding : binding,
       state   : switch(code) {
-        case Self:                 Self(Start);
-        case True:                 Value(Immediate(world.rubyTrue));
-        case Nil:                  Value(Immediate(world.rubyNil));
-        case False:                Value(Immediate(world.rubyFalse));
-        case String(value):        Value(Function(function() return world.stringLiteral(value)));
-        case Exprs(expressions):   Exprs(Crnt(0, expressions));
-        case SetLvar(name, rhs):   SetLocal(FindRhs(name, rhs));
-        case GetLvar(name):        GetLocal(Name(name));
-        case Constant(ns, name):   GetConst(ResolveNs(ns, name));
-        case Send(trg, msg, args): Send(Start(trg, msg, args));
+        case Self:                  Self(Start);
+        case True:                  Value(Immediate(world.rubyTrue));
+        case Nil:                   Value(Immediate(world.rubyNil));
+        case False:                 Value(Immediate(world.rubyFalse));
+        case String(value):         Value(Function(function() return world.stringLiteral(value)));
+        case Exprs(expressions):    Exprs(Crnt(0, expressions));
+        case SetLvar(name, rhs):    SetLocal(FindRhs(name, rhs));
+        case GetLvar(name):         GetLocal(Name(name));
+        case Constant(ns, name):    GetConst(ResolveNs(ns, name));
+        case Send(trg, msg, args):  Send(Start(trg, msg, args));
+        case Def(name, args, body): Def(Start(name, args, body));
         case Class(Constant(ns, nm), spr, bd): OpenClass(FindNs(ns, nm)); // FIXME
         case _: throw "Unhandled AST: " + code;
       }
@@ -135,6 +136,16 @@ class Interpreter {
       var ns:RClass = expr;
       return Pop(ns.constants[name]);
 
+    case Def(Start(name, args, body)):
+      var klass = sf.binding.defTarget;
+      klass.imeths[name] = {
+        klass: world.objectClass, // FIXME
+        ivars: new InternalMap(),
+        name:  name,
+        args:  args,
+        body:  Ruby(body),
+      }
+      return Pop(world.intern(name));
     case OpenClass(FindNs(None, name)):
       return NoAction(OpenClass(Open(sf.binding.defTarget, name)));
     case OpenClass(Open(ns, name)):
@@ -180,6 +191,10 @@ class Interpreter {
     inline function noAction(state)   return NoAction(Send(state));
 
     return switch(state) {
+      case Start(None, msg, argsCode):
+        currentExpression = sf.binding.self;
+        noAction(GetTarget(msg, argsCode));
+
       case Start(targetCode, msg, argsCode):
         push(GetTarget(msg, argsCode), targetCode);
 
@@ -226,8 +241,12 @@ class Interpreter {
           case(Ruby(ast)):    Push(Send(End), ast, bnd);
           case(Internal(fn)): Pop(fn(bnd, world));
         }
+
+      case End:
+        Pop(currentExpression);
+
       case _:
-        throw "haven't moved this yet";
+        throw "Unhandled: " + state;
     }
   }
 }
