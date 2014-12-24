@@ -61,7 +61,7 @@ class Interpreter {
 
   public function nextExpression():RObject {
     while(!step()) {}
-    return world.currentExpression;
+    return currentExpression;
   }
 
   // returns true if this step evaluated to an expression
@@ -77,7 +77,7 @@ class Interpreter {
         pushCode(ast, binding);
         return false;
       case Pop(result):
-        world.currentExpression = result;
+        currentExpression = result;
         state.stack.pop();
         return true;
       case NoAction(state):
@@ -96,13 +96,14 @@ class Interpreter {
 
   public function evaluateAll():RObject {
     while(isInProgress()) step();
-    return world.currentExpression;
+    return currentExpression;
   }
 
+  public var currentExpression(get, set):RObject; // set becomes public, is there a private for this?
+
   // ----- PRIVATE -----
-  function currentExpression():RObject {
-    return world.currentExpression;
-  }
+  function get_currentExpression()    return world.currentExpression;
+  function set_currentExpression(val) return world.currentExpression = val;
 
   function continueExecuting(sf:StackFrame):EvaluationResult {
     switch(sf.state) {
@@ -120,14 +121,14 @@ class Interpreter {
 
     case Exprs(Crnt(i, exprs)):
       if(i < exprs.length) return Push(Exprs(Crnt(i+1, exprs)), exprs[i], sf.binding);
-      else                 return Pop(currentExpression());
+      else                 return Pop(currentExpression);
 
     case SetLocal(FindRhs(name, rhs)):
       return Push(SetLocal(SetLhs(name)), rhs, sf.binding);
 
     case SetLocal(SetLhs(name)):
-      sf.binding.lvars[name] = currentExpression();
-      return Pop(currentExpression());
+      sf.binding.lvars[name] = currentExpression;
+      return Pop(currentExpression);
 
     case GetLocal(Name(name)):
       return Pop(sf.binding.lvars[name]);
@@ -137,7 +138,7 @@ class Interpreter {
     case GetConst(ResolveNs(nsCode, name)):
       return Push(GetConst(Get(name)), nsCode, sf.binding);
     case GetConst(Get(name)):
-      var expr:Dynamic = currentExpression();
+      var expr:Dynamic = currentExpression;
       var ns:RClass = expr;
       return Pop(ns.constants[name]);
 
@@ -190,7 +191,7 @@ class Interpreter {
         push(GetTarget(msg, argsCode), targetCode);
 
       case GetTarget(msg, argsCode):
-        var target = currentExpression();
+        var target = currentExpression;
         if(argsCode.length == 0)
           noAction(Invoke(target, msg, []));
         else
@@ -198,7 +199,7 @@ class Interpreter {
 
       case EvalArgs(trg, msg, argAsts, argObjs):
         throw("No tests should reach this yet!");
-        argObjs.push(currentExpression());
+        argObjs.push(currentExpression);
         if(argAsts.length < argObjs.length)
           noAction(Invoke(trg, msg, argObjs));
         else
