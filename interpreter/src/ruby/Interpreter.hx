@@ -165,54 +165,77 @@ class Interpreter {
   }
 
 
+  /* Could be rendered in much more granularity, someting like:
+    Start             -> (GetImplicitTarget | EvalTarget)
+    GetImplicitTarget -> EvalArgs
+    EvalTarget        -> EvalArgs
+    EvalArgs          -> (PushArg | FindMethod)
+    PushArg           -> PopArg
+    PopArg            -> (PushArg | FindMethod)
+    StartMethodLookup -> GetClass
+    GetClass          -> MethodLookup
+    MethodLookup      -> (MethodMissing | FoundMethod | SetSuperclass)
+    SetSuperclass     -> MethodLookup
+    MethodMissing     -> ??
+    FoundMethod       -> CreateBinding
+    CreateBinding     -> SetLocals
+    SetLocals         -> (... | InvokeMethod)
+    InvokeMethod      -> Finished
+    End
+  */
   private function evalSend(sf:StackFrame, state:SendState):EvaluationResult {
-    switch(state) {
-    case Start(targetCode, msg, argsCode):
-      return Push(Send(GetTarget(msg, argsCode)), targetCode, sf.binding);
+    inline function push(state, code) return Push(Send(state), code, sf.binding);
+    inline function noAction(state)   return NoAction(Send(state));
 
-    case GetTarget(msg, argsCode):
-      var target = currentExpression();
-      if(argsCode.length == 0) return NoAction(Send(Invoke(target, msg, [])));
-      else return Push(Send(EvalArgs(target, msg, argsCode, [])), argsCode[0], sf.binding);
+    return switch(state) {
+      case Start(targetCode, msg, argsCode):
+        push(GetTarget(msg, argsCode), targetCode);
 
-    case EvalArgs(trg, msg, argAsts, argObjs):
-      argObjs.push(currentExpression());
-      if(argAsts.length < argObjs.length)
-        return NoAction(Send(Invoke(trg, msg, argObjs)));
-      return Push(Send(EvalArgs(trg, msg, argAsts, argObjs)),
-                  argAsts[argObjs.length],
-                  sf.binding);
+      case GetTarget(msg, argsCode):
+        var target = currentExpression();
+        if(argsCode.length == 0)
+          noAction(Invoke(target, msg, []));
+        else
+          push(EvalArgs(target, msg, argsCode, []), argsCode[0]);
 
-    case Invoke(target, message, args):
-      var klass = target.klass;
-      while(klass != null && klass.imeths[message] == null)
-        klass = klass.superclass;
+      case EvalArgs(trg, msg, argAsts, argObjs):
+        throw("No tests should reach this yet!");
+        argObjs.push(currentExpression());
+        if(argAsts.length < argObjs.length)
+          noAction(Invoke(trg, msg, argObjs));
+        else
+          push(EvalArgs(trg, msg, argAsts, argObjs),
+               argAsts[argObjs.length]);
 
-      var meth  = null;
-      if(klass == null) throw "HAVEN'T IMPLEMENTED METHOD MISSING YET!";
-      else              meth = klass.imeths[message];
+      case Invoke(target, message, args):
+        var klass = target.klass;
+        while(klass != null && klass.imeths[message] == null)
+          klass = klass.superclass;
 
-      // make the new binding
-      var bnd:RBinding = {
-        klass:     world.objectClass, // FIXME: should be Binding, not Object!
-        ivars:     new InternalMap(),
-        self:      target,
-        defTarget: target.klass,
-        lvars:     new InternalMap(),
-      };
+        var meth  = null;
+        if(klass == null) throw "HAVEN'T IMPLEMENTED METHOD MISSING YET!";
+        else              meth = klass.imeths[message];
 
-      // TODO: set the args in the binding
-      if(args.length > 0) throw "NEED TO SET ARGS!";
+        // make the new binding
+        var bnd:RBinding = {
+          klass:     world.objectClass, // FIXME: should be Binding, not Object!
+          ivars:     new InternalMap(),
+          self:      target,
+          defTarget: target.klass,
+          lvars:     new InternalMap(),
+        };
 
-      // execute the method (if it is code, push it on the stack and evaluate it)
-      // if it's internal, evaluate it directly
-      switch(meth.body) {
-        case(Ruby(ast)):    return Push(Send(End), ast, bnd);
-        case(Internal(fn)): return Pop(fn(bnd, world));
-      }
+        // TODO: set the args in the binding
+        if(args.length > 0) throw "NEED TO SET ARGS!";
 
-    case _:
-      throw "haven't moved this yet";
+        // execute the method (if it is code, push it on the stack and evaluate it)
+        // if it's internal, evaluate it directly
+        switch(meth.body) {
+          case(Ruby(ast)):    Push(Send(End), ast, bnd);
+          case(Internal(fn)): Pop(fn(bnd, world));
+        }
+      case _:
+        throw "haven't moved this yet";
     }
   }
 
