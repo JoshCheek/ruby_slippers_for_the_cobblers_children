@@ -17,7 +17,7 @@ namespace :interpreter do
   desc 'Run interpreter test suite (server needs to be running)'
   task :test do
     sh 'haxe',
-      '-main', 'ruby.RunTests',
+      '-main', 'RunTests',
       '-cp',   'interpreter/src',
       '-cp',   'interpreter/test',
       '--interp'
