@@ -1,14 +1,14 @@
 package ruby;
 import  ruby.ds.*;
-import  ruby.ds.objects.*;
+import  ruby.ds.Objects;
 import  ruby.ds.Errors;
 import  ruby.ds.Interpreter;
 using   ruby.LanguageGoBag;
 using   Lambda;
 
 class Interpreter {
-  private var state : ruby.ds.Interpreter;
-  private var world : ruby.World;
+  private var state:ruby.ds.Interpreter;
+  private var world:ruby.World;
 
   public var isFinished        (get, never):Bool;
   public var isInProgress      (get, never):Bool;

@@ -1,5 +1,5 @@
 package ruby.ds;
-import ruby.ds.objects.*;
+import ruby.ds.Objects;
 
 // The container of all state (actually, instructions are currently stored in the interpreter)
 typedef World = {

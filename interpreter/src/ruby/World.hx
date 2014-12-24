@@ -1,7 +1,7 @@
 package ruby;
 
 import ruby.ds.*;
-import ruby.ds.objects.*;
+import ruby.ds.Objects;
 
 
 // For now, this will become a god class,

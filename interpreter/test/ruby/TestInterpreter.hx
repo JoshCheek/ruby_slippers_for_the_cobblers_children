@@ -1,8 +1,6 @@
 package ruby;
 
-import ruby.ds.objects.RString;
-import ruby.ds.objects.RObject;
-import ruby.ds.objects.RClass;
+import ruby.ds.Objects;
 import ruby.ds.InternalMap;
 import ruby.ds.Errors;
 

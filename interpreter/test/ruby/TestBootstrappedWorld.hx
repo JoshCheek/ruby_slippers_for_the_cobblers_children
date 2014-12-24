@@ -1,6 +1,6 @@
 package ruby;
 
-import ruby.ds.objects.RClass;
+import ruby.ds.Objects;
 using Lambda;
 
 class TestBootstrappedWorld extends ruby.support.TestCase {

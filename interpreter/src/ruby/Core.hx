@@ -1,5 +1,5 @@
 package ruby;
-import ruby.ds.objects.*;
+import ruby.ds.Objects;
 
 class Core {
   public static function lookupClass(bnd:RBinding, world:ruby.World):RObject {

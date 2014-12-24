@@ -22,8 +22,6 @@ LanguageGoBag
 Objects
   lazily make the maps (e.g. constants can be null until we need to use it)
 
-consolidate all objects into one file
-
 How cool would it be if we could define the methods with native code within them? e.g.
   class Binding
     native_def local_variable_set(name, val)

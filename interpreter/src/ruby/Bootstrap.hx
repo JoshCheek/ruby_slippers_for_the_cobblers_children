@@ -1,6 +1,6 @@
 package ruby;
 import ruby.ds.InternalMap;
-import ruby.ds.objects.*;
+import ruby.ds.Objects;
 
 class Bootstrap {
   public static function bootstrap():ruby.ds.World {
@@ -137,7 +137,7 @@ class Bootstrap {
       ivars: new InternalMap(),
       name: "class",
       args: [],
-      body: ruby.ds.objects.RMethod.ExecutableType.Internal(Core.lookupClass),
+      body: Internal(Core.lookupClass),
     }
 
     // TODO: move this into Ruby, only allocate needs to be haxe level
@@ -146,7 +146,7 @@ class Bootstrap {
       ivars: new InternalMap(),
       name:  "new",
       args:  [],
-      body:  ruby.ds.objects.RMethod.ExecutableType.Internal(Core.allocate),
+      body: Internal(Core.allocate),
     }
 
     // the data structure

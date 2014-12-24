@@ -3,7 +3,7 @@ import ruby.Bootstrap;
 import ruby.Interpreter;
 import ruby.ds.World;
 import ruby.ds.Errors;
-import ruby.ds.objects.*;
+import ruby.ds.Objects;
 import haxe.PosInfos;
 
 using ruby.LanguageGoBag;

@@ -1,7 +1,5 @@
 package ruby.ds;
-import  ruby.ds.objects.RObject;
-import  ruby.ds.objects.RClass;
-import  ruby.ds.objects.RBinding;
+import  ruby.ds.Objects;
 
 // World is of this type
 typedef Interpreter = {
