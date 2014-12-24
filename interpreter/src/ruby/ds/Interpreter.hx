@@ -24,18 +24,17 @@ enum EvaluationResult {
 
 
 enum ExecutionState {
-  // lookin good
+  GetLocal  (state:GetLocalState);
   SetLocal  (state:SetLocalState);
   GetConst  (state:GetConstState);
   Exprs     (state:ExprsState);
   OpenClass (state:OpenClassState);
   Send      (state:SendState);
-
-  //astate would add consistency:
-  Self;
-  Value(obj:RObject);
-  PendingValue(fn:Void->RObject);
-  GetLocal(name:String);
+  Self      (state:SelfState);
+  Value     (state:ValueState);
+}
+enum GetLocalState {
+  Name(name:String);
 }
 enum SetLocalState {
   FindRhs(name:String, rhs:Ast);
@@ -58,4 +57,11 @@ enum SendState {
   EvalArgs(target:RObject, message:String, argsCode:Array<Ast>, args:Array<RObject>);
   Invoke(target:RObject, message:String, args:Array<RObject>);
   End;
+}
+enum SelfState {
+  Start;
+}
+enum ValueState {
+  Immediate(value:RObject);
+  Function(fn:Void->RObject);
 }

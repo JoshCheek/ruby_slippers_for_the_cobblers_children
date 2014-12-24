@@ -43,14 +43,14 @@ class Interpreter {
       ast     : code,
       binding : binding,
       state   : switch(code) {
-        case Self:                 Self;
-        case True:                 Value(world.rubyTrue);
-        case Nil:                  Value(world.rubyNil);
-        case False:                Value(world.rubyFalse);
-        case String(value):        PendingValue(function() return world.stringLiteral(value));
+        case Self:                 Self(Start);
+        case True:                 Value(Immediate(world.rubyTrue));
+        case Nil:                  Value(Immediate(world.rubyNil));
+        case False:                Value(Immediate(world.rubyFalse));
+        case String(value):        Value(Function(function() return world.stringLiteral(value)));
         case Exprs(expressions):   Exprs(Crnt(0, expressions));
         case SetLvar(name, rhs):   SetLocal(FindRhs(name, rhs));
-        case GetLvar(name):        GetLocal(name);
+        case GetLvar(name):        GetLocal(Name(name));
         case Constant(ns, name):   GetConst(ResolveNs(ns, name));
         case Send(trg, msg, args): Send(Start(trg, msg, args));
         case Class(Constant(ns, nm), spr, bd): OpenClass(FindNs(ns, nm)); // FIXME
@@ -109,13 +109,13 @@ class Interpreter {
     case Send(state):
       return evalSend(sf, state);
 
-    case Self:
+    case Self(Start):
       return Pop(sf.binding.self);
 
-    case Value(result):
+    case Value(Immediate(result)):
       return Pop(result);
 
-    case PendingValue(getValue):
+    case Value(Function(getValue)):
       return Pop(getValue());
 
     // TODO: Check out guards for pattern matching
@@ -131,7 +131,7 @@ class Interpreter {
       sf.binding.lvars[name] = currentExpression();
       return Pop(currentExpression());
 
-    case GetLocal(name):
+    case GetLocal(Name(name)):
       return Pop(sf.binding.lvars[name]);
 
     case GetConst(ResolveNs(None, name)):
