@@ -29,9 +29,7 @@ enum ExecutionState {
   GetConst  (state:GetConstState);
   Exprs     (state:ExprsState);
   OpenClass (state:OpenClassState);
-
-  // in need of state:
-  Send(s:{state:String, targetCode:Ast, target:RObject, message:String, argsCode:Array<Ast>, args:Array<RObject>});
+  Send      (state:SendState);
 
   //astate would add consistency:
   Self;
@@ -53,4 +51,11 @@ enum ExprsState {
 enum OpenClassState {
   FindNs(namespaceCode:Ast, name:String);
   Open(namespace:RClass, name:String);
+}
+enum SendState {
+  Start(targetCode:Ast, message:String, argsCode:Array<Ast>);
+  GetTarget(message:String, argsCode:Array<Ast>);
+  EvalArgs(target:RObject, message:String, argsCode:Array<Ast>, args:Array<RObject>);
+  Invoke(target:RObject, message:String, args:Array<RObject>);
+  End;
 }
