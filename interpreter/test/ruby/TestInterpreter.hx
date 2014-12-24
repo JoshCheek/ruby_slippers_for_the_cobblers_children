@@ -9,6 +9,10 @@ import ruby.ds.Errors;
 using ruby.LanguageGoBag;
 
 class TestInterpreter extends ruby.support.TestCase {
+  function testItsCurrentExpressionIsNilByDefault() {
+    assertEquals(world.rubyNil, interpreter.currentExpression);
+  }
+
   function testInterpretsSingleExpression() {
     pushCode("true");
     rAssertEq(world.rubyTrue, interpreter.nextExpression());
@@ -16,9 +20,9 @@ class TestInterpreter extends ruby.support.TestCase {
 
   function testEvaluatingExpressionsUpdatesTheCurrentExpression() {
     pushCode("true");
-    rAssertEq(world.rubyNil, world.currentExpression);
+    rAssertEq(world.rubyNil, interpreter.currentExpression);
     interpreter.nextExpression();
-    rAssertEq(world.rubyTrue, world.currentExpression);
+    rAssertEq(world.rubyTrue, interpreter.currentExpression);
   }
 
   function testInterpretsMultipleExpressions() {

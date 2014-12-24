@@ -1,8 +1,4 @@
-Binding class
-
 Interpreter:
-  move all state into the Interpreter thing
-  Interpreter#currentExpression as attr
   create Stack class: (#push(val:T):T, #pop():T, #current:T, length:Int, isEmpty:Bool)
 
 Haxe
@@ -12,6 +8,8 @@ Haxe
 test showing that I can set a local in toplevel binding, and then access it (ie interpreter is setting up the stack correctly)
 
 -----
+
+Binding class
 
 abstraction in world for constant lookup (world.toplevelNamespace.constants['A'])
 abstraction in world for class creation
@@ -28,3 +26,23 @@ Objects
   lazily make the maps (e.g. constants can be null until we need to use it)
 
 consolidate all objects into one file
+
+How cool would it be if we could define the methods with native code within them? e.g.
+  class Binding
+    native_def local_variable_set(name, val)
+      return binding.self.lvars[args['name']] = args['val'];
+    end
+  end
+
+  class Class
+    native_def allocate
+      var instance:RObject = {
+        klass:binding.self,
+        ivars:new ruby.ds.InternalMap(),
+      }
+      world.objectSpace.push(instance);
+      return instance;
+    end
+  end
+  Might be able to edit the parser to accomplish this!
+  To deal with the interpretation, we would have to parse it separately and generate the file it goes into.

@@ -155,12 +155,13 @@ class Bootstrap {
       symbols           : symbols,
       toplevelNamespace : toplevelNamespace,
       currentExpression : rubyNil,
+      stack             : new List(),
 
+      toplevelBinding   : toplevelBinding,
       main              : main,
       rubyNil           : rubyNil,
       rubyTrue          : rubyTrue,
       rubyFalse         : rubyFalse,
-      toplevelBinding   : toplevelBinding,
 
       basicObjectClass  : basicObjectClass,
       objectClass       : objectClass,

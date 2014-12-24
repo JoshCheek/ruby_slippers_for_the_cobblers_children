@@ -3,11 +3,10 @@ import  ruby.ds.objects.RObject;
 import  ruby.ds.objects.RClass;
 import  ruby.ds.objects.RBinding;
 
-// TODO: remove world, and have Interpreter be an attribute of World
-// ie "namespacing" chunks of related data
+// World is of this type
 typedef Interpreter = {
-  public var world : ruby.ds.World;
-  public var stack : List<StackFrame>;
+  public var stack             : List<StackFrame>;
+  public var currentExpression : RObject;
 }
 
 typedef StackFrame = {

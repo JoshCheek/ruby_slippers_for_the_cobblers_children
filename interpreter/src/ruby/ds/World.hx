@@ -3,12 +3,14 @@ import ruby.ds.objects.*;
 
 // The container of all state (actually, instructions are currently stored in the interpreter)
 typedef World = {
-  public var objectSpace        : Array<RObject>;
-  public var symbols            : InternalMap<RSymbol>;
-  public var toplevelNamespace  : RClass;
+  // interpreter
+  public var currentExpression : RObject;
+  public var stack             : List<Interpreter.StackFrame>;
 
-  // interpreter state
-  public var currentExpression  : RObject;
+  // general state
+  public var objectSpace       : Array<RObject>;
+  public var symbols           : InternalMap<RSymbol>;
+  public var toplevelNamespace : RClass;
 
   // important objects
   public var toplevelBinding    : RBinding;
@@ -18,9 +20,9 @@ typedef World = {
   public var rubyFalse          : RObject;
 
   // important classes
-  public var klassClass         : RClass;
-  public var moduleClass        : RClass;
   public var objectClass        : RClass;
   public var basicObjectClass   : RClass;
+  public var moduleClass        : RClass;
+  public var klassClass         : RClass;
   public var stringClass        : RClass;
 }

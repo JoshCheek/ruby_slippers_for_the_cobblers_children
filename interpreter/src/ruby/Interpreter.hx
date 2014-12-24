@@ -16,9 +16,9 @@ class Interpreter {
   public var currentBinding    (get, never):RBinding;
   public var currentExpression (get,   set):RObject; // set becomes public, is there a private for this?
 
-  public function new(state:ruby.ds.Interpreter) {
+  public function new(world:ruby.World, state:ruby.ds.Interpreter) {
+    this.world = world;
     this.state = state;
-    this.world = new ruby.World(state.world);
   }
 
 
@@ -93,8 +93,8 @@ class Interpreter {
 
   inline function get_isInProgress()         return !isFinished;
   inline function get_isFinished()           return state.stack.isEmpty();
-  inline function get_currentExpression()    return world.currentExpression;
-  inline function set_currentExpression(val) return world.currentExpression = val;
+  inline function get_currentExpression()    return state.currentExpression;
+  inline function set_currentExpression(val) return state.currentExpression = val;
   inline function get_stackSize()            return state.stack.length;
   inline function get_currentBinding()       return state.stack.isEmpty() ? world.toplevelBinding : state.stack.last().binding;
 

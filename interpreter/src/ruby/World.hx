@@ -10,7 +10,8 @@ class World {
   private var world:ruby.ds.World;
 
   public function new(world:ruby.ds.World) {
-    this.world = world;
+    this.world       = world;
+    this.interpreter = new ruby.Interpreter(this, world);
   }
 
   // public function intern(name:String):RSymbol {
@@ -71,18 +72,18 @@ class World {
   function get_objectSpace() return world.objectSpace;
 
   // Objects special enough to be properties
-  public var              main(get, never):RObject;
-  public var           rubyNil(get, never):RObject;
-  public var         rubyFalse(get, never):RObject;
-  public var          rubyTrue(get, never):RObject;
-  public var        classClass(get, never):RClass;
-  public var       stringClass(get, never):RClass;
-  public var       moduleClass(get, never):RClass;
-  public var       objectClass(get, never):RClass;
-  public var  basicObjectClass(get, never):RClass;
-  public var   toplevelBinding(get, never):RBinding;
-  public var toplevelNamespace(get, never):RClass;
-  public var currentExpression(get,   set):RObject;
+  public var              main(    get, never):RObject;
+  public var           rubyNil(    get, never):RObject;
+  public var         rubyFalse(    get, never):RObject;
+  public var          rubyTrue(    get, never):RObject;
+  public var        classClass(    get, never):RClass;
+  public var       stringClass(    get, never):RClass;
+  public var       moduleClass(    get, never):RClass;
+  public var       objectClass(    get, never):RClass;
+  public var  basicObjectClass(    get, never):RClass;
+  public var   toplevelBinding(    get, never):RBinding;
+  public var toplevelNamespace(    get, never):RClass;
+  public var       interpreter(default,  null):ruby.Interpreter;
 
   function              get_main() return world.main;
   function           get_rubyNil() return world.rubyNil;
@@ -95,7 +96,4 @@ class World {
   function  get_basicObjectClass() return world.basicObjectClass;
   function   get_toplevelBinding() return world.toplevelBinding;
   function get_toplevelNamespace() return world.toplevelNamespace;
-
-  function get_currentExpression()            return world.currentExpression;
-  function set_currentExpression(obj:RObject) return world.currentExpression = obj;
 }

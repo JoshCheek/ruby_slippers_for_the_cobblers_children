@@ -15,7 +15,7 @@ class TestCase extends haxe.unit.TestCase {
   override function setup() {
     var worldDs = ruby.Bootstrap.bootstrap();
     world       = new ruby.World(worldDs);
-    interpreter = new Interpreter({world:worldDs, stack:new List()});
+    interpreter = world.interpreter;
   }
 
   function rInspect(val:RObject):String {

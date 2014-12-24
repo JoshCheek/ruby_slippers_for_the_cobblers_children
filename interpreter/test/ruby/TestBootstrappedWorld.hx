@@ -9,10 +9,6 @@ class TestBootstrappedWorld extends ruby.support.TestCase {
     assertEquals(world.objectClass, world.toplevelNamespace);
   }
 
-  function testItsCurrentExpressionIsNilByDefault() {
-    assertEquals(world.rubyNil, world.currentExpression);
-  }
-
   function testTOPLEVEL_BINDING() {
     var tlb = world.toplevelBinding;
     rAssertEq(tlb.self, world.main);
