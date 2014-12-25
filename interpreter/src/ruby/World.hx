@@ -16,7 +16,7 @@ class World {
 
   public function intern(name:String):RSymbol {
     if(!world.symbols.exists(name)) {
-      var symbol:RSymbol = {name: name, klass: world.objectClass, ivars: new InternalMap()};
+      var symbol:RSymbol = {name: name, klass: world.symbolClass, ivars: new InternalMap()};
       world.symbols.set(name, symbol);
     }
     return world.symbols.get(name);
@@ -40,6 +40,7 @@ class World {
     return str;
   }
 
+
   // s b/c static and instance functions can't have the same name -.^
   static public function sinspect(obj:RObject):String {
     if(obj == null) return 'Haxe null';
@@ -57,10 +58,13 @@ class World {
       var tmp:Dynamic = obj;
       var objString:RString = tmp;
       return '"'+objString.value+'"'; // will do for now
+    } else if(klass.name == 'Symbol') {
+      var tmp:Dynamic = obj;
+      var objSym:RSymbol = tmp;
+      return ':'+objSym.name; // will do for now
     } else {
+      // throw("NO INSPECTION FOR: " + obj.klass.name);
       return "#<" + obj.klass.name + ">";
-    // } else {
-    //   return "" + obj; // :D
     }
   }
   public function inspect(obj:RObject):String {

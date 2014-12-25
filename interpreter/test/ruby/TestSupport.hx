@@ -10,6 +10,15 @@ class TestSupport extends ruby.support.TestCase {
     assertInspects(world.stringLiteral("abc"), '"abc"');
   }
 
+  function testRAssertEq() {
+    rAssertEq(world.intern("abc"), world.intern("abc"));
+
+    var fails = true;
+    try rAssertEq(world.intern("abc"), world.intern("xyz"))
+    catch (e:haxe.unit.TestStatus) fails = false;
+    assertFalse(fails);
+  }
+
   function testAssertNextExpressions() {
     var ast = ParseRuby.fromCode("true; nil; true");
     // fewer
