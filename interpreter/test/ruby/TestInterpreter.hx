@@ -85,15 +85,61 @@ class TestInterpreter extends ruby.support.TestCase {
     rAssertEq(world.stringClass, interpreter.nextExpression());
   }
 
-  public function testClassDefinition() {
-    pushCode("class A; end");
+  public function testClassAndMethodDefinition() {
+    pushCode("
+        # def in a class
+        class A
+          def ameth; end
+        end
+
+        # toplevel def with body
+        def ometh
+          true
+        end
+        ometh
+
+        # def without a body
+        def nobody_meth; end
+        nobody_meth
+
+        # def with arguments
+    ");
+
     assertNull(world.toplevelNamespace.constants['A']);
-    interpreter.evaluateAll();
-    var aClass = world.toplevelNamespace.constants['A'];
-    assertEquals('A', rInspect(aClass));
-    assertEquals(world.classClass,  aClass.klass);
-    assertEquals(world.objectClass, world.castClass(aClass).superclass);
-    // TODO: Test non-toplevel
+    assertNextExpressions([
+      world.intern("ameth"), // ends def
+      world.intern("ameth"), // ends class
+
+      world.intern("ometh"),
+      world.rubyTrue,
+      world.rubyTrue,
+
+      world.intern("nobody_meth"),
+      world.rubyNil,
+    ]);
+
+    // class definition
+    var aClass = world.castClass(world.toplevelNamespace.constants['A']);
+    assertEquals(world.classClass,  aClass.klass);       // klass
+    assertTrue(aClass.ivars.empty());                    // ivars
+    assertEquals('A', rInspect(aClass));                 // name
+    assertEquals(world.objectClass, aClass.superclass);  // superclass
+    assertTrue(aClass.constants.empty());                // ivars
+
+    // TODO: assert the methods that should exist on it
+
+    // A#ameth
+    var ameth = aClass.imeths['ameth'];
+    // FIXME: Assert klass (should be Method, but haven't made that one yet, so it's Object)
+    assertEquals("ameth", ameth.name);
+    assertEquals(0, ameth.args.length);
+    assertLooksKindaSimilar(ameth.body, Ruby(Default));
+
+    // Object#ometh
+    var ometh = world.objectClass.imeths['ometh'];
+    assertEquals("ometh", ometh.name);
+    assertEquals(0, ometh.args.length);
+    assertLooksKindaSimilar(ometh.body, Ruby(True));
   }
 
   // TODO: Test reopening the class
@@ -108,8 +154,6 @@ class TestInterpreter extends ruby.support.TestCase {
       world.rubyNil.klass,
     ]);
   }
-
-  // TODO: Test method definition
 
   public function testInstantiation() {
     pushCode("class A
@@ -138,27 +182,13 @@ class TestInterpreter extends ruby.support.TestCase {
     //   //   takes no params, does nothing
   }
 
-  // line mode?
-  public function testToplevelInstanceMethods() {
-    pushCode("
-      # toplevel method is defined on Object
-      def m
-        true
-      end
-      m
-    ");
-    assertNextExpressions([
-      world.intern("m"),
-      world.rubyTrue,
-      world.rubyTrue
-    ]);
-    assertTrue(null != world.objectClass.imeths['m']);
-  }
-
-  /* ----- OLD TESTS THAT NEED TO BE REIMPLEMENTED -----
-
   public function _testAacceptance1() {
-    var interpreter = forCode('
+    // evaluate class body
+    // methods can take args
+    // set/get ivars
+    // ??#puts
+    // send with args
+    pushCode('
       class User
         def initialize(name)
           self.name = name
@@ -177,19 +207,21 @@ class TestInterpreter extends ruby.support.TestCase {
       puts user.name'
     );
 
-    interpreter.drainAll();
+    var userClassObj:Dynamic = world.toplevelNamespace.constants['User'];
+    var userClass:RClass     = userClassObj;
 
-    // // the code successfully printed
-    // // ... eventually switch to `assert_equal "Josh", stdout.string`
+    interpreter.evaluateAll();
+    // trace(world.inspect(userClass));
+    assertTrue(null != userClass.imeths['initialize']);
+    assertTrue(null != userClass.imeths['name']);
+    assertTrue(null != userClass.imeths['name=']);
+    // assertEquals(3, userClass.imeths.length);
+
+    // the code successfully printed
+    // ... eventually switch to `assert_equal "Josh", stdout.string`
     // assertEquals("Josh\n", interpreter.printedInternally());
-
-    // // it defined the class
-    // var userClass = interpreter.lookupClass('User');
-    // assertEquals('User', userClass.name);
-    // assertEquals('[initialize,name,name=]', Std.string(userClass.imeths));
 
     // // it is tracking the instance
     // assertEquals(1, interpreter.eachObject(userClass).length);
   }
-  */
 }

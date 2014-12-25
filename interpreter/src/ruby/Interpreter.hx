@@ -91,7 +91,11 @@ class Interpreter {
     case False: Pop(world.rubyFalse);
     case Nil:   Pop(world.rubyNil);
     case String(val): Pop(world.stringLiteral(val));
-    case Default: throw("SHOULDN'T HIT THIS! STACK IS: "+ state.stack.last().state);
+    case Default:
+      var iter = this.state.stack.iterator();
+      iter.next();
+      var state = iter.next().state;
+      throw("SHOULDN'T HIT THIS! FIRST STACK IS: " + state);
     case SetIvar(_) | GetIvar(_) | Float(_) | Integer(_):
       throw "UNHANDLED: " + sf.state;
 
@@ -223,12 +227,9 @@ class Interpreter {
         else                      push(EvalArgs(target, msg, argCodes, []), argCodes[0]);
 
       case EvalArgs(trg, msg, argCodes, args):
-        throw("No tests should reach this yet!");
-
         args = args.concat([currentExpression]); // concat returns a new array
-        if(argCodes.length < args.length) noAction(Invoke(trg, msg, args));
-        else                              push(EvalArgs(trg, msg, argCodes, args),
-                                               argCodes[argCodes.length]);
+        if(argCodes.length <= args.length) noAction(Invoke(trg, msg, args));
+        else                               push(EvalArgs(trg, msg, argCodes, args), argCodes[argCodes.length]);
 
       case Invoke(target, message, args):
         var klass = target.klass;
@@ -260,8 +261,9 @@ class Interpreter {
         // execute the method (if it is code, push it on the stack and evaluate it)
         // if it's internal, evaluate it directly
         switch(meth.body) {
-          case(Ruby(ast)):    Push(Send(End), ast, bnd);
-          case(Internal(fn)): Pop(fn(bnd, world));
+          case(Ruby(Default)): Pop(world.rubyNil);
+          case(Ruby(ast)):     Push(Send(End), ast, bnd);
+          case(Internal(fn)):  Pop(fn(bnd, world));
         }
 
       case End:

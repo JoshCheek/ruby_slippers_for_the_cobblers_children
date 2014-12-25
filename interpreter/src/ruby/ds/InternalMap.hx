@@ -10,4 +10,8 @@ abstract InternalMap<T>(haxe.ds.StringMap<T>) {
 
   @:arrayAccess public inline function get(k:String)      return this.get(k);
   @:arrayAccess public inline function set(k:String, v:T) return this.set(k, v);
+
+  inline public function empty():Bool {
+    return Lambda.empty(this);
+  }
 }
