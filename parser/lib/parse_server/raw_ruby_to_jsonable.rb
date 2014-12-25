@@ -191,6 +191,12 @@ module ParseServer
           name:     ast.children.first.to_s,
           location: location_hash(ast),
         }
+      when :restarg
+        assert_children ast, 1
+        { type:     :rest_arg,
+          name:     ast.children.first.to_s,
+          location: location_hash(ast),
+        }
       when :const
         assert_children ast, 2
         namespace, name = ast.children

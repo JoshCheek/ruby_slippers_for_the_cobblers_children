@@ -429,7 +429,15 @@ RSpec.describe ParseServer::RawRubyToJsonable do
       end
 
       example 'optional arg'
-      example 'splatted args'
+      example 'splatted args' do
+        method_definition = call 'def a(*b) end', filename: 'f.rb'
+        standard_assertions method_definition, type: :method_definition
+        arg, *remaining_args = method_definition[:args]
+        expect(remaining_args).to be_empty
+
+        standard_assertions arg, type: :rest_arg, location: ['f.rb', 6, 8]
+        expect(arg[:name]).to eq 'b'
+      end
       example 'required keyword arg'
       example 'optional keyword arg'
       example 'remaining keyword args'
