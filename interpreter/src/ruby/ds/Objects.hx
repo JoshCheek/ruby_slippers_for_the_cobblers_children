@@ -1,4 +1,5 @@
 package ruby.ds;
+import ruby.ds.Interpreter;
 
 typedef RObject = {
   klass:RClass,
@@ -30,14 +31,16 @@ typedef RBinding = {
   lvars     : InternalMap<RObject>,
 }
 
+enum ArgType {
+  Required(name:String);
+}
 enum ExecutableType {
-  Ruby(ast:Ast);
+  Ruby(ast:ExecutionState);
   Internal(fn:RBinding -> ruby.World -> RObject);
 }
 typedef RMethod = {
   > RObject,
   name : String,
-  args : Array<Ast>,
+  args : Array<ArgType>, // rename to params
   body : ExecutableType,
 }
-

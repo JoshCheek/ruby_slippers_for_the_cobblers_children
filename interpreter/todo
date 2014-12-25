@@ -1,3 +1,9 @@
+Stack: make it immutable
+Are we still using ExecutionState.Value?
+Bunch of renamings:
+  method args -> method params
+  ExecutionState -> idk, something like Execution, Evaluation, Eval, EvalState, Expression
+
 Haxe
   Check out guards for pattern matching
   Check empty expression list. It should return nil, pretty sure this returns whatever happens to be the current expression

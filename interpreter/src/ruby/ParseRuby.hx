@@ -1,14 +1,9 @@
 package ruby;
-
-import ruby.ds.Ast;
+import ruby.ds.Interpreter;
+import ruby.ds.Objects;
 
 class ParseRuby {
-  public static function fromCode(rawCode:String):Ast {
-    // using server, b/c loading the bin for each request was just taking annoyingly long
-    return usingServer(rawCode);
-  }
-
-  public static function usingServer(rawCode:String):Ast {
+  public static function fromCode(rawCode:String):ExecutionState {
     var envVarName = "RUBY_PARSER_PORT";
     var port       = "";
     if(Sys.environment().exists(envVarName))
@@ -22,16 +17,12 @@ class ParseRuby {
     parser.onError  = function(message) trace("HTTP ERROR: " + message);
     parser.onStatus = function(status) { };
     parser.request(true);
-    return fromRawJson(rawJson);
-  }
-
-  public static function fromRawJson(rawJson:String) {
     return fromJson(haxe.Json.parse(rawJson));
   }
 
-  public static function fromJson(ast:Dynamic):Ast {
-    if(ast == null) return None;
-    var rubyAst = switch(ast.type) {
+  static function fromJson(ast:Dynamic):ExecutionState {
+    if(ast == null) return Default;
+    return switch(ast.type) {
       case "nil"                   : Nil;
       case "true"                  : True;
       case "false"                 : False;
@@ -39,22 +30,23 @@ class ParseRuby {
       case "integer"               : Integer(ast.value);
       case "float"                 : Float(ast.value);
       case "string"                : String(ast.value);
-      case "expressions"           : Exprs(fromJsonArray(ast.expressions));
-      case "set_local_variable"    : SetLvar(ast.name, fromJson(ast.value));
-      case "get_local_variable"    : GetLvar(ast.name);
-      case "set_instance_variable" : SetIvar(ast.name, fromJson(ast.value));
-      case "get_instance_variable" : GetIvar(ast.name);
-      case "send"                  : Send(fromJson(ast.target), ast.message, fromJsonArray(ast.args));
-      case "constant"              : Constant(fromJson(ast.namespace), ast.name);
-      case "class"                 : Class(fromJson(ast.name_lookup), fromJson(ast.superclass), fromJson(ast.body));
-      case "method_definition"     : Def(ast.name, fromJsonArray(ast.args), fromJson(ast.body));
-      case "required_arg"          : RequiredArg(ast.name);
-      case _                       : Undefined(ast);
+      case "expressions"           : Exprs(Start(ast.expressions.map(fromJson)));
+      case "set_local_variable"    : SetLvar(FindRhs(ast.name, fromJson(ast.value)));
+      case "get_local_variable"    : GetLvar(Name(ast.name));
+      case "set_instance_variable" : SetIvar(FindRhs(ast.name, fromJson(ast.value)));
+      case "get_instance_variable" : GetIvar(Name(ast.name));
+      case "send"                  : Send(Start(fromJson(ast.target), ast.message, ast.args.map(fromJson)));
+      case "constant"              : Const(GetNs(fromJson(ast.namespace), ast.name));
+      case "class"                 : OpenClass(GetNs(fromJson(ast.name_lookup), fromJson(ast.superclass), fromJson(ast.body)));
+      case "method_definition"     : Def(Start(ast.name, ast.args.map(toArg), fromJson(ast.body)));
+      case _                       : throw("CAN'T PARSE: " + ast);
     }
-    return rubyAst;
   }
 
-  private static function fromJsonArray(array:Array<Dynamic>):Array<Ast> {
-    return array.map(fromJson);
+  private static function toArg(arg:Dynamic):ArgType {
+    switch(arg.type) {
+      case "required_arg": return Required(arg.name);
+      case _: throw("Unknown arg type!: " + arg);
+    }
   }
 }

@@ -35,27 +35,9 @@ class Interpreter {
   }
 
 
-  public function pushCode(code:Ast, ?binding) {
+  public function pushCode(code:ExecutionState, ?binding) {
     if(binding==null) binding = currentBinding;
-    this.state.stack.push({
-      ast     : code,
-      binding : binding,
-      state   : switch(code) {
-        case Self:                  Self(Start);
-        case True:                  Value(Immediate(world.rubyTrue));
-        case Nil:                   Value(Immediate(world.rubyNil));
-        case False:                 Value(Immediate(world.rubyFalse));
-        case String(value):         Value(Function(function() return world.stringLiteral(value)));
-        case Exprs(expressions):    Exprs(Crnt(0, expressions));
-        case SetLvar(name, rhs):    SetLocal(FindRhs(name, rhs));
-        case GetLvar(name):         GetLocal(Name(name));
-        case Constant(ns, name):    GetConst(ResolveNs(ns, name));
-        case Send(trg, msg, args):  Send(Start(trg, msg, args));
-        case Def(name, args, body): Def(Start(name, args, body));
-        case Class(Constant(ns, nm), spr, bd): OpenClass(FindNs(ns, nm)); // FIXME
-        case _: throw "Unhandled AST: " + code;
-      }
-    });
+    this.state.stack.push({binding:binding, state:code});
   }
 
   public function evaluateAll():RObject {
@@ -100,70 +82,107 @@ class Interpreter {
   inline function get_currentBinding()       return state.stack.isEmpty() ? world.toplevelBinding : state.stack.last().binding;
 
   function continueExecuting(sf:StackFrame):EvaluationResult {
-    switch(sf.state) {
+    return switch(sf.state) {
     case Send(state):
-      return evalSend(sf, state);
+      evalSend(sf, state);
 
-    case Self(Start):
-      return Pop(sf.binding.self);
+    case Self:  Pop(sf.binding.self);
+    case True:  Pop(world.rubyTrue);
+    case False: Pop(world.rubyFalse);
+    case Nil:   Pop(world.rubyNil);
+    case String(val): Pop(world.stringLiteral(val));
+    case Default: throw("SHOULDN'T HIT THIS! STACK IS: "+ state.stack.last().state);
+    case SetIvar(_) | GetIvar(_) | Float(_) | Integer(_):
+      throw "UNHANDLED: " + sf.state;
 
     case Value(Immediate(result)):
-      return Pop(result);
+      Pop(result);
 
     case Value(Function(getValue)):
-      return Pop(getValue());
+      Pop(getValue());
 
+    case Exprs(Start(exprs)):
+      NoAction(Exprs(Crnt(0, exprs)));
     case Exprs(Crnt(i, exprs)):
-      if(i < exprs.length) return Push(Exprs(Crnt(i+1, exprs)), exprs[i], sf.binding);
-      else                 return Pop(currentExpression);
+      if(i < exprs.length) Push(Exprs(Crnt(i+1, exprs)), exprs[i], sf.binding);
+      else                 Pop(currentExpression);
 
-    case SetLocal(FindRhs(name, rhs)):
-      return Push(SetLocal(SetLhs(name)), rhs, sf.binding);
+    case SetLvar(FindRhs(name, rhs)):
+      Push(SetLvar(SetLhs(name)), rhs, sf.binding);
 
-    case SetLocal(SetLhs(name)):
+    case SetLvar(SetLhs(name)):
       sf.binding.lvars[name] = currentExpression;
-      return Pop(currentExpression);
+      Pop(currentExpression);
 
-    case GetLocal(Name(name)):
-      return Pop(sf.binding.lvars[name]);
+    case GetLvar(Name(name)):
+      Pop(sf.binding.lvars[name]);
 
-    case GetConst(ResolveNs(None, name)):
-      return Pop(sf.binding.defTarget.constants[name]); // TODO: Can we push current namepace instead of having two weird paths through? (might not be able to b/c that would cause it to find the current ns as an intermediate expression, which could fuck up tests
-    case GetConst(ResolveNs(nsCode, name)):
-      return Push(GetConst(Get(name)), nsCode, sf.binding);
-    case GetConst(Get(name)):
+    case Const(GetNs(Default, name)):
+      Pop(sf.binding.defTarget.constants[name]); // TODO: Can we push current namepace instead of having two weird paths through? (might not be able to b/c that would cause it to find the current ns as an intermediate expression, which could fuck up tests
+    case Const(GetNs(nsCode, name)):
+      Push(Const(Get(name)), nsCode, sf.binding);
+    case Const(Get(name)):
       var expr:Dynamic = currentExpression;
       var ns:RClass = expr;
-      return Pop(ns.constants[name]);
+      Pop(ns.constants[name]);
 
     case Def(Start(name, args, body)):
-      var klass = sf.binding.defTarget;
-      klass.imeths[name] = {
+      var klass:RClass = sf.binding.defTarget;
+      var meth:RMethod = {
         klass: world.objectClass, // FIXME
         ivars: new InternalMap(),
         name:  name,
         args:  args,
         body:  Ruby(body),
       }
-      return Pop(world.intern(name));
-    case OpenClass(FindNs(None, name)):
-      return NoAction(OpenClass(Open(sf.binding.defTarget, name)));
-    case OpenClass(Open(ns, name)):
+      klass.imeths[name] = meth;
+      Pop(world.intern(name));
+
+    // TODO: extract OpenClass into its own method
+    case OpenClass(GetNs(Const(GetNs(Default, name)), superclassCode, body)):
+      currentExpression = sf.binding.defTarget;
+      return NoAction(OpenClass(GetSpr(name, superclassCode, body)));
+    case OpenClass(GetNs(Const(GetNs(ns, name)), superclassCode, body)):
+      return Push(OpenClass(GetSpr(name, superclassCode, body)), ns, sf.binding);
+    case OpenClass(GetSpr(name, Default, body)):
+      var tmp:Dynamic = currentExpression;
+      var ns:RClass = tmp;
+      currentExpression = world.objectClass;
+      return NoAction(OpenClass(Open(ns, name, body)));
+    case OpenClass(Open(ns, name, body)):
+      var tmp:Dynamic = currentExpression;
+      var sprClass:RClass = tmp;
+      var tmp:Dynamic = ns.constants[name];
+      var klass:RClass = null;
       if(ns.constants[name] == null) {
-        var klass:RClass = {
+        klass = {
           name:       name,
           klass:      world.classClass,
-          superclass: world.objectClass, // FIXME
+          superclass: sprClass,
           ivars:      new InternalMap(),
           imeths:     new InternalMap(),
           constants:  new InternalMap(),
         };
         ns.constants[name] = klass;
+      } else {
+        klass = world.castClass(ns.constants[name]);
       }
-      return Pop(world.rubyNil); // FIXME
-
-    case OpenClass(state):
-      throw "No tests on this yet: " + state;
+      return NoAction(OpenClass(Body(klass, body)));
+    case OpenClass(Body(klass, Default)):
+      return Pop(world.rubyNil);
+    case OpenClass(Body(klass, body)):
+      var bnd:RBinding = {
+        klass:     world.objectClass, // FIXME: should be Binding, not Object!
+        ivars:     new InternalMap(),
+        self:      klass,
+        defTarget: klass,
+        lvars:     new InternalMap(),
+      };
+      return Push(OpenClass(Finished), body, bnd);
+    case OpenClass(Finished):
+      return Pop(currentExpression);
+    case OpenClass(x):
+      throw "FIX OpenClass: " + x;
     }
   }
 
@@ -191,28 +210,25 @@ class Interpreter {
     inline function noAction(state)   return NoAction(Send(state));
 
     return switch(state) {
-      case Start(None, msg, argsCode):
+      case Start(Default, msg, argCodes):
         currentExpression = sf.binding.self;
-        noAction(GetTarget(msg, argsCode));
+        noAction(GetTarget(msg, argCodes));
 
-      case Start(targetCode, msg, argsCode):
-        push(GetTarget(msg, argsCode), targetCode);
+      case Start(targetCode, msg, argCodes):
+        push(GetTarget(msg, argCodes), targetCode);
 
-      case GetTarget(msg, argsCode):
+      case GetTarget(msg, argCodes):
         var target = currentExpression;
-        if(argsCode.length == 0)
-          noAction(Invoke(target, msg, []));
-        else
-          push(EvalArgs(target, msg, argsCode, []), argsCode[0]);
+        if(argCodes.length == 0) noAction(Invoke(target, msg, []));
+        else                      push(EvalArgs(target, msg, argCodes, []), argCodes[0]);
 
-      case EvalArgs(trg, msg, argAsts, argObjs):
+      case EvalArgs(trg, msg, argCodes, args):
         throw("No tests should reach this yet!");
-        argObjs.push(currentExpression);
-        if(argAsts.length < argObjs.length)
-          noAction(Invoke(trg, msg, argObjs));
-        else
-          push(EvalArgs(trg, msg, argAsts, argObjs),
-               argAsts[argObjs.length]);
+
+        args = args.concat([currentExpression]); // concat returns a new array
+        if(argCodes.length < args.length) noAction(Invoke(trg, msg, args));
+        else                              push(EvalArgs(trg, msg, argCodes, args),
+                                               argCodes[argCodes.length]);
 
       case Invoke(target, message, args):
         var klass = target.klass;
@@ -233,7 +249,13 @@ class Interpreter {
         };
 
         // TODO: set the args in the binding
-        if(args.length > 0) throw "NEED TO SET ARGS!";
+        if(args.length > 0) throw "CAN'T YET HANDLE PASSING ARGS TO METHODS";
+        for(param in meth.args) {
+          switch(param) {
+            case Required(name): // no op
+            case _: throw("THIS ALGORITHM WON'T WORK FOR NON-REQUIRED ARGS! GOT: " + param);
+          }
+        }
 
         // execute the method (if it is code, push it on the stack and evaluate it)
         // if it's internal, evaluate it directly

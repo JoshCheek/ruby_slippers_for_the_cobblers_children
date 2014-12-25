@@ -8,61 +8,77 @@ typedef Interpreter = {
 }
 
 typedef StackFrame = {
-  public var ast     : Ast;
   public var binding : RBinding;
   public var state   : ExecutionState;
 }
 
 enum EvaluationResult {
   NoAction (newState:ExecutionState);
-  Push     (newState:ExecutionState, code:Ast, binding:RBinding);
+  Push     (newState:ExecutionState, code:ExecutionState, binding:RBinding);
   Pop      (returnValue:RObject);
 }
 
 
 enum ExecutionState {
-  GetLocal  (state:GetLocalState);
-  SetLocal  (state:SetLocalState);
-  GetConst  (state:GetConstState);
+  Default;
+  Nil;
+  Self;
+  True;
+  False;
+  Integer   (value:Int);
+  Float     (value:Float);
+  String    (value:String);
+  GetLvar   (state:GetLvarState);
+  SetLvar   (state:SetLvarState);
+  GetIvar   (state:GetIvarState);
+  SetIvar   (state:SetIvarState);
+  Const     (state:ConstState);
   Exprs     (state:ExprsState);
   OpenClass (state:OpenClassState);
   Send      (state:SendState);
-  Self      (state:SelfState);
   Value     (state:ValueState);
   Def       (state:DefState);
 }
-enum GetLocalState {
+enum GetLvarState {
   Name(name:String);
 }
-enum SetLocalState {
-  FindRhs(name:String, rhs:Ast);
+enum SetLvarState {
+  FindRhs(name:String, rhs:ExecutionState);
   SetLhs(name:String);
 }
-enum GetConstState {
-  ResolveNs(namespace:Ast, name:String);
+enum GetIvarState {
+  Name(name:String);
+}
+enum SetIvarState {
+  FindRhs(name:String, rhs:ExecutionState);
+  SetLhs(name:String);
+}
+enum ConstState {
+  GetNs(namespace:ExecutionState, name:String);
   Get(name:String);
 }
 enum ExprsState {
-  Crnt(index:Int, expressions:Array<Ast>);
+  Start(expressions:Array<ExecutionState>);
+  Crnt(index:Int, expressions:Array<ExecutionState>);
 }
 enum OpenClassState {
-  FindNs(namespaceCode:Ast, name:String);
-  Open(namespace:RClass, name:String);
+  GetNs(namespaceCode:ExecutionState, superclassCode:ExecutionState, body:ExecutionState);
+  GetSpr(name:String, superclassCode:ExecutionState, body:ExecutionState);
+  Open(ns:RClass, name:String, body:ExecutionState);
+  Body(klass:RClass, body:ExecutionState);
+  Finished;
 }
 enum SendState {
-  Start(targetCode:Ast, message:String, argsCode:Array<Ast>);
-  GetTarget(message:String, argsCode:Array<Ast>);
-  EvalArgs(target:RObject, message:String, argsCode:Array<Ast>, args:Array<RObject>);
+  Start(targetCode:ExecutionState, message:String, argsCode:Array<ExecutionState>);
+  GetTarget(message:String, argsCode:Array<ExecutionState>);
+  EvalArgs(target:RObject, message:String, argsCode:Array<ExecutionState>, args:Array<RObject>);
   Invoke(target:RObject, message:String, args:Array<RObject>);
   End;
-}
-enum SelfState {
-  Start;
 }
 enum ValueState {
   Immediate(value:RObject);
   Function(fn:Void->RObject);
 }
 enum DefState {
-  Start(name:String, args:Array<Ast>, body:Ast);
+  Start(name:String, args:Array<ArgType>, body:ExecutionState);
 }

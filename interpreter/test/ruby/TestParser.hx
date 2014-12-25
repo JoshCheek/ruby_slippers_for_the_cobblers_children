@@ -1,9 +1,9 @@
 package ruby;
-import ruby.ds.Ast;
+import ruby.ds.Interpreter;
 using Lambda;
 
 class TestParser extends ruby.support.TestCase {
-  function assertParses(rubyCode:String, expected:Ast, ?c:haxe.PosInfos) {
+  function assertParses(rubyCode:String, expected:ExecutionState, ?c:haxe.PosInfos) {
     var actual = ruby.ParseRuby.fromCode(rubyCode);
     assertEquals(Std.string(expected), Std.string(actual), c);
   }
@@ -11,13 +11,13 @@ class TestParser extends ruby.support.TestCase {
   // literals
   function testSpecialObjects() {
     assertParses(    "nil;    true;    false;    self",
-      Exprs([Nil, True, False, Self])
+      Exprs(Start([Nil, True, False, Self]))
     );
   }
 
   function testIntegers() {
     assertParses(               "1;             -123",
-      Exprs([Integer(1), Integer(-123)])
+      Exprs(Start([Integer(1), Integer(-123)]))
     );
   }
 
@@ -38,19 +38,19 @@ class TestParser extends ruby.support.TestCase {
       A
       @a = 1
       @a",
-      Exprs([
-        SetLvar("a", Integer(1)),
-        GetLvar("a"),
-        Constant(None, "A"), // going w/ nil b/c that's what comes in, but kinda seems like the parser should make this a CurrentNamespace node or something
-        SetIvar("@a", Integer(1)),
-        GetIvar("@a"),
-      ])
+      Exprs(Start([
+        SetLvar(FindRhs("a", Integer(1))),
+        GetLvar(Name("a")),
+        Const(GetNs(Default, "A")), // going w/ nil b/c that's what comes in, but kinda seems like the parser should make this a CurrentNamespace node or something
+        SetIvar(FindRhs("@a", Integer(1))),
+        GetIvar(Name("@a")),
+      ]))
     );
   }
 
   // sending messages
   function testSendingMessages() {
-    assertParses("true.something(false)", Send(True, "something", [False]));
+    assertParses("true.something(false)", Send(Start(True, "something", [False])));
   }
 
   // class and module definitions
@@ -61,15 +61,15 @@ class TestParser extends ruby.support.TestCase {
         end
       end
       ",
-      Class(
-        Constant(None, "A"), // name
-        None,                   // superclass
-        Class(                 // body
-          Constant(Constant(None, "B"), "C"),
-          Constant(None, "D"),
-          None
-        )
-      )
+      OpenClass(GetNs(
+        Const(GetNs(Default, "A")), // name
+        Default,                    // superclass
+        OpenClass(GetNs(            // body
+          Const(GetNs(Const(GetNs(Default, "B")), "C")),
+          Const(GetNs(Default, "D")),
+          Default
+        ))
+      ))
     );
   }
 
@@ -81,14 +81,14 @@ class TestParser extends ruby.support.TestCase {
         true
       end
       ",
-      Exprs([
-        Def("bland_method", [], None),
-        Def(
+      Exprs(Start([
+        Def(Start("bland_method", [], Default)),
+        Def(Start(
           "method_with_args_and_body",
-          [RequiredArg("arg")],
+          [Required("arg")],
           True
-        ),
-      ])
+        )),
+      ]))
     );
   }
 
