@@ -78,6 +78,7 @@ class World {
   public var          rubyTrue(    get, never):RObject;
   public var        classClass(    get, never):RClass;
   public var       stringClass(    get, never):RClass;
+  public var       symbolClass(    get, never):RClass;
   public var       moduleClass(    get, never):RClass;
   public var       objectClass(    get, never):RClass;
   public var  basicObjectClass(    get, never):RClass;
@@ -91,6 +92,7 @@ class World {
   function          get_rubyTrue() return world.rubyTrue;
   function        get_classClass() return world.klassClass;
   function       get_stringClass() return world.stringClass;
+  function       get_symbolClass() return world.symbolClass;
   function       get_moduleClass() return world.moduleClass;
   function       get_objectClass() return world.objectClass;
   function  get_basicObjectClass() return world.basicObjectClass;

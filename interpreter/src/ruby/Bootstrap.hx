@@ -99,6 +99,15 @@ class Bootstrap {
       imeths:     new InternalMap(),
       constants:  new InternalMap(),
     };
+    var symbolClass:RClass = {
+      name:       "Symbol",
+      klass:      klassClass,
+      superclass: objectClass,
+      ivars:      new InternalMap(),
+      imeths:     new InternalMap(),
+      constants:  new InternalMap(),
+    };
+
 
     // namespacing
     var toplevelNamespace = objectClass;
@@ -110,6 +119,7 @@ class Bootstrap {
     toplevelNamespace.constants[trueClass.name]        = trueClass;
     toplevelNamespace.constants[falseClass.name]       = falseClass;
     toplevelNamespace.constants[stringClass.name]      = stringClass;
+    toplevelNamespace.constants[symbolClass.name]      = symbolClass;
 
     // Object tracking
     objectSpace.push(toplevelBinding);
@@ -126,6 +136,7 @@ class Bootstrap {
     objectSpace.push(trueClass);
     objectSpace.push(falseClass);
     objectSpace.push(stringClass);
+    objectSpace.push(symbolClass);
 
     // core methods
 
@@ -168,6 +179,7 @@ class Bootstrap {
       moduleClass       : moduleClass,
       klassClass        : klassClass,
       stringClass       : stringClass,
+      symbolClass       : symbolClass,
     }
 
   }

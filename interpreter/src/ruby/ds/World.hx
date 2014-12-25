@@ -25,4 +25,5 @@ typedef World = {
   public var moduleClass        : RClass;
   public var klassClass         : RClass;
   public var stringClass        : RClass;
+  public var symbolClass        : RClass;
 }

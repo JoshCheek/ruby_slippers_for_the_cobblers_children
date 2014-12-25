@@ -38,6 +38,8 @@ class TestBootstrappedWorld extends ruby.support.TestCase {
     assertEquals(name,             self.name);
     assertEquals(world.classClass, self.klass);
     assertEquals(superclass,       self.superclass);
+    if(null == world.toplevelNamespace.constants[name])
+      throw "Need to put the class in the toplevel namespace!";
     rAssertEq(self, world.toplevelNamespace.constants[name]);
     assertInObjectSpace(self);
   }
@@ -51,6 +53,7 @@ class TestBootstrappedWorld extends ruby.support.TestCase {
   function testFalseClass()  assertClassDef(world.rubyFalse.klass,  "FalseClass",  world.objectClass);
 
   function testStringClass() assertClassDef(world.stringClass, "String", world.objectClass);
+  function testSymbolClass() assertClassDef(world.symbolClass, "Symbol", world.objectClass);
 }
 
 /*
