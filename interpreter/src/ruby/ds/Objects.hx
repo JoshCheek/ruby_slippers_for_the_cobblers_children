@@ -33,6 +33,7 @@ typedef RBinding = {
 
 enum ArgType {
   Required(name:String);
+  Rest(name:String);
 }
 enum ExecutableType {
   Ruby(ast:ExecutionState);

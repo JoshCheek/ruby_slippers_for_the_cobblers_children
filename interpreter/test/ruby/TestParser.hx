@@ -77,7 +77,7 @@ class TestParser extends ruby.support.TestCase {
   function testMethodDefinitions() {
     assertParses("
       def bland_method; end
-      def method_with_args_and_body(arg)
+      def method_with_args_and_body(req, *rst)
         true
       end
       ",
@@ -85,7 +85,7 @@ class TestParser extends ruby.support.TestCase {
         Def(Start("bland_method", [], Default)),
         Def(Start(
           "method_with_args_and_body",
-          [Required("arg")],
+          [Required("req"), Rest("rst")],
           True
         )),
       ]))

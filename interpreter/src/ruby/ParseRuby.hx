@@ -46,6 +46,7 @@ class ParseRuby {
   private static function toArg(arg:Dynamic):ArgType {
     switch(arg.type) {
       case "required_arg": return Required(arg.name);
+      case "rest_arg":     return Rest(arg.name);
       case _: throw("Unknown arg type!: " + arg);
     }
   }
