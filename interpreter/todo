@@ -1,3 +1,6 @@
+general solution to the casting everywhere, e.g. delegate to something which blows up if its ever not that
+
+
 Stack: make it immutable
 Are we still using ExecutionState.Value?
 Bunch of renamings:
@@ -11,6 +14,9 @@ Haxe
 test showing that I can set a local in toplevel binding, and then access it (ie interpreter is setting up the stack correctly)
 
 -----
+
+Some better abstraction to allow control of which expressions to see
+  ie 'expressions within this file', intermediate expressions of ??, no intermediate expressions of ??, only after line x, only for this particular state
 
 Binding class
 
@@ -47,3 +53,14 @@ How cool would it be if we could define the methods with native code within them
   end
   Might be able to edit the parser to accomplish this!
   To deal with the interpretation, we would have to parse it separately and generate the file it goes into.
+
+-----
+
+How cool would it be to implement the whole VM in this style
+then you can see the internal instructions, as well!
+
+interpreter state does go on the interpreter
+the world is just the state being manipulated by it, its methods are just helper methods for access, but anything that manipulates it should be in the interpreter itself
+this will allow for the implementation of multiple interpreters:
+  StateMachineInterpreter
+  StackInterpreter
