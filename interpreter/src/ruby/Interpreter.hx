@@ -54,8 +54,6 @@ class Interpreter {
   public function step():Bool {
     if(isFinished) throw new NothingToEvaluateError("Check before evaluating!");
     var frame = state.stack.first();
-    // trace("STACK SIZE: " + state.stack.length);
-    // trace("CURRENT: " + frame.ast);
 
     switch(continueExecuting(frame)) {
       case Push(state, ast, binding):
@@ -241,7 +239,7 @@ class Interpreter {
         else                               push(EvalArgs(trg, msg, argCodes, args), argCodes[argCodes.length]);
 
       case Invoke(target, message, args):
-        trace(target.klass.name+'#'+message);
+        // trace(target.klass.name+'#'+message);
         var klass = target.klass;
         while(klass != null && klass.imeths[message] == null)
           klass = klass.superclass;

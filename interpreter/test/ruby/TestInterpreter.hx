@@ -227,15 +227,15 @@ class TestInterpreter extends ruby.support.TestCase {
     // ... eventually switch to `assert_equal "Josh", stdout.string`
     assertLooksKindaSimilar(["Josh\n"], world.printedToStdout);
 
-    // // it is tracking the instance
-    // var users = world.eachObject(userClass);
-    // assertEquals(1, users.length);
-    // var user = users[0];
+    // it is tracking the instance
+    var users = world.eachObject(userClass);
+    assertEquals(1, users.length);
+    var user = users[0];
 
-    // // the instance has the ivar set
-    // assertEquals(world.stringClass, user.ivars['@name'].klass);
-    // var nameD:Dynamic = user.ivars['@name'];
-    // var name:RString  = nameD;
-    // assertEquals("Josh", name.value);
+    // the instance has the ivar set
+    assertEquals(world.stringClass, user.ivars['@name'].klass);
+    var nameD:Dynamic = user.ivars['@name'];
+    var name:RString  = nameD;
+    assertEquals("Josh", name.value);
   }
 }

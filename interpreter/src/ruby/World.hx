@@ -40,6 +40,14 @@ class World {
     return str;
   }
 
+  public function eachObject(klass:RClass):Array<RObject> {
+    var selected = [];
+    for(obj in world.objectSpace)
+      if(obj.klass == klass)
+        selected.push(obj);
+    return selected;
+  }
+
 
   // s b/c static and instance functions can't have the same name -.^
   static public function sinspect(obj:RObject):String {
