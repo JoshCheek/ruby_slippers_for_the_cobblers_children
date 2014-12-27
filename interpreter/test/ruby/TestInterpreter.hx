@@ -103,6 +103,9 @@ class TestInterpreter extends ruby.support.TestCase {
         nobody_meth
 
         # def with arguments
+        def meth_with_args(req, *rest)
+        end
+        # TODO: invoke it
     ");
 
     assertNull(world.toplevelNamespace.constants['A']);
@@ -116,6 +119,8 @@ class TestInterpreter extends ruby.support.TestCase {
 
       world.intern("nobody_meth"),
       world.rubyNil,
+
+      world.intern("meth_with_args"),
     ]);
 
     // class definition
@@ -140,6 +145,13 @@ class TestInterpreter extends ruby.support.TestCase {
     assertEquals("ometh", ometh.name);
     assertEquals(0, ometh.args.length);
     assertLooksKindaSimilar(ometh.body, Ruby(True));
+
+    // Object#meth_with_args
+    var methWithArgs = world.objectClass.imeths['meth_with_args'];
+    assertLooksKindaSimilar(
+      methWithArgs.args,
+      [Required("req"), Rest("rest")]
+    );
   }
 
   // TODO: Test reopening the class

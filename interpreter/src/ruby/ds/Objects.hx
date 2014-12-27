@@ -37,11 +37,17 @@ enum ArgType {
 }
 enum ExecutableType {
   Ruby(ast:ExecutionState);
-  Internal(fn:RBinding -> ruby.World -> RObject);
+  Internal(fn:RBinding -> ruby.World -> EvaluationResult);
 }
 typedef RMethod = {
   > RObject,
   name : String,
   args : Array<ArgType>, // rename to params
   body : ExecutableType,
+}
+
+
+typedef RArray = {
+  > RObject,
+  elements : Array<RObject>,
 }

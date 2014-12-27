@@ -249,12 +249,24 @@ class Interpreter {
           lvars:     new InternalMap(),
         };
 
-        // TODO: set the args in the binding
-        if(args.length > 0) throw "CAN'T YET HANDLE PASSING ARGS TO METHODS";
+        // Set the args in the binding
+        var argsDup = [for(a in args) a];
+        argsDup.reverse;
+
         for(param in meth.args) {
           switch(param) {
-            case Required(name): // no op
-            case _: throw("THIS ALGORITHM WON'T WORK FOR NON-REQUIRED ARGS! GOT: " + param);
+            case Required(name):
+              bnd.lvars[name] = args.pop();
+            case Rest(name):
+              var internalRestArgs:Array<RObject> = [];
+              var restArgs:RArray = {
+                klass    : world.objectClass, // FIXME!
+                ivars    : new InternalMap(),
+                elements : [],
+              }
+              while(argsDup.length != 0)
+                restArgs.elements.push(argsDup.pop());
+              bnd.lvars[name] = restArgs;
           }
         }
 

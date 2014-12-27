@@ -156,8 +156,8 @@ class Bootstrap {
       klass: objectClass, // FIXME: SHOULD BE METHOD CLASS
       ivars: new InternalMap(),
       name:  "new",
-      args:  [],
-      body: Internal(Core.allocate),
+      args:  [Rest("rest")],
+      body:  Internal(Core.allocate),
     }
 
     // the data structure
