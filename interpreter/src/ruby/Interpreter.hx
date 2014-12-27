@@ -96,8 +96,6 @@ class Interpreter {
       iter.next();
       var state = iter.next().state;
       throw("SHOULDN'T HIT THIS! FIRST STACK IS: " + state);
-    case SetIvar(_) | GetIvar(_) | Float(_) | Integer(_):
-      throw "UNHANDLED: " + sf.state;
 
     case Value(Immediate(result)):
       Pop(result);
@@ -113,13 +111,22 @@ class Interpreter {
 
     case SetLvar(FindRhs(name, rhs)):
       Push(SetLvar(SetLhs(name)), rhs, sf.binding);
-
     case SetLvar(SetLhs(name)):
       sf.binding.lvars[name] = currentExpression;
       Pop(currentExpression);
-
     case GetLvar(Name(name)):
       Pop(sf.binding.lvars[name]);
+
+    case GetIvar(Name(name)):
+      var value = sf.binding.self.ivars[name];
+      if(value == null) value = world.rubyNil;
+      Pop(value);
+
+    case SetIvar(FindRhs(name, rhs)):
+      Push(SetIvar(SetLhs(name)), rhs, sf.binding);
+    case SetIvar(SetLhs(name)):
+      sf.binding.self.ivars[name] = currentExpression;
+      Pop(currentExpression);
 
     case Const(GetNs(Default, name)):
       Pop(sf.binding.defTarget.constants[name]); // TODO: Can we push current namepace instead of having two weird paths through? (might not be able to b/c that would cause it to find the current ns as an intermediate expression, which could fuck up tests
@@ -187,6 +194,8 @@ class Interpreter {
       return Pop(currentExpression);
     case OpenClass(x):
       throw "FIX OpenClass: " + x;
+    case Float(_) | Integer(_):
+      throw "UNHANDLED: " + sf.state;
     }
   }
 
@@ -232,12 +241,13 @@ class Interpreter {
         else                               push(EvalArgs(trg, msg, argCodes, args), argCodes[argCodes.length]);
 
       case Invoke(target, message, args):
+        trace(target.klass.name+'#'+message);
         var klass = target.klass;
         while(klass != null && klass.imeths[message] == null)
           klass = klass.superclass;
 
         var meth  = null;
-        if(klass == null) throw "HAVEN'T IMPLEMENTED METHOD MISSING YET!";
+        if(klass == null) throw "HAVEN'T IMPLEMENTED METHOD MISSING YET! "+target.klass.name+"#"+message;
         else              meth = klass.imeths[message];
 
         // make the new binding
@@ -275,11 +285,22 @@ class Interpreter {
         switch(meth.body) {
           case(Ruby(Default)): Pop(world.rubyNil);
           case(Ruby(ast)):     Push(Send(End), ast, bnd);
-          case(Internal(fn)):  Pop(fn(bnd, world));
+          case(Internal(fn)):  fn(bnd, world);
         }
+
+      // case ReturnInternal(callback):
+      //   Push(CallIntoInternal(callback), code, bnd);
+      // case CallIntoInternal(callback):
+      //   callback(currentExpression);
+      // case EndCalculated(toReturn);
+      //   currentExpression = toReturn;
+      //   noAction(END);
 
       case End:
         Pop(currentExpression);
+
+      case EndInternal(returnValue):
+        Pop(returnValue);
 
       case _:
         throw "Unhandled: " + state;

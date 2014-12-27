@@ -146,9 +146,9 @@ class Bootstrap {
     objectClass.imeths["class"] = {
       klass: objectClass, // FIXME: SHOULD BE METHOD CLASS
       ivars: new InternalMap(),
-      name: "class",
-      args: [],
-      body: Internal(Core.lookupClass),
+      name:  "class",
+      args:  [],
+      body:  Internal(Core.lookupClass),
     }
 
     // TODO: move this into Ruby, only allocate needs to be haxe level
@@ -160,6 +160,22 @@ class Bootstrap {
       body:  Internal(Core.allocate),
     }
 
+    objectClass.imeths['puts'] = {
+      klass: objectClass, // FIXME: SHOULD BE METHOD CLASS
+      ivars: new InternalMap(),
+      name:  "puts",
+      args:  [Rest('rest')],
+      body:  Internal(Core.puts),
+    }
+
+    basicObjectClass.imeths['initialize'] = {
+      klass: objectClass,  // FIXME: SHOULD BE METHOD CLASS
+      ivars: new InternalMap(),
+      name:  "initialize",
+      args:  [],
+      body:  Internal(Core.initialize),
+    }
+
     // the data structure
     return {
       objectSpace       : objectSpace,
@@ -167,6 +183,7 @@ class Bootstrap {
       toplevelNamespace : toplevelNamespace,
       currentExpression : rubyNil,
       stack             : new List(),
+      printedToStdout   : [],
 
       toplevelBinding   : toplevelBinding,
       main              : main,

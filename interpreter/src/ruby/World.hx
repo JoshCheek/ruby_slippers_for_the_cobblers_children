@@ -89,6 +89,7 @@ class World {
   public var   toplevelBinding(    get, never):RBinding;
   public var toplevelNamespace(    get, never):RClass;
   public var       interpreter(default,  null):ruby.Interpreter;
+  public var   printedToStdout(    get,   set):Array<String>;
 
   function              get_main() return world.main;
   function           get_rubyNil() return world.rubyNil;
@@ -102,4 +103,6 @@ class World {
   function  get_basicObjectClass() return world.basicObjectClass;
   function   get_toplevelBinding() return world.toplevelBinding;
   function get_toplevelNamespace() return world.toplevelNamespace;
+  function   get_printedToStdout() return world.printedToStdout;
+  function   set_printedToStdout(strs) return world.printedToStdout = strs;
 }

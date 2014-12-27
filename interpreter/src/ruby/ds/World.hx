@@ -11,6 +11,7 @@ typedef World = {
   public var objectSpace       : Array<RObject>;
   public var symbols           : InternalMap<RSymbol>;
   public var toplevelNamespace : RClass;
+  public var printedToStdout   : Array<String>;
 
   // important objects
   public var toplevelBinding    : RBinding;

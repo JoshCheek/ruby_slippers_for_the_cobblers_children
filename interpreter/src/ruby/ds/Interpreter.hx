@@ -73,6 +73,9 @@ enum SendState {
   GetTarget(message:String, argsCode:Array<ExecutionState>);
   EvalArgs(target:RObject, message:String, argsCode:Array<ExecutionState>, args:Array<RObject>);
   Invoke(target:RObject, message:String, args:Array<RObject>);
+  // CallIntoInternal(callback:RObject->InvokeInternal);
+  EndInternal(toReturn:RObject);
+  EndCalculated(toReturn:RObject);
   End;
 }
 enum ValueState {

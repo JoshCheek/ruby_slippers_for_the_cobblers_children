@@ -194,12 +194,7 @@ class TestInterpreter extends ruby.support.TestCase {
     //   //   takes no params, does nothing
   }
 
-  public function _testAacceptance1() {
-    // evaluate class body
-    // methods can take args
-    // set/get ivars
-    // ??#puts
-    // send with args
+  public function testAacceptance1() {
     pushCode('
       class User
         def initialize(name)
@@ -219,21 +214,28 @@ class TestInterpreter extends ruby.support.TestCase {
       puts user.name'
     );
 
+    interpreter.evaluateAll();
+
     var userClassObj:Dynamic = world.toplevelNamespace.constants['User'];
     var userClass:RClass     = userClassObj;
 
-    interpreter.evaluateAll();
-    // trace(world.inspect(userClass));
     assertTrue(null != userClass.imeths['initialize']);
     assertTrue(null != userClass.imeths['name']);
     assertTrue(null != userClass.imeths['name=']);
-    // assertEquals(3, userClass.imeths.length);
 
     // the code successfully printed
     // ... eventually switch to `assert_equal "Josh", stdout.string`
-    // assertEquals("Josh\n", interpreter.printedInternally());
+    assertLooksKindaSimilar(["Josh\n"], world.printedToStdout);
 
     // // it is tracking the instance
-    // assertEquals(1, interpreter.eachObject(userClass).length);
+    // var users = world.eachObject(userClass);
+    // assertEquals(1, users.length);
+    // var user = users[0];
+
+    // // the instance has the ivar set
+    // assertEquals(world.stringClass, user.ivars['@name'].klass);
+    // var nameD:Dynamic = user.ivars['@name'];
+    // var name:RString  = nameD;
+    // assertEquals("Josh", name.value);
   }
 }
