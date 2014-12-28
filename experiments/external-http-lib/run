@@ -1,0 +1,33 @@
+#!/bin/bash
+
+cd "$(dirname "$0")"
+
+TITLE:() {
+  color="\033[34m"
+  endcolor="\033[0m"
+  text="-- $* --"
+  printf -- "${color}${text}${endcolor}\n"
+}
+
+TITLE: ENSURING PARSER SERVER IS STARTED
+rake parser:server:restart
+
+TITLE: RUNNING HAXE VERSION
+haxe -x "ExternalHttp.hx" || exit $!
+
+TITLE: COMPILING FOR NODE
+haxe -main "ExternalHttp.hx" -js "ExternalHttp.node.js" || exit $!
+
+TITLE: RUNNING IN NODE
+node "ExternalHttp.node.js" || exit $!
+
+TITLE: COMPILING FOR BROWSER
+echo "I haven't actually figured out how to do this yet :/"
+# haxe -main "ExternalHttp.hx" -js "ExternalHttp.node.js" || exit $!
+# browserify "ExternalHttp.node.js" -o "ExternalHttp.browser.js" || exit $!
+
+# TITLE: RUNNING BROWSER CODE IN NODE
+# node "main.browser.js" || exit $!
+
+# TITLE: OPENING IN BROWSER # idk if non-mac's have an "open" command
+# open "page.html"
