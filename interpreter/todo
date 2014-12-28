@@ -1,3 +1,6 @@
+Can pass files to the compiler with: http://api.haxe.org/haxe/Resource.html
+
+
 general solution to the casting everywhere, e.g. delegate to something which blows up if its ever not that
 
 
