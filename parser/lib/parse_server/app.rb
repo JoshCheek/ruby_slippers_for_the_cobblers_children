@@ -8,7 +8,6 @@ module ParseServer
 
     def initialize(rack_env)
       @request = Rack::Request.new(rack_env)
-      @status  = 200
     end
 
     def call
@@ -23,7 +22,9 @@ module ParseServer
     private
 
     def headers
-      {'Content-Type' => 'application/json; charset=utf-8'}
+      { 'Content-Type' => 'application/json; charset=utf-8',
+        'Access-Control-Allow-Origin' => 'null', # allows static files (maybe should only enable in dev mode?)
+      }
     end
 
     def ast

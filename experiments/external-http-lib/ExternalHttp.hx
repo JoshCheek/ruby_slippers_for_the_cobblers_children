@@ -1,5 +1,4 @@
-// still need a browser version :/
-
+// runs in node.js, the browser, and neko
 class ExternalHttp {
   public static function main() {
     MyHttp.init();
@@ -9,7 +8,22 @@ class ExternalHttp {
   }
 }
 
-#if js
+#if !(js && node)
+// this will be all non node.js code (e.g. browser js and neko)
+class MyHttp {
+  public static function init() { };
+  public static function post(url:String, data:String, callback:String->Void):Void {
+    var request      = new haxe.Http(url);
+    var resultBody   = "";
+    request.onData   = callback;
+    request.onError  = function(message) throw("HTTP ERROR: " + message);
+    request.onStatus = function(status) { };
+    request.setPostData(data);
+    request.request(true);
+  }
+}
+
+#else
 // NODE!!! Wat is this? :(
 // get inspired, yo! https://github.com/rest-client/rest-client#usage-raw-url
 typedef NodeReqCb = ClientRequest->Void;
@@ -49,19 +63,6 @@ class MyHttp {
     });
     request.write(data);
     request.end();
-  }
-}
-#else
-class MyHttp {
-  public static function init() {};
-  public static function post(url:String, data:String, callback:String->Void):Void {
-    var request      = new haxe.Http(url);
-    var resultBody   = "";
-    request.onData   = callback;
-    request.onError  = function(message) throw("HTTP ERROR: " + message);
-    request.onStatus = function(status) { };
-    request.setPostData(data);
-    request.request(true);
   }
 }
 #end

@@ -13,21 +13,25 @@ TITLE: ENSURING PARSER SERVER IS STARTED
 rake parser:server:restart
 
 TITLE: RUNNING HAXE VERSION
-haxe -x "ExternalHttp.hx" || exit $!
+haxe -main "ExternalHttp" -neko "ExternalHttp.hx.n" || exit $!
+neko "ExternalHttp.hx.n" || exit $!
 
-TITLE: COMPILING FOR NODE
-haxe -main "ExternalHttp.hx" -js "ExternalHttp.node.js" || exit $!
-
-TITLE: RUNNING IN NODE
+TITLE: NODE
+haxe -main "ExternalHttp.hx" -D node -js "ExternalHttp.node.js" || exit $!
 node "ExternalHttp.node.js" || exit $!
 
-TITLE: COMPILING FOR BROWSER
-echo "I haven't actually figured out how to do this yet :/"
-# haxe -main "ExternalHttp.hx" -js "ExternalHttp.node.js" || exit $!
-# browserify "ExternalHttp.node.js" -o "ExternalHttp.browser.js" || exit $!
-
-# TITLE: RUNNING BROWSER CODE IN NODE
-# node "main.browser.js" || exit $!
-
-# TITLE: OPENING IN BROWSER # idk if non-mac's have an "open" command
-# open "page.html"
+TITLE: BROWSER
+haxe -main "ExternalHttp.hx" -js "ExternalHttp.browser.js" || exit $!
+cat <<HTML > page.html
+<!doctype html>
+<html>
+  <head>
+    <title>Hello world js example</title>
+  </head>
+  <body>
+    <script src="ExternalHttp.browser.js"></script>
+    <p>Check the js console for output</p>
+  </body>
+</html>
+HTML
+open "page.html" # idk if non-mac's have an "open" command
