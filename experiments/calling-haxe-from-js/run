@@ -16,26 +16,19 @@ TITLE:() {
 TITLE: SETTING UP THE ENVIRONMENT
 cd "$(dirname "$0")"
 root_dir="$(pwd -P)"
-export NODE_PATH="$root_dir" # allows it to find the files its requiring
+export NODE_PATH="$root_dir" # allows node and browserify to find the files that get required
 
 TITLE: COMPILING HAXE TO JS
-haxe "HxHw.hx" -js "hx_hw.js" # no `-main` flag means it won't invoke our main
-
+haxe "HxHw.hx" -main HxHw -js "hx_hw.js" # using the `-main` flag to declare the lib on module.exports
 
 TITLE: RUNNING IN NODE
 node "main.node.js" || exit $!
 
-
 TITLE: COMPILING FOR BROWSER
-# browserify "main.node.js" -o "main.browser.js" <-- use this if we didn't have to fix the dependency injection
-browserify "main.node.js" |
-  sed 's/typeof window != "undefined" ? window : exports/exports/' > "main.browser.js" ||
-  exit $!
-
+browserify "main.node.js" -o "main.browser.js" || exit $!
 
 TITLE: RUNNING BROWSER CODE IN NODE
 node "main.browser.js" || exit $!
-
 
 TITLE: OPENING IN BROWSER # idk if non-mac's have an "open" command
 open "page.html"
