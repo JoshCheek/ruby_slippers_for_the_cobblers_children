@@ -7,6 +7,10 @@ import ruby.ds.Errors;
 using ruby.LanguageGoBag;
 
 class TestInterpreter extends ruby.support.TestCase {
+  function testItBlowsUpWhenGivenNoCode() {
+    assertThrows(function() interpreter.pushCode(null));
+  }
+
   function testItsCurrentExpressionIsNilByDefault() {
     assertEquals(world.rubyNil, interpreter.currentExpression);
   }

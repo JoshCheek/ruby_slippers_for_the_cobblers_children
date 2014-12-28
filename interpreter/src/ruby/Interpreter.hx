@@ -21,7 +21,6 @@ class Interpreter {
     this.state = state;
   }
 
-
   public function getLocal(name:String):RObject { // do I actually want this public?
     var val = currentBinding.lvars[name];
     if(val!=null) return val;
@@ -36,6 +35,7 @@ class Interpreter {
 
 
   public function pushCode(code:ExecutionState, ?binding) {
+    if(code==null) throw new Errors("Code to evaluate was null!");
     if(binding==null) binding = currentBinding;
     this.state.stack.push({binding:binding, state:code});
   }
