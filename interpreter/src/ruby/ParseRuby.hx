@@ -3,14 +3,12 @@ import ruby.ds.Interpreter;
 import ruby.ds.Objects;
 
 class ParseRuby {
-  public static function fromCode(rawCode:String):ExecutionState {
-    var envVarName = "RUBY_PARSER_PORT";
-    var port       = "";
-    if(Sys.environment().exists(envVarName))
-      port = Sys.environment().get(envVarName);
-    else
-      throw 'Need to set the port to find the server in env var $envVarName';
-    var parser = new haxe.Http('http://localhost:$port');
+  public static var serverUrl = 'http://localhost:3003';
+
+  public static function fromCode(rawCode:String, ?serverUrl:String):ExecutionState {
+    if(serverUrl==null) serverUrl = ParseRuby.serverUrl;
+
+    var parser = new haxe.Http(serverUrl);
     parser.setPostData(rawCode);
     var rawJson = "";
     parser.onData   = function(jsonResult) rawJson += jsonResult;
