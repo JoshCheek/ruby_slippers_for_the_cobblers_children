@@ -1,23 +1,24 @@
 // runs in node.js, the browser, and neko
 class ExternalHttp {
   public static function main() {
-    MyHttp.post('http://localhost:3003/', '1+1', function(body) {
-      trace("BODY: " + body);
-    });
+    var body = null;
+    var body = MyHttp.post('http://localhost:3003/', '1+1');
+    trace("RETURNED: " + body);
   }
 }
 
 #if !(js && node)
 // this will be all non node.js code (e.g. browser js and neko)
 class MyHttp {
-  public static function post(url:String, data:String, callback:String->Void):Void {
+  public static function post(url:String, data:String):String {
     var request      = new haxe.Http(url);
     var resultBody   = "";
-    request.onData   = callback;
+    request.onData   = function(chunk)   resultBody += chunk;
     request.onError  = function(message) throw("HTTP ERROR: " + message);
-    request.onStatus = function(status) { };
+    request.onStatus = function(status)  { };
     request.setPostData(data);
     request.request(true);
+    return resultBody;
   }
 }
 
@@ -55,16 +56,21 @@ class MyHttp {
     nodeUrl  = untyped __js__("require('url')");
 	}
 
-  public static function post(url:String, data:String, callback:String->Void):Void {
+  public static function post(url:String, data:String):String {
     var postOptions     = nodeUrl.parse(url);
-    postOptions.method  = 'POST';
     postOptions.headers = { 'Content-Type':  'application/x-www-form-urlencoded', 'Content-Length': data.length };
+    postOptions.method  = 'POST';
+    var resultBody      = "";
     var request         = nodeHttp.request(postOptions, function(res) {
       res.setEncoding('utf8');
-      res.on('data', callback);
+      res.on('data', function(chunk) {
+        trace("CHUNK: " + chunk);
+        resultBody += chunk;
+      });
     });
     request.write(data);
     request.end();
+    return resultBody;
   }
 }
 #end
