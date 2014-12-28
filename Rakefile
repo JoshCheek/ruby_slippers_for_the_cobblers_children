@@ -15,7 +15,7 @@ task run:     'parser:server:run'
 # frontend tasks
 namespace :frontend do
   desc 'Compile the interpreter'
-  task :compile do
+  task :compile_interpreter do
     sh 'haxe',
       '-main', 'RubyLib',
       '-cp',   'frontend',
@@ -23,10 +23,18 @@ namespace :frontend do
       '-js',   'frontend/RubyLib.js'
   end
 
+  desc 'Compile into single JS file for the browser (you need browserify for this: npm install -g browserify)'
+  task :compile_browser do
+    ENV['NODE_PATH'] = File.expand_path('frontend')
+    sh 'browserify', 'frontend/run.js', '-o', 'frontend/run.browser.js'
+  end
+
+  desc 'Compile everything'
+  task compile: ['frontend:compile_interpreter', 'frontend:compile_browser']
+
   desc 'Run the frontend code'
   task run: 'frontend:compile' do
-    ENV['NODE_PATH'] = File.expand_path('frontend')
-    sh 'node', 'frontend/run.js'
+    sh 'open', 'frontend/proof-of-concept.html'
   end
 end
 
