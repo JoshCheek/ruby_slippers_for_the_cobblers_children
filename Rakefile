@@ -12,6 +12,24 @@ task stop:    'parser:server:stop'
 task status:  'parser:server:status'
 task run:     'parser:server:run'
 
+# frontend tasks
+namespace :frontend do
+  desc 'Compile the interpreter'
+  task :compile do
+    sh 'haxe',
+      '-main', 'RubyLib',
+      '-cp',   'frontend',
+      '-cp',   'interpreter/src',
+      '-js',   'frontend/RubyLib.js'
+  end
+
+  desc 'Run the frontend code'
+  task run: 'frontend:compile' do
+    ENV['NODE_PATH'] = File.expand_path('frontend')
+    sh 'node', 'frontend/run.js'
+  end
+end
+
 # interpreter tasks
 namespace :interpreter do
   desc 'Run interpreter test suite (server needs to be running)'
