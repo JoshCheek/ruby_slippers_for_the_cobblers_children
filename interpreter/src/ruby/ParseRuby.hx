@@ -7,14 +7,7 @@ class ParseRuby {
 
   public static function fromCode(rawCode:String, ?serverUrl:String):ExecutionState {
     if(serverUrl==null) serverUrl = ParseRuby.serverUrl;
-
-    var parser = new haxe.Http(serverUrl);
-    parser.setPostData(rawCode);
-    var rawJson = "";
-    parser.onData   = function(jsonResult) rawJson += jsonResult;
-    parser.onError  = function(message) trace("HTTP ERROR: " + message);
-    parser.onStatus = function(status) { };
-    parser.request(true);
+    var rawJson = ruby.Http.post(serverUrl, rawCode);
     return fromJson(haxe.Json.parse(rawJson));
   }
 
