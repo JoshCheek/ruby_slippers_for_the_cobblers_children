@@ -1,0 +1,13 @@
+Forgot what I did specifically, it was probably http://haxeflixel.com/documentation/install-haxeflixel/
+except I had to overwrite their binary b/c it didn't work right (guessing it was an issue with the link,
+or flixel not following the link, not sure, but solution was to delete /usr/bin/flixel, and then write my
+own, which was a shell script to invoke flixel).
+
+Note that Flixel prints its header information for every command, even successful ones.
+You'll want to look at the bottom of the output for the relevant information.
+
+$ flixel tpl -n FlixelHelloWorld
+$ sed -i ''  /super.create/i\\\n'add(new FlxText(0, 0, 100, "Hello World!"));'\n source/MenuState.hx
+
+You can also turn of the splash screen with
+$ sed -i '' /skipSplash:Bool/s/false/true/ source/Main.hx
