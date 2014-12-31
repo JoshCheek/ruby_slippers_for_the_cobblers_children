@@ -12,6 +12,23 @@ To run the tests
 * First start the parser server: `$ rake parser:server:start`
 * Then run the tests: `rake interpreter:test`
 
+Some Ruby testing notes
+-----------------------
+
+* [RubySpec](https://github.com/rubyspec/rubyspec), Brian's work to formally define Ruby's behaviour.
+  Looks like [this](https://github.com/ruby/ruby/blob/1026907467ea3d5441e1bfa95f5f37b431a684f3/spec/default.mspec) is integration for MRI.
+* [Brian gives up on RubySpec](http://rubini.us/2014/12/31/matz-s-ruby-developers-don-t-use-rubyspec/) I got pretty frustrated with MRI after reading this (tweets like "MRI is the Internet Explorer of Ruby")
+* [Charlie Nutter tells me I'm wrong](https://twitter.com/headius/status/550405187853352960) makes arguments decent enough for me to stop angrily demonizing MRI,
+  but Ruby still needs a formal spec, it's harmful to Ruby to think of MRI as the definition of Ruby as it conflates an implementation to a specification,
+  causing leaked implementation details to become canon, which severely restricts what other implementations can do. ...but then again,
+  Charlie has put a shit ton of effort into JRuby, and he's apparently on the Ruby core team now, so he definitely knows what he's talking about better than I do,
+  especially in this domain. But still, I'd like to hear him address those criticisms specifically,
+  rather than addressing why he doesn't think RubySpec is a good enough specification for Ruby ...which, if I read the underlying intonations correctly, amounted to disliking Brian.
+  Which is fine, but someone needs to sit down and say "this is what Ruby is". Thoughtfully and thoroughly, with considerations to the implications of those decisions.
+* [I think this is where Ruby's specification starts](https://github.com/ruby/ruby/blob/trunk/test/runner.rb)
+  as in you can presumably do something like `ruby test/runner.rb` decided to go look at it to see if it seemed viable as a test suite (as in "doesn't depend on a C implementation"),
+  and it looks like it should be runnable. Depending on how serious I get, probably worth hitting that one and RubySpec simultaneously for a bit.
+
 Some haxe notes
 ---------------
 
