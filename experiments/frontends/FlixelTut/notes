@@ -1,0 +1,31 @@
+http://haxeflixel.com/documentation/part-ii-testing/
+
+$ flixel tpl -n FlixelTut
+
+* FlxState - where all the action happens
+* FlxTilemap - the dungeon
+* FlxSprite - player's avatar and enemies
+* FlxGroup, FlxSprite, FlxText, FlxButton + more - HUD / Interface
+
+*Sigh* after this tut, I'm unwilling to put more effort into Flixel,
+unless everything else I look at is bad. This is b/c it has made
+terrible design decisions that will infect my code.
+
+e.g.
+
+```haxe
+FlxG.switchState(new PlayState());
+```
+
+The obvious question is what is `FlxG` is switching state on?
+And the answer: a [global state variable](https://github.com/HaxeFlixel/flixel/blob/914a3478e9bfef824713301d5e97404aaea95af8/flixel/FlxG.hx#L94)
+
+If it was just up to me to pass it in, that would be feasible scar tissue around this
+timebomb dependency, but it is not, the library is deeply coupled:
+
+```fish
+> ag '\bFlxG\.' ~/ref/haxe/flixel | wc -l
+     799
+```
+
+So... going to try Luxe.
