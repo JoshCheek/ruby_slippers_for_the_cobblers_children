@@ -13,28 +13,41 @@ task status:  'parser:server:status'
 task run:     'parser:server:run'
 
 # frontend tasks
+desc 'Compiles and runs all frontend code'
+task frontend: ['frontend:cpp:run', 'frontend:java:run']
+
 namespace :frontend do
-  desc 'Compile the interpreter'
-  task :compile_interpreter do
-    sh 'haxe',
-      '-main', 'RubyLib',
-      '-cp',   'frontend',
-      '-cp',   'interpreter/src',
-      '-js',   'frontend/RubyLib.js'
+  namespace :cpp do
+    desc 'Compile the interpreter to c++'
+    task :compile do
+      ENV['PATH'] = '/usr/bin:' << ENV['PATH'] # b/c I'm accidentally overriding bins it uses to compile (https://github.com/JoshCheek/dotfiles/blob/485fd3fcdcaf5714b8744a39b58828784dac8d87/bin/strip)
+      sh 'haxe',
+        '-main', 'RubyLib',
+        '-cp',   'frontend',
+        '-cp',   'interpreter/src',
+        '-cpp',  'frontend/cpp'
+    end
+
+    desc 'Run the frontend\'s c++ interpreter'
+    task run: 'frontend:cpp:compile' do
+      sh 'frontend/cpp/RubyLib'
+    end
   end
 
-  desc 'Compile into single JS file for the browser (you need browserify for this: npm install -g browserify)'
-  task :compile_browser do
-    ENV['NODE_PATH'] = File.expand_path('frontend')
-    sh 'browserify', 'frontend/run.js', '-o', 'frontend/run.browser.js'
-  end
+  namespace :java do
+    desc 'Compile the interpreter to Java'
+    task :compile do
+      sh 'haxe',
+        '-main', 'RubyLib',
+        '-cp',   'frontend',
+        '-cp',   'interpreter/src',
+        '-java', 'frontend/java'
+    end
 
-  desc 'Compile everything'
-  task compile: ['frontend:compile_interpreter', 'frontend:compile_browser']
-
-  desc 'Run the frontend code'
-  task run: 'frontend:compile' do
-    sh 'open', 'frontend/proof-of-concept.html'
+    desc 'Run the frontend\'s Java interpreter'
+    task run: 'frontend:java:compile' do
+      sh 'java', '-jar', 'frontend/java/RubyLib.jar'
+    end
   end
 end
 
