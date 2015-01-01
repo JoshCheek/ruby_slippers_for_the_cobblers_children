@@ -33,24 +33,18 @@ class Player extends FlxSprite {
       _left = _right = false;
 
     if( _up || _down || _left || _right) {
-      var mA:Float = 0;
-      if (_up) {
-        mA = -90;
-        if (_left)
-          mA -= 45;
-        else if (_right)
-          mA += 45;
-      } else if (_down) {
-        mA = 90;
-        if (_left)
-          mA += 45;
-        else if (_right)
-          mA -= 45;
-      } else if (_left)
-        mA = 180;
-      else if (_right)
-        mA = 0;
-
+      var mA:Float =
+        if      (_down && _right)  45;
+        else if (_down && _left)  135;
+        else if (_up   && _left)  225;
+        else if (_up   && _right) 315;
+        else if (_up)             270;
+        else if (_down)            90;
+        else if (_left)           180;
+        else                        0;
+      // NOTE: on 4.0, this becomes FlxPoint#rotate,
+      // and the direction of the angle isn't inverted
+      // (I'm on 3.3.6)
       FlxAngle.rotatePoint(speed, 0, 0, 0, mA, velocity);
     }
   }
