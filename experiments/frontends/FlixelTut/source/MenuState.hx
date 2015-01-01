@@ -6,6 +6,7 @@ import flixel.FlxState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxMath;
+import flixel.util.FlxDestroyUtil;
 
 using flixel.util.FlxSpriteUtil;
 
@@ -28,6 +29,7 @@ class MenuState extends FlxState {
 
   // called when this state is destroyed
   override public function destroy():Void {
+    _btnPlay = FlxDestroyUtil.destroy(_btnPlay);
     super.destroy();
   }
 

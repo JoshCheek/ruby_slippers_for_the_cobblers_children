@@ -51,3 +51,12 @@ It's all composition everywhere, no global state that I saw. Was originally writ
 ported it to Haxe and is merging it into Luxe. He says he "loved the design of phoenix"
 (http://snowkit.org/2014/10/27/luxe-alpha-1-0/) wish he'd taken more inspiration from it
 instead of... idk, the flash api or something.
+
+$ lime test flash
+
+Hmm... it's not registering the mouse clicks correctly. I noticed this in
+other flixel games I played. When I tap-click, it sees that as a mouse-down event
+I think, and I have to tap a second time to get it to register the mouse-up event.
+When I full-on press the trackpad, it works correctly. But I've got my computer
+set up to treat taps as clicks, and haven't run into anything else (including flash libs)
+that are confused about this.
