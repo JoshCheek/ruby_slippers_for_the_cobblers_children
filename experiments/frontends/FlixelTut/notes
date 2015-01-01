@@ -29,3 +29,25 @@ timebomb dependency, but it is not, the library is deeply coupled:
 ```
 
 So... going to try Luxe.
+
+...back, they put more effort into it in a way that implies they're
+maybe intending to one day not suffer these issues (e.g. static attribute
+is a getter, which delegates to another var), but nonetheless, they do
+(which causes me to be completely confused about why they bothered creating the lib in the first place).
+So going to push on flixel some more since it isn't in alpha and has a community behind it.
+
+...flambe, too. Checked that one out, same issues. Is this a necessity of
+the domain or is everyone mimicking what everyone else has already done?
+Something else? I was really excited about haxe, but these libs are demotivating.
+
+...lime itself looks pretty good. You still subclass it and it calls into you,
+but it provides you the state in a RenderContext instead of stuck onto
+some global variable somewhere. Problem is it provides no abstractions,
+so, it doesn't render anything, you have to talk directly to Flash/Dom/OpenGl.
+
+...there's a lib inside of Luxe called "Phoenix", which is the best I've seen so far.
+It's all composition everywhere, no global state that I saw. Was originally written in C++
+(https://github.com/jonparrott/PhoenixCore/). It's now abandoned. Sven, the Snowkit guy
+ported it to Haxe and is merging it into Luxe. He says he "loved the design of phoenix"
+(http://snowkit.org/2014/10/27/luxe-alpha-1-0/) wish he'd taken more inspiration from it
+instead of... idk, the flash api or something.
