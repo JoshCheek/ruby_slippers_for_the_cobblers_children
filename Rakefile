@@ -49,6 +49,17 @@ namespace :frontend do
       sh 'java', '-jar', 'frontend/java/RubyLib.jar'
     end
   end
+
+  namespace :neko do
+    desc 'Run the frontend\'s code with neko'
+    task :run do
+      sh 'haxe',
+        '-main', 'RubyLib',
+        '-cp',   'frontend',
+        '-cp',   'interpreter/src',
+        '--interp'
+    end
+  end
 end
 
 # interpreter tasks
