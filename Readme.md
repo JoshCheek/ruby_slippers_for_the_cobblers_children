@@ -25,6 +25,10 @@ Would be nice to add games to it in order to make it more compelling for learner
 interact with it and develop an intuition for how Ruby works, what it does, how thier
 code manipulates this.
 
+Would be nice to have a local version, too, so they can run their local code against it rather than MRI,
+rather than having to remember to stop and go to the website and translate their code
+into something it can comprehend.
+
 
 Prioritized TODO
 ----------------
