@@ -60,6 +60,24 @@ namespace :frontend do
         '--interp'
     end
   end
+
+  namespace :flash do
+    desc 'Compile the interpreter to flash'
+    task :compile do
+      sh 'haxe',
+        '-main', 'RubyLib',
+        '-cp',   'frontend',
+        '-cp',   'interpreter/src',
+        '-swf',  'frontend/RubyLib.swf'
+    end
+
+    desc 'Run the frontend\'s flash interpreter'
+    task run: 'frontend:flash:compile' do
+      raise "I don't know how to runs swf files :/
+             presumably the browser can do it, but it shows nothing.
+             Perhaps b/c it's printing to some stream that isn't printed on the screen"
+    end
+  end
 end
 
 # interpreter tasks
