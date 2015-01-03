@@ -1,0 +1,5 @@
+#!/bin/sh
+bindir="$(dirname "$0")"
+cd "${bindir}/.."
+export PATH="${bindir}:${PATH}"
+lime test neko

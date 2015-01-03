@@ -1,9 +1,10 @@
 # pick a default port if user hasn't
 ENV['RUBY_PARSER_PORT'] ||= '3003'
 
-# set PATH
-parser_bin_dir = File.expand_path('parser/bin', __dir__)
-ENV['PATH'] = "#{parser_bin_dir}:#{ENV['PATH']}"
+# Fix PATH:
+parser_bin_dir   = File.expand_path('parser/bin',   __dir__) # currently only offers ast_for, but I'm not actually using it anymore (I usually curl, anyway), so maybe delete it
+frontend_bin_dir = File.expand_path('frontend/bin', __dir__) # fix accidental override of cpp resource http://man.cx/strip(1) vs https://github.com/JoshCheek/dotfiles/blob/485fd3fcdcaf5714b8744a39b58828784dac8d87/bin/strip
+ENV['PATH'] = "#{parser_bin_dir}:#{frontend_bin_dir}:#{ENV['PATH']}"
 
 # shortcuts
 task default: ['parser:test', 'interpreter:test']
@@ -13,71 +14,9 @@ task status:  'parser:server:status'
 task run:     'parser:server:run'
 
 # frontend tasks
-desc 'Compiles and runs all frontend code'
-task frontend: ['frontend:cpp:run', 'frontend:java:run']
-
-namespace :frontend do
-  namespace :cpp do
-    desc 'Compile the interpreter to c++'
-    task :compile do
-      ENV['PATH'] = '/usr/bin:' << ENV['PATH'] # b/c I'm accidentally overriding bins it uses to compile (https://github.com/JoshCheek/dotfiles/blob/485fd3fcdcaf5714b8744a39b58828784dac8d87/bin/strip)
-      sh 'haxe',
-        '-main', 'RubyLib',
-        '-cp',   'frontend',
-        '-cp',   'interpreter/src',
-        '-cpp',  'frontend/cpp'
-    end
-
-    desc 'Run the frontend\'s c++ interpreter'
-    task run: 'frontend:cpp:compile' do
-      sh 'frontend/cpp/RubyLib'
-    end
-  end
-
-  namespace :java do
-    desc 'Compile the interpreter to Java'
-    task :compile do
-      sh 'haxe',
-        '-main', 'RubyLib',
-        '-cp',   'frontend',
-        '-cp',   'interpreter/src',
-        '-java', 'frontend/java'
-    end
-
-    desc 'Run the frontend\'s Java interpreter'
-    task run: 'frontend:java:compile' do
-      sh 'java', '-jar', 'frontend/java/RubyLib.jar'
-    end
-  end
-
-  namespace :neko do
-    desc 'Run the frontend\'s code with neko'
-    task :run do
-      sh 'haxe',
-        '-main', 'RubyLib',
-        '-cp',   'frontend',
-        '-cp',   'interpreter/src',
-        '--interp'
-    end
-  end
-
-  namespace :flash do
-    desc 'Compile the interpreter to flash'
-    task :compile do
-      sh 'haxe',
-        '-main', 'RubyLib',
-        '-cp',   'frontend',
-        '-cp',   'interpreter/src',
-        '-swf',  'frontend/RubyLib.swf'
-    end
-
-    desc 'Run the frontend\'s flash interpreter'
-    task run: 'frontend:flash:compile' do
-      raise "I don't know how to runs swf files :/
-             presumably the browser can do it, but it shows nothing.
-             Perhaps b/c it's printing to some stream that isn't printed on the screen"
-    end
-  end
+desc 'Run the frontend code'
+task :frontend do
+  sh 'frontend/bin/build'
 end
 
 # interpreter tasks
