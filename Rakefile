@@ -3,8 +3,7 @@ ENV['RUBY_PARSER_PORT'] ||= '3003'
 
 # Fix PATH:
 parser_bin_dir   = File.expand_path('parser/bin',   __dir__) # currently only offers ast_for, but I'm not actually using it anymore (I usually curl, anyway), so maybe delete it
-frontend_bin_dir = File.expand_path('frontend/bin', __dir__) # fix accidental override of cpp resource http://man.cx/strip(1) vs https://github.com/JoshCheek/dotfiles/blob/485fd3fcdcaf5714b8744a39b58828784dac8d87/bin/strip
-ENV['PATH'] = "#{parser_bin_dir}:#{frontend_bin_dir}:#{ENV['PATH']}"
+ENV['PATH'] = "#{parser_bin_dir}:#{ENV['PATH']}"
 
 # shortcuts
 task default: ['parser:test', 'interpreter:test']
@@ -16,7 +15,7 @@ task run:     'parser:server:run'
 # frontend tasks
 desc 'Run the frontend code'
 task :frontend do
-  sh 'frontend/bin/build'
+  sh 'frontend/bin/run'
 end
 
 # interpreter tasks

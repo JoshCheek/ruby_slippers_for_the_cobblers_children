@@ -1,0 +1,5 @@
+#!/bin/sh
+cd "$(dirname "$0")/.."
+frontend_root=`pwd`
+export PATH="${frontend_root}/bin:${PATH}"
+lime test mac -64
