@@ -22,11 +22,32 @@ import flixel.FlxState;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxMath;
+import flixel.util.FlxColor;
+
+using flixel.util.FlxSpriteUtil;
+
 
 // TODO: rename
 class MenuState extends FlxState {
+  private var _sprBack:FlxSprite;
+
 	override public function create():Void {
     add(new FlxText(10, 10, 100, "Hello, World!"));
+
+    // /Users/josh/ref/haxe/flixel/flixel/util/FlxColor.hx
+    // public function makeGraphic(Width:Int, Height:Int, Color:Int = FlxColor.WHITE, Unique:Bool = false, ?Key:String):FlxSprite
+    _sprBack = new FlxSprite().makeGraphic(120, 120, FlxColor.TRANSPARENT);
+
+    // public static function drawRect(sprite:FlxSprite,
+    //   X:Float, Y:Float, Width:Float, Height:Float, Color:Int,
+    //   ?lineStyle:LineStyle, ?fillStyle:FillStyle, ?drawStyle:DrawStyle
+    // ):FlxSprite
+    _sprBack.drawRect(1, 1, 118, 44,  FlxColor.WHITE);
+    _sprBack.drawRect(1, 46, 118, 73, FlxColor.BLUE);
+    _sprBack.screenCenter(true, true);
+    add(_sprBack);
+
+
     var rawCode = 'class User\n' +
                   '  def initialize(name)\n' +
                   '    self.name = name\n' +
@@ -65,6 +86,7 @@ class MenuState extends FlxState {
 	}
 
 	override public function destroy():Void {
+    _sprBack = flixel.util.FlxDestroyUtil.destroy(_sprBack);
 		super.destroy();
 	}
 
