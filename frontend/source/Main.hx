@@ -9,17 +9,17 @@ import flixel.FlxGame;
 import flixel.FlxState;
 
 class Main extends Sprite {
-	public static function main():Void {
-		Lib.current.addChild(new Main()); // fkn global state everywhere :(
-	}
+  public static function main():Void {
+    Lib.current.addChild(new Main()); // fkn global state everywhere :(
+  }
 
-	public function new() {
-		super();
+  public function new() {
+    super();
     if(stage == null) addEventListener(Event.ADDED_TO_STAGE, init);
     else              init();
-	}
+  }
 
-	private function init(?e:Event):Void {
+  private function init(?e:Event):Void {
     if (hasEventListener(Event.ADDED_TO_STAGE))
       removeEventListener(Event.ADDED_TO_STAGE, init);
 
@@ -30,13 +30,13 @@ class Main extends Sprite {
     var drawFps         : Int             = 60;        // how often to call draw
     var skipSplash      : Bool            = true;
     var startFullscreen : Bool            = false;
-		var stageWidth      : Int             = Lib.current.stage.stageWidth;
-		var stageHeight     : Int             = Lib.current.stage.stageHeight;
+    var stageWidth      : Int             = Lib.current.stage.stageWidth;
+    var stageHeight     : Int             = Lib.current.stage.stageHeight;
     var zoom            : Float           = Math.min(stageWidth/gameWidth, stageHeight/gameHeight);
 
     gameWidth  = Math.ceil(stageWidth  / zoom);
     gameHeight = Math.ceil(stageHeight / zoom);
 
-		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, updateFps, drawFps, skipSplash, startFullscreen));
-	}
+    addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, updateFps, drawFps, skipSplash, startFullscreen));
+  }
 }

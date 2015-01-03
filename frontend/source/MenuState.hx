@@ -31,7 +31,7 @@ using flixel.util.FlxSpriteUtil;
 class MenuState extends FlxState {
   private var _sprBack:FlxSprite;
 
-	override public function create():Void {
+  override public function create():Void {
     add(new FlxText(10, 10, 100, "Hello, World!"));
 
     // /Users/josh/ref/haxe/flixel/flixel/util/FlxColor.hx
@@ -82,15 +82,15 @@ class MenuState extends FlxState {
     trace("--------------------");
     trace("PRINTED: " + world.printedToStdout);
 
-		super.create();
-	}
+    super.create();
+  }
 
-	override public function destroy():Void {
+  override public function destroy():Void {
     _sprBack = flixel.util.FlxDestroyUtil.destroy(_sprBack);
-		super.destroy();
+    super.destroy();
 	}
 
-	override public function update():Void {
-		super.update();
-	}
+  override public function update():Void {
+    super.update();
+  }
 }
