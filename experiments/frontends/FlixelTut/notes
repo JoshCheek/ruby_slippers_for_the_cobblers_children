@@ -1,4 +1,5 @@
-http://haxeflixel.com/documentation/part-ii-testing/
+Tut:  http://haxeflixel.com/documentation/part-ii-testing/
+Code: https://github.com/HaxeFlixel/flixel-tutorial/
 
 $ flixel tpl -n FlixelTut
 
@@ -60,3 +61,18 @@ I think, and I have to tap a second time to get it to register the mouse-up even
 When I full-on press the trackpad, it works correctly. But I've got my computer
 set up to treat taps as clicks, and haven't run into anything else (including flash libs)
 that are confused about this.
+
+Okay, at this point, it died at runtime when I'd click "play", so just copying their code
+into my repo since theirs works. I couldn't figure out what the difference is.
+
+They then build the level using a tool called OgmoEditor http://www.ogmoeditor.com/
+but it seems to be Windows only. Unfortunate, it looked nice and simple.
+Looking around, I could probably use some of these options: http://www.rocket5studios.com/game-design/cool-indie-level-editors/
+Specifically, https://github.com/bjorn/tiled looked legit.
+
+Parse the oep/oel using some lib from flixel-addons
+$ haxelib install flixel-addons
+
+Desclare the dep by adding `<haxelib name="flixel-addons" />` to Project.xml
+
+Lots of good drawing functions in flixel/util/FlxSpriteUtil.hx

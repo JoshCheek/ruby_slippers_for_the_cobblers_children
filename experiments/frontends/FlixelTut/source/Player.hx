@@ -3,88 +3,124 @@ package;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
-import flixel.util.FlxColor;
+import flixel.system.FlxSound;
+import flixel.ui.FlxButton;
 import flixel.util.FlxAngle;
+import flixel.util.FlxColor;
+import flixel.util.FlxDestroyUtil;
 
-class Player extends FlxSprite {
-  public var speed:Float = 200;
-
-  public function new(x:Float=0, y:Float=0) {
-    super(x, y);
-
-    // loadGraphic("assets/images/player.png", true, 16, 16);
-    // loadGraphic(AssetPaths.player__png, true, 16, 16);
-    loadGraphic("assets/images/player.png", true, 16, 16);
-
-    setFacingFlip(FlxObject.LEFT, false, false);
-    setFacingFlip(FlxObject.RIGHT, true, false);
-
-    // animation.FlxAnimationController#add(
-    //   Name:String, Frames:Array<Int>, FrameRate:Int = 30, Looped:Bool = true
-    // ):Void
-    animation.add("d",  [0, 1, 0, 2], 6, false);
-    animation.add("lr", [3, 4, 3, 5], 6, false);
-    animation.add("u",  [6, 7, 6, 8], 6, false);
-
-    width    = 8;
-    height   = 14;
-    offset.x = 4;
-    offset.y = 2;
-  }
-
-
-  override public function update():Void {
-    movement();
-    super.update();
-  }
-
-  override public function draw():Void {
-    if(velocity.x != 0 || velocity.y != 0) {
-      switch(facing) {
-        case FlxObject.LEFT, FlxObject.RIGHT: animation.play("lr");
-        case FlxObject.UP:                    animation.play("u");
-        case FlxObject.DOWN:                  animation.play("d");
-      }
-    }
-    super.draw();
-  }
-
-  private function movement():Void {
-    var _up    = FlxG.keys.anyPressed(["UP",    "W"]);
-    var _down  = FlxG.keys.anyPressed(["DOWN",  "S"]);
-    var _left  = FlxG.keys.anyPressed(["LEFT",  "A"]);
-    var _right = FlxG.keys.anyPressed(["RIGHT", "D"]);
-
-    if(_up && _down)
-      _up = _down = false;
-
-    if(_left && _right)
-      _left = _right = false;
-
-    if( _up || _down || _left || _right) {
-      var mA:Float =
-        if      (_down && _right)  45;
-        else if (_down && _left)  135;
-        else if (_up   && _left)  225;
-        else if (_up   && _right) 315;
-        else if (_up)             270;
-        else if (_down)            90;
-        else if (_left)           180;
-        else                        0;
-
-      // an int at least 2 bytes long (these are defined as 0x1000, depending which "bit" they set decides the direction)
-      // not sure why they do this instead of using Enumerables, or 4 bits instead of 2 bytes
-      facing = _up    ? FlxObject.UP    :
-               _down  ? FlxObject.DOWN  :
-               _left  ? FlxObject.LEFT  :
-               _right ? FlxObject.RIGHT :
-                        FlxObject.RIGHT;
-
-      // NOTE: on 4.0, this becomes FlxPoint#rotate,
-      // and the direction of the angle isn't inverted
-      // (I'm on 3.3.6)
-      FlxAngle.rotatePoint(speed, 0, 0, 0, mA, velocity);
-    }
-  }
-
+class Player extends FlxSprite
+{
+	public var speed:Float = 200;
+	private var _sndStep:FlxSound;
+	
+	public function new(X:Float=0, Y:Float=0) 
+	{
+		super(X, Y);
+		
+		loadGraphic(AssetPaths.player__png, true, 16, 16);
+		setFacingFlip(FlxObject.LEFT, false, false);
+		setFacingFlip(FlxObject.RIGHT, true, false);
+		animation.add("d", [0, 1, 0, 2], 6, false);
+		animation.add("lr", [3, 4, 3, 5], 6, false);
+		animation.add("u", [6, 7, 6, 8], 6, false);
+		drag.x = drag.y = 1600;
+		setSize(8, 14);
+		offset.set(4, 2);
+		
+		_sndStep = FlxG.sound.load(AssetPaths.step__wav);
+	}
+	
+	private function movement():Void
+	{
+		var _up:Bool = false;
+		var _down:Bool = false;
+		var _left:Bool = false;
+		var _right:Bool = false;
+		
+		#if !FLX_NO_KEYBOARD
+		_up = FlxG.keys.anyPressed(["UP", "W"]);
+		_down = FlxG.keys.anyPressed(["DOWN", "S"]);
+		_left = FlxG.keys.anyPressed(["LEFT", "A"]);
+		_right = FlxG.keys.anyPressed(["RIGHT", "D"]);
+		#end
+		#if mobile
+		_up = _up || PlayState.virtualPad.buttonUp.status == FlxButton.PRESSED;
+		_down = _down || PlayState.virtualPad.buttonDown.status == FlxButton.PRESSED;
+		_left  = _left || PlayState.virtualPad.buttonLeft.status == FlxButton.PRESSED;
+		_right = _right || PlayState.virtualPad.buttonRight.status == FlxButton.PRESSED;
+		#end
+		
+		if (_up && _down)
+			_up = _down = false;
+		if (_left && _right)
+			_left = _right = false;
+		
+		if ( _up || _down || _left || _right)
+		{
+			var mA:Float = 0;
+			if (_up)
+			{
+				mA = -90;
+				if (_left)
+					mA -= 45;
+				else if (_right)
+					mA += 45;
+					
+				facing = FlxObject.UP;
+			}
+			else if (_down)
+			{
+				mA = 90;
+				if (_left)
+					mA += 45;
+				else if (_right)
+					mA -= 45;
+				
+				facing = FlxObject.DOWN;
+			}
+			else if (_left)
+			{
+				mA = 180;
+				facing = FlxObject.LEFT;
+			}
+			else if (_right)
+			{
+				mA = 0;
+				facing = FlxObject.RIGHT;
+			}
+			FlxAngle.rotatePoint(speed, 0, 0, 0, mA, velocity);
+		}
+		
+		if ((velocity.x != 0 || velocity.y != 0) && touching == FlxObject.NONE)
+		{
+			_sndStep.play();
+			
+			switch(facing)
+			{
+				case FlxObject.LEFT, FlxObject.RIGHT:
+					animation.play("lr");
+					
+				case FlxObject.UP:
+					animation.play("u");
+					
+				case FlxObject.DOWN:
+					animation.play("d");
+			}
+		}
+		
+	}
+	
+	override public function update():Void 
+	{
+		movement();
+		super.update();
+	}
+	
+	override public function destroy():Void 
+	{
+		super.destroy();
+		
+		_sndStep = FlxDestroyUtil.destroy(_sndStep);
+	}
 }
