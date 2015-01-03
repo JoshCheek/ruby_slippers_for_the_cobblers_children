@@ -23,13 +23,13 @@ class Main extends Sprite {
     if (hasEventListener(Event.ADDED_TO_STAGE))
       removeEventListener(Event.ADDED_TO_STAGE, init);
 
+    var initialState    : Class<FlxState> = MenuState; // IDK why I pass a class instead of an instance or a function, it ultimately calls Type.createInstance, idk why they do that instead of new (maybe new won't look up a local var?)
     var gameWidth       : Int             = 640;       // might change, depending on your zoom.
     var gameHeight      : Int             = 480;       // might change, depending on your zoom.
     var updateFps       : Int             = 60;        // how often to call update
     var drawFps         : Int             = 60;        // how often to call draw
     var skipSplash      : Bool            = true;
     var startFullscreen : Bool            = false;
-    var initialState    : Class<FlxState> = MenuState;
 		var stageWidth      : Int             = Lib.current.stage.stageWidth;
 		var stageHeight     : Int             = Lib.current.stage.stageHeight;
     var zoom            : Float           = Math.min(stageWidth/gameWidth, stageHeight/gameHeight);
