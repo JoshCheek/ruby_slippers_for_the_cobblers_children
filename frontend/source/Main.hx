@@ -53,8 +53,8 @@ class Main extends Sprite {
       removeEventListener(Event.ADDED_TO_STAGE, init);
 
     var initialStateClass : Class<FlxState> = RubyInterpreter;
-    var gameWidth         : Int             = 640;  // might change, depending on your zoom.
-    var gameHeight        : Int             = 480;  // might change, depending on your zoom.
+    var gameWidth         : Int             = 1280; // might change, depending on your zoom.
+    var gameHeight        : Int             = 960;  // might change, depending on your zoom.
     var updateFps         : Int             = 60;   // how often to call update
     var drawFps           : Int             = 60;   // how often to call draw
     var skipSplash        : Bool            = true; // this splash thing is the reason FlxGame takes a class instead of an instance, and thus I can't give arguments to my first MenuState (though, they could just take a function that returns the thing :/)
