@@ -31,13 +31,15 @@ import flixel.ui.FlxButton;
 import flixel.text.FlxText;
 import flixel.util.FlxMath;
 import flixel.util.FlxColor;
-
-
+import flixel.group.FlxTypedGroup;
+import flixel.group.FlxSpriteGroup;
 
 using flixel.util.FlxSpriteUtil;
 
 
 class Main extends Sprite {
+  var game:FlxGame;
+
   public static function main():Void {
     Lib.current.addChild(new Main()); // fkn global state everywhere :(
   }
@@ -49,9 +51,12 @@ class Main extends Sprite {
   }
 
   private function init(?e:Event):Void {
+    // cleanup
     if (hasEventListener(Event.ADDED_TO_STAGE))
       removeEventListener(Event.ADDED_TO_STAGE, init);
 
+
+    // create game
     var initialStateClass : Class<FlxState> = RubyInterpreter;
     var gameWidth         : Int             = 1280; // might change, depending on your zoom.
     var gameHeight        : Int             = 960;  // might change, depending on your zoom.
@@ -62,16 +67,18 @@ class Main extends Sprite {
     var stageWidth        : Int             = Lib.current.stage.stageWidth;
     var stageHeight       : Int             = Lib.current.stage.stageHeight;
     var zoom              : Float           = Math.min(stageWidth/gameWidth, stageHeight/gameHeight);
-
     gameWidth  = Math.ceil(stageWidth  / zoom);
     gameHeight = Math.ceil(stageHeight / zoom);
+    game       = new flixel.FlxGame(gameWidth, gameHeight, initialStateClass, zoom, updateFps, drawFps, skipSplash, startFullscreen);
+    addChild(game);
 
-    addChild(new FlxGame(gameWidth, gameHeight, initialStateClass, zoom, updateFps, drawFps, skipSplash, startFullscreen));
+    // Use normal mouse (segfaults if you put this before the game. IDK why)
+    FlxG.mouse.useSystemCursor = true;
   }
 }
 
 class RubyInterpreter extends FlxState {
-  private var _callStack  : FlxSprite;
+  private var callStack   : Callstack;
   private var interpreter : ruby.Interpreter;
   private var world       : ruby.World;
 
@@ -83,6 +90,8 @@ class RubyInterpreter extends FlxState {
   // but I'm uncomfortable with subclassing FlxGame b/c these internal methods could easily change.
   // So, dropping initialization here instead of in Main where it probably goes
   override public function create():Void {
+
+    // set up the interpreter (this setup should all be pushed up the callstack, I think)
     var rawCode = 'class User\n' +
                   '  def initialize(name)\n' +
                   '    self.name = name\n' +
@@ -99,25 +108,15 @@ class RubyInterpreter extends FlxState {
                   '\n' +
                   'user = User.new("Josh")\n' +
                   'puts user.name';
-
     var worldDs = ruby.Bootstrap.bootstrap();
+    var ast     = ruby.ParseRuby.fromCode(rawCode);
     world       = new ruby.World(worldDs);
     interpreter = world.interpreter;
-    var ast     = ruby.ParseRuby.fromCode(rawCode);
     interpreter.pushCode(ast);
 
-    // add(new FlxText(10, 10, 100, "Hello, World!"));
-
-    // public function makeGraphic(Width:Int, Height:Int, Color:Int = FlxColor.WHITE, Unique:Bool = false, ?Key:String):FlxSprite
-    _callStack = new FlxSprite().makeGraphic(120, 120, FlxColor.GREEN);
-
-    // public static function drawRect(sprite:FlxSprite,
-    //   X:Float, Y:Float, Width:Float, Height:Float, Color:Int,
-    //   ?lineStyle:LineStyle, ?fillStyle:FillStyle, ?drawStyle:DrawStyle
-    // ):FlxSprite
-    _callStack.drawRect(1, 1, 118, 44,  FlxColor.WHITE);
-    add(_callStack);
-
+    // set up the callstack
+    callStack = new Callstack(960);
+    add(callStack);
 
     trace("CODE TO INTERPRET: \n" + rawCode);
     trace("--------------------");
@@ -128,16 +127,50 @@ class RubyInterpreter extends FlxState {
   // this is not getting called :/
   override public function destroy():Void {
     trace("--------------------");
-    trace("PRINTED: " + world.printedToStdout);
-    _callStack = flixel.util.FlxDestroyUtil.destroy(_callStack);
+    callStack = flixel.util.FlxDestroyUtil.destroy(callStack);
     super.destroy();
 	}
 
+  // TODO: exit when isInProgress becomes false
+  // TODO: trigger this by clicking or something
   override public function update():Void {
-    while(interpreter.isInProgress) {
-      trace(world.inspect(interpreter.currentExpression));
+    if(!interpreter.isInProgress) return; // is there a destroy on the game?
+    if(FlxG.mouse.justPressed)
       interpreter.nextExpression();
-    }
+    // callStack.update();
+    // world.inspect(interpreter.currentExpression))
+
+    super.update(); // updates children (e.g. callstack)
+  }
+}
+
+class StackFrame extends FlxSpriteGroup {
+}
+
+// TODO: currently centering in the outer container
+class Callstack extends FlxTypedGroup<FlxSprite> {
+  private var background  : FlxSprite;
+  private var heading     : FlxText;
+  private var frames      : Array<StackFrame>;
+
+  public function new(height:Int) {
+    super();
+    this.frames     = [];
+    this.background = add(new FlxSprite().makeGraphic(200/*w*/, 960/*h*/, FlxColor.GREEN));
+    add(new FlxText(10/*x*/, 10/*y*/, 0/*width: 0=autocalculate*/, "Callstack", 25/*font size*/));
+  }
+
+  // push
+  // pop
+  // advanceState
+
+  override public function update() {
     super.update();
+    // while(interpreter.stack.length < frames.length)
+    //   frames.pop();
+
+    // for(rFrame in interpreter.stack)
+    // var stackHeading = background.drawRect(1/*x*/, 1/*y*/, 200/*w*/, 960/*h*/,  FlxColor.WHITE); // optional: LineStyle, FillStyle, DrawStyle
+    // add(stackHeading);
   }
 }
