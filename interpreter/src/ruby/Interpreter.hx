@@ -46,28 +46,31 @@ class Interpreter {
   }
 
   public function nextExpression():RObject {
-    while(!step()) {}
-    return currentExpression;
+    while(true) {
+      switch(step()) {
+        case Pop(obj): return obj;
+        case _: /*no op*/
+      }
+    }
   }
 
   // returns true if this step evaluated to an expression
-  public function step():Bool {
+  public function step():EvaluationResult {
     if(isFinished) throw new NothingToEvaluateError("Check before evaluating!");
-    var frame = state.stack.first();
+    var frame  = state.stack.first();
+    var result = continueExecuting(frame);
 
-    switch(continueExecuting(frame)) {
+    switch(result) {
       case Push(state, ast, binding):
         frame.state = state;
         pushCode(ast, binding);
-        return false;
-      case Pop(result):
-        currentExpression = result;
+      case Pop(obj):
+        currentExpression = obj;
         state.stack.pop();
-        return true;
       case NoAction(state):
         frame.state = state;
-        return false;
     }
+    return result;
   }
 
   // ----- PRIVATE -----
