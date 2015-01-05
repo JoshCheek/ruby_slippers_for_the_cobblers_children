@@ -28,6 +28,10 @@ Some Ruby testing notes
 * [I think this is where Ruby's specification starts](https://github.com/ruby/ruby/blob/trunk/test/runner.rb)
   as in you can presumably do something like `ruby test/runner.rb` decided to go look at it to see if it seemed viable as a test suite (as in "doesn't depend on a C implementation"),
   and it looks like it should be runnable. Depending on how serious I get, probably worth hitting that one and RubySpec simultaneously for a bit.
+* [Official Ruby Spec](http://www.iso.org/iso/iso_catalogue/catalogue_tc/catalogue_detail.htm?csnumber=59579)
+  I haven't looked into it yet. Got the link from the [rebuttal](https://gist.github.com/nateberkopec/11dbcf0ee7f2c08450ea)
+  of Brian's post. UPDATE: it costs $200 and is for Ruby 1.8 YorickPeterse has an excellent rebuttal of why it's bad for RubySpec to die.
+  It's really annoying that MRI sees itself as "whatever the fuck we happened to do is what Ruby is".
 
 Some haxe notes
 ---------------
