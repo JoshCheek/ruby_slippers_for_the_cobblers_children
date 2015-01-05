@@ -78,9 +78,9 @@ class Main extends Sprite {
 }
 
 class RubyInterpreter extends FlxState {
-  private var callStack   : Callstack;
-  private var interpreter : ruby.Interpreter;
-  private var world       : ruby.World;
+  // private var _callStack   : Callstack;
+  private var _interpreter : ruby.Interpreter;
+  private var _world       : ruby.World;
 
   // FlxGame takes a class instead of an instance.
   // This means I can't init it with args (was going to send a PR, but I couldn't get the test suite to run --
@@ -90,7 +90,7 @@ class RubyInterpreter extends FlxState {
   // but I'm uncomfortable with subclassing FlxGame b/c these internal methods could easily change.
   // So, dropping initialization here instead of in Main where it probably goes
   override public function create():Void {
-
+    super.create();
     // set up the interpreter (this setup should all be pushed up the callstack, I think)
     var rawCode = 'class User\n' +
                   '  def initialize(name)\n' +
@@ -110,67 +110,101 @@ class RubyInterpreter extends FlxState {
                   'puts user.name';
     var worldDs = ruby.Bootstrap.bootstrap();
     var ast     = ruby.ParseRuby.fromCode(rawCode);
-    world       = new ruby.World(worldDs);
-    interpreter = world.interpreter;
-    interpreter.pushCode(ast);
+    trace("AST: " + ast);
+    _world       = new ruby.World(worldDs);
+    _interpreter = _world.interpreter;
+    _interpreter.pushCode(ast);
 
     // set up the callstack
-    callStack = new Callstack(960);
-    add(callStack);
+    // _callStack = new Callstack(960);
+    // add(_callStack);
 
     trace("CODE TO INTERPRET: \n" + rawCode);
     trace("--------------------");
-
-    super.create();
   }
 
   // this is not getting called :/
   override public function destroy():Void {
     trace("--------------------");
-    callStack = flixel.util.FlxDestroyUtil.destroy(callStack);
+    // callStack = flixel.util.FlxDestroyUtil.destroy(callStack);
     super.destroy();
 	}
 
   // TODO: exit when isInProgress becomes false
   // TODO: trigger this by clicking or something
   override public function update():Void {
-    if(!interpreter.isInProgress) return; // is there a destroy on the game?
-    if(FlxG.mouse.justPressed)
-      interpreter.nextExpression();
-    // callStack.update();
-    // world.inspect(interpreter.currentExpression))
+    if(_interpreter.isInProgress // everything is done a this point, how do I quit?
+     ) {
+      trace("ABOUT TO STEP");
+      var result = _interpreter.step();
+      trace("BACK!");
+      // trace(result);
+      // switch(result) {
+      //   case Push(replacementState, pushed, binding): _callStack.push(replacementState, pushed, binding);
+      //   case Pop(obj):                                _callStack.pop(obj);
+      //   case NoAction(replacementState):              _callStack.replaceState(replacementState);
+      // }
+      // _callStack.update();
+      // _world.inspect(_interpreter.currentExpression);
+    }
 
     super.update(); // updates children (e.g. callstack)
   }
 }
 
 class StackFrame extends FlxSpriteGroup {
-}
-
-// TODO: currently centering in the outer container
-class Callstack extends FlxTypedGroup<FlxSprite> {
-  private var background  : FlxSprite;
-  private var heading     : FlxText;
-  private var frames      : Array<StackFrame>;
-
-  public function new(height:Int) {
-    super();
-    this.frames     = [];
-    this.background = add(new FlxSprite().makeGraphic(200/*w*/, 960/*h*/, FlxColor.GREEN));
-    add(new FlxText(10/*x*/, 10/*y*/, 0/*width: 0=autocalculate*/, "Callstack", 25/*font size*/));
+  public function new(pushed, binding, width, stackHeight) {
+    super(10, stackHeight);
+    this.frameWidth = width;
+    // makeGraphic(10, stackHeight,
   }
 
-  // push
-  // pop
-  // advanceState
-
-  override public function update() {
-    super.update();
-    // while(interpreter.stack.length < frames.length)
-    //   frames.pop();
-
-    // for(rFrame in interpreter.stack)
-    // var stackHeading = background.drawRect(1/*x*/, 1/*y*/, 200/*w*/, 960/*h*/,  FlxColor.WHITE); // optional: LineStyle, FillStyle, DrawStyle
-    // add(stackHeading);
+  public function replaceState(replacementState) {
   }
 }
+
+// // TODO: currently centering in the outer container
+// class Callstack extends FlxTypedGroup<FlxSprite> {
+//   private var background  : FlxSprite;
+//   private var heading     : FlxText;
+//   private var frames      : Stack<StackFrame>;
+//   private var _width      : Int;
+//   private var _height     : Int;
+//   private var stackHeight : Int;
+//
+//   public function new(height:Int) {
+//     super();
+//     this._width       = 200; // px
+//     this._height      = 960;
+//     this.frames       = new Stack();
+//     this.background =   add(new FlxSprite().makeGraphic(_width/*w*/, _height/*h*/, FlxColor.GREEN));
+//     var text = new FlxText(10/*x*/, 10/*y*/, 0/*width: 0=autocalculate*/, "Callstack", 25/*font size*/);
+//     add(text);
+//     this.stackHeight = text.frameHeight + 10;
+//   }
+//
+//   public function push(replacementState, pushed, binding) {
+//     replaceState(replacementState);
+//     var frame = new StackFrame(pushed, binding, _width, stackHeight+10);
+//     frame.update();
+//     this.stackHeight += 10 + frame.frameHeight;
+//     frames.push(frame);
+//     add(frame);
+//   }
+//
+//   public function pop(obj) {
+//     var frame = frames.pop();
+//     this.stackHeight -= 10;
+//     this.stackHeight -= frame.frameHeight;
+//     remove(frame);
+//     frame.destroy();
+//   }
+//
+//   public function replaceState(replacementState) {
+//     var crntFrame = frames.peek;
+//     this.stackHeight -= crntFrame.frameHeight;
+//     crntFrame.replaceState(replacementState);
+//     crntFrame.update();
+//     this.stackHeight += crntFrame.frameHeight;
+//   }
+// }

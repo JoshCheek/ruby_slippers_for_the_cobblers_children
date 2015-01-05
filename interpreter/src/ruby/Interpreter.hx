@@ -34,10 +34,12 @@ class Interpreter {
   }
 
 
-  public function pushCode(code:ExecutionState, ?binding) {
+  public function pushCode(code:ExecutionState, ?binding):StackFrame {
     if(code==null) throw new Errors("Code to evaluate was null!");
     if(binding==null) binding = currentBinding;
-    this.state.stack.push({binding:binding, state:code});
+    var stackFrame = {binding:binding, state:code};
+    this.state.stack.push(stackFrame);
+    return stackFrame;
   }
 
   public function evaluateAll():RObject {
@@ -63,7 +65,8 @@ class Interpreter {
     switch(result) {
       case Push(state, ast, binding):
         frame.state = state;
-        pushCode(ast, binding);
+        var frame = pushCode(ast, binding);
+        result = Push(state, ast, frame.binding);
       case Pop(obj):
         currentExpression = obj;
         state.stack.pop();
