@@ -2,12 +2,17 @@
 
 require 'shellwords'
 
-ruby_parser_port = ENV['RUBY_PARSER_PORT'] ||= '3003'
+# declarations
 interpreter_root = File.dirname File.dirname __FILE__
+parser_pidfile   = File.expand_path '../parser/tmp/puma.pid', interpreter_root
+server_is_up     = File.exist? parser_pidfile
 show_help        = false
 errors           = []
 class_paths      = ['src', 'test']
 main             = 'RunTests'
+
+# Default vars
+ENV['RUBY_PARSER_PORT'] ||= '3003'
 
 # check args
 if 1 < ARGV.size
@@ -18,36 +23,51 @@ end
 # parse args
 ARGV.each do |arg|
   case arg
-  when /^a(ll)?$/i     then main = 'RunTests'
-  when /^r(ruby)?$/i   then main = 'ruby.RunTests'
-  when /^t(est)?$/i    then main = 'toplevel.RunTests'
-  when /^h(elp)?$/i    then show_help = true
-  when /^(-h|--help)$/ then show_help = true
+  when /^a(ll)?$/i      then main = 'RunTests'
+  when /^r(uby)?$/i     then main = 'ruby.RunTests'
+  when /^t(oplevel)?$/i then main = 'toplevel.RunTests'
+  when /^h(elp)?$/i     then show_help = true
+  when /^(-h|--help)$/  then show_help = true
   else
     show_help = true
     errors << "Unknown argument #{arg.inspect}"
   end
 end
 
+# verify server
+if !show_help && !server_is_up
+  message = "Server is not running (no pidfile at #{parser_pidfile.inspect}\n"\
+            "probably do `rake parser:server:start`"
+  errors << message
+end
+
+
+def print_errors(errors, delimiter_line=nil)
+  return if errors.empty?
+  puts delimiter_line if delimiter_line
+  puts "Errors:"
+  print "\e[31m" # red
+  errors.each { |e|
+    puts e.each_line.map { |line| "  #{line.chomp}" }
+  }
+  print "\e[39m" # reset
+end
+
 # execute
 if show_help
   puts "Usage: #$0 [a|r|t|h]"
-
-  if errors.any?
-    puts "Errors:"
-    puts "\e[31m" # red
-    errors.each { |e| puts "  #{e}" }
-    print "\e[39m" # reset
-  end
-
+  print_errors(errors, "")
   puts
   puts "Command (defaults to all)"
   puts "  \e[92ma\e[39m[ll]      - Run all tests"
   puts "  \e[92mr\e[39m[uby]     - Run tests on ruby package (the interpreter itself)"
   puts "  \e[92mt\e[39m[oplevel] - Run tests on toplevel modules"
   puts "  \e[92mh\e[39m[elp]     - Show this help screen"
-
   exit errors.any?
+
+elsif errors.any?
+  print_errors errors
+  exit 1
 
 else
   Dir.chdir interpreter_root
