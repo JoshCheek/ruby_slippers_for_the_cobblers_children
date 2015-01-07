@@ -8,6 +8,8 @@ class RunTests {
   }
 
   static function main() {
-    addTests(new TestRunner()).run();
+    var runner    = addTests(new TestRunner());
+    var allPassed = runner.run();
+    if(!allPassed) Sys.exit(1);
   }
 }

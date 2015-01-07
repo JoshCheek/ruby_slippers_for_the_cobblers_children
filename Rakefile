@@ -22,11 +22,7 @@ end
 namespace :interpreter do
   desc 'Run interpreter test suite (server needs to be running)'
   task :test do
-    sh 'haxe',
-      '-main', 'RunTests',
-      '-cp',   'interpreter/src',
-      '-cp',   'interpreter/test',
-      '--interp'
+    sh 'interpreter/bin/test'
   end
 end
 

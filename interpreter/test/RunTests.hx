@@ -3,6 +3,8 @@ class RunTests {
     var runner = new haxe.unit.TestRunner();
     toplevel.RunTests.addTests(runner);
     ruby.RunTests.addTests(runner);
-    runner.run();
+
+    var allPassed = runner.run();
+    if(!allPassed) Sys.exit(1);
   }
 }
