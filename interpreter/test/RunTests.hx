@@ -1,5 +1,7 @@
+import haxe.unit.TestRunner;
+
 class RunTests {
-  static function main() {
+  static function setup(r:TestRunner):TestRunner {
     var envVarName = "RUBY_PARSER_PORT";
     if(Sys.environment().exists(envVarName)) {
       var port = Sys.environment().get(envVarName);
@@ -8,7 +10,6 @@ class RunTests {
       throw 'Need to set the port to find the server in env var $envVarName';
     }
 
-    var r = new haxe.unit.TestRunner();
     r.add(new TestStack());
     r.add(new ruby.TestLanguageGoBag());
     r.add(new ruby.TestParser());
@@ -16,6 +17,10 @@ class RunTests {
     r.add(new ruby.TestBootstrappedWorld());
     r.add(new ruby.TestWorld());
     r.add(new ruby.TestInterpreter());
-    r.run();
+    return r;
+  }
+
+  static function main() {
+    setup(new TestRunner()).run();
   }
 }
