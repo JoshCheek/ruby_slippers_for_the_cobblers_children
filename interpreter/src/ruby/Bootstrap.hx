@@ -9,41 +9,35 @@ class Bootstrap {
     var symbols = new InternalMap();
 
     // Object / Class / Module
-    var basicObjectClass:RClass = {
-      name:       "BasicObject",
-      klass:      null,
-      superclass: null,
-      ivars:      new InternalMap(),
-      imeths:     new InternalMap(),
-      constants:  new InternalMap(),
-    };
+    var basicObjectClass = new RClass();
+    basicObjectClass.name      = "BasicObject";
+    basicObjectClass.ivars     = new InternalMap();
+    basicObjectClass.imeths    = new InternalMap();
+    basicObjectClass.constants = new InternalMap();
 
-    var objectClass:RClass = {
-      name:       "Object",
-      klass:      null,
-      superclass: basicObjectClass,
-      ivars:      new InternalMap(),
-      imeths:     new InternalMap(),
-      constants:  new InternalMap(),
-    };
+    var objectClass = new RClass();
+    objectClass.name       = "Object";
+    objectClass.klass      = null;
+    objectClass.superclass = basicObjectClass;
+    objectClass.ivars      = new InternalMap();
+    objectClass.imeths     = new InternalMap();
+    objectClass.constants  = new InternalMap();
 
-    var klassClass:RClass = {
-      name:       "Class",
-      klass:      null,
-      superclass: objectClass,
-      ivars:      new InternalMap(),
-      imeths:     new InternalMap(),
-      constants:  new InternalMap(),
-    };
+    var klassClass = new RClass();
+    klassClass.name       = "Class";
+    klassClass.klass      = null;
+    klassClass.superclass = objectClass;
+    klassClass.ivars      = new InternalMap();
+    klassClass.imeths     = new InternalMap();
+    klassClass.constants  = new InternalMap();
 
-    var moduleClass:RClass = {
-      name:       'Module',
-      klass:      klassClass,
-      superclass: objectClass,
-      ivars:      new InternalMap(),
-      imeths:     new InternalMap(),
-      constants:  new InternalMap(),
-    }
+    var moduleClass = new RClass();
+    moduleClass.name       = 'Module';
+    moduleClass.klass      = klassClass;
+    moduleClass.superclass = objectClass;
+    moduleClass.ivars      = new InternalMap();
+    moduleClass.imeths     = new InternalMap();
+    moduleClass.constants  = new InternalMap();
 
     basicObjectClass.klass = klassClass;
     objectClass.klass      = klassClass;
@@ -51,62 +45,70 @@ class Bootstrap {
     klassClass.superclass  = moduleClass;
 
     // initial execution context
-    var main = {klass: objectClass, ivars: new InternalMap()};
+    var main = new RObject();
+    main.klass = objectClass;
+    main.ivars = new InternalMap();
 
-    var toplevelBinding:RBinding = {
-      klass:     objectClass,
-      ivars:     new InternalMap(),
-      self:      main,
-      defTarget: objectClass,
-      lvars:     new InternalMap(),
-    };
+    var toplevelBinding = new RBinding();
+    toplevelBinding.klass     = objectClass;
+    toplevelBinding.ivars     = new InternalMap();
+    toplevelBinding.self      = main;
+    toplevelBinding.defTarget = objectClass;
+    toplevelBinding.lvars     = new InternalMap();
 
     // special constants (classes are wrong)
-    var trueClass:RClass = {
-      name:       "TrueClass",
-      klass:      klassClass,
-      superclass: objectClass,
-      ivars:      new InternalMap(),
-      imeths:     new InternalMap(),
-      constants:  new InternalMap(),
-    };
-    var falseClass:RClass = {
-      name:       "FalseClass",
-      klass:      klassClass,
-      superclass: objectClass,
-      ivars:      new InternalMap(),
-      imeths:     new InternalMap(),
-      constants:  new InternalMap(),
-    };
-    var nilClass:RClass = {
-      name:       "NilClass",
-      klass:      klassClass,
-      superclass: objectClass,
-      ivars:      new InternalMap(),
-      imeths:     new InternalMap(),
-      constants:  new InternalMap(),
-    };
-    var rubyNil   = {klass: nilClass,   ivars: new InternalMap()};
-    var rubyTrue  = {klass: trueClass,  ivars: new InternalMap()};
-    var rubyFalse = {klass: falseClass, ivars: new InternalMap()};
+    var trueClass = new RClass();
+    trueClass.name       = "TrueClass";
+    trueClass.klass      = klassClass;
+    trueClass.superclass = objectClass;
+    trueClass.ivars      = new InternalMap();
+    trueClass.imeths     = new InternalMap();
+    trueClass.constants  = new InternalMap();
+
+    var falseClass = new RClass();
+    falseClass.name       = "FalseClass";
+    falseClass.klass      = klassClass;
+    falseClass.superclass = objectClass;
+    falseClass.ivars      = new InternalMap();
+    falseClass.imeths     = new InternalMap();
+    falseClass.constants  = new InternalMap();
+
+    var nilClass = new RClass();
+    nilClass.name       = "NilClass";
+    nilClass.klass      = klassClass;
+    nilClass.superclass = objectClass;
+    nilClass.ivars      = new InternalMap();
+    nilClass.imeths     = new InternalMap();
+    nilClass.constants  = new InternalMap();
+
+    var rubyNil     = new RObject();
+    rubyNil.klass   = nilClass;
+    rubyNil.ivars   = new InternalMap();
+
+    var rubyTrue    = new RObject();
+    rubyTrue.klass  = trueClass;
+    rubyTrue.ivars  = new InternalMap();
+
+    var rubyFalse   = new RObject();
+    rubyFalse.klass = falseClass;
+    rubyFalse.ivars = new InternalMap();
 
     // core classes
-    var stringClass:RClass = {
-      name:       "String",
-      klass:      klassClass,
-      superclass: objectClass,
-      ivars:      new InternalMap(),
-      imeths:     new InternalMap(),
-      constants:  new InternalMap(),
-    };
-    var symbolClass:RClass = {
-      name:       "Symbol",
-      klass:      klassClass,
-      superclass: objectClass,
-      ivars:      new InternalMap(),
-      imeths:     new InternalMap(),
-      constants:  new InternalMap(),
-    };
+    var stringClass = new RClass();
+    stringClass.name       = "String";
+    stringClass.klass      = klassClass;
+    stringClass.superclass = objectClass;
+    stringClass.ivars      = new InternalMap();
+    stringClass.imeths     = new InternalMap();
+    stringClass.constants  = new InternalMap();
+
+    var symbolClass = new RClass();
+    symbolClass.name       = "Symbol";
+    symbolClass.klass      = klassClass;
+    symbolClass.superclass = objectClass;
+    symbolClass.ivars      = new InternalMap();
+    symbolClass.imeths     = new InternalMap();
+    symbolClass.constants  = new InternalMap();
 
 
     // namespacing
@@ -143,38 +145,35 @@ class Bootstrap {
     // FIXME: Putting this here b/c it will get me further
     // but really it goes on Kernel, which doesn't exist yet,
     // b/c we have no modules yet
-    objectClass.imeths["class"] = {
-      klass: objectClass, // FIXME: SHOULD BE METHOD CLASS
-      ivars: new InternalMap(),
-      name:  "class",
-      args:  [],
-      body:  Internal(Core.lookupClass),
-    }
+    var meth:RMethod;
+    objectClass.imeths["class"] = meth = new RMethod();
+    meth.klass = objectClass; // FIXME: SHOULD BE METHOD CLASS
+    meth.ivars = new InternalMap();
+    meth.name  = "class";
+    meth.args  = [];
+    meth.body  = Internal(Core.lookupClass);
 
     // TODO: move this into Ruby, only allocate needs to be haxe level
-    klassClass.imeths["new"] = {
-      klass: objectClass, // FIXME: SHOULD BE METHOD CLASS
-      ivars: new InternalMap(),
-      name:  "new",
-      args:  [Rest("rest")],
-      body:  Internal(Core.allocate),
-    }
+    klassClass.imeths["new"] = meth = new RMethod();
+    meth.klass = objectClass; // FIXME: SHOULD BE METHOD CLASS
+    meth.ivars = new InternalMap();
+    meth.name  = "new";
+    meth.args  = [Rest("rest")];
+    meth.body  = Internal(Core.allocate);
 
-    objectClass.imeths['puts'] = {
-      klass: objectClass, // FIXME: SHOULD BE METHOD CLASS
-      ivars: new InternalMap(),
-      name:  "puts",
-      args:  [Rest('rest')],
-      body:  Internal(Core.puts),
-    }
+    objectClass.imeths['puts'] = meth = new RMethod();
+    meth.klass = objectClass; // FIXME: SHOULD BE METHOD CLASS
+    meth.ivars = new InternalMap();
+    meth.name  = "puts";
+    meth.args  = [Rest('rest')];
+    meth.body  = Internal(Core.puts);
 
-    basicObjectClass.imeths['initialize'] = {
-      klass: objectClass,  // FIXME: SHOULD BE METHOD CLASS
-      ivars: new InternalMap(),
-      name:  "initialize",
-      args:  [],
-      body:  Internal(Core.initialize),
-    }
+    basicObjectClass.imeths['initialize'] = meth = new RMethod();
+    meth.klass = objectClass;  // FIXME: SHOULD BE METHOD CLASS
+    meth.ivars = new InternalMap();
+    meth.name  = "initialize";
+    meth.args  = [];
+    meth.body  = Internal(Core.initialize);
 
     // the data structure
     return {

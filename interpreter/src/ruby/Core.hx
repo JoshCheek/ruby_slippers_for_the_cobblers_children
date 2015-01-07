@@ -33,22 +33,25 @@ class Core {
     var klass:RClass = klassD;
     var rest:RArray  = restD;
 
-    var instance:RObject = {
-      klass:klass,
-      ivars:new ruby.ds.InternalMap(),
-    }
+    var instance = new RObject();
+    instance.klass = klass;
+    instance.ivars = new ruby.ds.InternalMap();
+
     world.objectSpace.push(instance);
+
+    var bnd = new RBinding();
+    bnd.klass     = world.objectClass; // FIXME: should be Binding, not Object!
+    bnd.ivars     = new InternalMap();
+    bnd.self      = instance;
+    bnd.defTarget = klass; // TODO: UNTESTED
+    bnd.lvars     = new InternalMap();
+
 
     // invoke initialize, return result
     return Push(
       Send(EndInternal(instance)),
       Send(Invoke(instance, "initialize", rest.elements)),
-      { klass:     world.objectClass, // FIXME: should be Binding, not Object!
-        ivars:     new InternalMap(),
-        self:      instance,
-        defTarget: klass, // TODO: UNTESTED
-        lvars:     new InternalMap(),
-      }
+      bnd
     );
   }
 }

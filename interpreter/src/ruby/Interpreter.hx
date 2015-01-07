@@ -143,13 +143,12 @@ class Interpreter {
 
     case Def(Start(name, args, body)):
       var klass:RClass = sf.binding.defTarget;
-      var meth:RMethod = {
-        klass: world.objectClass, // FIXME
-        ivars: new InternalMap(),
-        name:  name,
-        args:  args,
-        body:  Ruby(body),
-      }
+      var meth:RMethod = new RMethod();
+      meth.klass = world.objectClass; // FIXME
+      meth.ivars = new InternalMap();
+      meth.name  = name;
+      meth.args  = args;
+      meth.body  = Ruby(body);
       klass.imeths[name] = meth;
       Pop(world.intern(name));
 
@@ -170,14 +169,13 @@ class Interpreter {
       var tmp:Dynamic = ns.constants[name];
       var klass:RClass = null;
       if(ns.constants[name] == null) {
-        klass = {
-          name:       name,
-          klass:      world.classClass,
-          superclass: sprClass,
-          ivars:      new InternalMap(),
-          imeths:     new InternalMap(),
-          constants:  new InternalMap(),
-        };
+        klass = new RClass();
+        klass.name       = name;
+        klass.klass      = world.classClass;
+        klass.superclass = sprClass;
+        klass.ivars      = new InternalMap();
+        klass.imeths     = new InternalMap();
+        klass.constants  = new InternalMap();
         ns.constants[name] = klass;
       } else {
         klass = world.castClass(ns.constants[name]);
@@ -186,13 +184,12 @@ class Interpreter {
     case OpenClass(Body(klass, Default)):
       return Pop(world.rubyNil);
     case OpenClass(Body(klass, body)):
-      var bnd:RBinding = {
-        klass:     world.objectClass, // FIXME: should be Binding, not Object!
-        ivars:     new InternalMap(),
-        self:      klass,
-        defTarget: klass,
-        lvars:     new InternalMap(),
-      };
+      var bnd = new RBinding();
+      bnd.klass     = world.objectClass; // FIXME: should be Binding, not Object!
+      bnd.ivars     = new InternalMap();
+      bnd.self      = klass;
+      bnd.defTarget = klass;
+      bnd.lvars     = new InternalMap();
       return Push(OpenClass(Finished), body, bnd);
     case OpenClass(Finished):
       return Pop(currentExpression);
@@ -255,13 +252,12 @@ class Interpreter {
         else              meth = klass.imeths[message];
 
         // make the new binding
-        var bnd:RBinding = {
-          klass:     world.objectClass, // FIXME: should be Binding, not Object!
-          ivars:     new InternalMap(),
-          self:      target,
-          defTarget: target.klass,
-          lvars:     new InternalMap(),
-        };
+        var bnd:RBinding = new RBinding();
+        bnd.klass     = world.objectClass; // FIXME: should be Binding, not Object!
+        bnd.ivars     = new InternalMap();
+        bnd.self      = target;
+        bnd.defTarget = target.klass;
+        bnd.lvars     = new InternalMap();
 
         // Set the args in the binding
         var argsDup = [for(a in args) a];
@@ -273,11 +269,11 @@ class Interpreter {
               bnd.lvars[name] = args.pop();
             case Rest(name):
               var internalRestArgs:Array<RObject> = [];
-              var restArgs:RArray = {
-                klass    : world.objectClass, // FIXME!
-                ivars    : new InternalMap(),
-                elements : [],
-              }
+              var restArgs:RArray = new RArray();
+              restArgs.klass    = world.objectClass; // FIXME!
+              restArgs.ivars    = new InternalMap();
+              restArgs.elements = [];
+
               while(argsDup.length != 0)
                 restArgs.elements.push(argsDup.pop());
               bnd.lvars[name] = restArgs;

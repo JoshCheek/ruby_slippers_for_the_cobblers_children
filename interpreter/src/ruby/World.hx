@@ -16,7 +16,10 @@ class World {
 
   public function intern(name:String):RSymbol {
     if(!world.symbols.exists(name)) {
-      var symbol:RSymbol = {name: name, klass: world.symbolClass, ivars: new InternalMap()};
+      var symbol = new RSymbol();
+      symbol.name  = name;
+      symbol.klass = world.symbolClass;
+      symbol.ivars = new InternalMap();
       world.symbols.set(name, symbol);
     }
     return world.symbols.get(name);
@@ -31,11 +34,11 @@ class World {
   }
 
   public function stringLiteral(value:String):RString {
-    var str:RString = {
-      klass: stringClass,
-      ivars: new InternalMap(),
-      value: value,
-    }
+    var str:RString = new RString();
+    str.klass = stringClass;
+    str.ivars = new InternalMap();
+    str.value = value;
+
     objectSpace.push(str);
     return str;
   }

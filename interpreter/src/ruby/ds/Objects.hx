@@ -1,34 +1,32 @@
 package ruby.ds;
 import ruby.ds.Interpreter;
 
-typedef RObject = {
-  klass:RClass,
-  ivars:InternalMap<RObject>,
+class RObject {
+  public var klass:RClass;
+  public var ivars:InternalMap<RObject>;
+
+  public function new() {}
 }
 
-typedef RString = {
-  > RObject,
-  value:String
+class RString extends RObject {
+  public var value:String;
 }
 
-typedef RSymbol = {
-  > RObject,
-  name:String
+class RSymbol extends RObject {
+  public var name:String;
 }
 
-typedef RClass = {
-  > RObject,
-  name       : String,
-  superclass : RClass,
-  constants  : InternalMap<RObject>,
-  imeths     : InternalMap<RMethod>,
+class RClass extends RObject {
+  public var name       : String;
+  public var superclass : RClass;
+  public var constants  : InternalMap<RObject>;
+  public var imeths     : InternalMap<RMethod>;
 }
 
-typedef RBinding = {
-  > RObject,
-  self      : RObject,
-  defTarget : RClass,
-  lvars     : InternalMap<RObject>,
+class RBinding extends RObject {
+  public var self      : RObject;
+  public var defTarget : RClass;
+  public var lvars     : InternalMap<RObject>;
 }
 
 enum ArgType {
@@ -39,15 +37,13 @@ enum ExecutableType {
   Ruby(ast:ExecutionState);
   Internal(fn:RBinding -> ruby.World -> EvaluationResult);
 }
-typedef RMethod = {
-  > RObject,
-  name : String,
-  args : Array<ArgType>, // rename to params
-  body : ExecutableType,
+class RMethod extends RObject {
+  public var name : String;
+  public var args : Array<ArgType>; // rename to params
+  public var body : ExecutableType;
 }
 
 
-typedef RArray = {
-  > RObject,
-  elements : Array<RObject>,
+class RArray extends RObject {
+  public var elements : Array<RObject>;
 }
