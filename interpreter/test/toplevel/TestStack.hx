@@ -1,3 +1,5 @@
+package toplevel;
+
 class TestStack extends haxe.unit.TestCase {
   function testStack() {
     var s = new Stack<String>();
