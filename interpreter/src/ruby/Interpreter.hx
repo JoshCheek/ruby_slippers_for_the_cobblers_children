@@ -7,7 +7,7 @@ using   ruby.LanguageGoBag;
 using   Lambda;
 
 class Interpreter {
-  private var state:ruby.ds.Interpreter;
+  public  var state:ruby.ds.Interpreter;
   private var world:ruby.World;
 
   public var isFinished        (get, never):Bool;

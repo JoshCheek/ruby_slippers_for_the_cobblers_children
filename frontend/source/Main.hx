@@ -72,13 +72,12 @@ class Main extends Sprite {
     game       = new flixel.FlxGame(gameWidth, gameHeight, initialStateClass, zoom, updateFps, drawFps, skipSplash, startFullscreen);
     addChild(game);
 
-    // Use normal mouse (segfaults if you put this before the game. IDK why)
     FlxG.mouse.useSystemCursor = true;
   }
 }
 
 class RubyInterpreter extends FlxState {
-  // private var _callStack   : Callstack;
+  private var _callStack   : Callstack;
   private var _interpreter : ruby.Interpreter;
   private var _world       : ruby.World;
 
@@ -114,10 +113,16 @@ class RubyInterpreter extends FlxState {
     _world       = new ruby.World(worldDs);
     _interpreter = _world.interpreter;
     _interpreter.pushCode(ast);
+    // class RBinding extends RObject {
+    //   public var self      : RObject;
+    //   public var defTarget : RClass;
+    //   public var lvars     : InternalMap<RObject>;
+    // }
 
     // set up the callstack
-    // _callStack = new Callstack(960);
-    // add(_callStack);
+    _callStack = new Callstack(960);
+    add(_callStack);
+
 
     trace("CODE TO INTERPRET: \n" + rawCode);
     trace("--------------------");
@@ -133,78 +138,69 @@ class RubyInterpreter extends FlxState {
   // TODO: exit when isInProgress becomes false
   // TODO: trigger this by clicking or something
   override public function update():Void {
-    if(_interpreter.isInProgress // everything is done a this point, how do I quit?
-     ) {
-      trace("ABOUT TO STEP");
-      var result = _interpreter.step();
-      trace("BACK!");
-      // trace(result);
-      // switch(result) {
-      //   case Push(replacementState, pushed, binding): _callStack.push(replacementState, pushed, binding);
-      //   case Pop(obj):                                _callStack.pop(obj);
-      //   case NoAction(replacementState):              _callStack.replaceState(replacementState);
-      // }
-      // _callStack.update();
-      // _world.inspect(_interpreter.currentExpression);
+    if(_interpreter.isInProgress) { // everything is done a this point, how do I quit?
+      if(FlxG.mouse.justPressed) {
+        _world.inspect(_interpreter.currentExpression);
+        _interpreter.step();
+      }
+      _callStack.frames = _interpreter.state.stack;
     }
-
     super.update(); // updates children (e.g. callstack)
   }
 }
 
-class StackFrame extends FlxSpriteGroup {
-  public function new(pushed, binding, width, stackHeight) {
-    super(10, stackHeight);
-    this.frameWidth = width;
-    // makeGraphic(10, stackHeight,
+
+class Callstack extends FlxTypedGroup<FlxSprite> {
+  public  var frames      : List<StackFrame>;
+  private var _width      : Int;
+  private var _height     : Int;
+
+  public function new(height:Int) {
+    super();
+    this._width  = 200;
+    this._height = 960;
+    this.frames  = new List();
   }
 
-  public function replaceState(replacementState) {
+  override public function update() {
+    clear();
+    add(new FlxSprite().makeGraphic(_width/*w*/, _height/*h*/, FlxColor.GREEN));
+    var text = new FlxText(10/*x*/,
+                           10/*y*/,
+                           0/*width: 0=autocalculate*/,
+                           "Callstack",
+                           25/*font size*/);
+    add(text);
+    var yOffset = text.frameHeight + 10;
+    for(frame in frames) {
+      add(new FlxSprite(0, yOffset)
+            .makeGraphic(_width, text.frameHeight, FlxColor.WHITE));
+      yOffset += text.frameHeight + 10;
+    }
   }
+
+  // public function push(replacementState, pushed, binding) {
+  //   replaceState(replacementState);
+  //   var frame = new StackFrame(pushed, binding, _width, stackFrameHeight+10);
+  //   frame.update();
+  //   this.stackFrameHeight += 10 + frame.frameHeight;
+  //   frames.push(frame);
+  //   add(frame);
+  // }
+
+  // public function pop(obj) {
+  //   var frame = frames.pop();
+  //   this.stackFrameHeight -= 10;
+  //   this.stackFrameHeight -= frame.frameHeight;
+  //   remove(frame);
+  //   frame.destroy();
+  // }
+
+  // public function replaceState(replacementState) {
+  //   var crntFrame = frames.peek;
+  //   this.stackFrameHeight -= crntFrame.frameHeight;
+  //   crntFrame.replaceState(replacementState);
+  //   crntFrame.update();
+  //   this.stackFrameHeight += crntFrame.frameHeight;
+  // }
 }
-
-// // TODO: currently centering in the outer container
-// class Callstack extends FlxTypedGroup<FlxSprite> {
-//   private var background  : FlxSprite;
-//   private var heading     : FlxText;
-//   private var frames      : Stack<StackFrame>;
-//   private var _width      : Int;
-//   private var _height     : Int;
-//   private var stackHeight : Int;
-//
-//   public function new(height:Int) {
-//     super();
-//     this._width       = 200; // px
-//     this._height      = 960;
-//     this.frames       = new Stack();
-//     this.background =   add(new FlxSprite().makeGraphic(_width/*w*/, _height/*h*/, FlxColor.GREEN));
-//     var text = new FlxText(10/*x*/, 10/*y*/, 0/*width: 0=autocalculate*/, "Callstack", 25/*font size*/);
-//     add(text);
-//     this.stackHeight = text.frameHeight + 10;
-//   }
-//
-//   public function push(replacementState, pushed, binding) {
-//     replaceState(replacementState);
-//     var frame = new StackFrame(pushed, binding, _width, stackHeight+10);
-//     frame.update();
-//     this.stackHeight += 10 + frame.frameHeight;
-//     frames.push(frame);
-//     add(frame);
-//   }
-//
-//   public function pop(obj) {
-//     var frame = frames.pop();
-//     this.stackHeight -= 10;
-//     this.stackHeight -= frame.frameHeight;
-//     remove(frame);
-//     frame.destroy();
-//   }
-//
-//   public function replaceState(replacementState) {
-//     var crntFrame = frames.peek;
-//     this.stackHeight -= crntFrame.frameHeight;
-//     crntFrame.replaceState(replacementState);
-//     crntFrame.update();
-//     this.stackHeight += crntFrame.frameHeight;
-//   }
-// }
