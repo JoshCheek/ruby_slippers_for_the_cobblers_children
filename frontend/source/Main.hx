@@ -117,7 +117,7 @@ class RubyInterpreter extends FlxState {
     interpreter.pushCode(ast);
 
     // set up the callstack
-    callStack = new Callstack(960);
+    callStack = new Callstack();
     add(callStack);
   }
 
@@ -129,22 +129,21 @@ class RubyInterpreter extends FlxState {
         callStack.frames = interpreter.state.stack;
         super.update();
       }
-    } else {
-      // TODO: Exit program here
+    }
+    if(FlxG.keys.justReleased.Q) {
+      #if desktop
+      flash.system.System.exit(0); // based on the tutorial
+      #end
     }
   }
 }
 
 
 class Callstack extends FlxTypedGroup<FlxSprite> {
-  public  var frames  : List<StackFrame>;
-  private var _width  : Int;
-  private var _height : Int;
+  public  var frames : List<StackFrame>;
 
-  public function new(height:Int) {
+  public function new() {
     super();
-    this._width  = 200;
-    this._height = 960;
     this.frames  = new List();
     add(title());
   }
