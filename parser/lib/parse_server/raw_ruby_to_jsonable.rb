@@ -165,10 +165,10 @@ module ParseServer
       when :class
         # (class (const nil :A) nil nil)
         assert_children ast, 3
-        location, superclass, body = ast.children
+        namespace, superclass, body = ast.children
 
         { type:       :class,
-          name_lookup:translate(location),
+          name_lookup:translate(namespace),
           superclass: translate(superclass),
           body:       translate(body),
           location:   location_hash(ast),
@@ -198,6 +198,7 @@ module ParseServer
           location: location_hash(ast),
         }
       when :const
+        # TODO: __ENCODING__
         assert_children ast, 2
         namespace, name = ast.children
         { type:      :constant,
