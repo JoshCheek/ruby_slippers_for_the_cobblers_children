@@ -161,47 +161,26 @@ class Callstack extends FlxTypedGroup<FlxSprite> {
     this._width  = 200;
     this._height = 960;
     this.frames  = new List();
+    add(title());
   }
 
   override public function update() {
     clear();
-    add(new FlxSprite().makeGraphic(_width/*w*/, _height/*h*/, FlxColor.GREEN));
-    var text = new FlxText(10/*x*/,
-                           10/*y*/,
-                           0/*width: 0=autocalculate*/,
-                           "Callstack",
-                           25/*font size*/);
-    add(text);
-    var yOffset = text.frameHeight + 10;
+    var title = this.title();
+    add(title);
+    var yOffset = title.frameHeight + 10;
     for(frame in frames.fromEnd()) {
       var frameText = Std.string(frame.state).substr(0, 100);
       add(new FlxText(10, yOffset, 0, frameText, 20));
-      yOffset += text.frameHeight + 10;
+      yOffset += title.frameHeight + 10;
     }
   }
 
-  // public function push(replacementState, pushed, binding) {
-  //   replaceState(replacementState);
-  //   var frame = new StackFrame(pushed, binding, _width, stackFrameHeight+10);
-  //   frame.update();
-  //   this.stackFrameHeight += 10 + frame.frameHeight;
-  //   frames.push(frame);
-  //   add(frame);
-  // }
-
-  // public function pop(obj) {
-  //   var frame = frames.pop();
-  //   this.stackFrameHeight -= 10;
-  //   this.stackFrameHeight -= frame.frameHeight;
-  //   remove(frame);
-  //   frame.destroy();
-  // }
-
-  // public function replaceState(replacementState) {
-  //   var crntFrame = frames.peek;
-  //   this.stackFrameHeight -= crntFrame.frameHeight;
-  //   crntFrame.replaceState(replacementState);
-  //   crntFrame.update();
-  //   this.stackFrameHeight += crntFrame.frameHeight;
-  // }
+  private function title() {
+    return new FlxText(10 /*x*/,
+                       10 /*y*/,
+                       0  /*width: 0=autocalculate*/,
+                       "Callstack",
+                       25 /*font size*/);
+  }
 }
