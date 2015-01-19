@@ -6,6 +6,11 @@ displaying its internal state visually, in order to help learners
 understnd what is available, and how Ruby works.
 It's still a giant WIP.
 
+This is the best it currently does.
+Note that the text is rendered onto an OpenFL canvas.
+
+![Object Model Viewer](https://s3.amazonaws.com/josh.cheek/images/scratch/object_model_viewer.png)
+
 
 High Level Description / Plan
 -----------------------------
