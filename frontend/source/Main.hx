@@ -91,6 +91,7 @@ class RubyInterpreter extends FlxState {
   // So, dropping initialization here instead of in Main where it probably goes
   override public function create():Void {
     super.create();
+
     // set up the interpreter (this setup should all be pushed up the callstack, I think)
     var rawCode = 'class User\n' +
                   '  def initialize(name)\n' +
@@ -114,30 +115,12 @@ class RubyInterpreter extends FlxState {
     _world       = new ruby.World(worldDs);
     _interpreter = _world.interpreter;
     _interpreter.pushCode(ast);
-    // class RBinding extends RObject {
-    //   public var self      : RObject;
-    //   public var defTarget : RClass;
-    //   public var lvars     : InternalMap<RObject>;
-    // }
 
     // set up the callstack
     _callStack = new Callstack(960);
     add(_callStack);
-
-
-    trace("CODE TO INTERPRET: \n" + rawCode);
-    trace("--------------------");
   }
 
-  // this is not getting called :/
-  override public function destroy():Void {
-    trace("--------------------");
-    // callStack = flixel.util.FlxDestroyUtil.destroy(callStack);
-    super.destroy();
-	}
-
-  // TODO: exit when isInProgress becomes false
-  // TODO: trigger this by clicking or something
   override public function update():Void {
     if(_interpreter.isInProgress) { // everything is done a this point, how do I quit?
       if(FlxG.keys.justReleased.N) {
@@ -146,15 +129,17 @@ class RubyInterpreter extends FlxState {
         _callStack.frames = _interpreter.state.stack;
         super.update();
       }
+    } else {
+      // TODO: Exit program here
     }
   }
 }
 
 
 class Callstack extends FlxTypedGroup<FlxSprite> {
-  public  var frames      : List<StackFrame>;
-  private var _width      : Int;
-  private var _height     : Int;
+  public  var frames  : List<StackFrame>;
+  private var _width  : Int;
+  private var _height : Int;
 
   public function new(height:Int) {
     super();
@@ -166,21 +151,22 @@ class Callstack extends FlxTypedGroup<FlxSprite> {
 
   override public function update() {
     clear();
-    var title = this.title();
-    add(title);
-    var yOffset = title.frameHeight + 10;
+    var title   = add(this.title());
+    var yOffset = title.frameHeight + paddingSize;
     for(frame in frames.fromEnd()) {
       var frameText = Std.string(frame.state).substr(0, 100);
-      add(new FlxText(10, yOffset, 0, frameText, 20));
-      yOffset += title.frameHeight + 10;
+      var text      = add(new FlxText(paddingSize, yOffset, 0, frameText, 20));
+      yOffset += text.frameHeight + paddingSize;
     }
   }
 
   private function title() {
-    return new FlxText(10 /*x*/,
-                       10 /*y*/,
-                       0  /*width: 0=autocalculate*/,
+    return new FlxText(paddingSize  /*x*/,
+                       paddingSize  /*y*/,
+                       0            /*width: 0=autocalculate*/,
                        "Callstack",
-                       25 /*font size*/);
+                       25           /*font size*/);
   }
+
+  private inline static var paddingSize = 10;
 }
