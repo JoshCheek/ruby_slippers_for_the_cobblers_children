@@ -111,7 +111,9 @@ class RubyInterpreter extends FlxState {
                   'puts user.name';
     var worldDs = ruby.Bootstrap.bootstrap();
     var ast     = ruby.ParseRuby.fromCode(rawCode);
-    trace("AST: " + ast);
+    trace("CODE WE ARE INTERPRETING\n"+
+          "------------------------\n"+
+          rawCode);
     world       = new ruby.World(worldDs);
     interpreter = world.interpreter;
     interpreter.pushCode(ast);
