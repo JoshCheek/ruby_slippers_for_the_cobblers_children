@@ -140,7 +140,7 @@ class RubyInterpreter extends FlxState {
   // TODO: trigger this by clicking or something
   override public function update():Void {
     if(_interpreter.isInProgress) { // everything is done a this point, how do I quit?
-      if(FlxG.mouse.justReleased) {
+      if(FlxG.keys.justReleased.N) {
         _world.inspect(_interpreter.currentExpression);
         _interpreter.step();
         _callStack.frames = _interpreter.state.stack;
