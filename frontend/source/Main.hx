@@ -143,10 +143,10 @@ class RubyInterpreter extends FlxState {
       if(FlxG.mouse.justReleased) {
         _world.inspect(_interpreter.currentExpression);
         _interpreter.step();
+        _callStack.frames = _interpreter.state.stack;
+        super.update();
       }
-      _callStack.frames = _interpreter.state.stack;
     }
-    super.update(); // updates children (e.g. callstack)
   }
 }
 
