@@ -140,7 +140,8 @@ class RubyInterpreter extends FlxState {
 
 
 class Callstack extends FlxTypedGroup<FlxSprite> {
-  public  var frames : List<StackFrame>;
+  public var frames : List<StackFrame>;
+  private inline static var paddingSize = 10;
 
   public function new() {
     super();
@@ -153,8 +154,7 @@ class Callstack extends FlxTypedGroup<FlxSprite> {
     var title   = add(this.title());
     var yOffset = title.frameHeight + paddingSize;
     for(frame in frames.fromEnd()) {
-      var frameText = Std.string(frame.state).substr(0, 100);
-      var text      = add(new FlxText(paddingSize, yOffset, 0, frameText, 20));
+      var text = add(new FlxText(paddingSize, yOffset, 0, frameText(frame), 20));
       yOffset += text.frameHeight + paddingSize;
     }
   }
@@ -167,5 +167,35 @@ class Callstack extends FlxTypedGroup<FlxSprite> {
                        25           /*font size*/);
   }
 
-  private inline static var paddingSize = 10;
+  private function frameText(frame:ruby.ds.Interpreter.StackFrame):String {
+    var varNames = frame.binding.lvars.keys();
+    var text = "";
+
+    text += Type.enumConstructor(frame.state) + "(";
+    switch (frame.state) {
+      case Default           : text += "Default";
+      case Nil               : text += "Nil";
+      case Self              : text += "Self";
+      case True              : text += "True";
+      case False             : text += "False";
+      case Integer   (value) : text += "Integer("+Std.string(value)+")";
+      case Float     (value) : text += "Float("+Std.string(value)+")";
+      case String    (value) : text += 'String("'+Std.string(value)+'")';
+      case GetLvar   (state) : text += Type.enumConstructor(state);
+      case SetLvar   (state) : text += Type.enumConstructor(state);
+      case GetIvar   (state) : text += Type.enumConstructor(state);
+      case SetIvar   (state) : text += Type.enumConstructor(state);
+      case Const     (state) : text += Type.enumConstructor(state);
+      case Exprs     (state) : text += Type.enumConstructor(state);
+      case OpenClass (state) : text += Type.enumConstructor(state);
+      case Send      (state) : text += Type.enumConstructor(state);
+      case Value     (state) : text += Type.enumConstructor(state);
+      case Def       (state) : text += Type.enumConstructor(state);
+    }
+    text += ")";
+
+    if(varNames.hasNext()) text += " | locals:";
+    for(name in varNames)  text += " " + name;
+    return text;
+  }
 }
