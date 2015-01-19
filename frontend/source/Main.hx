@@ -156,17 +156,21 @@ class Callstack extends FlxTypedGroup<FlxSprite> {
     var title   = add(this.title());
     var yOffset = title.frameHeight + paddingSize;
     for(frame in frames.fromEnd()) {
-      var text = add(new FlxText(paddingSize, yOffset, 0, frameText(frame), 20));
+      var text = new FlxText(paddingSize, yOffset, 0, frameText(frame), 20);
+      text.systemFont = "Arial";
+      add(text);
       yOffset += text.frameHeight + paddingSize;
     }
   }
 
   private function title() {
-    return new FlxText(paddingSize  /*x*/,
-                       paddingSize  /*y*/,
-                       0            /*width: 0=autocalculate*/,
-                       "Callstack",
-                       25           /*font size*/);
+    var title = new FlxText(paddingSize  /*x*/,
+                            paddingSize  /*y*/,
+                            0            /*width: 0=autocalculate*/,
+                            "Callstack",
+                            25           /*font size*/);
+    title.systemFont = "Helvetica";
+    return title;
   }
 
   private function frameText(frame:ruby.ds.Interpreter.StackFrame):String {
