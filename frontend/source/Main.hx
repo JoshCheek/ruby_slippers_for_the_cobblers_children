@@ -141,13 +141,6 @@ class RubyInterpreter extends FlxState {
 }
 
 
-class DisplayStackFrame extends FlxTypedGroup<FlxSprite> {
-  public function new(text:String) {
-    super();
-  }
-}
-
-
 class DisplayCallstack extends FlxTypedGroup<FlxSprite> {
   public var frames : List<StackFrame>;
   private inline static var paddingSize = 10;
@@ -166,6 +159,7 @@ class DisplayCallstack extends FlxTypedGroup<FlxSprite> {
       var text = new FlxText(paddingSize, yOffset, 0, frameContent(frame), 20);
       text.systemFont = "Arial";
       add(text);
+      // var img = frameImage(paddingSize, yOffset, text.frameWidth, text.frameHeight);
       yOffset += text.frameHeight + paddingSize;
     }
   }
@@ -210,5 +204,10 @@ class DisplayCallstack extends FlxTypedGroup<FlxSprite> {
     if(varNames.hasNext()) text += " | locals:";
     for(name in varNames)  text += " " + name;
     return text;
+  }
+
+  private function frameImage(xOffset, yOffset, frameWidth, frameHeight) {
+    var background = new FlxSprite().drawRoundRect(xOffset, yOffset, frameWidth, frameHeight, frameWidth*0.2, frameHeight*0.2, FlxColor.RED);
+    return background;
   }
 }
