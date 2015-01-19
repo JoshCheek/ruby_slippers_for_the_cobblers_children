@@ -78,7 +78,7 @@ class Main extends Sprite {
 }
 
 class RubyInterpreter extends FlxState {
-  private var callStack   : Callstack;
+  private var callStack   : DisplayCallstack;
   private var interpreter : ruby.Interpreter;
   private var world       : ruby.World;
 
@@ -119,7 +119,7 @@ class RubyInterpreter extends FlxState {
     interpreter.pushCode(ast);
 
     // set up the callstack
-    callStack = new Callstack();
+    callStack = new DisplayCallstack();
     add(callStack);
   }
 
@@ -141,7 +141,14 @@ class RubyInterpreter extends FlxState {
 }
 
 
-class Callstack extends FlxTypedGroup<FlxSprite> {
+class DisplayStackFrame extends FlxTypedGroup<FlxSprite> {
+  public function new(text:String) {
+    super();
+  }
+}
+
+
+class DisplayCallstack extends FlxTypedGroup<FlxSprite> {
   public var frames : List<StackFrame>;
   private inline static var paddingSize = 10;
 
