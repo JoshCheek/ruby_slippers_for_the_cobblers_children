@@ -163,7 +163,7 @@ class DisplayCallstack extends FlxTypedGroup<FlxSprite> {
     var title   = add(this.title());
     var yOffset = title.frameHeight + paddingSize;
     for(frame in frames.fromEnd()) {
-      var text = new FlxText(paddingSize, yOffset, 0, frameText(frame), 20);
+      var text = new FlxText(paddingSize, yOffset, 0, frameContent(frame), 20);
       text.systemFont = "Arial";
       add(text);
       yOffset += text.frameHeight + paddingSize;
@@ -180,7 +180,7 @@ class DisplayCallstack extends FlxTypedGroup<FlxSprite> {
     return title;
   }
 
-  private function frameText(frame:ruby.ds.Interpreter.StackFrame):String {
+  private function frameContent(frame:ruby.ds.Interpreter.StackFrame):String {
     var varNames = frame.binding.lvars.keys();
     var text = "";
 
