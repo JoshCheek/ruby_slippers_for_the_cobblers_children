@@ -56,7 +56,6 @@ class Main extends Sprite {
     if (hasEventListener(Event.ADDED_TO_STAGE))
       removeEventListener(Event.ADDED_TO_STAGE, init);
 
-
     // create game
     var initialStateClass : Class<FlxState> = RubyInterpreter;
     var gameWidth         : Int             = 1280; // might change, depending on your zoom.
@@ -73,14 +72,15 @@ class Main extends Sprite {
     game       = new flixel.FlxGame(gameWidth, gameHeight, initialStateClass, zoom, updateFps, drawFps, skipSplash, startFullscreen);
     addChild(game);
 
+    // No fancy cursors -- for whatever reason, this has to come after the game is created, or it segfaults
     FlxG.mouse.useSystemCursor = true;
   }
 }
 
 class RubyInterpreter extends FlxState {
-  private var _callStack   : Callstack;
-  private var _interpreter : ruby.Interpreter;
-  private var _world       : ruby.World;
+  private var callStack   : Callstack;
+  private var interpreter : ruby.Interpreter;
+  private var world       : ruby.World;
 
   // FlxGame takes a class instead of an instance.
   // This means I can't init it with args (was going to send a PR, but I couldn't get the test suite to run --
@@ -112,21 +112,21 @@ class RubyInterpreter extends FlxState {
     var worldDs = ruby.Bootstrap.bootstrap();
     var ast     = ruby.ParseRuby.fromCode(rawCode);
     trace("AST: " + ast);
-    _world       = new ruby.World(worldDs);
-    _interpreter = _world.interpreter;
-    _interpreter.pushCode(ast);
+    world       = new ruby.World(worldDs);
+    interpreter = world.interpreter;
+    interpreter.pushCode(ast);
 
     // set up the callstack
-    _callStack = new Callstack(960);
-    add(_callStack);
+    callStack = new Callstack(960);
+    add(callStack);
   }
 
   override public function update():Void {
-    if(_interpreter.isInProgress) { // everything is done a this point, how do I quit?
+    if(interpreter.isInProgress) { // everything is done a this point, how do I quit?
       if(FlxG.keys.justReleased.N) {
-        _world.inspect(_interpreter.currentExpression);
-        _interpreter.step();
-        _callStack.frames = _interpreter.state.stack;
+        world.inspect(interpreter.currentExpression);
+        interpreter.step();
+        callStack.frames = interpreter.state.stack;
         super.update();
       }
     } else {
