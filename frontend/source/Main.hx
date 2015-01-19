@@ -35,6 +35,7 @@ import flixel.group.FlxTypedGroup;
 import flixel.group.FlxSpriteGroup;
 
 using flixel.util.FlxSpriteUtil;
+using ruby.LanguageGoBag;
 
 
 class Main extends Sprite {
@@ -139,7 +140,7 @@ class RubyInterpreter extends FlxState {
   // TODO: trigger this by clicking or something
   override public function update():Void {
     if(_interpreter.isInProgress) { // everything is done a this point, how do I quit?
-      if(FlxG.mouse.justPressed) {
+      if(FlxG.mouse.justReleased) {
         _world.inspect(_interpreter.currentExpression);
         _interpreter.step();
       }
@@ -172,9 +173,9 @@ class Callstack extends FlxTypedGroup<FlxSprite> {
                            25/*font size*/);
     add(text);
     var yOffset = text.frameHeight + 10;
-    for(frame in frames) {
-      add(new FlxSprite(0, yOffset)
-            .makeGraphic(_width, text.frameHeight, FlxColor.WHITE));
+    for(frame in frames.fromEnd()) {
+      var frameText = Std.string(frame.state).substr(0, 100);
+      add(new FlxText(10, yOffset, 0, frameText, 20));
       yOffset += text.frameHeight + 10;
     }
   }
