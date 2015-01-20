@@ -34,16 +34,15 @@ class Asserter {
   }
 }
 
-typedef Assertable = Asserter -> Void;
+typedef AssertBlock = Asserter -> Void;
 
 enum Testable {
-  Spec(name:String, body:Assertable);
-  Desc(name:String, desc:Description);
+  One(name:String,  body:AssertBlock);
+  Many(name:String, desc:Description);
 }
 
-// TODO: Rename Description -> Suite
 class Description {
-  public var beforeBlocks : Array<Assertable>;
+  public var beforeBlocks : Array<AssertBlock>;
   public var testables    : Array<Testable>;
 
   public function new() {
@@ -53,7 +52,7 @@ class Description {
 
   public function describe(name:String, body:Description->Void):Description {
     var child = new Description();
-    testables.push(Desc(name, child));
+    testables.push(Many(name, child));
     body(child);
     return this;
   }
@@ -64,7 +63,7 @@ class Description {
   }
 
   public function it(name, body) {
-    this.testables.push(Spec(name, body));
+    this.testables.push(One(name, body));
     return this;
   }
 }
@@ -136,18 +135,18 @@ class Run {
     this.reporter = reporter;
   }
 
-  private function _run(description:Description, beforeBlocks:Array<Assertable>) {
+  private function _run(description:Description, beforeBlocks:Array<AssertBlock>) {
     var allBeforeBlocks = beforeBlocks.concat(description.beforeBlocks);
     for(testable in description.testables) {
       switch(testable) {
-        case Spec(name, body):
+        case One(name, body):
           runSpec(name, allBeforeBlocks, body);
-        case Desc(name, child): runDesc(name, allBeforeBlocks, child);
+        case Many(name, child): runDesc(name, allBeforeBlocks, child);
       }
     }
   }
 
-  private function runSpec(name, beforeBlocks:Array<Assertable>, body) {
+  private function runSpec(name, beforeBlocks:Array<AssertBlock>, body) {
     reporter.declareSpec(name, function(onSuccess, onFailure) {
       var asserter = new Asserter(onSuccess, onFailure);
       for(block in beforeBlocks) block(asserter);
