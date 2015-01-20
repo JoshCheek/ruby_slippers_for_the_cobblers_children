@@ -154,13 +154,10 @@ class DisplayCallstack extends FlxTypedGroup<FlxSprite> {
   override public function update() {
     clear();
     var title   = add(this.title());
-    var yOffset = title.frameHeight + paddingSize;
+    var yOffset = title.frameHeight + paddingSize*3;
     for(frame in frames.fromEnd()) {
-      var text = new FlxText(paddingSize, yOffset, 0, frameContent(frame), 20);
-      text.systemFont = "Arial";
-      add(text);
-      // var img = frameImage(paddingSize, yOffset, text.frameWidth, text.frameHeight);
-      yOffset += text.frameHeight + paddingSize;
+      var img = addFrameImage(paddingSize, yOffset, frameContent(frame));
+      yOffset += img.frameHeight + paddingSize;
     }
   }
 
@@ -206,8 +203,16 @@ class DisplayCallstack extends FlxTypedGroup<FlxSprite> {
     return text;
   }
 
-  private function frameImage(xOffset, yOffset, frameWidth, frameHeight) {
-    var background = new FlxSprite().drawRoundRect(xOffset, yOffset, frameWidth, frameHeight, frameWidth*0.2, frameHeight*0.2, FlxColor.RED);
+  private function addFrameImage(xOffset, yOffset, content:String) {
+    var text        = new FlxText(xOffset+paddingSize, yOffset+paddingSize, 0, content, 20);
+    text.systemFont = "Arial";
+    var width       = paddingSize + Std.int(text.fieldWidth) + paddingSize;
+    var height      = paddingSize + text.frameHeight         + paddingSize;
+    var background  = new FlxSprite(xOffset, yOffset);
+    background.makeGraphic(width, height, FlxColor.TRANSPARENT);
+    FlxSpriteUtil.drawRoundRect(background, 0, 0, width, height, 20, 20, FlxColor.GREEN);
+    add(background);
+    add(text);
     return background;
   }
 }
