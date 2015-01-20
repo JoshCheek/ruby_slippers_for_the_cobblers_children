@@ -1,15 +1,63 @@
 Ruby Object Model Viewer
 ========================
 
-This will eventually be a Ruby Interpreter that runs in the browser,
-displaying its internal state visually, in order to help learners
-understnd what is available, and how Ruby works.
-It's still a giant WIP.
+### Vision (why)
 
-This is the best it currently does.
+Teach learners to think about Ruby in its underlying model rather than syntactic patterns they've memorized.
+Allow them to reason about their code in terms of how it affects the object model.
 
-![Object Model Viewer](https://s3.amazonaws.com/josh.cheek/images/scratch/interpreter-flash.gif)
+### Goal (what)
 
+* A Ruby interpreter with a **visual/interactive interface**.
+* Explore the object graph by clicking around it,
+  following variables, and watching the algorithms execute
+  (e.g. understand inheritance by watching it look up a method).
+* Experiment by submitting your own code,
+  seeing how it is interpreted,
+  tweaking it and observing the difference.
+
+### Implementation (How)
+
+* This will eventually be a Ruby Interpreter that attempts to expose all
+  of its state and algorithms as data structures that can be reflected on.
+  Once this is accomplished, it becomes a matter of providing a user-interface
+  to draw the visualization and allow interactive exploration.
+* It will run in the browser to reduce the setup and know-how required to try it.
+  This is important because I think it's significantly impacted adoption of
+  [SeeingIsBelieving](https://github.com/JoshCheek/seeing_is_believing),
+  even though it's one of the most effective tools a learner could use
+  (to be fair, that depends on whether the learner learns via hypothesizing
+  and experimenting).
+* I might also turn it into a binary that can be run from the comand-line.
+  This would have value because once a learner sees it as a viable tool,
+  they can run it locally, without leaving their development environment.
+  Which in turn allows them to run it against code that has more than one
+  file (the web interface will likely be a single Ace editor, thus it can
+  handle only one file). Of course, that's exponentially more ambitious than
+  this project is at present.
+
+### Current state and stability
+
+* Here (as of 20 Jan 2015), it parses and interprets the code sample on the left.
+  It is only capable of drawing the stack at this time.
+  ![Object Model Viewer](https://s3.amazonaws.com/josh.cheek/images/scratch/interpreter-flash.gif)
+* The interpreter is barely capable of interpreting more than the current
+  acceptance test (the code in the screen-recording)
+* I'm almost certainly going to change the name.
+* It's still in the very early stages of development, so expect huge sweeping changes.
+  * I might switch the frontend from Flash
+  * I might switch the frontend library from HaxeFlixel
+  * Once I start working on interpreter code again,
+    expect that entire codebase to roil with experimentation and sweeping design changes.
+
+
+-----
+
+<span style="color:red; font-size:30px;">
+Everything below this line is months old and I haven't re-read to make sure it still makes sense
+</style>
+
+-----
 
 High Level Description / Plan
 -----------------------------
