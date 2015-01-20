@@ -133,6 +133,7 @@ class RubyInterpreter extends FlxState {
       }
     }
     if(FlxG.keys.justReleased.Q) {
+      trace('PRINTED: ' + world.printedToStdout);
       #if desktop
       flash.system.System.exit(0); // based on the tutorial
       #end
