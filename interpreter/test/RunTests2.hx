@@ -23,9 +23,9 @@ class Asserter {
     this.onFailure = onFailure;
   }
 
-  public function eqm<T>(a:T, b:T, m:String) {
-    if(a == b) onSuccess(m);
-    else       onFailure(m);
+  public function eqm<T>(a:T, b:T, message) {
+    if(a == b) onSuccess(message);
+    else       onFailure(message);
   }
 
   public function eq<T>(a:T, b:T) {
@@ -50,7 +50,7 @@ class Description {
     this.testables    = [];
   }
 
-  public function describe(name:String, body:Description->Void):Description {
+  public function describe(name, body) {
     var child = new Description();
     testables.push(Many(name, child));
     body(child);
@@ -69,7 +69,7 @@ class Description {
 }
 
 class DescribeStack {
-  public static function describe(d:Description) {
+  public static function describe(d) {
     d.describe('Stack Test', function(d) {
       var int_stack    : Array<Int>;
       var string_stack : Array<String>;
@@ -97,11 +97,11 @@ class Reporter {
 
   public function declareSpec(name, run) {
     output.out("SPECIFICATION: " + name);
-    var onSuccess = function(msg:String) {
+    var onSuccess = function(msg) {
       output.out("SUCCESS: " + msg);
     }
 
-    var onFailure = function(msg:String) {
+    var onFailure = function(msg) {
       output.out("FAILURE: " + msg);
       throw new TestFinished();
     }
