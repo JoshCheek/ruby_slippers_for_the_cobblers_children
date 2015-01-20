@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+Dir.chdir File.expand_path('../..', __FILE__)
+
+exec *%w[
+haxe
+  --interp
+  -cp   src
+  -cp   test
+  -main RunTests2
+]
