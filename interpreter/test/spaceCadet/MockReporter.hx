@@ -1,8 +1,14 @@
 package spaceCadet;
 import spaceCadet.SpaceCadet;
 
+typedef SpecState = {
+  numSucceeded : Int,
+  didSucceed   : Bool,
+  isPending    : Bool
+}
+
 class DescData {
-  public var specifications : Map<String, {numSucceeded:Int, didSucceed:Bool}>;
+  public var specifications : Map<String, SpecState>;
   public var descriptions   : Map<String, DescData>;
   public function new() {
     this.descriptions   = new Map();
@@ -16,7 +22,7 @@ class MockReporter implements Reporter {
   public function new() {}
 
   public function declareSpec(name, run) {
-    var result = {numSucceeded: 0, didSucceed: true};
+    var result = {numSucceeded:0, didSucceed:true, isPending:false};
     crnt.specifications.set(name, result);
 
     var onSuccess = function(msg) {
@@ -29,6 +35,7 @@ class MockReporter implements Reporter {
     }
 
     var onPending = function(?msg) {
+      result.isPending = true;
       throw new TestFinished();
     }
 
@@ -76,5 +83,11 @@ class MockReporter implements Reporter {
     for(child in desc.specifications.keys()) children.push(child);
     for(child in desc.descriptions.keys())   children.push(child);
     return children;
+  }
+
+  public function isPending(name) {
+    if(wasSpecified(name))
+      return crnt.specifications.get(name).isPending;
+    return false;
   }
 }

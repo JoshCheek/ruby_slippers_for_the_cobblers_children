@@ -52,10 +52,9 @@ class DescribeRunningASuite {
         a.eq(true, reporter.wasSpecified("name3"));
       });
 
-      d.it('reports passed and failed assertions', function(a) {
+      d.it('reports each passing assertion', function(a) {
         desc.it("name1", function(a) { a.eq(1, 1); a.eq(1, 1); });
         desc.it("name2", function(a) { a.eq(1, 1); });
-        desc.it("name3", function(a) { a.eq(1, 2); });
         a.eq(0, reporter.numSucceeded("name1"));
         a.eq(0, reporter.numSucceeded("name2"));
         run();
@@ -71,6 +70,16 @@ class DescribeRunningASuite {
         run();
         a.eq(true,  reporter.didSucceed("name1"));
         a.eq(false, reporter.didSucceed("name2"));
+      });
+
+      d.it("reports pending specs", function(a) {
+        desc.it("notPending", function(a) {});
+        desc.it("isPending", function(a) { a.pending("in a bit, yo!"); });
+        a.eq(false, reporter.isPending("notPending"));
+        a.eq(false, reporter.isPending("isPending"));
+        run();
+        a.eq(false, reporter.isPending("notPending"));
+        a.eq(true,  reporter.isPending("isPending"));
       });
 
       d.it('ends the spec when it sees a failed assertion', function(a) {
