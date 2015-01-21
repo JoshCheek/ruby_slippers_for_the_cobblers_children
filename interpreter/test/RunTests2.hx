@@ -3,7 +3,7 @@ import spaceCadet.*;
 class RunTests2 {
   static function main() {
     // define tests
-    var root = new SpaceCadet.Description();
+    var root = new Description();
     DescribeRunningASuite.describe(root);
     DescribeAssertions.describe(root);
     DescribeBeforeBlocks.describe(root);
