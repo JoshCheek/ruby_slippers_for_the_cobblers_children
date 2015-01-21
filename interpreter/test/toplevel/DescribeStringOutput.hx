@@ -50,6 +50,11 @@ class DescribeStringOutput {
         strio.writeString("aåa");
         a.eq("aåa", strio.string);
       });
+
+      d.it("can write escape sequences", function(a) {
+        strio.writeString("\033[31m");
+        a.eq("\033[31m", strio.string);
+      });
     });
   }
 }

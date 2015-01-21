@@ -38,8 +38,18 @@ class DescribeOutput {
       });
 
       d.specify("#replaceln replaces the contents of the current line without a newline", function(a) {
-        assertOut("a\rb", function() {
-          output.write("a").replaceln("b");
+        assertOut("a\rb", function() output.write("a").replaceln("b") );
+      });
+
+      d.describe("colour stack", function(d) {
+        d.specify("when told to colour the output, it tracks the current colour, allowing it to push/pop them", function(a) {
+          assertOut(" a \033[31m b \033[32m c \033[31m d \033[39m e ", function() {
+            output.write(" a ").fgRed.write(" b ").fgGreen.write(" c ").fgPop.write(" d ").fgPop.write(" e ");
+          });
+        });
+
+        d.specify("fgPop raises if called with no colour stck", function(a) {
+          a.pending();
         });
       });
     });
