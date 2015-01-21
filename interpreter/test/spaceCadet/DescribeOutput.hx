@@ -38,7 +38,7 @@ class DescribeOutput {
       });
 
       d.specify("#replaceln replaces the contents of the current line without a newline", function(a) {
-        assertOut("a\rb", function() output.write("a").replaceln("b") );
+        assertOut("a\r\033[2Kb", function() output.write("a").replaceln("b") );
       });
 
       d.describe("colour stack", function(d) {

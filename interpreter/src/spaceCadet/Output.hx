@@ -39,7 +39,7 @@ class Output {
   }
 
   public function replaceln(message) {
-    outstream.writeString("\r");
+    outstream.writeString("\r\033[2K");
     outstream.writeString(message);
     return this;
   }
