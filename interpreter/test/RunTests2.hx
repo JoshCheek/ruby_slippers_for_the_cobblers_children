@@ -4,7 +4,8 @@ class RunTests2 {
   static function main() {
     // define tests
     var root = new spaceCadet.SpaceCadet.Description();
-    spaceCadet.SpaceCadetDesc.SpaceCadetDesc.describe(root);
+    spaceCadet.DescribeRunningASuite.describe(root);
+    spaceCadet.SpaceCadetDesc.describe(root);
 
     // run and report
     var output   = new spaceCadet.SpaceCadet.Output(Sys.stdout(), Sys.stderr());
