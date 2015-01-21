@@ -2,11 +2,12 @@ import spaceCadet.*;
 
 class RunTests {
   static function main() {
+    var hadFailure = false;
     // haxe.unit
       var runner = new haxe.unit.TestRunner();
       toplevel.RunTests.addTests(runner);
       ruby.RunTests.addTests(runner);
-      var haxeUnitPassed = runner.run();
+      hadFailure = hadFailure || !runner.run();
 
     // SpaceCadet
       // define
@@ -21,10 +22,9 @@ class RunTests {
       var output   = new Output(Sys.stdout(), Sys.stderr());
       var reporter = new Reporter.StreamReporter(output);
       Run.run(root, reporter);
-      var spaceCadetPassed = reporter.numFails == 0;
+      hadFailure = hadFailure || 0 != reporter.numFails;
 
     // Exit status
-      var hadFailure = !haxeUnitPassed || !spaceCadetPassed;
       if(hadFailure) Sys.exit(1);
   }
 }
