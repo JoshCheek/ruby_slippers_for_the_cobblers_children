@@ -1,5 +1,0 @@
-package spaceCadet;
-
-class SpaceCadet {
-}
-

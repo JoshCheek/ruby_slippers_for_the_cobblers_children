@@ -1,6 +1,4 @@
 package spaceCadet;
-import spaceCadet.SpaceCadet;
-using Lambda;
 
 class DescribeRunningASuite {
   public static function describe(d:Description) {

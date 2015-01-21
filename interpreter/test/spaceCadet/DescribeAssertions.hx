@@ -1,5 +1,4 @@
 package spaceCadet;
-import spaceCadet.SpaceCadet;
 
 class DescribeAssertions {
   public static function describe(d:Description) {

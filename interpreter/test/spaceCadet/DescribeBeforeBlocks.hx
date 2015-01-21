@@ -1,5 +1,4 @@
 package spaceCadet;
-import spaceCadet.SpaceCadet;
 
 class DescribeBeforeBlocks {
   public static function describe(d:Description) {
