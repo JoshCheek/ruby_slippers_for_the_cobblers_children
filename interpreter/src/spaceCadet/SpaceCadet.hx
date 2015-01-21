@@ -40,6 +40,16 @@ class Asserter {
     eqm(a, b, msg);
   }
 
+  public function streqm<T>(a:T, b:T, message) {
+    if(Std.string(a) == Std.string(b)) onSuccess(message);
+    else                               onFailure(message);
+  }
+
+  public function streq<T>(a:T, b:T) {
+    var msg = "Expect Std.string(" + Std.string(a) + ") to == Std.string(" + Std.string(b) + ")";
+    streqm(a, b, msg);
+  }
+
   public function pending(reason="Not Implemented") {
     onPending(reason);
   }

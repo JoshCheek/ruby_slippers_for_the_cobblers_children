@@ -3,22 +3,24 @@ import spaceCadet.SpaceCadet;
 using Lambda;
 
 class DescData {
-  public function new() {};
-}
-class MockReporter implements Reporter {
-  private var specifications:Map<String, {numSucceeded:Int, didSucceed:Bool}>;
-  private var descriptions:Map<String, DescData>;
+  public var specifications : Map<String, {numSucceeded:Int, didSucceed:Bool}>;
+  public var descriptions   : Map<String, DescData>;
   public function new() {
     this.descriptions   = new Map();
     this.specifications = new Map();
-  }
+  };
+}
+class MockReporter implements Reporter {
+  private var crnt = new DescData();
+  public function new() {}
 
   public function declareSpec(name, run) {
     var result = {numSucceeded: 0, didSucceed: true};
-    specifications.set(name, result);
+    crnt.specifications.set(name, result);
 
-    var onSuccess = function(msg)
+    var onSuccess = function(msg) {
       result.numSucceeded++;
+    }
 
     var onFailure = function(msg) {
       result.didSucceed = false;
@@ -36,35 +38,43 @@ class MockReporter implements Reporter {
   }
 
   public function declareDescription(name, run) {
-    descriptions.set(name, new DescData());
+    var data = new DescData();
+    crnt.descriptions.set(name, data);
+    var oldDesc = this.crnt;
+    this.crnt = data;
     run();
+    this.crnt = oldDesc;
   }
 
   public function wasDescribed(name) {
-    return descriptions.exists(name);
+    return crnt.descriptions.exists(name);
   }
 
   public function wasSpecified(name) {
-    return specifications.exists(name);
+    return crnt.specifications.exists(name);
   }
 
   public function numSucceeded(name) {
-    if(wasSpecified(name))
-      specifications.get(name).numSucceeded;
+    if(wasSpecified(name)) {
+      return crnt.specifications.get(name).numSucceeded;
+    }
     return 0;
   }
 
   public function didSucceed(name) {
     if(wasSpecified(name))
-      return specifications.get(name).didSucceed;
+      return crnt.specifications.get(name).didSucceed;
     return false;
   }
 
-  // sigh, this is so dumb
+  // Sigh, this is so dumb.
+  // Do I just not get how to do it right in Haxe, or is this really the way to do it?
   public function childrenOf(name) {
+    var desc = crnt.descriptions.get(name);
+    if(desc == null) throw("NO DESC: " + name);
     var children = [];
-    for(child in specifications.keys()) children.push(child);
-    for(child in descriptions.keys())   children.push(child);
+    for(child in desc.specifications.keys()) children.push(child);
+    for(child in desc.descriptions.keys())   children.push(child);
     return children;
   }
 }
@@ -97,9 +107,10 @@ class SpaceCadetDesc {
           a.eq(true, reporter.wasSpecified("name"));
         });
 
-        d.it('reports true assertions', function(a) {
+        d.it('reports passed and failed assertions', function(a) {
           desc.it("name1", function(a) { a.eq(1, 1); a.eq(1, 1); });
           desc.it("name2", function(a) { a.eq(1, 1); });
+          desc.it("name3", function(a) { a.eq(1, 2); });
           a.eq(0, reporter.numSucceeded("name1"));
           a.eq(0, reporter.numSucceeded("name2"));
           run();
@@ -107,11 +118,14 @@ class SpaceCadetDesc {
           a.eq(1, reporter.numSucceeded("name2"));
         });
 
-        d.it('reports failed assertions', function(a) {
-          desc.it("name", function(a) a.eq(1, 2));
-          a.eq(false, reporter.didSucceed("name"));
+        d.it("reports failed assertions", function(a) {
+          desc.it("name1", function(a) a.eq(1, 1));
+          desc.it("name2", function(a) a.eq(1, 2));
+          a.eq(false, reporter.didSucceed("name1"));
+          a.eq(false, reporter.didSucceed("name2"));
           run();
-          a.eq(true, reporter.didSucceed("name"));
+          a.eq(true,  reporter.didSucceed("name1"));
+          a.eq(false, reporter.didSucceed("name2"));
         });
 
         d.it('ends the spec when it sees a failed assertion', function(a) {
@@ -129,16 +143,16 @@ class SpaceCadetDesc {
           desc.describe("out1", function(d) d.it("in1", function(_) {}));
           desc.describe("out2", function(d) d.it("in2", function(_) {}));
           run();
-          a.eq(["in1"], reporter.childrenOf("out1"));
-          a.eq(["in2"], reporter.childrenOf("out2"));
+          a.streq(["in1"], reporter.childrenOf("out1"));
+          a.streq(["in2"], reporter.childrenOf("out2"));
         });
 
         d.it('reports describe blocks as children of their parent', function(a) {
           desc.describe("out1", function(d) d.describe("in1", function(_) {}));
           desc.describe("out2", function(d) d.describe("in2", function(_) {}));
           run();
-          a.eq(["in1"], reporter.childrenOf("out1"));
-          a.eq(["in2"], reporter.childrenOf("out2"));
+          a.streq(["in1"], reporter.childrenOf("out1"));
+          a.streq(["in2"], reporter.childrenOf("out2"));
         });
       });
 
