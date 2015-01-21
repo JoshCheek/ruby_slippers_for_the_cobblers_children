@@ -18,8 +18,8 @@ class DescData {
 
 
 class MockReporter implements Reporter {
-  private var crnt          = new DescData();
-  public  var orderDeclared = [];
+  public var crnt          = new DescData();
+  public var orderDeclared = [];
   public function new() {}
 
   public function declareSpec(name, run) {
@@ -37,7 +37,8 @@ class MockReporter implements Reporter {
     }
 
     var onPending = function(?msg) {
-      result.isPending = true;
+      result.isPending  = true;
+      result.didSucceed = false;
       throw new TestFinished();
     }
 
