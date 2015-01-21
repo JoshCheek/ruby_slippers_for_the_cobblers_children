@@ -25,12 +25,16 @@ class DescribeOutput {
         assertOut("a", function() output.write("a"));
       });
 
-      d.specify("#writeln writes its messages to the output stream without a newline", function(a) {
+      d.specify("#writeln writes its messages to the output stream with a newline", function(a) {
         assertOut("a\n", function() output.writeln("a"));
       });
 
       d.specify("#writeln does not add the newline if the message it is writing already ends in a newline", function(a) {
-        assertOut("a\n", function() output.writeln("a"));
+        assertOut("a\n", function() output.writeln("a\n"));
+      });
+
+      d.specify("#writeln can write blank lines", function(a) {
+        assertOut("\n", function() output.writeln(""));
       });
 
       d.specify("#replaceln replaces the contents of the current line without a newline", function(a) {

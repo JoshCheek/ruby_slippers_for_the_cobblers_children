@@ -1,5 +1,7 @@
 package spaceCadet;
 
+using StringTools;
+
 class Output {
   var outstream:haxe.io.Output;
   var errstream:haxe.io.Output;
@@ -11,7 +13,8 @@ class Output {
 
   public function writeln(message) {
     outstream.writeString(message);
-    outstream.writeString("\n");
+    if(!message.endsWith("\n"))
+      outstream.writeString("\n");
     return this;
   }
 
