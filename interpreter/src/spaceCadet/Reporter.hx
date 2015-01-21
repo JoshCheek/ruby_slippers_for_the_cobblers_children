@@ -1,9 +1,15 @@
 package spaceCadet;
 
 interface Reporter {
-  public function declareSpec(name:String, run:
-      (String->Void)->(String->Void)->(String->Void)->Void):Void;
-  public function declareDescription(name:String, run:Void->Void):Void;
+  public function declareSpec(
+    name : String,
+    run  : (String->Void)->(String->Void)->(String->Void)->Void
+  ) : Void;
+
+  public function declareDescription(
+    name : String,
+    run  : Void->Void
+  ) : Void;
 }
 
 class TestFinished {
