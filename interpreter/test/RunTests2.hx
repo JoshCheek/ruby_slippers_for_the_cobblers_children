@@ -5,6 +5,7 @@ class RunTests2 {
     // define tests
     var root = new spaceCadet.SpaceCadet.Description();
     spaceCadet.DescribeRunningASuite.describe(root);
+    spaceCadet.DescribeAssertions.describe(root);
     spaceCadet.SpaceCadetDesc.describe(root);
 
     // run and report
