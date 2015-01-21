@@ -1,5 +1,5 @@
 package spaceCadet;
-import spaceCadet.SpaceCadet;
+import spaceCadet.Reporter;
 
 typedef SpecState = {
   numSucceeded : Int,

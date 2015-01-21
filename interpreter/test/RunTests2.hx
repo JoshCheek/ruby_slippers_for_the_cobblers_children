@@ -10,7 +10,7 @@ class RunTests2 {
 
     // run and report
     var output   = new Output(Sys.stdout(), Sys.stderr());
-    var reporter = new SpaceCadet.StreamReporter(output);
+    var reporter = new Reporter.StreamReporter(output);
     spaceCadet.SpaceCadet.Run.run(root, reporter);
 
     if(reporter.numFails != 0) Sys.exit(1);
