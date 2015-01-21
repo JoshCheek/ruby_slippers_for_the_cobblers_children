@@ -87,6 +87,10 @@ class Description {
     this.testables.push(One(name, body));
     return this;
   }
+
+  // why can't I do this?: public function specify = it;
+  public function specify(name, body) return it(name, body);
+  public function example(name, body) return it(name, body);
 }
 
 interface Reporter {

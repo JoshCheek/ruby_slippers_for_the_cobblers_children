@@ -107,6 +107,19 @@ class SpaceCadetDesc {
           a.eq(true, reporter.wasSpecified("name"));
         });
 
+        d.it('can declare a specification with #it, #specify, and #example', function(a) {
+          desc.it(     "name1", function(_) {});
+          desc.specify("name2", function(_) {});
+          desc.example("name3", function(_) {});
+          a.eq(false, reporter.wasSpecified("name1"));
+          a.eq(false, reporter.wasSpecified("name2"));
+          a.eq(false, reporter.wasSpecified("name3"));
+          run();
+          a.eq(true, reporter.wasSpecified("name1"));
+          a.eq(true, reporter.wasSpecified("name2"));
+          a.eq(true, reporter.wasSpecified("name3"));
+        });
+
         d.it('reports passed and failed assertions', function(a) {
           desc.it("name1", function(a) { a.eq(1, 1); a.eq(1, 1); });
           desc.it("name2", function(a) { a.eq(1, 1); });
@@ -154,6 +167,20 @@ class SpaceCadetDesc {
           a.streq(["in1"], reporter.childrenOf("out1"));
           a.streq(["in2"], reporter.childrenOf("out2"));
         });
+
+        // 'allows multiple describe blocks with the same name'
+        // 'allows multiple specification blocks with the same name'
+      });
+
+      d.describe("Assertions", function(d) {
+        // d.specify("eq passes when objects are ==", function(a) {
+        // });
+        // d.specify("eqm is the same as eq, but with a custom message",function(a) {
+        // });
+        // d.specify("streq passes when objects string representations are ==", function(a) {
+        // });
+        // d.specify("streqm is the same as streq, but with a custom message",function(a) {
+        // });
       });
 
       d.it('runs the specs and describe blcks in the order they were described in', function(a) {
