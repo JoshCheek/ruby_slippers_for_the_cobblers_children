@@ -2,6 +2,19 @@ package spaceCadet;
 
 using StringTools;
 
+@:enum
+abstract Colour(String) from String to String {
+  var FgNone    = "\033[39m";
+  var FgBlack   = "\033[30m";
+  var FgRed     = "\033[31m";
+  var FgGreen   = "\033[32m";
+  var FgYellow  = "\033[33m";
+  var FgBlue    = "\033[34m";
+  var FgMagenta = "\033[35m";
+  var FgCyan    = "\033[36m";
+  var FgWhite   = "\033[37m";
+}
+
 class Output {
   var outstream   : haxe.io.Output;
   var errstream   : haxe.io.Output;
@@ -31,71 +44,33 @@ class Output {
     return this;
   }
 
-  public var fgPop(  get, never) : Output;
-  public var fgBlack(  get, never):Output;
-  public var fgRed(  get, never):Output;
-  public var fgGreen(get, never):Output;
-  public var fgYellow(get, never):Output;
-  public var fgBlue(get, never):Output;
-  public var fgMagenta(get, never):Output;
-  public var fgCyan(get, never):Output;
-  public var fgWhite(get, never):Output;
+  public var fgPop     (get, never):Output;
+  public var fgBlack   (get, never):Output;
+  public var fgRed     (get, never):Output;
+  public var fgGreen   (get, never):Output;
+  public var fgYellow  (get, never):Output;
+  public var fgBlue    (get, never):Output;
+  public var fgMagenta (get, never):Output;
+  public var fgCyan    (get, never):Output;
+  public var fgWhite   (get, never):Output;
 
+  function pushColour(colour:Colour) {
+    write(colourStack.push(colour));
+    return this;
+  }
   function get_fgPop() {
     colourStack.pop();
-    if(null == colourStack.peek)
-      write("\033[39m");
-    else
-      write(colourStack.peek);
+    if(null == colourStack.peek) write(Colour.FgNone);
+    else                         write(colourStack.peek);
     return this;
   }
-  function get_fgBlack() {
-    var black = "\033[30m";
-    colourStack.push(black);
-    write(black);
-    return this;
-  }
-  function get_fgRed() {
-    var red = "\033[31m";
-    colourStack.push(red);
-    write(red);
-    return this;
-  }
-  function get_fgGreen() {
-    var green = "\033[32m";
-    colourStack.push(green);
-    write(green);
-    return this;
-  }
-  function get_fgYellow() {
-    var yellow = "\033[33m";
-    colourStack.push(yellow);
-    write(yellow);
-    return this;
-  }
-  function get_fgBlue() {
-    var blue = "\033[34m";
-    colourStack.push(blue);
-    write(blue);
-    return this;
-  }
-  function get_fgMagenta() {
-    var magenta = "\033[35m";
-    colourStack.push(magenta);
-    write(magenta);
-    return this;
-  }
-  function get_fgCyan() {
-    var cyan = "\033[36m";
-    colourStack.push(cyan);
-    write(cyan);
-    return this;
-  }
-  function get_fgWhite() {
-    var white = "\033[37m";
-    colourStack.push(white);
-    write(white);
-    return this;
-  }
+  function get_fgBlack()   return pushColour(FgBlack);
+  function get_fgRed()     return pushColour(FgRed);
+  function get_fgGreen()   return pushColour(FgGreen);
+  function get_fgYellow()  return pushColour(FgYellow);
+  function get_fgBlue()    return pushColour(FgBlue);
+  function get_fgMagenta() return pushColour(FgMagenta);
+  function get_fgCyan()    return pushColour(FgCyan);
+  function get_fgWhite()   return pushColour(FgWhite);
 }
 
