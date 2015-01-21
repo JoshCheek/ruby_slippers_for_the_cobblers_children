@@ -204,14 +204,50 @@ class SpaceCadetDesc {
       });
 
       d.describe("Assertions", function(d) {
-        // d.specify("eq passes when objects are ==", function(a) {
-        // });
-        // d.specify("eqm is the same as eq, but with a custom message",function(a) {
-        // });
-        // d.specify("streq passes when objects string representations are ==", function(a) {
-        // });
-        // d.specify("streqm is the same as streq, but with a custom message",function(a) {
-        // });
+        var successMessage:String = null;
+        var failureMessage:String = null;
+        var pendingMessage:String = null;
+        var onSuccess = function(m) { successMessage = m; };
+        var onFailure = function(m) { failureMessage = m; };
+        var onPending = function(m) { pendingMessage = m; };
+        var asserter  = new Asserter(onSuccess, onFailure, onPending);
+        d.before(function(a) {
+          successMessage = null;
+          failureMessage = null;
+          pendingMessage = null;
+        });
+
+        d.specify("eq passes when objects are ==", function(a) {
+          a.eq(null, successMessage);
+          asserter.eq(1, 2);
+          a.eq(null, successMessage);
+          asserter.eq(1, 1);
+          a.eq(false, successMessage == null);
+        });
+
+        d.specify("eqm is the same as eq, but with a custom message",function(a) {
+          a.eq(null, successMessage);
+          asserter.eqm(1, 2, "zomg");
+          a.eq(null, successMessage);
+          asserter.eqm(1, 1, "zomg");
+          a.eq("zomg", successMessage);
+        });
+
+        d.specify("streq passes when objects string representations are ==", function(a) {
+          a.eq(null, successMessage);
+          asserter.streq({}, {a:1});
+          a.eq(null, successMessage);
+          asserter.streq({}, {});
+          a.eq(false, successMessage==null);
+        });
+
+        d.specify("streqm is the same as streq, but with a custom message",function(a) {
+          a.eq(null, successMessage);
+          asserter.streqm({}, {a:1}, "zomg");
+          a.eq(null, successMessage);
+          asserter.streqm({}, {}, "zomg");
+          a.eq("zomg", successMessage);
+        });
       });
 
       d.it('runs the specs and describe blcks in the order they were described in', function(a) {
