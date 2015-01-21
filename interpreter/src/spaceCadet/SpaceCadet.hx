@@ -79,7 +79,13 @@ class Description {
   }
 }
 
-class Reporter {
+interface Reporter {
+  public function declareSpec(name:String, run:
+      (String->Void)->(String->Void)->(String->Void)->Void):Void;
+  public function declareDescription(name:String, run:Void->Void):Void;
+}
+
+class StreamReporter implements Reporter {
   public var output:Output;
   public function new(output:Output) {
     this.output = output;
