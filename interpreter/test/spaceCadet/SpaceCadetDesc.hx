@@ -34,16 +34,15 @@ class MockReporter implements Reporter {
     try {
       run(onSuccess, onFailure, onPending);
     } catch(_:TestFinished) {}
-    // output.out("SPEC: " + name + " -- SUCCESSES: " + Std.string(successes) + " FAILURE: " + failMsg);
   }
 
   public function declareDescription(name, run) {
-    var data = new DescData();
-    crnt.descriptions.set(name, data);
     var oldDesc = this.crnt;
-    this.crnt = data;
+    var data    = new DescData();
+    this.crnt   = data;
+    oldDesc.descriptions.set(name, data);
     run();
-    this.crnt = oldDesc;
+    this.crnt   = oldDesc;
   }
 
   public function wasDescribed(name) {
@@ -81,18 +80,18 @@ class MockReporter implements Reporter {
 
 class SpaceCadetDesc {
   public static function describe(d:Description) {
-    var desc     : Description;
-    var reporter : MockReporter;
-    var run      : Void->Void;
-
-    d.before(function(a) {
-      desc     = new Description();
-      reporter = new MockReporter();
-      run      = function() Run.run(desc, reporter);
-    });
-
     d.describe('Space Cadet', function(d) {
       d.describe('running a test suite', function(d) {
+        var desc     : Description;
+        var reporter : MockReporter;
+        var run      : Void->Void;
+
+        d.before(function(a) {
+          desc     = new Description();
+          reporter = new MockReporter();
+          run      = function() Run.run(desc, reporter);
+        });
+
         d.it('reports describe blocks', function(a) {
           desc.describe("name", function(_) {});
           a.eq(false, reporter.wasDescribed("name"));
