@@ -178,8 +178,29 @@ class SpaceCadetDesc {
           a.streq(["in2"], reporter.childrenOf("out2"));
         });
 
-        // 'allows multiple describe blocks with the same name'
-        // 'allows multiple specification blocks with the same name'
+        d.it('allows multiple describe blocks with the same name', function(a) {
+          desc.describe("desc", function(_) {});
+          desc.describe("desc", function(_) {});
+          a.eq(2, desc.testables.length);
+          for(t in desc.testables) {
+            switch(t) {
+              case Many(name, desc): a.eq("desc", name);
+              case _: throw("GOT: " + Std.string(t));
+            }
+          }
+        });
+
+        d.it('allows multiple specification blocks with the same name', function(a) {
+          desc.it("spec", function(_) {});
+          desc.it("spec", function(_) {});
+          a.eq(2, desc.testables.length);
+          for(t in desc.testables) {
+            switch(t) {
+              case One(name, body): a.eq("spec", name);
+              case _: throw("GOT: " + Std.string(t));
+            }
+          }
+        });
       });
 
       d.describe("Assertions", function(d) {
