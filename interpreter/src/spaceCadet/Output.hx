@@ -32,8 +32,14 @@ class Output {
   }
 
   public var fgPop(  get, never) : Output;
+  public var fgBlack(  get, never):Output;
   public var fgRed(  get, never):Output;
   public var fgGreen(get, never):Output;
+  public var fgYellow(get, never):Output;
+  public var fgBlue(get, never):Output;
+  public var fgMagenta(get, never):Output;
+  public var fgCyan(get, never):Output;
+  public var fgWhite(get, never):Output;
 
   function get_fgPop() {
     colourStack.pop();
@@ -41,6 +47,12 @@ class Output {
       write("\033[39m");
     else
       write(colourStack.peek);
+    return this;
+  }
+  function get_fgBlack() {
+    var black = "\033[30m";
+    colourStack.push(black);
+    write(black);
     return this;
   }
   function get_fgRed() {
@@ -53,6 +65,36 @@ class Output {
     var green = "\033[32m";
     colourStack.push(green);
     write(green);
+    return this;
+  }
+  function get_fgYellow() {
+    var yellow = "\033[33m";
+    colourStack.push(yellow);
+    write(yellow);
+    return this;
+  }
+  function get_fgBlue() {
+    var blue = "\033[34m";
+    colourStack.push(blue);
+    write(blue);
+    return this;
+  }
+  function get_fgMagenta() {
+    var magenta = "\033[35m";
+    colourStack.push(magenta);
+    write(magenta);
+    return this;
+  }
+  function get_fgCyan() {
+    var cyan = "\033[36m";
+    colourStack.push(cyan);
+    write(cyan);
+    return this;
+  }
+  function get_fgWhite() {
+    var white = "\033[37m";
+    colourStack.push(white);
+    write(white);
     return this;
   }
 }

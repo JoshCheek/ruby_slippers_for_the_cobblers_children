@@ -51,6 +51,39 @@ class DescribeOutput {
         d.specify("fgPop raises if called with no colour stck", function(a) {
           a.pending();
         });
+
+        d.specify("fgBlack pushes black onto the colour stack", function(a) {
+          output.fgBlack.fgPop;
+          a.eq("\033[30m\033[39m", outstream.string);
+        });
+        d.specify("fgRed pushes red onto the colour stack", function(a) {
+          output.fgRed.fgPop;
+          a.eq("\033[31m\033[39m", outstream.string);
+        });
+        d.specify("fgGreen pushes green onto the colour stack", function(a) {
+          output.fgGreen.fgPop;
+          a.eq("\033[32m\033[39m", outstream.string);
+        });
+        d.specify("fgYellow pushes yellow onto the colour stack", function(a) {
+          output.fgYellow.fgPop;
+          a.eq("\033[33m\033[39m", outstream.string);
+        });
+        d.specify("fgBlue pushes blue onto the colour stack", function(a) {
+          output.fgBlue.fgPop;
+          a.eq("\033[34m\033[39m", outstream.string);
+        });
+        d.specify("fgMagenta pushes magenta onto the colour stack", function(a) {
+          output.fgMagenta.fgPop;
+          a.eq("\033[35m\033[39m", outstream.string);
+        });
+        d.specify("fgCyan pushes cyan onto the colour stack", function(a) {
+          output.fgCyan.fgPop;
+          a.eq("\033[36m\033[39m", outstream.string);
+        });
+        d.specify("fgWhite pushes white onto the colour stack", function(a) {
+          output.fgWhite.fgPop;
+          a.eq("\033[37m\033[39m", outstream.string);
+        });
       });
     });
   }
