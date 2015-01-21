@@ -92,20 +92,20 @@ class StreamReporter implements Reporter {
   }
 
   public function declareSpec(name, run) {
-    output.out("SPECIFICATION:\033[39m " + name);
+    output.out("\033[34m"+name+"\033[39m");
     var onSuccess = function(msg) {
-      output.out("\033[32mSUCCESS:\033[39m " + msg);
+      output.out("  \033[32m"+msg+"\033[39m");
     }
 
     var onFailure = function(msg) {
-      output.out("\033[31mFAILURE:\033[39m " + msg);
+      output.out("  \033[31m"+msg+"\033[39m");
       throw new TestFinished();
     }
 
     var onPending = function(?msg) {
       if(msg == null)
         msg = "Not Implemented";
-      output.out("\033[33mPENDING:\033[39m " + msg);
+      output.out("  \033[33m"+msg+"\033[39m");
       throw new TestFinished();
     }
 
@@ -116,9 +116,8 @@ class StreamReporter implements Reporter {
   }
 
   public function declareDescription(name, run) {
-    output.out("BEGIN : " + name);
+    output.out("\033[35m"+name+"\033[39m");
     run();
-    output.out("END: " + name);
   }
 }
 
