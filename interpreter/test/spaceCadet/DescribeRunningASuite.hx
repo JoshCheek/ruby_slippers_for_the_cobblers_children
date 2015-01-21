@@ -132,6 +132,30 @@ class DescribeRunningASuite {
           }
         }
       });
+
+      d.it('runs the specs and describe blcks in the order they were described in', function(a) {
+        desc.describe("d1", function(d) {
+          d.it("d1s1", function(_) {});
+          d.it("d1s2", function(_) {});
+        }).describe("d2", function(d) {
+          d.it("d2s1", function(_) {});
+          d.describe("d2d3", function(d) {
+            d.it("d2d3s1", function(_) {});
+          });
+          d.it("d2s2", function(_) {});
+        });
+        a.streq([], reporter.orderDeclared);
+        run();
+        a.streq(["d1",
+                 "d1s1",
+                 "d1s2",
+                 "d2",
+                 "d2s1",
+                 "d2d3",
+                 "d2d3s1",
+                 "d2s2"],
+                 reporter.orderDeclared);
+      });
     });
   }
 }

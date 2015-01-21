@@ -18,10 +18,12 @@ class DescData {
 
 
 class MockReporter implements Reporter {
-  private var crnt = new DescData();
+  private var crnt          = new DescData();
+  public  var orderDeclared = [];
   public function new() {}
 
   public function declareSpec(name, run) {
+    orderDeclared.push(name);
     var result = {numSucceeded:0, didSucceed:true, isPending:false};
     crnt.specifications.set(name, result);
 
@@ -45,6 +47,7 @@ class MockReporter implements Reporter {
   }
 
   public function declareDescription(name, run) {
+    orderDeclared.push(name);
     var oldDesc = this.crnt;
     var data    = new DescData();
     this.crnt   = data;
