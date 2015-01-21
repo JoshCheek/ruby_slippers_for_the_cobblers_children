@@ -77,6 +77,7 @@ class Description {
     body(child);
     return this;
   }
+  public function context(name, body) return describe(name, body);
 
   public function before(beforeBlock) {
     this.beforeBlocks.push(beforeBlock);

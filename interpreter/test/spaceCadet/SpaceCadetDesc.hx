@@ -100,6 +100,16 @@ class SpaceCadetDesc {
           a.eq(true, reporter.wasDescribed("name"));
         });
 
+        d.it('can declare a describe block with #describe and #context', function(a) {
+          desc.describe("name1", function(_) {});
+          desc.context( "name2", function(_) {});
+          a.eq(false, reporter.wasDescribed("name1"));
+          a.eq(false, reporter.wasDescribed("name2"));
+          run();
+          a.eq(true, reporter.wasDescribed("name1"));
+          a.eq(true, reporter.wasDescribed("name2"));
+        });
+
         d.it('reports specification blocks', function(a) {
           desc.it("name", function(_) {});
           a.eq(false, reporter.wasSpecified("name"));
