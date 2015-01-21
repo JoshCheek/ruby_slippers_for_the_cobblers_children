@@ -9,9 +9,20 @@ class Output {
     this.errstream = errstream;
   }
 
-  public function out(message) {
-    this.outstream.writeString(message);
-    this.outstream.writeString("\n");
+  public function writeln(message) {
+    outstream.writeString(message);
+    outstream.writeString("\n");
+    return this;
+  }
+
+  public function write(message) {
+    outstream.writeString(message);
+    return this;
+  }
+
+  public function replaceln(message) {
+    outstream.writeString("\r");
+    outstream.writeString(message);
     return this;
   }
 }

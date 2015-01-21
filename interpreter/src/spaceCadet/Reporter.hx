@@ -24,7 +24,7 @@ class StreamReporter implements Reporter {
   }
 
   public function declareSpec(name, run) {
-    output.out("\033[34m"+name+"\033[39m");
+    output.writeln("\033[34m"+name+"\033[39m");
     var outputMessages = "";
 
     var onSuccess = function(msg) {
@@ -47,11 +47,11 @@ class StreamReporter implements Reporter {
     try {
       run(onSuccess, onFailure, onPending);
     } catch(_:TestFinished) {}
-    output.out(outputMessages);
+    output.writeln(outputMessages);
   }
 
   public function declareDescription(name, run) {
-    output.out("\033[35m"+name+"\033[39m");
+    output.writeln("\033[35m"+name+"\033[39m");
     run();
   }
 }
