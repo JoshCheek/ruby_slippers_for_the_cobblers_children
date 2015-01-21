@@ -41,11 +41,11 @@ class Asserter {
   }
 
   public function eq<T>(a:T, b:T) {
-    var msg = "Expect " + Std.string(a) + " to == " + Std.string(b);
+    var msg = Std.string(a) + " == " + Std.string(b);
     eqm(a, b, msg);
   }
   public function neq<T>(a:T, b:T) {
-    var msg = "Expect " + Std.string(a) + " to != " + Std.string(b);
+    var msg = Std.string(a) + " != " + Std.string(b);
     neqm(a, b, msg);
   }
 
@@ -60,12 +60,12 @@ class Asserter {
   }
 
   public function streq<T>(a:T, b:T) {
-    var msg = "Expect Std.string(" + Std.string(a) + ") to == Std.string(" + Std.string(b) + ")";
+    var msg = "Std.string(" + Std.string(a) + ") == Std.string(" + Std.string(b) + ")";
     streqm(a, b, msg);
   }
 
   public function nstreq<T>(a:T, b:T) {
-    var msg = "Expect Std.string(" + Std.string(a) + ") to != Std.string(" + Std.string(b) + ")";
+    var msg = "Std.string(" + Std.string(a) + ") != Std.string(" + Std.string(b) + ")";
     nstreqm(a, b, msg);
   }
 
