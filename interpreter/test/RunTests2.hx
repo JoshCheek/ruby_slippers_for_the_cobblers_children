@@ -1,72 +1,4 @@
-class Output {
-  var outstream:haxe.io.Output;
-  var errstream:haxe.io.Output;
-
-  public function new(outstream, errstream) {
-    this.outstream = outstream;
-    this.errstream = errstream;
-  }
-
-  public function out(message) {
-    this.outstream.writeString(message);
-    this.outstream.writeString("\n");
-    return this;
-  }
-}
-
-class Asserter {
-  private var onSuccess : String -> Void;
-  private var onFailure : String -> Void;
-
-  public function new(onSuccess, onFailure) {
-    this.onSuccess = onSuccess;
-    this.onFailure = onFailure;
-  }
-
-  public function eqm<T>(a:T, b:T, message) {
-    if(a == b) onSuccess(message);
-    else       onFailure(message);
-  }
-
-  public function eq<T>(a:T, b:T) {
-    var msg = "Expect " + Std.string(a) + " to == " + Std.string(b);
-    eqm(a, b, msg);
-  }
-}
-
-typedef AssertBlock = Asserter -> Void;
-
-enum Testable {
-  One(name:String,  body:AssertBlock);
-  Many(name:String, desc:Description);
-}
-
-class Description {
-  public var beforeBlocks : Array<AssertBlock>;
-  public var testables    : Array<Testable>;
-
-  public function new() {
-    this.beforeBlocks = [];
-    this.testables    = [];
-  }
-
-  public function describe(name, body) {
-    var child = new Description();
-    testables.push(Many(name, child));
-    body(child);
-    return this;
-  }
-
-  public function before(beforeBlock) {
-    this.beforeBlocks.push(beforeBlock);
-    return this;
-  }
-
-  public function it(name, body) {
-    this.testables.push(One(name, body));
-    return this;
-  }
-}
+import spaceCadet.SpaceCadet;
 
 class DescribeStack {
   public static function describe(d) {
@@ -89,86 +21,16 @@ class DescribeStack {
   }
 }
 
-class Reporter {
-  public var output:Output;
-  public function new(output:Output) {
-    this.output = output;
-  }
-
-  public function declareSpec(name, run) {
-    output.out("SPECIFICATION: " + name);
-    var onSuccess = function(msg) {
-      output.out("SUCCESS: " + msg);
-    }
-
-    var onFailure = function(msg) {
-      output.out("FAILURE: " + msg);
-      throw new TestFinished();
-    }
-
-    try {
-      run(onSuccess, onFailure);
-    } catch(_:TestFinished) {}
-    // output.out("SPEC: " + name + " -- SUCCESSES: " + Std.string(successes) + " FAILURE: " + failMsg);
-  }
-
-  public function declareDescription(name, run) {
-    output.out("BEGIN : " + name);
-    run();
-    output.out("END: " + name);
-  }
-}
-
-class TestFinished {
-  public function new() {}
-}
-
-
-class Run {
-  public static function run(desc:Description, rep:Reporter) {
-    new Run(rep)._run(desc, []);
-  }
-
-  private var reporter:Reporter;
-
-  public function new(reporter) {
-    this.reporter = reporter;
-  }
-
-  private function _run(description:Description, beforeBlocks:Array<AssertBlock>) {
-    var allBeforeBlocks = beforeBlocks.concat(description.beforeBlocks);
-    for(testable in description.testables) {
-      switch(testable) {
-        case One(name, body):
-          runSpec(name, allBeforeBlocks, body);
-        case Many(name, child): runDesc(name, allBeforeBlocks, child);
-      }
-    }
-  }
-
-  private function runSpec(name, beforeBlocks:Array<AssertBlock>, body) {
-    reporter.declareSpec(name, function(onSuccess, onFailure) {
-      var asserter = new Asserter(onSuccess, onFailure);
-      for(block in beforeBlocks) block(asserter);
-      body(asserter);
-    });
-  }
-
-  private function runDesc(name, beforeBlocks, description) {
-    reporter.declareDescription(name, function() {
-      _run(description, beforeBlocks);
-    });
-  }
-}
-
 class RunTests2 {
   static function main() {
     // define tests
-    var root = new Description();
+    var root = new spaceCadet.SpaceCadet.Description();
     DescribeStack.describe(root);
+    spaceCadet.SpaceCadetDesc.SpaceCadetDesc.describe(root);
 
-    var output   = new Output(Sys.stdout(), Sys.stderr());
-    var reporter = new Reporter(output);
+    // run and report
+    var output   = new spaceCadet.SpaceCadet.Output(Sys.stdout(), Sys.stderr());
+    var reporter = new spaceCadet.SpaceCadet.Reporter(output);
     Run.run(root, reporter);
 
     // if(!allPassed) Sys.exit(1);
