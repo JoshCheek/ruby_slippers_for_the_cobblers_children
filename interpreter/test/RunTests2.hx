@@ -13,6 +13,6 @@ class RunTests2 {
     var reporter = new spaceCadet.SpaceCadet.StreamReporter(output);
     spaceCadet.SpaceCadet.Run.run(root, reporter);
 
-    // if(!allPassed) Sys.exit(1);
+    if(reporter.numFails != 0) Sys.exit(1);
   }
 }

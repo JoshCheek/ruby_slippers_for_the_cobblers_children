@@ -121,6 +121,7 @@ interface Reporter {
 
 class StreamReporter implements Reporter {
   public var output:Output;
+  public var numFails = 0;
   public function new(output:Output) {
     this.output = output;
   }
@@ -134,6 +135,7 @@ class StreamReporter implements Reporter {
     }
 
     var onFailure = function(msg) {
+      this.numFails += 1;
       outputMessages += " | \033[31m"+msg+"\033[39m";
       throw new TestFinished();
     }
