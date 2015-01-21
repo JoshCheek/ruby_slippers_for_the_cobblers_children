@@ -6,7 +6,7 @@ class RunTests2 {
     var root = new spaceCadet.SpaceCadet.Description();
     spaceCadet.DescribeRunningASuite.describe(root);
     spaceCadet.DescribeAssertions.describe(root);
-    spaceCadet.SpaceCadetDesc.describe(root);
+    spaceCadet.DescribeBeforeBlocks.describe(root);
 
     // run and report
     var output   = new spaceCadet.SpaceCadet.Output(Sys.stdout(), Sys.stderr());
