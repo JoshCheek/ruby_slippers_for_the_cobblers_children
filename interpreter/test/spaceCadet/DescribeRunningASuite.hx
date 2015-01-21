@@ -5,6 +5,8 @@ using Lambda;
 class DescribeRunningASuite {
   public static function describe(d:Description) {
     d.describe('running a Space Cadet test suite', function(d) {
+      var noop = function(_:Dynamic) { };
+
       var desc     : Description;
       var reporter : MockReporter;
       var run      : Void->Void;
@@ -16,15 +18,15 @@ class DescribeRunningASuite {
       });
 
       d.it('reports describe blocks', function(a) {
-        desc.describe("name", function(_) {});
+        desc.describe("name", noop);
         a.eq(false, reporter.wasDescribed("name"));
         run();
         a.eq(true, reporter.wasDescribed("name"));
       });
 
       d.it('can declare a describe block with #describe and #context', function(a) {
-        desc.describe("name1", function(_) {});
-        desc.context( "name2", function(_) {});
+        desc.describe("name1", noop);
+        desc.context( "name2", noop);
         a.eq(false, reporter.wasDescribed("name1"));
         a.eq(false, reporter.wasDescribed("name2"));
         run();
@@ -33,16 +35,16 @@ class DescribeRunningASuite {
       });
 
       d.it('reports specification blocks', function(a) {
-        desc.it("name", function(_) {});
+        desc.it("name", noop);
         a.eq(false, reporter.wasSpecified("name"));
         run();
         a.eq(true, reporter.wasSpecified("name"));
       });
 
       d.it('can declare a specification with #it, #specify, and #example', function(a) {
-        desc.it(     "name1", function(_) {});
-        desc.specify("name2", function(_) {});
-        desc.example("name3", function(_) {});
+        desc.it(     "name1", noop);
+        desc.specify("name2", noop);
+        desc.example("name3", noop);
         a.eq(false, reporter.wasSpecified("name1"));
         a.eq(false, reporter.wasSpecified("name2"));
         a.eq(false, reporter.wasSpecified("name3"));
@@ -73,7 +75,7 @@ class DescribeRunningASuite {
       });
 
       d.it("reports pending specs", function(a) {
-        desc.it("notPending", function(a) {});
+        desc.it("notPending", noop);
         desc.it("isPending", function(a) { a.pending("in a bit, yo!"); });
         a.eq(false, reporter.isPending("notPending"));
         a.eq(false, reporter.isPending("isPending"));
@@ -94,24 +96,24 @@ class DescribeRunningASuite {
       });
 
       d.it('reports the specification as a child of the describe block', function(a) {
-        desc.describe("out1", function(d) d.it("in1", function(_) {}));
-        desc.describe("out2", function(d) d.it("in2", function(_) {}));
+        desc.describe("out1", function(d) d.it("in1", noop));
+        desc.describe("out2", function(d) d.it("in2", noop));
         run();
         a.streq(["in1"], reporter.childrenOf("out1"));
         a.streq(["in2"], reporter.childrenOf("out2"));
       });
 
       d.it('reports describe blocks as children of their parent', function(a) {
-        desc.describe("out1", function(d) d.describe("in1", function(_) {}));
-        desc.describe("out2", function(d) d.describe("in2", function(_) {}));
+        desc.describe("out1", function(d) d.describe("in1", noop));
+        desc.describe("out2", function(d) d.describe("in2", noop));
         run();
         a.streq(["in1"], reporter.childrenOf("out1"));
         a.streq(["in2"], reporter.childrenOf("out2"));
       });
 
       d.it('allows multiple describe blocks with the same name', function(a) {
-        desc.describe("desc", function(_) {});
-        desc.describe("desc", function(_) {});
+        desc.describe("desc", noop);
+        desc.describe("desc", noop);
         a.eq(2, desc.testables.length);
         for(t in desc.testables) {
           switch(t) {
@@ -122,8 +124,8 @@ class DescribeRunningASuite {
       });
 
       d.it('allows multiple specification blocks with the same name', function(a) {
-        desc.it("spec", function(_) {});
-        desc.it("spec", function(_) {});
+        desc.it("spec", noop);
+        desc.it("spec", noop);
         a.eq(2, desc.testables.length);
         for(t in desc.testables) {
           switch(t) {
@@ -135,14 +137,14 @@ class DescribeRunningASuite {
 
       d.it('runs the specs and describe blcks in the order they were described in', function(a) {
         desc.describe("d1", function(d) {
-          d.it("d1s1", function(_) {});
-          d.it("d1s2", function(_) {});
+          d.it("d1s1", noop);
+          d.it("d1s2", noop);
         }).describe("d2", function(d) {
-          d.it("d2s1", function(_) {});
+          d.it("d2s1", noop);
           d.describe("d2d3", function(d) {
-            d.it("d2d3s1", function(_) {});
+            d.it("d2d3s1", noop);
           });
-          d.it("d2s2", function(_) {});
+          d.it("d2s2", noop);
         });
         a.streq([], reporter.orderDeclared);
         run();
