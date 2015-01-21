@@ -49,7 +49,13 @@ class DescribeOutput {
         });
 
         d.specify("fgPop raises if called with no colour stck", function(a) {
-          a.pending();
+          var raised = false;
+          try output.fgPop
+          catch(e:String) {
+            raised = true;
+            a.eq(true, ~/stack/.match(e));
+          }
+          a.eq(true, raised);
         });
 
         d.specify("fgBlack pushes black onto the colour stack", function(a) {

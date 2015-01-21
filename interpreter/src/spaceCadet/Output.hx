@@ -59,9 +59,9 @@ class Output {
     return this;
   }
   function get_fgPop() {
-    colourStack.pop();
-    if(null == colourStack.peek) write(Colour.FgNone);
-    else                         write(colourStack.peek);
+    if(colourStack.pop() == null) throw "Colour stack is empty, nothing to pop!";
+    if(null == colourStack.peek)  write(Colour.FgNone);
+    else                          write(colourStack.peek);
     return this;
   }
   function get_fgBlack()   return pushColour(FgBlack);
