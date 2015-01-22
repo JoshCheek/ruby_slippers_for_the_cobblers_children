@@ -41,6 +41,15 @@ class DescribeOutput {
         assertOut("a\r\033[2Kb", function() output.write("a").resetln.write("b"));
       });
 
+      d.specify('#yield receives a function and invokes it in order to not break up the call-chain', function(a) {
+        output.write("1")
+              .yield(function() output.write("2"))
+              .yield(function() return 123)
+              .yield(function() output.write("3"))
+              .write("4");
+        a.eq("1234", outstream.string);
+      });
+
       d.describe("colour stack", function(d) {
         d.specify("when told to colour the output, it tracks the current colour, allowing it to push/pop them", function(a) {
           assertOut(" a \033[31m b \033[32m c \033[31m d \033[39m e ", function() {

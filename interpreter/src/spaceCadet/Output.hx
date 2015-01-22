@@ -53,6 +53,11 @@ class Output {
     return this;
   }
 
+  public function yield(fn:Void->Void) {
+    fn();
+    return this;
+  }
+
   public var indent(get, never):Output;
   public function get_indent() {
     indentDepth++;
