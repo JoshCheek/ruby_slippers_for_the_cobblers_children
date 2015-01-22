@@ -1,6 +1,5 @@
 package toplevel;
 
-// https://github.com/HaxeFoundation/haxe/blob/156f6241058dc065172da04f1fab1d89eaa22472/std/haxe/io/Output.hx
 class DescribeStringOutput {
   public static function construct(?str:String) {
     return new StringOutput(str);
@@ -9,7 +8,7 @@ class DescribeStringOutput {
   // A good reference for what it should do is haxe.io.BytesOutput
   // https://github.com/HaxeFoundation/haxe/blob/156f6241058dc065172da04f1fab1d89eaa22472/std/haxe/io/BytesOutput.hx
   public static function describe(d:spaceCadet.Description) {
-    d.describe("StringIO", function(d) {
+    d.describe("StringOutput", function(d) {
       var strio:StringOutput;
 
       d.before(function(a) {
