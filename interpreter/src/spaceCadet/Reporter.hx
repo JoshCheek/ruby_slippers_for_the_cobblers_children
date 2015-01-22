@@ -24,34 +24,91 @@ class StreamReporter implements Reporter {
   }
 
   public function declareSpec(name, run) {
-    output.writeln("\033[34m"+name+"\033[39m");
-    var outputMessages = "";
+    var successMsgs = [];
+    var failureMsg  = null;
+    var pendingMsg  = null;
+    specLine("begin", name, successMsgs, failureMsg, pendingMsg);
 
     var onSuccess = function(msg) {
-      outputMessages += " | \033[32m"+msg+"\033[39m";
+      successMsgs.push(msg);
+      specLine("passAssertion", name, successMsgs, failureMsg, pendingMsg);
     }
 
     var onFailure = function(msg) {
       this.numFails += 1;
-      outputMessages += " | \033[31m"+msg+"\033[39m";
+      failureMsg     = msg;
       throw new TestFinished();
     }
 
     var onPending = function(?msg) {
-      if(msg == null)
-        msg = "Not Implemented";
-      outputMessages += " | \033[33m"+msg+"\033[39m";
+      if(msg == null) msg = "Not Implemented";
+      pendingMsg = msg;
       throw new TestFinished();
     }
 
     try {
       run(onSuccess, onFailure, onPending);
     } catch(_:TestFinished) {}
-    output.writeln(outputMessages);
+
+    if(failureMsg != null)
+      specLine("fail", name, successMsgs, failureMsg, pendingMsg);
+    else if(pendingMsg != null)
+      specLine("pending", name, successMsgs, failureMsg, pendingMsg);
+    else
+      specLine("pass", name, successMsgs, failureMsg, pendingMsg);
   }
 
   public function declareDescription(name, run) {
-    output.writeln("\033[35m"+name+"\033[39m");
+    output.fgMagenta.writeln(name).fgPop;
     run();
+  }
+
+  // todo: resetln needs to respect indentation
+  private function specLine(status:String, specName:String, successMsgs:Array<String>, failureMsg:String, pendingMsg:String) {
+    if(status == "begin")
+      output
+        .fgBlue
+          .write(specName)
+          .fgPop;
+    else if(status == "pass")
+      output
+        .fgGreen
+          .resetln
+          .writeln(specName)
+          .fgPop;
+    else if(status == "pending")
+      output
+        .fgYellow
+          .resetln
+          .writeln(specName)
+          .writeln(pendingMsg)
+          .fgPop
+    else if(status == "fail") {
+      output
+        .fgRed
+          .resetln
+          .writeln(specName)
+          .fgPop
+        .fgGreen;
+      for(msg in successMsgs) // kinda breaks the flow :/
+        output.writeln(msg);
+      output
+          .fgPop
+        .fgRed
+          .writeln(failureMsg)
+          .fgPop;
+    }
+    else if(status == "passAssertion")
+      output
+        .fgBlue
+          .resetln
+          .write(specName)
+          .fgPop
+        .fgWhite
+          .write(" - ")
+          .fgPop
+        .fgGreen
+          .write(successMsgs[successMsgs.length-1])
+          .fgPop;
   }
 }
