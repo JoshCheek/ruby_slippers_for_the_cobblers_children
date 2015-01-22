@@ -19,6 +19,7 @@ class RunTests {
       toplevel.DescribeOutput.describe(root);
       toplevel.DescribeStringOutput.describe(root);
       toplevel.DescribeEscapeString.describe(root);
+      toplevel.DescribeInspect.describe(root);
       // run
       var output   = new Output(Sys.stdout(), Sys.stderr());
       var reporter = new Reporter.StreamReporter(output);
