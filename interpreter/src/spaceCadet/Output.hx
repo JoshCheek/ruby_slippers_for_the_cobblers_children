@@ -38,9 +38,10 @@ class Output {
     return this;
   }
 
-  public function replaceln(message) {
+  public var resetln(get, never):Output;
+
+  public function get_resetln() {
     outstream.writeString("\r\033[2K");
-    outstream.writeString(message);
     return this;
   }
 
@@ -56,6 +57,7 @@ class Output {
 
   function pushColour(colour:Colour) {
     write(colourStack.push(colour));
+    outstream.flush();
     return this;
   }
   function get_fgPop() {

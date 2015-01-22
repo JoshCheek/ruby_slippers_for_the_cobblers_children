@@ -37,9 +37,11 @@ class DescribeOutput {
         assertOut("\n", function() output.writeln(""));
       });
 
-      d.specify("#replaceln replaces the contents of the current line without a newline", function(a) {
-        assertOut("a\r\033[2Kb", function() output.write("a").replaceln("b") );
+      d.specify("#resetln erases the contents of the current line without a newline", function(a) {
+        assertOut("a\r\033[2Kb", function() output.write("a").resetln.write("b"));
       });
+
+      // d.describe
 
       d.describe("colour stack", function(d) {
         d.specify("when told to colour the output, it tracks the current colour, allowing it to push/pop them", function(a) {
