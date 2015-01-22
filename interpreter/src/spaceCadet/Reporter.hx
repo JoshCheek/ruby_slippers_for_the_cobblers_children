@@ -59,10 +59,12 @@ class StreamReporter implements Reporter {
   }
 
   public function declareDescription(name, run) {
-    output.fgMagenta.writeln(name).fgPop
-          .indent;
-    run();
-    output.outdent;
+    output.fgMagenta
+            .writeln(name)
+            .fgPop
+          .indent
+            .yield(run)
+            .outdent;
   }
 
   private function specLine(status:String, specName:String, successMsgs:Array<String>, failureMsg:String, pendingMsg:String) {
@@ -93,10 +95,8 @@ class StreamReporter implements Reporter {
           .writeln(specName)
           .fgPop
         .indent
-          .fgGreen;
-      for(msg in successMsgs) // kinda breaks the flow :/
-        output.writeln(msg);
-      output
+          .fgGreen
+            .yield(function() for(msg in successMsgs) output.writeln(msg))
             .fgPop
           .fgRed
             .writeln(failureMsg)
