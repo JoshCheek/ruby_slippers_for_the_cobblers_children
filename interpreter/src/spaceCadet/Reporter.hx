@@ -12,6 +12,14 @@ interface Reporter {
   ) : Void;
 }
 
+enum SpecEvent {
+  Begin(specName:String);
+  PassAssertion(specName:String, successMsgs:Array<String>);
+  EndPassing(specName:String);
+  EndPending(specName:String, pendingMsg:String);
+  EndFailing(specName:String, successMsgs:Array<String>,  failureMsg:String);
+}
+
 // Feels backwards that the reporter receives the run blocks,
 // but I don't think it would be possible to make an async reporter
 // if we didn't (even though this reporter is not async b/c it progressively writes to the stream)
@@ -29,11 +37,11 @@ class StreamReporter implements Reporter {
     var successMsgs = [];
     var failureMsg  = null;
     var pendingMsg  = null;
-    specLine("begin", name, successMsgs, failureMsg, pendingMsg);
+    specLine(Begin(name));
 
     var onSuccess = function(msg) {
       successMsgs.push(msg);
-      specLine("passAssertion", name, successMsgs, failureMsg, pendingMsg);
+      specLine(PassAssertion(name, successMsgs));
     }
 
     var onFailure = function(msg) {
@@ -49,11 +57,11 @@ class StreamReporter implements Reporter {
     run(onSuccess, onFailure, onPending);
 
     if(failureMsg != null)
-      specLine("fail", name, successMsgs, failureMsg, pendingMsg);
+      specLine(EndFailing(name, successMsgs, failureMsg));
     else if(pendingMsg != null)
-      specLine("pending", name, successMsgs, failureMsg, pendingMsg);
+      specLine(EndPending(name, pendingMsg));
     else
-      specLine("pass", name, successMsgs, failureMsg, pendingMsg);
+      specLine(EndPassing(name));
   }
 
   public function declareDescription(name, run) {
@@ -65,19 +73,20 @@ class StreamReporter implements Reporter {
             .outdent;
   }
 
-  private function specLine(status:String, specName:String, successMsgs:Array<String>, failureMsg:String, pendingMsg:String) {
-    if(status == "begin")
+  private function specLine(status:SpecEvent) {
+    switch(status) {
+      case Begin(specName):
       output
         .fgYellow
           .write(EscapeString.call(specName))
           .fgPop;
-    else if(status == "pass")
+      case EndPassing(specName):
       output
         .fgGreen
           .resetln
           .writeln(EscapeString.call(specName))
           .fgPop;
-    else if(status == "pending")
+      case EndPending(specName, pendingMsg):
       output
         .fgYellow
           .resetln
@@ -85,8 +94,8 @@ class StreamReporter implements Reporter {
           .indent
             .writeln(EscapeString.call(pendingMsg))
             .outdent
-          .fgPop
-    else if(status == "fail") {
+          .fgPop;
+      case EndFailing(specName, successMsgs, failureMsg):
       output
         .fgRed
           .resetln
@@ -101,8 +110,7 @@ class StreamReporter implements Reporter {
             .writeln(EscapeString.call(failureMsg))
             .fgPop
           .outdent;
-    }
-    else if(status == "passAssertion")
+      case PassAssertion(specName, successMsgs):
       output
         .fgYellow
           .resetln
@@ -111,5 +119,6 @@ class StreamReporter implements Reporter {
         .fgGreen
           .write(EscapeString.call(successMsgs[successMsgs.length-1]))
           .fgPop;
+    }
   }
 }
