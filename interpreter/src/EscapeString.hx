@@ -11,13 +11,13 @@ class EscapeString {
     while(i < toEscape.length) {
       var code = toEscape.charCodeAt(i);
 
-      if(code < 7)
-        buffer.add(toHex(code));
-      else if(code < 14 || code == 27)
-        buffer.add(escapeRepresentation(code));
+      if((6 < code && code < 14) || code == 27)
+        buffer.add(toEscapedChar(code));
       else if(code < 32 || code == 127)
         buffer.add(toHex(code));
       else
+        // if performance is poor, an optimization would be to
+        // look for runs of these and add them to the buffer in one go
         buffer.add(toEscape.charAt(i));
 
       i++;
@@ -25,7 +25,11 @@ class EscapeString {
     return buffer.toString();
   }
 
-  static function escapeRepresentation(code:Int):String {
+  inline static function toHex(code:Int):String {
+    return "\\x" + StringTools.hex(code, 2);
+  }
+
+  inline static function toEscapedChar(code:Int):String {
     switch(code) {
       case  7: return "\\a"; // bell
       case  8: return "\\b"; // backspace
@@ -37,9 +41,5 @@ class EscapeString {
       case 27: return "\\e"; // escape
       case  _: throw "WAT IS THIS THING: " + code;
     }
-  }
-
-  inline static function toHex(code:Int):String {
-    return "\\x" + StringTools.hex(code, 2);
   }
 }
