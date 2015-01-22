@@ -16,7 +16,7 @@ class RunTests {
       spaceCadet.DescribeAssertions.describe(root);
       spaceCadet.DescribeBeforeBlocks.describe(root);
       spaceCadet.DescribeReporter.describe(root);
-      spaceCadet.DescribeOutput.describe(root);
+      toplevel.DescribeOutput.describe(root);
       toplevel.DescribeStringOutput.describe(root);
       // run
       var output   = new Output(Sys.stdout(), Sys.stderr());

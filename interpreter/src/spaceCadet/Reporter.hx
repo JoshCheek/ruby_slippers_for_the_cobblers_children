@@ -23,6 +23,7 @@ class StreamReporter implements Reporter {
     this.output = output;
   }
 
+  // this feels backwards, should the reporter really be invoking run?
   public function declareSpec(name, run) {
     var successMsgs = [];
     var failureMsg  = null;

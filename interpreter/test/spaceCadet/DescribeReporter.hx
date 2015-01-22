@@ -6,7 +6,7 @@ class DescribeReporter {
     d.describe('Space Cadet StreamReporter', function(d) {
       var stdout   : StringOutput;
       var stderr   : StringOutput;
-      var output   : spaceCadet.Output;
+      var output   : Output;
       var reporter : StreamReporter;
 
       d.before(function(a) {

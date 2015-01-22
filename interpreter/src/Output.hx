@@ -1,5 +1,3 @@
-package spaceCadet;
-
 using StringTools;
 
 @:enum

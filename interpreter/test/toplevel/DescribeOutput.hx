@@ -1,10 +1,10 @@
-package spaceCadet;
+package toplevel;
 
 class DescribeOutput {
-  public static function describe(d:Description) {
+  public static function describe(d:spaceCadet.Description) {
     var outstream : StringOutput;
     var errstream : StringOutput;
-    var output    : spaceCadet.Output;
+    var output    : Output;
     var assertOut : String -> (Void -> Void) -> Void;
 
     d.before(function(a) {
