@@ -25,6 +25,18 @@ Some Ruby testing notes
   especially in this domain. But still, I'd like to hear him address those criticisms specifically,
   rather than addressing why he doesn't think RubySpec is a good enough specification for Ruby ...which, if I read the underlying intonations correctly, amounted to disliking Brian.
   Which is fine, but someone needs to sit down and say "this is what Ruby is". Thoughtfully and thoroughly, with considerations to the implications of those decisions.
+* [http://tonyarcieri.com/volapuk-a-cautionary-tale-for-any-language-community](Volapük: A Cautionary Tale for Any Language Community)
+  Charles Oliver Nutter tweeted this (apparently Tony Arcierti wrote it).
+  Basically says there was a popular Esperanto-like language with tons of followers, and it died b/c one of its main contributors forked it,
+  making it not a universal language. Says that forking languages is harmful. Questionable logic b/c that language's selling point was its candidacy as a single universal language.
+  This is not true of Ruby, for example. Also, Rbx isn't deviating by choice, they're deviating b/c there's no fucking specification of what Ruby is,
+  and they tried to make one, but it wasn't adopted and nothing reasonable has been suggested in its place. IOW, Rbx would be an implementation of Ruby,
+  if there was something concrete to implement. It's basically on MRI for seeing it like "Ruby is whatever we happen to have done, bugs, implementation details, and all".
+  That's the real harm, I still think it's exactly like everyone considering HTML and HTTP to be whatever IE happened to have done back in the day when it owned the browser market.
+  Remember how shitty that was? See how many awesome browser options we have now that there's a real standard? Given that there isn't a Ruby standard,
+  I think it makes total sense to let go of the pain, restrictions, and tedium of trying to mimic Ruby, and instead focus on what cool things Rbx can bring to the table.
+  Now, to be fair, he's spent years of his life implementing a Ruby (probably more years on JRuby than I've even been programming), so in many ways, he would know better than I.
+  But he is now apparently on the Ruby core team, which makes me less confident in his objectivity. I feel like JRuby has felt a lot of the same pains as Rbx over the years.
 * [I think this is where Ruby's specification starts](https://github.com/ruby/ruby/blob/trunk/test/runner.rb)
   as in you can presumably do something like `ruby test/runner.rb` decided to go look at it to see if it seemed viable as a test suite (as in "doesn't depend on a C implementation"),
   and it looks like it should be runnable. Depending on how serious I get, probably worth hitting that one and RubySpec simultaneously for a bit.
