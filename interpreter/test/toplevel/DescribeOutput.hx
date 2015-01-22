@@ -81,7 +81,6 @@ class DescribeOutput {
         });
         d.specify("fgWhite pushes white onto the colour stack", function(a) {
           output.fgWhite.write("X").fgPop.write("Y");
-          trace(outstream.string.charCodeAt(0));
           a.eq("\033[37mX\033[39mY", outstream.string);
         });
 

@@ -61,7 +61,7 @@ class StreamReporter implements Reporter {
 
   public function declareDescription(name, run) {
     output.fgMagenta
-            .writeln(name)
+            .writeln(EscapeString.call(name))
             .fgPop
           .indent
             .yield(run)
@@ -71,50 +71,48 @@ class StreamReporter implements Reporter {
   private function specLine(status:String, specName:String, successMsgs:Array<String>, failureMsg:String, pendingMsg:String) {
     if(status == "begin")
       output
-        .fgBlue
-          .write(specName)
+        .fgYellow
+          .write(EscapeString.call(specName))
           .fgPop;
     else if(status == "pass")
       output
         .fgGreen
           .resetln
-          .writeln(specName)
+          .writeln(EscapeString.call(specName))
           .fgPop;
     else if(status == "pending")
       output
         .fgYellow
           .resetln
-          .writeln(specName)
+          .writeln(EscapeString.call(specName))
           .indent
-            .writeln(pendingMsg)
+            .writeln(EscapeString.call(pendingMsg))
             .outdent
           .fgPop
     else if(status == "fail") {
       output
         .fgRed
           .resetln
-          .writeln(specName)
+          .writeln(EscapeString.call(specName))
           .fgPop
         .indent
           .fgGreen
-            .yield(function() for(msg in successMsgs) output.writeln(msg))
+            .yield(function() for(msg in successMsgs)
+                     output.writeln(EscapeString.call(msg)))
             .fgPop
           .fgRed
-            .writeln(failureMsg)
+            .writeln(EscapeString.call(failureMsg))
             .fgPop
           .outdent;
     }
     else if(status == "passAssertion")
       output
-        .fgBlue
+        .fgYellow
           .resetln
-          .write(specName)
-          .fgPop
-        .fgWhite
-          .write(" - ")
+          .write(EscapeString.call(specName) + " ")
           .fgPop
         .fgGreen
-          .write(successMsgs[successMsgs.length-1])
+          .write(EscapeString.call(successMsgs[successMsgs.length-1]))
           .fgPop;
   }
 }
