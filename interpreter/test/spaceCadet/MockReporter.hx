@@ -27,24 +27,18 @@ class MockReporter implements Reporter {
     var result = {numSucceeded:0, didSucceed:true, isPending:false};
     crnt.specifications.set(name, result);
 
-    var onSuccess = function(msg) {
+    var onSuccess = function(msg)
       result.numSucceeded++;
-    }
 
-    var onFailure = function(msg) {
+    var onFailure = function(msg)
       result.didSucceed = false;
-      throw new TestFinished();
-    }
 
     var onPending = function(?msg) {
       result.isPending  = true;
       result.didSucceed = false;
-      throw new TestFinished();
     }
 
-    try {
-      run(onSuccess, onFailure, onPending);
-    } catch(_:TestFinished) {}
+    run(onSuccess, onFailure, onPending);
   }
 
   public function declareDescription(name, run) {

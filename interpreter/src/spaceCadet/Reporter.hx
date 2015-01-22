@@ -12,10 +12,12 @@ interface Reporter {
   ) : Void;
 }
 
-class TestFinished {
-  public function new() {}
-}
-
+// Feels backwards that the reporter receives the run blocks,
+// but I don't think it would be possible to make an async reporter
+// if we didn't (even though this reporter is not async b/c it progressively writes to the stream)
+//
+// I think it will need to pass the runDesc a callback in order to truly be able to handle async,
+// but seems better to wait until I need that feature than to try and guess right now.
 class StreamReporter implements Reporter {
   public var output:Output;
   public var numFails = 0;
@@ -23,7 +25,6 @@ class StreamReporter implements Reporter {
     this.output = output;
   }
 
-  // this feels backwards, should the reporter really be invoking run?
   public function declareSpec(name, run) {
     var successMsgs = [];
     var failureMsg  = null;
@@ -38,18 +39,14 @@ class StreamReporter implements Reporter {
     var onFailure = function(msg) {
       this.numFails += 1;
       failureMsg     = msg;
-      throw new TestFinished();
     }
 
     var onPending = function(?msg) {
       if(msg == null) msg = "Not Implemented";
       pendingMsg = msg;
-      throw new TestFinished();
     }
 
-    try {
-      run(onSuccess, onFailure, onPending);
-    } catch(_:TestFinished) {}
+    run(onSuccess, onFailure, onPending);
 
     if(failureMsg != null)
       specLine("fail", name, successMsgs, failureMsg, pendingMsg);

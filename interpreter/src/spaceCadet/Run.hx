@@ -1,5 +1,9 @@
 package spaceCadet;
 
+class TestFinished {
+  public function new() {}
+}
+
 class Run {
   public static function run(desc:Description, rep:Reporter) {
     new Run(rep)._run(desc, []);
@@ -15,18 +19,30 @@ class Run {
     var allBeforeBlocks = beforeBlocks.concat(description.beforeBlocks);
     for(testable in description.testables) {
       switch(testable) {
-        case One(name, body):
-          runSpec(name, allBeforeBlocks, body);
+        case One(name, body):   runSpec(name, allBeforeBlocks, body);
         case Many(name, child): runDesc(name, allBeforeBlocks, child);
       }
     }
   }
 
   private function runSpec(name, beforeBlocks:Array<AssertBlock>, body) {
-    reporter.declareSpec(name, function(onSuccess, onFailure, onPending) {
-      var asserter = new Asserter(onSuccess, onFailure, onPending);
-      for(block in beforeBlocks) block(asserter);
-      body(asserter);
+    reporter.declareSpec(name, function(reportSuccess, reportFailure, reportPending) {
+      var onFailure = function(msg) {
+        reportFailure(msg);
+        throw new TestFinished();
+      }
+
+      var onPending = function(?msg) {
+        reportPending(msg);
+        throw new TestFinished();
+      }
+
+      var asserter = new Asserter(reportSuccess, onFailure, onPending);
+
+      try {
+        for(block in beforeBlocks) block(asserter);
+        body(asserter);
+      } catch(_:TestFinished) {}
     });
   }
 
