@@ -59,11 +59,12 @@ class StreamReporter implements Reporter {
   }
 
   public function declareDescription(name, run) {
-    output.fgMagenta.writeln(name).fgPop;
+    output.fgMagenta.writeln(name).fgPop
+          .indent;
     run();
+    output.outdent;
   }
 
-  // todo: resetln needs to respect indentation
   private function specLine(status:String, specName:String, successMsgs:Array<String>, failureMsg:String, pendingMsg:String) {
     if(status == "begin")
       output
@@ -81,7 +82,9 @@ class StreamReporter implements Reporter {
         .fgYellow
           .resetln
           .writeln(specName)
-          .writeln(pendingMsg)
+          .indent
+            .writeln(pendingMsg)
+            .outdent
           .fgPop
     else if(status == "fail") {
       output
@@ -89,14 +92,16 @@ class StreamReporter implements Reporter {
           .resetln
           .writeln(specName)
           .fgPop
-        .fgGreen;
+        .indent
+          .fgGreen;
       for(msg in successMsgs) // kinda breaks the flow :/
         output.writeln(msg);
       output
-          .fgPop
-        .fgRed
-          .writeln(failureMsg)
-          .fgPop;
+            .fgPop
+          .fgRed
+            .writeln(failureMsg)
+            .fgPop
+          .outdent;
     }
     else if(status == "passAssertion")
       output
