@@ -21,6 +21,7 @@ class Output {
   var colourStack : Stack<String>;
   var indentDepth = 0;
   var indentNext  = true;
+  var writeColour = false;
 
   public function new(outstream, errstream) {
     this.outstream   = outstream;
@@ -36,6 +37,11 @@ class Output {
   }
 
   public function write(message:String) {
+    if(writeColour) {
+      writeColour = false;
+      if(colourStack.isEmpty) message = Colour.FgNone    + message;
+      else                    message = colourStack.peek + message;
+    }
     if(indentNext) {
       indentNext = false;
       var i = 0;
@@ -82,13 +88,14 @@ class Output {
   public var fgWhite   (get, never):Output;
 
   function pushColour(colour:Colour) {
-    write(colourStack.push(colour));
+    colourStack.push(colour);
+    writeColour = true;
     return this;
   }
   function get_fgPop() {
-    if(colourStack.pop() == null) throw "Colour stack is empty, nothing to pop!";
-    if(null == colourStack.peek)  write(Colour.FgNone);
-    else                          write(colourStack.peek);
+    if(colourStack.isEmpty) throw "Colour stack is empty, nothing to pop!";
+    colourStack.pop();
+    writeColour = true;
     return this;
   }
   function get_fgBlack()   return pushColour(FgBlack);

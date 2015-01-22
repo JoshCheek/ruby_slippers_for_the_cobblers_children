@@ -51,6 +51,40 @@ class DescribeOutput {
       });
 
       d.describe("colour stack", function(d) {
+        d.specify("fgBlack pushes black onto the colour stack", function(a) {
+          output.fgBlack.write("X").fgPop.write("Y");
+          a.eq("\033[30mX\033[39mY", outstream.string);
+        });
+        d.specify("fgRed pushes red onto the colour stack", function(a) {
+          output.fgRed.write("X").fgPop.write("Y");
+          a.eq("\033[31mX\033[39mY", outstream.string);
+        });
+        d.specify("fgGreen pushes green onto the colour stack", function(a) {
+          output.fgGreen.write("X").fgPop.write("Y");
+          a.eq("\033[32mX\033[39mY", outstream.string);
+        });
+        d.specify("fgYellow pushes yellow onto the colour stack", function(a) {
+          output.fgYellow.write("X").fgPop.write("Y");
+          a.eq("\033[33mX\033[39mY", outstream.string);
+        });
+        d.specify("fgBlue pushes blue onto the colour stack", function(a) {
+          output.fgBlue.write("X").fgPop.write("Y");
+          a.eq("\033[34mX\033[39mY", outstream.string);
+        });
+        d.specify("fgMagenta pushes magenta onto the colour stack", function(a) {
+          output.fgMagenta.write("X").fgPop.write("Y");
+          a.eq("\033[35mX\033[39mY", outstream.string);
+        });
+        d.specify("fgCyan pushes cyan onto the colour stack", function(a) {
+          output.fgCyan.write("X").fgPop.write("Y");
+          a.eq("\033[36mX\033[39mY", outstream.string);
+        });
+        d.specify("fgWhite pushes white onto the colour stack", function(a) {
+          output.fgWhite.write("X").fgPop.write("Y");
+          trace(outstream.string.charCodeAt(0));
+          a.eq("\033[37mX\033[39mY", outstream.string);
+        });
+
         d.specify("when told to colour the output, it tracks the current colour, allowing it to push/pop them", function(a) {
           assertOut(" a \033[31m b \033[32m c \033[31m d \033[39m e ", function() {
             output.write(" a ").fgRed.write(" b ").fgGreen.write(" c ").fgPop.write(" d ").fgPop.write(" e ");
@@ -67,37 +101,17 @@ class DescribeOutput {
           a.eq(true, raised);
         });
 
-        d.specify("fgBlack pushes black onto the colour stack", function(a) {
-          output.fgBlack.fgPop;
-          a.eq("\033[30m\033[39m", outstream.string);
-        });
-        d.specify("fgRed pushes red onto the colour stack", function(a) {
-          output.fgRed.fgPop;
-          a.eq("\033[31m\033[39m", outstream.string);
-        });
-        d.specify("fgGreen pushes green onto the colour stack", function(a) {
-          output.fgGreen.fgPop;
-          a.eq("\033[32m\033[39m", outstream.string);
-        });
-        d.specify("fgYellow pushes yellow onto the colour stack", function(a) {
-          output.fgYellow.fgPop;
-          a.eq("\033[33m\033[39m", outstream.string);
-        });
-        d.specify("fgBlue pushes blue onto the colour stack", function(a) {
-          output.fgBlue.fgPop;
-          a.eq("\033[34m\033[39m", outstream.string);
-        });
-        d.specify("fgMagenta pushes magenta onto the colour stack", function(a) {
-          output.fgMagenta.fgPop;
-          a.eq("\033[35m\033[39m", outstream.string);
-        });
-        d.specify("fgCyan pushes cyan onto the colour stack", function(a) {
-          output.fgCyan.fgPop;
-          a.eq("\033[36m\033[39m", outstream.string);
-        });
-        d.specify("fgWhite pushes white onto the colour stack", function(a) {
-          output.fgWhite.fgPop;
-          a.eq("\033[37m\033[39m", outstream.string);
+        d.it("does not preemptively apply colours", function(a) {
+          output.fgRed
+                .fgGreen
+                .yield(function() a.eq("", outstream.string))
+                .fgPop
+                .yield(function() a.eq("", outstream.string))
+                .write("X")
+                .yield(function() a.eq("\033[31mX", outstream.string))
+                .fgPop
+                .write("Y")
+                .yield(function() a.eq("\033[31mX\033[39mY", outstream.string));
         });
       });
 
