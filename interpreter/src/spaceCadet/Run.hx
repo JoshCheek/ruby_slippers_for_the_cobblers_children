@@ -4,20 +4,34 @@ class TestFinished {
   public function new() {}
 }
 
+typedef ReporterOptions = {
+  @:optional var failFast:Bool;
+}
+
 class Run {
-  public static function run(desc:Description, rep:Reporter) {
-    new Run(rep)._run(desc, []);
+  public static function withDefaults(?opts:ReporterOptions) {
+    if(opts == null) opts = {};
+    if(opts.failFast == null) opts.failFast = false;
+    return opts;
   }
 
-  private var reporter:Reporter;
+  public static function run(desc:Description, rep:Reporter, ?opts:ReporterOptions) {
+    new Run(rep, opts)._run(desc, []);
+  }
 
-  public function new(reporter) {
+  private var reporter    : Reporter;
+  private var opts        : ReporterOptions;
+  private var haltTesting : Bool;
+
+  public function new(reporter, ?opts:ReporterOptions) {
+    this.opts     = withDefaults(opts);
     this.reporter = reporter;
   }
 
   private function _run(description:Description, beforeBlocks:Array<AssertBlock>) {
     var allBeforeBlocks = beforeBlocks.concat(description.beforeBlocks);
     for(testable in description.testables) {
+      if(haltTesting) return;
       switch(testable) {
         case One(name, body):   runSpec(name, allBeforeBlocks, body);
         case Many(name, child): runDesc(name, allBeforeBlocks, child);
@@ -28,6 +42,7 @@ class Run {
   private function runSpec(name, beforeBlocks:Array<AssertBlock>, body) {
     reporter.declareSpec(name, function(reportAssertionPass, reportPass, reportPending, reportFailure) {
       var onFailure = function(msg) {
+        if(opts.failFast) haltTesting = true;
         reportFailure(msg);
         throw new TestFinished();
       }
