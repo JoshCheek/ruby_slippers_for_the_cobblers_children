@@ -41,8 +41,6 @@ class DescribeOutput {
         assertOut("a\r\033[2Kb", function() output.write("a").resetln.write("b"));
       });
 
-      // d.describe
-
       d.describe("colour stack", function(d) {
         d.specify("when told to colour the output, it tracks the current colour, allowing it to push/pop them", function(a) {
           assertOut(" a \033[31m b \033[32m c \033[31m d \033[39m e ", function() {
@@ -91,6 +89,49 @@ class DescribeOutput {
         d.specify("fgWhite pushes white onto the colour stack", function(a) {
           output.fgWhite.fgPop;
           a.eq("\033[37m\033[39m", outstream.string);
+        });
+      });
+
+      d.describe("indentation", function(d) {
+        d.it("starts at 0 indentation", function(a) {
+          output.write("a");
+          a.eq("a", outstream.string);
+        });
+        d.it("can be told to indent", function(a) {
+          output.indent.write("a");
+          a.eq("  a", outstream.string);
+        });
+        d.it("can be told to outdent", function(a) {
+          output.indent.outdent.write("a");
+          a.eq("a", outstream.string);
+        });
+        d.specify("#writeln respects indentation, but doesn't preemptively write it", function(a) {
+          output.indent.writeln("a").writeln("b");
+          a.eq("  a\n  b\n", outstream.string);
+        });
+        d.specify("#resetln respects indentation, but doesn't preemptively write it", function(a) {
+          output.indent.write("a")
+                .resetln.write("b")
+                .resetln;
+          a.eq("  a\r\033[2K  b\r\033[2K", outstream.string);
+        });
+        d.it("can have multiple levels of indentation", function(a) {
+          output.indent.indent.writeln("a")
+                .outdent.writeln("b")
+                .outdent.writeln("c");
+          a.eq("    a\n"+
+               "  b\n"+
+               "c\n",
+               outstream.string);
+        });
+        d.it("throws an error if outdenting when there is no indentation", function(a) {
+          var raised = false;
+          try output.outdent
+          catch(e:String) {
+            raised = true;
+            a.eq(true, ~/no indentation/.match(e));
+          }
+          a.eq(true, raised);
         });
       });
     });

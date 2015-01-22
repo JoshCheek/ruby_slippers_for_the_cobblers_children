@@ -19,6 +19,8 @@ class Output {
   var outstream   : haxe.io.Output;
   var errstream   : haxe.io.Output;
   var colourStack : Stack<String>;
+  var indentDepth = 0;
+  var indentNext  = true;
 
   public function new(outstream, errstream) {
     this.outstream   = outstream;
@@ -26,22 +28,41 @@ class Output {
     this.colourStack = new Stack();
   }
 
-  public function writeln(message) {
-    outstream.writeString(message);
-    if(!message.endsWith("\n"))
-      outstream.writeString("\n");
+  public function writeln(message:String) {
+    if(!message.endsWith("\n")) message += "\n";
+    write(message);
+    indentNext = true;
     return this;
   }
 
-  public function write(message) {
+  public function write(message:String) {
+    if(indentNext) {
+      indentNext = false;
+      var i = 0;
+      while(i++ < indentDepth) message = "  " + message;
+    }
     outstream.writeString(message);
+    outstream.flush();
     return this;
   }
 
   public var resetln(get, never):Output;
-
   public function get_resetln() {
-    outstream.writeString("\r\033[2K");
+    write("\r\033[2K");
+    indentNext = true;
+    return this;
+  }
+
+  public var indent(get, never):Output;
+  public function get_indent() {
+    indentDepth++;
+    return this;
+  }
+
+  public var outdent(get, never):Output;
+  public function get_outdent() {
+    if(indentDepth == 0) throw "Cannot outdent, there is no indentation!";
+    indentDepth--;
     return this;
   }
 
@@ -57,7 +78,6 @@ class Output {
 
   function pushColour(colour:Colour) {
     write(colourStack.push(colour));
-    outstream.flush();
     return this;
   }
   function get_fgPop() {
