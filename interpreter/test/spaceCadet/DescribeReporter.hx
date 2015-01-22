@@ -17,7 +17,7 @@ class DescribeReporter {
       });
 
       d.it('implements the Reporter interface', function(a) {
-        a.pending();
+        var a:Reporter = new StreamReporter(output);
       });
 
       d.it('prints descriptions', function(a) {
