@@ -40,7 +40,7 @@ class MockReporter implements Reporter {
       result.didSucceed = false;
     }
 
-    run(passAssertion, onPass, onFailure, onPending);
+    run(passAssertion, onPass, onPending, onFailure);
   }
 
   public function declareDescription(name, run) {

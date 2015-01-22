@@ -26,28 +26,28 @@ class DescribeReporter {
         a.eq(true, ~/mydesc/.match(stdout.string));
       });
 
-      // NOTE: po,pa,f,pe = "pass one", "pass all", "fail", "pending"
+      // NOTE: po,pa,f,pe = "pass one", "pass all", "pending", "fail"
       d.it('prints successful specs', function(a) {
         a.eq(false, ~/myspec/.match(stdout.string));
-        reporter.declareSpec("myspec", function(po,pa,f,pe) { po(""); pa(); });
+        reporter.declareSpec("myspec", function(po,pa,pe,f) { po(""); pa(); });
         a.eq(true, ~/myspec/.match(stdout.string));
       });
 
       d.it('prints failing specs', function(a) {
         a.eq(false, ~/myspec/.match(stdout.string));
-        reporter.declareSpec("myspec", function(po,pa,f,pe) f(""));
+        reporter.declareSpec("myspec", function(po,pa,pe,f) f(""));
         a.eq(true, ~/myspec/.match(stdout.string));
       });
 
       d.it('prints pending specs', function(a) {
         a.eq(false, ~/myspec/.match(stdout.string));
-        reporter.declareSpec("myspec", function(po,pa,f,pe) pe(""));
+        reporter.declareSpec("myspec", function(po,pa,pe,f) pe(""));
         a.eq(true, ~/myspec/.match(stdout.string));
       });
 
       d.it('prints failure messages', function(a) {
         a.eq(false, ~/failmsg/.match(stdout.string));
-        reporter.declareSpec("myspec", function(po,pa,f,pe) f("failmsg"));
+        reporter.declareSpec("myspec", function(po,pa,pe,f) f("failmsg"));
         a.eq(true, ~/failmsg/.match(stdout.string));
       });
 

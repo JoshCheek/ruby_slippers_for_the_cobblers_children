@@ -6,8 +6,8 @@ typedef ReportPending = String -> Void;
 typedef ReportFailing = String -> Void;
 typedef SpecCallbacks = PassAssertion
                      -> ReportPassing
-                     -> ReportFailing
                      -> ReportPending
+                     -> ReportFailing
                      -> Void;
 
 typedef RunSpecs = Void -> Void;
@@ -51,17 +51,17 @@ class StreamReporter implements Reporter {
       specLine(EndPassing(name));
     }
 
-    var onFailure = function(msg) {
-      this.numFails += 1;
-      specLine(EndFailing(name, successMsgs, msg));
-    }
-
     var onPending = function(?msg) {
       if(msg == null) msg = "Not Implemented";
       specLine(EndPending(name, msg));
     }
 
-    run(passAssertion, onPass, onFailure, onPending);
+    var onFailure = function(msg) {
+      this.numFails += 1;
+      specLine(EndFailing(name, successMsgs, msg));
+    }
+
+    run(passAssertion, onPass, onPending, onFailure);
   }
 
   public function declareDescription(name, run) {
