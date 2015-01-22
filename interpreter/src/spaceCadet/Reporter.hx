@@ -3,7 +3,7 @@ package spaceCadet;
 interface Reporter {
   public function declareSpec(
     name : String,
-    run  : (String->Void)->(String->Void)->(String->Void)->Void
+    run  : (String->Void)->(Void->Void)->(String->Void)->(String->Void)->Void
   ) : Void;
 
   public function declareDescription(
@@ -35,33 +35,28 @@ class StreamReporter implements Reporter {
 
   public function declareSpec(name, run) {
     var successMsgs = [];
-    var failureMsg  = null;
-    var pendingMsg  = null;
     specLine(Begin(name));
 
-    var onSuccess = function(msg) {
+    var passAssertion = function(msg) {
       successMsgs.push(msg);
       specLine(PassAssertion(name, successMsgs));
     }
 
+    var onPass = function() {
+      specLine(EndPassing(name));
+    }
+
     var onFailure = function(msg) {
       this.numFails += 1;
-      failureMsg     = msg;
+      specLine(EndFailing(name, successMsgs, msg));
     }
 
     var onPending = function(?msg) {
       if(msg == null) msg = "Not Implemented";
-      pendingMsg = msg;
+      specLine(EndPending(name, msg));
     }
 
-    run(onSuccess, onFailure, onPending);
-
-    if(failureMsg != null)
-      specLine(EndFailing(name, successMsgs, failureMsg));
-    else if(pendingMsg != null)
-      specLine(EndPending(name, pendingMsg));
-    else
-      specLine(EndPassing(name));
+    run(passAssertion, onPass, onFailure, onPending);
   }
 
   public function declareDescription(name, run) {

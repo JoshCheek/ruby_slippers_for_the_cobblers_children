@@ -27,8 +27,10 @@ class MockReporter implements Reporter {
     var result = {numSucceeded:0, didSucceed:true, isPending:false};
     crnt.specifications.set(name, result);
 
-    var onSuccess = function(msg)
+    var passAssertion = function(msg)
       result.numSucceeded++;
+
+    var onPass = function() {}
 
     var onFailure = function(msg)
       result.didSucceed = false;
@@ -38,7 +40,7 @@ class MockReporter implements Reporter {
       result.didSucceed = false;
     }
 
-    run(onSuccess, onFailure, onPending);
+    run(passAssertion, onPass, onFailure, onPending);
   }
 
   public function declareDescription(name, run) {

@@ -26,7 +26,7 @@ class Run {
   }
 
   private function runSpec(name, beforeBlocks:Array<AssertBlock>, body) {
-    reporter.declareSpec(name, function(reportSuccess, reportFailure, reportPending) {
+    reporter.declareSpec(name, function(reportAssertionPass, reportPass, reportFailure, reportPending) {
       var onFailure = function(msg) {
         reportFailure(msg);
         throw new TestFinished();
@@ -37,12 +37,16 @@ class Run {
         throw new TestFinished();
       }
 
-      var asserter = new Asserter(reportSuccess, onFailure, onPending);
+      var asserter = new Asserter(reportAssertionPass, onFailure, onPending);
 
       try {
         for(block in beforeBlocks) block(asserter);
         body(asserter);
-      } catch(_:TestFinished) {}
+      } catch(_:TestFinished) {
+        return;
+      }
+
+      reportPass();
     });
   }
 
