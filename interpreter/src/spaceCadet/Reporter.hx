@@ -1,15 +1,20 @@
 package spaceCadet;
 
-interface Reporter {
-  public function declareSpec(
-    name : String,
-    run  : (String->Void)->(Void->Void)->(String->Void)->(String->Void)->Void
-  ) : Void;
+typedef PassAssertion = String -> Void;
+typedef ReportPassing = Void   -> Void;
+typedef ReportPending = String -> Void;
+typedef ReportFailing = String -> Void;
+typedef SpecCallbacks = PassAssertion
+                     -> ReportPassing
+                     -> ReportFailing
+                     -> ReportPending
+                     -> Void;
 
-  public function declareDescription(
-    name : String,
-    run  : Void->Void
-  ) : Void;
+typedef RunSpecs = Void -> Void;
+
+interface Reporter {
+  public function declareSpec(name:String, run:SpecCallbacks): Void;
+  public function declareDescription(name:String, run:RunSpecs):Void;
 }
 
 enum SpecEvent {
@@ -33,7 +38,7 @@ class StreamReporter implements Reporter {
     this.output = output;
   }
 
-  public function declareSpec(name, run) {
+  public function declareSpec(name, run:SpecCallbacks) {
     var successMsgs = [];
     specLine(Begin(name));
 
