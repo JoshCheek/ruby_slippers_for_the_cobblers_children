@@ -3,6 +3,8 @@ using StringTools;
 class Inspect {
   public static function call(toInspect:Dynamic) {
     switch(Type.typeof(toInspect)) {
+      case TBool:
+        return inspectBool(toInspect);
       case TClass(klass): // Class<Dynamic>
         if(klass==String) return inspectString(toInspect);
         if(klass==Array)  return inspectArray(toInspect);
@@ -20,6 +22,9 @@ class Inspect {
 
     return "";
   }
+
+  public static function inspectBool(toInspect:Bool)
+    return Std.string(toInspect);
 
   public static function inspectString(toInspect:String) {
     return '"' +

@@ -6,6 +6,15 @@ class DescribeInspect {
   }
   public static function describe(d:spaceCadet.Description) {
     d.describe("Inspect", function(d) {
+      d.describe("on a Bool", function(d) {
+        d.it('true -> "true"', function(a) {
+          a.eq("true", inspect(true));
+        });
+        d.it('false -> "false"', function(a) {
+          a.eq("false", inspect(false));
+        });
+      });
+
       d.describe("on String", function(d) {
         d.it("wraps strings in quotes and escapes them", function(a) {
           a.eq('"a\\bc"', inspect("a\x08c"));
