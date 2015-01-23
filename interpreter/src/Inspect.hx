@@ -5,6 +5,8 @@ class Inspect {
     switch(Type.typeof(toInspect)) {
       case TBool:
         return inspectBool(toInspect);
+      case TInt:
+        return Std.string(toInspect);
       case TClass(klass): // Class<Dynamic>
         if(klass==String) return inspectString(toInspect);
         if(klass==Array)  return inspectArray(toInspect);
@@ -12,7 +14,6 @@ class Inspect {
         throw("No inspect available yet");
       // case TEnum(e): // Enum<Dynamic>
       // case TNull:
-      // case TInt:
       // case TFloat:
       // case TBool:
       // case TObject:

@@ -15,6 +15,16 @@ class DescribeInspect {
         });
       });
 
+      d.describe("on an Int", function(d) {
+        d.it("inspects to the literal", function(a) {
+          a.eq("0", inspect(0));
+          a.eq("1", inspect(1));
+          a.eq("-1", inspect(-1));
+          a.eq("1234567890", inspect(1234567890));
+          a.eq("-1234567890", inspect(-1234567890));
+        });
+      });
+
       d.describe("on String", function(d) {
         d.it("wraps strings in quotes and escapes them", function(a) {
           a.eq('"a\\bc"', inspect("a\x08c"));
