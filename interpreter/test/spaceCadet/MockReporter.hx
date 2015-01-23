@@ -27,15 +27,15 @@ class MockReporter implements Reporter {
     var result = {numSucceeded:0, didSucceed:true, isPending:false};
     crnt.specifications.set(name, result);
 
-    var passAssertion = function(msg)
+    var passAssertion = function(msg, pos)
       result.numSucceeded++;
 
     var onPass = function() {}
 
-    var onFailure = function(msg)
+    var onFailure = function(msg, pos)
       result.didSucceed = false;
 
-    var onPending = function(?msg) {
+    var onPending = function(msg, pos) {
       result.isPending  = true;
       result.didSucceed = false;
     }

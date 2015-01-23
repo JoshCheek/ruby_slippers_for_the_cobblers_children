@@ -1,9 +1,9 @@
 package spaceCadet;
 
-typedef PassAssertion = String -> Void;
-typedef ReportPassing = Void   -> Void;
-typedef ReportPending = String -> Void;
-typedef ReportFailing = String -> Void;
+typedef PassAssertion = String -> haxe.PosInfos -> Void;
+typedef ReportPassing = Void   ->                  Void;
+typedef ReportPending = String -> haxe.PosInfos -> Void;
+typedef ReportFailing = String -> haxe.PosInfos -> Void;
 typedef SpecCallbacks = PassAssertion
                      -> ReportPassing
                      -> ReportPending
@@ -18,11 +18,11 @@ interface Reporter {
 }
 
 enum SpecEvent {
-  Begin(specName:String);
-  PassAssertion(specName:String, successMsgs:Array<String>);
-  EndPassing(specName:String);
-  EndPending(specName:String, pendingMsg:String);
-  EndFailing(specName:String, successMsgs:Array<String>,  failureMsg:String);
+  Begin(         specName:String);
+  PassAssertion( specName:String, pos:haxe.PosInfos, successMsgs:Array<String>);
+  EndPassing(    specName:String);
+  EndPending(    specName:String, pos:haxe.PosInfos, pendingMsg:String);
+  EndFailing(    specName:String, pos:haxe.PosInfos, successMsgs:Array<String>, failureMsg:String);
 }
 
 // Feels backwards that the reporter receives the run blocks,
@@ -42,23 +42,23 @@ class StreamReporter implements Reporter {
     var successMsgs = [];
     specLine(Begin(name));
 
-    var passAssertion = function(msg) {
+    var passAssertion = function(msg, pos) {
       successMsgs.push(msg);
-      specLine(PassAssertion(name, successMsgs));
+      specLine(PassAssertion(name, pos, successMsgs));
     }
 
     var onPass = function() {
       specLine(EndPassing(name));
     }
 
-    var onPending = function(?msg) {
+    var onPending = function(msg, pos) {
       if(msg == null) msg = "Not Implemented";
-      specLine(EndPending(name, msg));
+      specLine(EndPending(name, pos, msg));
     }
 
-    var onFailure = function(msg) {
+    var onFailure = function(msg, pos) {
       this.numFails += 1;
-      specLine(EndFailing(name, successMsgs, msg));
+      specLine(EndFailing(name, pos, successMsgs, msg));
     }
 
     run(passAssertion, onPass, onPending, onFailure);
@@ -86,20 +86,20 @@ class StreamReporter implements Reporter {
           .resetln
           .writeln(EscapeString.call(specName))
           .fgPop;
-      case EndPending(specName, pendingMsg):
+      case EndPending(specName, pos, pendingMsg):
       output
         .fgYellow
           .resetln
-          .writeln(EscapeString.call(specName))
+          .writeln(EscapeString.call(specName) + " (" + pos.fileName + ":" + pos.lineNumber + ")")
           .indent
             .writeln(EscapeString.call(pendingMsg))
             .outdent
           .fgPop;
-      case EndFailing(specName, successMsgs, failureMsg):
+      case EndFailing(specName, pos, successMsgs, failureMsg):
       output
         .fgRed
           .resetln
-          .writeln(EscapeString.call(specName))
+          .writeln(EscapeString.call(specName) + " (" + pos.fileName + ":" + pos.lineNumber + ")")
           .fgPop
         .indent
           .fgGreen
@@ -110,7 +110,7 @@ class StreamReporter implements Reporter {
             .writeln(EscapeString.call(failureMsg))
             .fgPop
           .outdent;
-      case PassAssertion(specName, successMsgs):
+      case PassAssertion(specName, pos, successMsgs):
       output
         .fgYellow
           .resetln
