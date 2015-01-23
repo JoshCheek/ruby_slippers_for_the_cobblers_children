@@ -22,6 +22,11 @@ class DescribeInspect {
         d.it("wraps the array in brackets", function(a) {
           a.eq("[]", inspect([]));
         });
+        d.it("inspects each element, separating them with commas", function(a) {
+          a.eq('["a"]', inspect(["a"]));
+          a.eq('["a", "b"]', inspect(["a", "b"]));
+          a.eq('[["a"], ["b"]]', inspect([["a"], ["b"]]));
+        });
       });
     });
   }

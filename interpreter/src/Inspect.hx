@@ -33,6 +33,9 @@ class Inspect {
   }
 
   public static function inspectArray(toInspect:Array<Dynamic>) {
-    return "[]";
+    var inspectedElements = [];
+    for(element in toInspect)
+      inspectedElements.push(call(element));
+    return "[" + inspectedElements.join(", ") + "]";
   }
 }
