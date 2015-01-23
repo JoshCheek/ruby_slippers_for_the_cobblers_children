@@ -1,11 +1,14 @@
+using StringTools;
+
 class Inspect {
   public static function call(toInspect:String) {
-    return '"' +                           // open double quote
-           StringTools.replace(
-             EscapeString.call(toInspect), // escape each char
-             '"',                          // replace double quote
-             '\\"'                         // with escaped double quote (otherwise it would close the string)
-           ) +
-           '"';                            // close double quote
+    return '"' +
+           EscapeString.call(
+             // do these go in EscapeString ?
+             // or maybe EscapeString isn't really escaping so much as making all chars printable?
+             toInspect.replace('\\', '\\\\')
+                      .replace('"', '\\"')
+          ) +
+           '"';
   }
 }

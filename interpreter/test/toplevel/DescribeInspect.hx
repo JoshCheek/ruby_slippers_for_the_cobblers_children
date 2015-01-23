@@ -13,6 +13,9 @@ class DescribeInspect {
         d.it("escapes double quotes to avoid delimiter confusion", function(a) {
           a.eq("\"\\\"\"", inspect('"'));
         });
+        d.it("escapes escapes -- you should be able to paste the result into a source file and get the un-inspected version", function(a) {
+          a.eq("\"\\\\\"", inspect('\\'));
+        });
       });
     });
   }
