@@ -3,7 +3,7 @@ using StringTools;
 class Inspect {
   public static function call(toInspect:Dynamic) {
     switch(Type.typeof(toInspect)) {
-      case TBool | TInt:
+      case TBool | TInt | TNull:
         return Std.string(toInspect);
       case TFloat:
         return inspectFloat(toInspect);
@@ -13,9 +13,6 @@ class Inspect {
       case _:
         throw("No inspect available yet");
       // case TEnum(e): // Enum<Dynamic>
-      // case TNull:
-      // case TFloat:
-      // case TBool:
       // case TObject:
       // case TFunction:
       // case TUnknown:

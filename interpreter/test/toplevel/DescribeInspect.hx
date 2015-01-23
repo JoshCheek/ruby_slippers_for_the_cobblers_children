@@ -1,11 +1,18 @@
 package toplevel;
 
+// TODO: haxe.Int32, haxe.Int64
 class DescribeInspect {
   public static function inspect(str:Dynamic) {
     return Inspect.call(str);
   }
   public static function describe(d:spaceCadet.Description) {
     d.describe("Inspect", function(d) {
+      d.describe("on null", function(d) {
+        d.it('inspects to "null"', function(a) {
+          a.eq("null", inspect(null));
+        });
+      });
+
       d.describe("on a Bool", function(d) {
         d.it('true -> "true"', function(a) {
           a.eq("true", inspect(true));
@@ -26,22 +33,19 @@ class DescribeInspect {
       });
 
       d.describe("on a Float", function(d) {
-        d.example('uses decimal notation if small enough', function(a) {
+        d.it('appends .0 when there are no values to the RHS of the point', function(a) {
           a.eq("0.0", inspect(0.0));
           a.eq("0.0", inspect(.0));
           a.eq("1.0", inspect(1.0));
           a.eq("-1.0", inspect(-1.0));
         });
 
-        d.example('with values to the RHS of the point', function(a) {
+        d.it('displays normally when there are values to the RHS of the point', function(a) {
           a.eq('123.456', inspect(123.456));
           a.eq('-123.456', inspect(-123.456));
         });
 
-        d.it('appends the decimal point if missing, non-decimal is an int', function(a) {
-          a.pending();
-        });
-        d.it('supports scientific notation', function(a) {
+        d.it('reverts to scientific notation when the float is sufficiently large', function(a) {
           a.eq('1e+50', inspect(1e+50));
           a.eq('1e+50', inspect(1e50));
           a.eq('1.23e+50', inspect(1.23e+50));
