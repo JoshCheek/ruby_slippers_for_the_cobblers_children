@@ -25,6 +25,31 @@ class DescribeInspect {
         });
       });
 
+      d.describe("on a Float", function(d) {
+        d.example('uses decimal notation if small enough', function(a) {
+          a.eq("0.0", inspect(0.0));
+          a.eq("0.0", inspect(.0));
+          a.eq("1.0", inspect(1.0));
+          a.eq("-1.0", inspect(-1.0));
+        });
+
+        d.example('with values to the RHS of the point', function(a) {
+          a.eq('123.456', inspect(123.456));
+          a.eq('-123.456', inspect(-123.456));
+        });
+
+        d.it('appends the decimal point if missing, non-decimal is an int', function(a) {
+          a.pending();
+        });
+        d.it('supports scientific notation', function(a) {
+          a.eq('1e+50', inspect(1e+50));
+          a.eq('1e+50', inspect(1e50));
+          a.eq('1.23e+50', inspect(1.23e+50));
+          a.eq('1.23e+50', inspect(1.23e50));
+          a.eq('-1.23e+50', inspect(-1.23e50));
+        });
+      });
+
       d.describe("on String", function(d) {
         d.it("wraps strings in quotes and escapes them", function(a) {
           a.eq('"a\\bc"', inspect("a\x08c"));

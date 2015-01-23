@@ -3,10 +3,10 @@ using StringTools;
 class Inspect {
   public static function call(toInspect:Dynamic) {
     switch(Type.typeof(toInspect)) {
-      case TBool:
-        return inspectBool(toInspect);
-      case TInt:
+      case TBool | TInt:
         return Std.string(toInspect);
+      case TFloat:
+        return inspectFloat(toInspect);
       case TClass(klass): // Class<Dynamic>
         if(klass==String) return inspectString(toInspect);
         if(klass==Array)  return inspectArray(toInspect);
@@ -24,10 +24,14 @@ class Inspect {
     return "";
   }
 
-  public static function inspectBool(toInspect:Bool)
-    return Std.string(toInspect);
+  private static function inspectFloat(toInspect:Float) {
+    var inspected = Std.string(toInspect);
+    if(~/\./.match(inspected)) return inspected;  // 12.34
+    if(~/e/.match(inspected))  return inspected;  // 12.34e+50
+    return inspected + ".0"; // 1 -> 1.0
+  }
 
-  public static function inspectString(toInspect:String) {
+  private static function inspectString(toInspect:String) {
     return '"' +
            EscapeString.call(
              // do these go in EscapeString ?
@@ -38,7 +42,7 @@ class Inspect {
            '"';
   }
 
-  public static function inspectArray(toInspect:Array<Dynamic>) {
+  private static function inspectArray(toInspect:Array<Dynamic>) {
     var inspectedElements = [];
     for(element in toInspect)
       inspectedElements.push(call(element));
