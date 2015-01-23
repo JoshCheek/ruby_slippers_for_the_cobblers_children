@@ -1,7 +1,27 @@
 using StringTools;
 
 class Inspect {
-  public static function call(toInspect:String) {
+  public static function call(toInspect:Dynamic) {
+    switch(Type.typeof(toInspect)) {
+      case TClass(klass): // Class<Dynamic>
+        if(klass==String) return inspectString(toInspect);
+        if(klass==Array)  return inspectArray(toInspect);
+      case _:
+        throw("No inspect available yet");
+      // case TEnum(e): // Enum<Dynamic>
+      // case TNull:
+      // case TInt:
+      // case TFloat:
+      // case TBool:
+      // case TObject:
+      // case TFunction:
+      // case TUnknown:
+    }
+
+    return "";
+  }
+
+  public static function inspectString(toInspect:String) {
     return '"' +
            EscapeString.call(
              // do these go in EscapeString ?
@@ -10,5 +30,9 @@ class Inspect {
                       .replace('"', '\\"')
           ) +
            '"';
+  }
+
+  public static function inspectArray(toInspect:Array<Dynamic>) {
+    return "[]";
   }
 }

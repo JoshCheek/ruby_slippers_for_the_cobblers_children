@@ -1,7 +1,7 @@
 package toplevel;
 
 class DescribeInspect {
-  public static function inspect(str) {
+  public static function inspect(str:Dynamic) {
     return Inspect.call(str);
   }
   public static function describe(d:spaceCadet.Description) {
@@ -15,6 +15,12 @@ class DescribeInspect {
         });
         d.it("escapes escapes -- you should be able to paste the result into a source file and get the un-inspected version", function(a) {
           a.eq("\"\\\\\"", inspect('\\'));
+        });
+      });
+
+      d.describe("on an array", function(d) {
+        d.it("wraps the array in brackets", function(a) {
+          a.eq("[]", inspect([]));
         });
       });
     });
