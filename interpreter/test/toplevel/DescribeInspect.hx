@@ -5,6 +5,13 @@ class DescribeInspect {
   public static function inspect(str:Dynamic) {
     return Inspect.call(str);
   }
+
+  // the Neko core implementation has an attribute "r" ...kinda iffy, but w/e
+  @:access(EReg.r)
+  public static function getUnknown():Dynamic {
+    return ~/regex/.r;
+  }
+
   public static function describe(d:spaceCadet.Description) {
     d.describe("Inspect", function(d) {
       d.describe("on null", function(d) {
@@ -74,6 +81,12 @@ class DescribeInspect {
           a.eq('["a"]', inspect(["a"]));
           a.eq('["a", "b"]', inspect(["a", "b"]));
           a.eq('[["a"], ["b"]]', inspect([["a"], ["b"]]));
+        });
+      });
+
+      d.describe("on unknown", function(d) {
+        d.it('displays "Unknown(s)", where s is whatever Std.string returns', function(a) {
+          a.eq("Unknown(#abstract)", inspect(getUnknown()));
         });
       });
     });

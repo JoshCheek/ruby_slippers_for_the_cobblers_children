@@ -3,22 +3,26 @@ using StringTools;
 class Inspect {
   public static function call(toInspect:Dynamic) {
     switch(Type.typeof(toInspect)) {
-      case TBool | TInt | TNull:
-        return Std.string(toInspect);
       case TFloat:
         return inspectFloat(toInspect);
+      case TUnknown:
+        return 'Unknown(${toInspect})';
+      case TBool | TInt | TNull:
+        return Std.string(toInspect);
       case TClass(klass): // Class<Dynamic>
         if(klass==String) return inspectString(toInspect);
         if(klass==Array)  return inspectArray(toInspect);
-      case _:
-        throw("No inspect available yet");
-      // case TEnum(e): // Enum<Dynamic>
-      // case TObject:
-      // case TFunction:
-      // case TUnknown:
+        throw 'No inspect for ${klass} yet!';
+      case TObject:
+        throw("TObject has no inspection yet");
+        return "";
+      case TFunction:
+        throw("TFunction has no inspection yet");
+        return "";
+      case TEnum(e): // Enum<Dynamic>
+        throw("TEnum has no inspection yet");
+        return "";
     }
-
-    return "";
   }
 
   private static function inspectFloat(toInspect:Float) {
