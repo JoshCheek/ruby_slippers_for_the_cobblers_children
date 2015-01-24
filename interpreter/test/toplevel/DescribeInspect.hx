@@ -10,6 +10,11 @@ typedef TypeDefedStruct0 = {}
 typedef TypeDefedStruct1 = {x:Int}
 typedef TypeDefedStruct2 = {x:Int, y:String}
 
+enum MapKeys {
+  KeyOne;
+  KeyTwo;
+}
+
 class DescribeInspect {
   public static function inspect(str:Dynamic) {
     return Inspect.call(str);
@@ -90,6 +95,35 @@ class DescribeInspect {
           a.eq('["a"]', inspect(["a"]));
           a.eq('["a", "b"]', inspect(["a", "b"]));
           a.eq('[["a"], ["b"]]', inspect([["a"], ["b"]]));
+        });
+      });
+
+      d.describe("on hashes", function(d) {
+        d.it("inspects like the literal", function(a) {
+          a.eq('[]', inspect([]));
+          a.eq('["a" => "b"]', inspect(["a" => "b"]));
+          a.eq('["a" => "b", "c" => "d"]', inspect(["a" => "b", "c" => "d"]));
+        });
+        d.it("works for StringMap", function(a) {
+          a.eq('["a" => "b"]', inspect(["a" => "b"]));
+        });
+        d.it("works for IntMap", function(a) {
+          a.eq('[1 => "a"]', inspect([1 => "a"]));
+        });
+        d.it("works for ObjectMap", function(a) {
+          a.eq('[{a: 1} => 2]', inspect([{a:1} => 2]));
+        });
+        d.it("works for EnumValueMap", function(a) {
+          a.pending('Enums don\'t have an inspect yet');
+          a.eq('[KeyOne => 2]', inspect([KeyOne => 2]));
+        });
+        d.it("works for WeakMap", function(a) {
+          a.pending('I don\'t know how to get one of these');
+        });
+        d.it("works for EnumValueMap", function(a) {
+          a.pending('Looks like another class that isn\'t in the publically released version');
+          // var map:haxe.ds.UnsafeStringMap = ["constructor" => "c", "prototype" => "p"];
+          // a.eq('["constructor" => "c", "prototype" => "p"]', inspect(map));
         });
       });
 
