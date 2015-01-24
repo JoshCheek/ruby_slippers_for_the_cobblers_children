@@ -28,36 +28,39 @@ class DescribeReporter {
         a.eq(true, ~/mydesc/.match(stdout.string));
       });
 
-      // NOTE: po,pa,f,pe = "pass one", "pass all", "pending", "fail"
+      // NOTE: po,pa,f,pe = "pass one", "pass all", "pending", "fail", "thrown"
       d.it('prints successful specs', function(a) {
         a.eq(false, ~/myspec/.match(stdout.string));
-        reporter.declareSpec("myspec", function(po,pa,pe,f) { po("", pos); pa(); });
+        reporter.declareSpec("myspec", function(po,pa,pe,f,t) { po("", pos); pa(); });
         a.eq(true, ~/myspec/.match(stdout.string));
       });
 
       d.it('prints failing specs', function(a) {
         a.eq(false, ~/myspec/.match(stdout.string));
-        reporter.declareSpec("myspec", function(po,pa,pe,f) f("", pos));
+        reporter.declareSpec("myspec", function(po,pa,pe,f,t) f("", pos));
         a.eq(true, ~/myspec/.match(stdout.string));
-      });
-
-      d.it('prints a backtrace for failing specs', function(a) {
-        a.pending();
-        reporter.declareSpec('myspec', function(po,pa,pe,f) {
-
-        });
       });
 
       d.it('prints pending specs', function(a) {
         a.eq(false, ~/myspec/.match(stdout.string));
-        reporter.declareSpec("myspec", function(po,pa,pe,f) pe("", pos));
+        reporter.declareSpec("myspec", function(po,pa,pe,f,t) pe("", pos));
         a.eq(true, ~/myspec/.match(stdout.string));
       });
 
       d.it('prints failure messages', function(a) {
         a.eq(false, ~/failmsg/.match(stdout.string));
-        reporter.declareSpec("myspec", function(po,pa,pe,f) f("failmsg", pos));
+        reporter.declareSpec("myspec", function(po,pa,pe,f,t) f("failmsg", pos));
         a.eq(true, ~/failmsg/.match(stdout.string));
+      });
+
+      d.it('prints error messages and backtraces', function(a) {
+        a.eq(false, ~/thefilename/.match(stdout.string));
+        a.eq(false, ~/11223344/.match(stdout.string));
+        reporter.declareSpec("thefilename",
+          function(po,pa,pe,f,t) t("thrown", [FilePos(null, "thefilename", 11223344)])
+        );
+        a.eq(true, ~/thefilename/.match(stdout.string));
+        a.eq(true, ~/11223344/.match(stdout.string));
       });
 
       // it includes the file/line number of the most recent passed assertion

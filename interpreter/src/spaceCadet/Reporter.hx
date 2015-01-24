@@ -1,14 +1,16 @@
 package spaceCadet;
 
-typedef PassAssertion = String -> haxe.PosInfos -> Void;
-typedef ReportPassing = Void   ->                  Void;
-typedef ReportPending = String -> haxe.PosInfos -> Void;
-typedef ReportFailing = String -> haxe.PosInfos -> Void;
-typedef SpecCallbacks = PassAssertion
-                     -> ReportPassing
-                     -> ReportPending
-                     -> ReportFailing
-                     -> Void;
+typedef PassAssertion  = String -> haxe.PosInfos -> Void;
+typedef ReportPassing  = Void   ->                  Void;
+typedef ReportPending  = String -> haxe.PosInfos -> Void;
+typedef ReportFailing  = String -> haxe.PosInfos -> Void;
+typedef ReportUncaught = Dynamic -> Array<haxe.CallStack.StackItem> -> Void;
+typedef SpecCallbacks  = PassAssertion
+                      -> ReportPassing
+                      -> ReportPending
+                      -> ReportFailing
+                      -> ReportUncaught
+                      -> Void;
 
 typedef RunSpecs = Void -> Void;
 
@@ -23,6 +25,7 @@ enum SpecEvent {
   EndPassing(    specName:String);
   EndPending(    specName:String, pos:haxe.PosInfos, pendingMsg:String);
   EndFailing(    specName:String, pos:haxe.PosInfos, successMsgs:Array<String>, failureMsg:String);
+  EndErrored(    specName:String, thown:Dynamic, backtrace:Array<haxe.CallStack.StackItem>);
 }
 
 // Feels backwards that the reporter receives the run blocks,
@@ -33,7 +36,8 @@ enum SpecEvent {
 // but seems better to wait until I need that feature than to try and guess right now.
 class StreamReporter implements Reporter {
   public var output:Output;
-  public var numFails = 0;
+  public var numFails  = 0;
+  public var numErrors = 0;
   public function new(output:Output) {
     this.output = output;
   }
@@ -61,7 +65,12 @@ class StreamReporter implements Reporter {
       specLine(EndFailing(name, pos, successMsgs, msg));
     }
 
-    run(passAssertion, onPass, onPending, onFailure);
+    var onUncaught = function(thrown, backtrace) {
+      this.numErrors += 1;
+      specLine(EndErrored(name, thrown, backtrace));
+    }
+
+    run(passAssertion, onPass, onPending, onFailure, onUncaught);
   }
 
   public function declareDescription(name, run) {
@@ -79,6 +88,15 @@ class StreamReporter implements Reporter {
       output
         .fgYellow
           .write(EscapeString.call(specName))
+          .fgPop;
+      case PassAssertion(specName, pos, successMsgs):
+      output
+        .fgYellow
+          .resetln
+          .write(EscapeString.call(specName) + " ")
+          .fgPop
+        .fgGreen
+          .write(EscapeString.call(successMsgs[successMsgs.length-1]))
           .fgPop;
       case EndPassing(specName):
       output
@@ -110,15 +128,30 @@ class StreamReporter implements Reporter {
             .writeln(EscapeString.call(failureMsg))
             .fgPop
           .outdent;
-      case PassAssertion(specName, pos, successMsgs):
+      case EndErrored(specName, thrown, backtrace):
       output
-        .fgYellow
+        .fgRed
           .resetln
-          .write(EscapeString.call(specName) + " ")
+          .writeln(EscapeString.call(specName))
           .fgPop
-        .fgGreen
-          .write(EscapeString.call(successMsgs[successMsgs.length-1]))
-          .fgPop;
+        .indent
+          .fgWhite
+            .writeln('UNCAUGHT: ${Inspect.call(thrown)}')
+            .fgPop
+          .yield(function() printBacktrace(backtrace))
+          .outdent;
+    }
+  }
+
+  function printBacktrace(backtrace:Array<haxe.CallStack.StackItem>) {
+    for(stackItem in backtrace) {
+      switch(stackItem) {
+        case FilePos(idk, filename, line):
+          output.fgGreen.write(filename).fgPop
+                .fgWhite.write(":").fgPop
+                .fgBlue.write(Std.string(line)).fgPop;
+        case _: throw('I don\'t know what kind of stack item this is: ${Inspect.call(stackItem)}');
+      }
     }
   }
 }

@@ -91,6 +91,24 @@ class DescribeRunningASuite {
         run();
         a.eq(1, reporter.numSucceeded("name"));
         a.eq(false, reporter.didSucceed("name"));
+        a.eq(false, reporter.didThrow("name"));
+      });
+
+      d.it('ends the spec and reports when it sees an exception', function(a) {
+        var lineno = -1;
+        desc.it("up", function(a) {
+          a.eq(1, 1);
+          lineno = 1 + function(?p:haxe.PosInfos) { return p.lineNumber; }();
+          throw("zomg!");
+          a.eq(1, 1);
+        });
+        a.eq(false, reporter.didThrow("up"));
+        run();
+        a.eq(1, reporter.numSucceeded("up"));
+        a.eq(false, reporter.didSucceed("up"));
+        a.eq(true, reporter.didThrow("up"));
+        a.eq("zomg!", reporter.thrown("up"));
+        a.eq(lineno, reporter.thrownLine("up"));
       });
 
       d.it('reports the specification as a child of the describe block', function(a) {

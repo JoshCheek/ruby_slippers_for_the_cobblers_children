@@ -4,7 +4,10 @@ import spaceCadet.Reporter;
 typedef SpecState = {
   numSucceeded : Int,
   didSucceed   : Bool,
-  isPending    : Bool
+  isPending    : Bool,
+  didThrow     : Bool,
+  thrown       : Dynamic,
+  backtrace    : Array<haxe.CallStack.StackItem>,
 }
 
 class DescData {
@@ -24,7 +27,7 @@ class MockReporter implements Reporter {
 
   public function declareSpec(name, run) {
     orderDeclared.push(name);
-    var result = {numSucceeded:0, didSucceed:true, isPending:false};
+    var result = {numSucceeded:0, didSucceed:true, isPending:false, didThrow:false, thrown:null, backtrace:[]};
     crnt.specifications.set(name, result);
 
     var passAssertion = function(msg, pos)
@@ -40,7 +43,14 @@ class MockReporter implements Reporter {
       result.didSucceed = false;
     }
 
-    run(passAssertion, onPass, onPending, onFailure);
+    var onUncaught = function(thrown:Dynamic, backtrace:Array<haxe.CallStack.StackItem>) {
+      result.didSucceed = false;
+      result.didThrow   = true;
+      result.thrown     = thrown;
+      result.backtrace  = backtrace;
+    }
+
+    run(passAssertion, onPass, onPending, onFailure, onUncaught);
   }
 
   public function declareDescription(name, run) {
@@ -72,6 +82,29 @@ class MockReporter implements Reporter {
     if(wasSpecified(name))
       return crnt.specifications.get(name).didSucceed;
     return false;
+  }
+
+  public function didThrow(name) {
+    if(wasSpecified(name))
+      return crnt.specifications.get(name).didThrow;
+    return false;
+  }
+
+  public function thrown(name) {
+    if(didThrow(name)) return crnt.specifications.get(name).thrown;
+    throw('Yo, ${Inspect.call(name)} did not throw!');
+  }
+
+  public function thrownLine(name) {
+    if(didThrow(name)) {
+      var bt = crnt.specifications.get(name).backtrace;
+      switch(bt[bt.length-1]) {
+        case FilePos(_, _, lineno): return lineno;
+        case _: throw('Whats this!?: ${bt[bt.length-1]}');
+      }
+    }
+
+    throw('Yo, ${Inspect.call(name)} did not throw!');
   }
 
   // Sigh, this is so dumb.

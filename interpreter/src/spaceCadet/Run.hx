@@ -40,7 +40,7 @@ class Run {
   }
 
   private function runSpec(name, beforeBlocks:Array<AssertBlock>, body) {
-    reporter.declareSpec(name, function(reportAssertionPass, reportPass, reportPending, reportFailure) {
+    reporter.declareSpec(name, function(reportAssertionPass, reportPass, reportPending, reportFailure, reportUncaught) {
       var onFailure = function(msg, position) {
         if(opts.failFast) haltTesting = true;
         reportFailure(msg, position);
@@ -61,6 +61,11 @@ class Run {
         for(block in beforeBlocks) block(asserter);
         body(asserter);
       } catch(_:TestFinished) {
+        return;
+      } catch(thrown:Dynamic) {
+        var stack = haxe.CallStack.exceptionStack();
+        stack.pop(); // remove our invocation of the test in the try block
+        reportUncaught(thrown, stack);
         return;
       }
 
