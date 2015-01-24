@@ -148,6 +148,13 @@ class DescribeInspect {
         });
       });
 
+      d.describe('on functions', function(d) {
+        d.it('returns a function looking thing with obvious "fuck if I know" indocators', function(a) {
+          a.eq('function(??) { ?? }', inspect(function() {}));
+          a.eq('function(??) { ?? }', inspect(function(a) return 1));
+        });
+      });
+
       d.describe("on unknown", function(d) {
         d.it('displays "Unknown(s)", where s is whatever Std.string returns', function(a) {
           a.eq("Unknown(#abstract)", inspect(getUnknown()));

@@ -27,8 +27,8 @@ class Inspect {
       case TObject:
         return inspectStruct(toInspect);
       case TFunction:
-        throw("TFunction has no inspection yet");
-        return "";
+        // doesn't appear to be any way to get this info at present
+        return "function(??) { ?? }";
       case TEnum(e): // Enum<Dynamic>
         throw("TEnum has no inspection yet");
         return "";
