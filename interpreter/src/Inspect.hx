@@ -14,8 +14,7 @@ class Inspect {
         if(klass==Array)  return inspectArray(toInspect);
         throw 'No inspect for ${klass} yet!';
       case TObject:
-        throw("TObject has no inspection yet");
-        return "";
+        return inspectStruct(toInspect);
       case TFunction:
         throw("TFunction has no inspection yet");
         return "";
@@ -48,5 +47,14 @@ class Inspect {
     for(element in toInspect)
       inspectedElements.push(call(element));
     return "[" + inspectedElements.join(", ") + "]";
+  }
+
+  private static function inspectStruct(toInspect:Dynamic) {
+    var keyValues = [];
+    for(fieldName in Reflect.fields(toInspect)) {
+      var inspectedValue = call(Reflect.field(toInspect, fieldName));
+      keyValues.push('${fieldName}: ${inspectedValue}');
+    }
+    return "{" + keyValues.join(", ") + "}";
   }
 }

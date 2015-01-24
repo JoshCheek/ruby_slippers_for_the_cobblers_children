@@ -1,6 +1,14 @@
 package toplevel;
 
-// TODO: haxe.Int32, haxe.Int64
+// TODO:
+// 'escape the interpolation? ${string}'
+// haxe.Int32
+// haxe.Int64
+// classes
+// enums
+// anonymous structs
+// typedefed structs
+
 class DescribeInspect {
   public static function inspect(str:Dynamic) {
     return Inspect.call(str);
@@ -81,6 +89,14 @@ class DescribeInspect {
           a.eq('["a"]', inspect(["a"]));
           a.eq('["a", "b"]', inspect(["a", "b"]));
           a.eq('[["a"], ["b"]]', inspect([["a"], ["b"]]));
+        });
+      });
+
+      d.describe("on an anonymous struct, it inspects each value", function(d) {
+        d.it("inspects empty structs", function(a) {
+          a.eq("{}", inspect({}));
+          a.eq("{a: 1}", inspect({a: 1}));
+          a.eq("{a: 1, b: \"omg\"}", inspect({a: 1, b: "omg"}));
         });
       });
 
