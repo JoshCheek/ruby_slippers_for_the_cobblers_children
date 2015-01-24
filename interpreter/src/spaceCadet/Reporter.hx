@@ -74,7 +74,7 @@ class StreamReporter implements Reporter {
   }
 
   public function declareDescription(name, run) {
-    output.fgMagenta
+    output.fgWhite
             .writeln(EscapeString.call(name))
             .fgPop
           .indent
@@ -109,10 +109,12 @@ class StreamReporter implements Reporter {
         .fgYellow
           .resetln
           .writeln(EscapeString.call(specName) + " (" + pos.fileName + ":" + pos.lineNumber + ")")
-          .indent
+          .fgPop
+        .indent
+          .fgCyan
             .writeln(EscapeString.call(pendingMsg))
-            .outdent
-          .fgPop;
+            .fgPop
+          .outdent;
       case EndFailing(specName, pos, successMsgs, failureMsg):
       output
         .fgRed
