@@ -147,9 +147,9 @@ class StreamReporter implements Reporter {
     for(stackItem in backtrace) {
       switch(stackItem) {
         case FilePos(idk, filename, line):
-          output.fgGreen.write(filename).fgPop
+          output.fgCyan.write(filename).fgPop
                 .fgWhite.write(":").fgPop
-                .fgBlue.write(Std.string(line)).fgPop;
+                .fgBlue.writeln(Std.string(line)).fgPop;
         case _: throw('I don\'t know what kind of stack item this is: ${Inspect.call(stackItem)}');
       }
     }
