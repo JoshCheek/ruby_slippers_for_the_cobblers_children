@@ -66,6 +66,7 @@ class Run {
         var stack = haxe.CallStack.exceptionStack();
         stack.pop(); // remove our invocation of the test in the try block
         reportUncaught(thrown, stack);
+        if(opts.failFast) haltTesting = true;
         return;
       }
 

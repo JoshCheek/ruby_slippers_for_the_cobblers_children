@@ -206,6 +206,38 @@ class DescribeRunningASuite {
         Run.run(desc, reporter, {failFast: true});
         a.streq(["d1", "d1d1", "d1d1s1", "d1d1s2"], reporter.orderDeclared);
       });
+
+      d.it('ends the suite immediately when it sees an error, and failFast is set', function(a) {
+        desc.describe("d1", function(d) {
+          d.describe("d1d1", function(d) {
+            d.it("d1d1s1", noop);                    // pass
+            d.it("d1d1s2", function(a) throw("up")); // fail
+            d.it("d1d1s3", noop);                    // skip
+          });
+          d.it("d1s1", noop);                        // skip
+          d.describe("d1d2", function(d) {
+            d.it("d1d2s1", noop);                    // skip
+          });
+        });
+
+        // not set
+        reporter = new MockReporter();
+        Run.run(desc, reporter, {});
+        a.streq(["d1",
+                 "d1d1",
+                 "d1d1s1",
+                 "d1d1s2",
+                 "d1d1s3",
+                 "d1s1",
+                 "d1d2",
+                 "d1d2s1"],
+                 reporter.orderDeclared);
+
+        // set
+        reporter = new MockReporter();
+        Run.run(desc, reporter, {failFast: true});
+        a.streq(["d1", "d1d1", "d1d1s1", "d1d1s2"], reporter.orderDeclared);
+      });
     });
   }
 }
