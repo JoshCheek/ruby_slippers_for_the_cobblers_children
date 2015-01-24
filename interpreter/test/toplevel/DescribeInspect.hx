@@ -6,8 +6,9 @@ package toplevel;
 // haxe.Int64
 // classes
 // enums
-// anonymous structs
-// typedefed structs
+typedef TypeDefedStruct0 = {}
+typedef TypeDefedStruct1 = {x:Int}
+typedef TypeDefedStruct2 = {x:Int, y:String}
 
 class DescribeInspect {
   public static function inspect(str:Dynamic) {
@@ -97,6 +98,19 @@ class DescribeInspect {
           a.eq("{}", inspect({}));
           a.eq("{a: 1}", inspect({a: 1}));
           a.eq("{a: 1, b: \"omg\"}", inspect({a: 1, b: "omg"}));
+        });
+      });
+
+      d.describe("on typedefed struct, it inspects like anonymous ones, since I can't figure out how to get the type info off of it", function(d) {
+        d.it("inspects empty structs", function(a) {
+          var s0:TypeDefedStruct0 = {};
+          a.eq("{}", inspect(s0));
+
+          var s1:TypeDefedStruct1 = {x: 1};
+          a.eq("{x: 1}", inspect(s1));
+
+          var s2:TypeDefedStruct2 = {x: 1, y: "abc"};
+          a.eq("{x: 1, y: \"abc\"}", inspect(s2));
         });
       });
 
