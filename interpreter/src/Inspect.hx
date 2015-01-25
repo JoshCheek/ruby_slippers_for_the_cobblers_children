@@ -19,9 +19,10 @@ class Inspect {
         // might be useful: Type.getSuperClass(c:Class<Dynamic>):Class<Dynamic>
         if( klass==String) return inspectString(toInspect);
         if( klass==Array)  return inspectArray(toInspect);
-        if( haxe.ds.StringMap == klass ||
-            haxe.ds.IntMap    == klass ||
-            haxe.ds.ObjectMap == klass
+        if( haxe.ds.StringMap    == klass ||
+            haxe.ds.IntMap       == klass ||
+            haxe.ds.ObjectMap    == klass ||
+            haxe.ds.EnumValueMap == klass
           ) return inspectMap(toInspect);
         throw 'No inspect for ${klass} yet!';
       case TObject:
@@ -29,9 +30,8 @@ class Inspect {
       case TFunction:
         // doesn't appear to be any way to get this info at present
         return "function(??) { ?? }";
-      case TEnum(e): // Enum<Dynamic>
-        throw("TEnum has no inspection yet");
-        return "";
+      case TEnum(e):
+        return inspectEnum(toInspect, e);
     }
   }
 
@@ -74,5 +74,13 @@ class Inspect {
     for(key in toInspect.keys())
       keyValues.push('${Inspect.call(key)} => ${Inspect.call(toInspect.get(key))}');
     return '[${keyValues.join(", ")}]';
+  }
+
+  private static function inspectEnum(instance:EnumValue, klass:Enum<Dynamic>) {
+    var inspectedParams = [];
+    for(param in Type.enumParameters(instance)) inspectedParams.push(call(param));
+    var constructor = Type.enumConstructor(instance);
+    if(inspectedParams.length == 0) return constructor;
+    else return '$constructor(${inspectedParams.join(", ")})';
   }
 }

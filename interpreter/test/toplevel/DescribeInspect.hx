@@ -1,18 +1,19 @@
 package toplevel;
 
 // TODO:
-// 'escape the interpolation? ${string}'
 // haxe.Int32
 // haxe.Int64
 // classes
-// enums
 typedef TypeDefedStruct0 = {}
 typedef TypeDefedStruct1 = {x:Int}
 typedef TypeDefedStruct2 = {x:Int, y:String}
 
-enum MapKeys {
+enum FixtureEnum {
   KeyOne;
   KeyTwo;
+  ZeroArgs;
+  OneArg(a:String);
+  TwoArgs(a:String, b:String);
 }
 
 class DescribeInspect {
@@ -114,7 +115,6 @@ class DescribeInspect {
           a.eq('[{a: 1} => 2]', inspect([{a:1} => 2]));
         });
         d.it("works for EnumValueMap", function(a) {
-          a.pending('Enums don\'t have an inspect yet');
           a.eq('[KeyOne => 2]', inspect([KeyOne => 2]));
         });
         d.it("works for WeakMap", function(a) {
@@ -152,6 +152,20 @@ class DescribeInspect {
         d.it('returns a function looking thing with obvious "fuck if I know" indocators', function(a) {
           a.eq('function(??) { ?? }', inspect(function() {}));
           a.eq('function(??) { ?? }', inspect(function(a) return 1));
+        });
+      });
+
+      d.describe('on Enum instances', function(d) {
+        d.it('returns the literal that would construct them', function(a) {
+          // I think this is what I ideally want (or maybe it needs to have DescribeInspect in there, too
+          // but there doesn't appear to be any way to access it from within Haxe :(
+          //
+          // a.eq('toplevel.FixtureEnum.ZeroArgs', inspect(ZeroArgs));
+          // a.eq('toplevel.FixtureEnum.OneArg("abc")', inspect(OneArg("abc")));
+          // a.eq('toplevel.FixtureEnum.TwoArgs("abc", "defg")', inspect(TwoArgs("abc", "defg")));
+          a.eq('ZeroArgs', inspect(ZeroArgs));
+          a.eq('OneArg("abc")', inspect(OneArg("abc")));
+          a.eq('TwoArgs("abc", "defg")', inspect(TwoArgs("abc", "defg")));
         });
       });
 
