@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+# setup
+require 'shellwords'
 require_relative 'binary'
 bin = Binary.new main:        'RunTests',
                  outstream:   $stdout,
@@ -8,11 +10,43 @@ bin = Binary.new main:        'RunTests',
 
 bin.cd_root!
 type_filename = 'types.xml'
-command       = bin.command(:xml, type_filename)
+command = bin.command(:xml, type_filename)
 
-require 'shellwords'
+# generate type info
 bin.puts orange: command.shelljoin
 system *command
 exit $!.exitstatus unless $?.success?
-
 puts "The file is in #{File.expand_path type_filename}"
+
+# Now we can play with it
+# Glancing at the format:
+# <haxe>
+#   <class path="CLASSNAME(or maybe packagename)" params="IDONTKNOW"
+#          file="PATH/TO/FILE", extern="BOOLAS0OR1">
+#     <METHODNAME public="BOOLAS0OR1" set="IDONTKNOW" params="IDONTKNOW"
+#       <haxe_doc>COMENTS FROM FILE"
+# some weird thing inside methodnames
+#   nodes named "f" (function?)
+#   c (seems to be a type signature, I think the last one is the return type)
+#   x (seems to be a type signature)
+# sometimes there's "typedef" nodes, I can't tell from glancing at itwhere
+#   they're at int he structure
+# looks like stuff from my lib includes file and line info
+require 'nokogiri'
+doc     = Nokogiri::XML File.read(type_filename);
+klasses = doc.css('/haxe/class')#.reverse.take(3) # limit it while playing around
+klasses.each do |klass|
+  name     = klass[:path].strip
+  filename = klass[:file].strip
+  puts "\e[92m#{name} \e[34m#{filename}\e[39m"
+  nontext_children = klass.children.reject do |c|
+    entirely_whitespace = /\A\s+\Z/m
+    c.text? && (c.text =~ entirely_whitespace)
+  end
+  largest_key = nontext_children.map(&:name).map(&:length).max
+  nontext_children.each do |node|
+    attrs = node.attributes.map { |k, v| "\e[33m#{k}\e[39m:\e[36m#{v}\e[39m" }
+    puts "  \e[35m#{node.name.ljust(largest_key)}  #{attrs.join(' ')}"
+  end
+  puts
+end
