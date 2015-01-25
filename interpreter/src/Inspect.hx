@@ -8,6 +8,9 @@ using StringTools;
 */
 class Inspect {
   public static function call(toInspect:Dynamic) {
+    var inspected = itsInspectReturns(toInspect);
+    if(inspected != null) return inspected;
+
     switch(Type.typeof(toInspect)) {
       case TFloat:
         return inspectFloat(toInspect);
@@ -67,6 +70,25 @@ class Inspect {
       keyValues.push('${fieldName}: ${inspectedValue}');
     }
     return "{" + keyValues.join(", ") + "}";
+  }
+
+  // Tried a lot of ways to reflect on this thing:
+  //
+  //   This works for structs, but not instances
+  //     Reflect.fields(toInspect).indexOf("inspect");
+  //   This works for instances, but not at runtime:
+  //     Type.getClassFields(Type.getClass(toInspect));
+  //
+  // So, just try calling it.
+  //
+  //   Really, we shouldn't be catching all Strings, only ones that match "Invalid call"
+  //   but I'll deal with that when it actually comes up, or when I've learned more about the language
+  //   Maybe we can compile/install from HEAD and then have RTTI and ignore this altogether.
+  private static function itsInspectReturns(toInspect:Dynamic) {
+    try return toInspect.inspect()
+    catch(_:String)  {}
+    catch(_:Dynamic) {};
+    return null;
   }
 
   private static function inspectMap(toInspect:Map.IMap<Dynamic,Dynamic>) {

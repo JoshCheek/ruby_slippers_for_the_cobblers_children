@@ -1,9 +1,15 @@
 package toplevel;
 
 // TODO:
-// haxe.Int32
-// haxe.Int64
-// classes
+//   rename .call to .inspect so we can use it as a static extension
+//   is it inspecting private fields right now? if so, don't
+// Haven't tested these:
+//   haxe.Int32
+//   haxe.Int64
+//   classes
+//   the enum class
+//   abstracts
+
 typedef TypeDefedStruct0 = {}
 typedef TypeDefedStruct1 = {x:Int}
 typedef TypeDefedStruct2 = {x:Int, y:String}
@@ -15,6 +21,19 @@ enum FixtureEnum {
   OneArg(a:String);
   TwoArgs(a:String, b:String);
 }
+
+class FixtureClassInspectArity0 {
+  var str:String;
+  public function new(str) this.str = str;
+  public function inspect() return str;
+}
+class FixtureClassInspectArity1 {
+  var str:String;
+  public function new(str) this.str = str;
+  public function inspect(_:Int) return str;
+}
+
+
 
 class DescribeInspect {
   public static function inspect(str:Dynamic) {
@@ -29,6 +48,33 @@ class DescribeInspect {
 
   public static function describe(d:spaceCadet.Description) {
     d.describe("Inspect", function(d) {
+      d.describe('on a type with an inspect function', function(d) {
+        d.context('for a struct', function(d) {
+          d.it("uses the inspect function, when it has 0 arity", function(a) {
+            a.eq("!!", inspect({inspect: function() { return "!!"; }}));
+          });
+          d.it("ignores the inspect function, when it nonzero arity", function(a) {
+            a.eq("{inspect: function(??) { ?? }}", inspect({inspect: function(_:Int) { return "!!"; }}));
+          });
+        });
+        d.context('for an instance', function(d) {
+          d.it("uses the inspect function, when it has arity 0", function(a) {
+            a.eq("!!", inspect(new FixtureClassInspectArity0("!!")));
+          });
+          d.it("ignores the inspect function, when it expects args", function(a) {
+            a.pending("Apparently it can't figure out the class at runtime (Type.getClass returns null)");
+            a.eq("What goes here?", inspect(new FixtureClassInspectArity1("!!")));
+          });
+        });
+        d.context('when inspect function raises an error', function(d) {
+          d.it('does not swallow the error', function(a) {
+            a.pending('Just ignoring this for now, b/c I\'m feeling like getting more done');
+            // test one where inspect throws a string, and where it throws something other than a string
+            // ...unless we find a way to not have to invoke it when we don't know if it's reasonable to do so
+          });
+        });
+      });
+
       d.describe("on null", function(d) {
         d.it('inspects to "null"', function(a) {
           a.eq("null", inspect(null));
