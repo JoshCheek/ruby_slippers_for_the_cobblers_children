@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+require_relative 'binary'
+bin = Binary.new main:        'RunTests',
+                 outstream:   $stdout,
+                 errstream:   $stderr,
+                 help_screen: "haven't made a help screen yet :P"
+
+bin.cd_root!
+type_filename = 'types.xml'
+command       = bin.command(:xml, type_filename)
+
+require 'shellwords'
+bin.puts orange: command.shelljoin
+system *command
+exit $!.exitstatus unless $?.success?
+
+puts "The file is in #{File.expand_path type_filename}"

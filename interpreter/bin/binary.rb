@@ -35,9 +35,10 @@ class Binary
     Dir.chdir interpreter_root
   end
 
-  def command(type)
+  def command(type, *params)
     case type
     when :run then common_command << '--interp'
+    when :xml then (common_command << '-xml').concat(params)
     else raise "There is no command type: #{type.inspect}"
     end
   end

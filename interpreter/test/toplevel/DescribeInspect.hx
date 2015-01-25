@@ -43,7 +43,11 @@ class DescribeInspect {
   // the Neko core implementation has an attribute "r" ...kinda iffy, but w/e
   @:access(EReg.r)
   public static function getUnknown():Dynamic {
+#if neko
     return ~/regex/.r;
+#else
+    throw("Figure out how to get one of these on whatever platform we're on");
+#end
   }
 
   public static function describe(d:spaceCadet.Description) {

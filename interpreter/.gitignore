@@ -1,1 +1,7 @@
+# Code compiled for the neko vm
+# (mostly don't see this anymore since I interpret instead of compile and run)
 *.n
+
+# Playing with generating type info and reflecting on it.
+# This is where I'm dumping it for now.
+types.xml
