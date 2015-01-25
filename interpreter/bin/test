@@ -1,18 +1,22 @@
 #!/usr/bin/env ruby
 
 require_relative 'binary'
-bin = Binary.new main: 'RunTests'
+bin = Binary.new main:        'RunTests',
+                 outstream:   $stdout,
+                 errstream:   $stderr,
+                 help_screen: <<HELPSCREEN
+Usage: #$0 [a|r|t|h]
 
-# Default vars
-ENV['RUBY_PARSER_PORT'] ||= '3003'
+Command:
+ %{green} a%{none}[ll]      - (DEFAULT) Run all tests
+ %{green} r%{none}[uby]     - Run tests on ruby package (the interpreter itself)
+ %{green} t%{none}[oplevel] - Run tests on toplevel modules
+ %{green} h%{none}[elp]     - Show this help screen
 
-# check args
-if 1 < ARGV.size
-  bin.show_help = true
-  bin.add_error "Expected 1 argument at most, but you gave #{ARGV.inspect}"
-end
+HELPSCREEN
 
-# parse args
+
+# process args and errors
 ARGV.each do |arg|
   case arg
   when /^a(ll)?$/i      then bin.main = 'RunTests'
@@ -20,48 +24,30 @@ ARGV.each do |arg|
   when /^t(oplevel)?$/i then bin.main = 'toplevel.RunTests'
   when /^h(elp)?$/i     then bin.show_help = true
   when /^(-h|--help)$/  then bin.show_help = true
-  else
-    bin.show_help = true
-    bin.add_error "Unknown argument #{arg.inspect}"
+  else bin.show_help = true
+       bin.add_error "Unknown argument #{arg.inspect}"
   end
 end
 
-def print_errors(errors, delimiter_line=nil)
-  return if errors.empty?
-  puts "Errors:"
-  print "\e[31m" # red
-  errors.each { |e|
-    puts e.each_line.map { |line| "  #{line.chomp}" }
-  }
-  print "\e[39m" # reset
-  puts delimiter_line if delimiter_line
+if 1 < ARGV.count
+  bin.show_help = true
+  bin.add_error "Expected 1 argument at most, but you gave #{ARGV.inspect}"
 end
 
-# execute
-if bin.show_help?
-  print_errors(bin.errors, "\n#{?-*80}\n\n")
-  puts "Usage: #$0 [a|r|t|h]"
-  puts
-  puts "Command (defaults to all)"
-  puts "  \e[92ma\e[39m[ll]      - Run all tests"
-  puts "  \e[92mr\e[39m[uby]     - Run tests on ruby package (the interpreter itself)"
-  puts "  \e[92mt\e[39m[oplevel] - Run tests on toplevel modules"
-  puts "  \e[92mh\e[39m[elp]     - Show this help screen"
-  exit !bin.errors?
-end
+bin.server_down? and bin.add_error \
+  "Server is not running (no pidfile at #{bin.parser_pidfile.inspect}"\
+  " probably do `rake parser:server:start`"
 
-bin.server_down? and
-  bin.add_error "Server is not running (no pidfile at #{bin.parser_pidfile.inspect}\n"\
-                "probably do `rake parser:server:start`"
 
-bin.errors? and begin
-  print_errors bin.errors
-  exit 1
-end
+# early exits
+bin.print_help    if bin.show_help?
+bin.print_errors  if bin.errors?
+exit !bin.errors? if bin.errors? || bin.show_help?
 
+
+# run the script
+ENV['RUBY_PARSER_PORT'] ||= '3003'
 require 'shellwords'
 bin.cd_root!
-print "\e[33m" # orange
-puts bin.command(:run).shelljoin
-print "\e[39m" # white
+bin.puts orange: bin.command(:run).shelljoin
 exec *bin.command(:run)

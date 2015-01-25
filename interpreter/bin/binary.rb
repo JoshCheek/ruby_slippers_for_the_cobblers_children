@@ -1,7 +1,9 @@
 class Binary
-  attr_accessor :parser_pidfile, :show_help, :errors, :main, :class_paths, :outstream, :errstream
-  def initialize(main:nil, show_help:false, errors:[], parser_pidfile: default_pidfile, outstream:$stdout, errstream:$stderr)
+  attr_accessor :parser_pidfile, :show_help, :errors, :main, :class_paths, :outstream, :errstream, :help_screen
+  def initialize(main:nil, show_help:false, errors:[], parser_pidfile: default_pidfile, outstream:, errstream:, help_screen:)
     self.parser_pidfile = parser_pidfile
+    self.help_screen    = help_screen
+    self.outstream      = outstream
     self.show_help      = show_help
     self.errors         = errors
     self.main           = main
@@ -43,6 +45,56 @@ class Binary
   def add_error(error)
     errors << error
     self
+  end
+
+  def print_errors
+    puts red: "Errors:"
+    errors.each do |err_msg|
+      err_msg.each_line do |line|
+        puts "  * #{line}"
+      end
+    end
+  end
+
+  def puts(*messages)
+    messages.each do |message|
+      case message
+      when String then outstream.puts message
+      when Hash   then message.each { |colour, message| puts __send__(colour, message) }
+      else raise "huh?: #{message.inspect}"
+      end
+    end
+  end
+
+  def print_help
+    puts help_screen % self.class.colours
+  end
+
+  def self.colours
+    { black:   "\e[30m",
+      red:     "\e[31m",
+      green:   "\e[32m",
+      orange:  "\e[33m",
+      blue:    "\e[34m",
+      magenta: "\e[35m",
+      cyan:    "\e[36m",
+      white:   "\e[37m",
+      none:    "\e[39m",
+    }
+  end
+
+  def colours
+    self.class.colours
+  end
+
+  def none(msg=nil)
+    "#{colours[:none]}#{msg}"
+  end
+
+  colours.each do |name, escape_sequence|
+    define_method(name) do |msg=nil|
+      msg ? "#{escape_sequence}#{msg}#{none}" : escape_sequence
+    end
   end
 
   private
