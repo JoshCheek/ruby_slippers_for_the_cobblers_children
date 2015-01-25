@@ -1,5 +1,7 @@
 Can pass files to the compiler with: http://api.haxe.org/haxe/Resource.html
 
+Space Cadet
+  if I ever make a mock lib, how about calling "MissionToMock" or "MockAttacks" or MocksAreFromMars, or Pluto (b/c it pretended to be a planet forevah)
 
 general solution to the casting everywhere, e.g. delegate to something which blows up if its ever not that
 
@@ -13,8 +15,6 @@ Bunch of renamings:
 Haxe
   Check out guards for pattern matching
   Check empty expression list. It should return nil, pretty sure this returns whatever happens to be the current expression
-
-test showing that I can set a local in toplevel binding, and then access it (ie interpreter is setting up the stack correctly)
 
 -----
 
