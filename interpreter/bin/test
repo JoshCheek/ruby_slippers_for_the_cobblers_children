@@ -1,84 +1,67 @@
 #!/usr/bin/env ruby
 
-require 'shellwords'
-
-# declarations
-interpreter_root = File.dirname File.dirname __FILE__
-parser_pidfile   = File.expand_path '../parser/tmp/puma.pid', interpreter_root
-server_is_up     = File.exist? parser_pidfile
-show_help        = false
-errors           = []
-class_paths      = ['src', 'test']
-main             = 'RunTests'
+require_relative 'binary'
+bin = Binary.new main: 'RunTests'
 
 # Default vars
 ENV['RUBY_PARSER_PORT'] ||= '3003'
 
 # check args
 if 1 < ARGV.size
-  show_help = true
-  errors << "Expected 1 argument at most, but you gave #{ARGV.inspect}"
+  bin.show_help = true
+  bin.add_error "Expected 1 argument at most, but you gave #{ARGV.inspect}"
 end
 
 # parse args
 ARGV.each do |arg|
   case arg
-  when /^a(ll)?$/i      then main = 'RunTests'
-  when /^r(uby)?$/i     then main = 'ruby.RunTests'
-  when /^t(oplevel)?$/i then main = 'toplevel.RunTests'
-  when /^h(elp)?$/i     then show_help = true
-  when /^(-h|--help)$/  then show_help = true
+  when /^a(ll)?$/i      then bin.main = 'RunTests'
+  when /^r(uby)?$/i     then bin.main = 'ruby.RunTests'
+  when /^t(oplevel)?$/i then bin.main = 'toplevel.RunTests'
+  when /^h(elp)?$/i     then bin.show_help = true
+  when /^(-h|--help)$/  then bin.show_help = true
   else
-    show_help = true
-    errors << "Unknown argument #{arg.inspect}"
+    bin.show_help = true
+    bin.add_error "Unknown argument #{arg.inspect}"
   end
 end
 
-# verify server
-if !show_help && !server_is_up
-  message = "Server is not running (no pidfile at #{parser_pidfile.inspect}\n"\
-            "probably do `rake parser:server:start`"
-  errors << message
-end
-
-
 def print_errors(errors, delimiter_line=nil)
   return if errors.empty?
-  puts delimiter_line if delimiter_line
   puts "Errors:"
   print "\e[31m" # red
   errors.each { |e|
     puts e.each_line.map { |line| "  #{line.chomp}" }
   }
   print "\e[39m" # reset
+  puts delimiter_line if delimiter_line
 end
 
 # execute
-if show_help
+if bin.show_help?
+  print_errors(bin.errors, "\n#{?-*80}\n\n")
   puts "Usage: #$0 [a|r|t|h]"
-  print_errors(errors, "")
   puts
   puts "Command (defaults to all)"
   puts "  \e[92ma\e[39m[ll]      - Run all tests"
   puts "  \e[92mr\e[39m[uby]     - Run tests on ruby package (the interpreter itself)"
   puts "  \e[92mt\e[39m[oplevel] - Run tests on toplevel modules"
   puts "  \e[92mh\e[39m[elp]     - Show this help screen"
-  exit errors.any?
-
-elsif errors.any?
-  print_errors errors
-  exit 1
-
-else
-  Dir.chdir interpreter_root
-  command = [
-    'haxe',
-    '--interp',
-    '-main', main,
-    *class_paths.flat_map { |cp| ['-cp', cp] }
-  ]
-  print "\e[33m" # orange
-  puts command.shelljoin
-  print "\e[39m" # white
-  exec *command
+  exit !bin.errors?
 end
+
+bin.server_down? and
+  bin.add_error "Server is not running (no pidfile at #{bin.parser_pidfile.inspect}\n"\
+                "probably do `rake parser:server:start`"
+
+bin.errors? and begin
+  print_errors bin.errors
+  exit 1
+end
+
+require 'shellwords'
+bin.cd_root!
+print "\e[33m" # orange
+puts bin.command(:run).shelljoin
+print "\e[39m" # white
+exec *bin.command(:run)
