@@ -1,10 +1,26 @@
-Ruby Object Model Viewer
-========================
+Ruby Slippers For The Cobbler's Children
+========================================
 
 ### Vision (why)
 
-Teach learners to think about Ruby in its underlying model rather than syntactic patterns they've memorized.
+To teach learners to think about Ruby in its underlying model rather than syntactic patterns they've memorized.
 Allow them to reason about their code in terms of how it affects the object model.
+
+They say ["The Cobbler's children have no shoes"](https://www.quora.com/Is-the-cobblers-children-have-no-shoes-a-real-phenomena-If-so-what-causes-it).
+I experienced this in my own education and continue to experience it as I continue to learn.
+And now, as an instructor at [The Turing School of Software and Design](http://turing.io/),
+I see it with my students.
+The opacity of the tools, the cryptic or nonexistent feedback,
+the oversight of communicating the model or providing examples,
+the slow feedback loops, the systems that don't allow for feedback.
+
+We are barefoot and our children are barefoot, and it is bullshit.
+This project is part of my attempt to address the issue for Ruby.
+
+You might also be interested in [Seeing Is Believing](https://github.com/JoshCheek/seeing_is_believing),
+another tool I created and use daily. It's aim wasn't quite as ambitious,
+but its method is similar: provide a labratory to perform experiments with
+a maximum of feedback and a minimum of effort.
 
 ### Goal (what)
 
@@ -51,16 +67,14 @@ Allow them to reason about their code in terms of how it affects the object mode
     expect that entire codebase to roil with experimentation and sweeping design changes.
 
 
------
+------
 
-<span style="color:red; font-size:30px;">
 Everything below this line is months old and I haven't re-read to make sure it still makes sense
-</style>
 
------
+------
 
-High Level Description / Plan
------------------------------
+Architecture
+------------
 
 User will be on a webpage with a text editor, e.g. http://104.131.24.233/josh/mocking-io,
 there will be an "Object Model" button (similar to the "Run" button on some of the code samples).
@@ -68,10 +82,6 @@ When they click it, it takes their code, sends it to the server for parsing.
 A JSON ast comes back. It instantiates an interpreter and hands the ast to the interpreter.
 It creates a canvas or something, and iterates over the interpreter's instructions,
 drawing a visual representation of the object model at each relevant point.
-
-Eventually, would be nice to get it interactive, so a user can step through the program,
-possibly also in reverse, click an object to see its ivars, click the ivar to follow
-the pointer to the target. Peruse the stack, etc.
 
 Would be nice to add games to it in order to make it more compelling for learners to
 interact with it and develop an intuition for how Ruby works, what it does, how thier
@@ -85,10 +95,6 @@ into something it can comprehend.
 Prioritized TODO
 ----------------
 
-* Interpreter: switch fillFrom to use `EvaluationState`, and get rid of the `workToDo` stack.
-  This will allow us to see intermediate steps in the algorithms the interpreter is doing (e.g. method lookup).
-* Interpreter: have all instantiation go through one spot so we have access to the correct classes and such.
-* Interpreter: `ruby.RubyInterpreter` is redundant, just rename it to `ruby.Interpreter`?
 * Interpreter: Break the parser tests back out. They were consolidated into one big test b/c it was too expensive to run the binary that many times, but now that it's using the server, it is much faster.
 * Interpreter: Better tests on class with methods.
 * Interpreter: Instance variable get/set
