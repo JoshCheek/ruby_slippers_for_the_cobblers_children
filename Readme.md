@@ -95,18 +95,22 @@ into something it can comprehend.
 Prioritized TODO
 ----------------
 
-* Interpreter: Break the parser tests back out. They were consolidated into one big test b/c it was too expensive to run the binary that many times, but now that it's using the server, it is much faster.
-* Interpreter: Better tests on class with methods.
-* Interpreter: Instance variable get/set
-* Interpreter: Methods can take ordinal arguments
-* Interpreter: provide a `puts` statement
-* Rendering: ...uhm... play around a bit, I guess
+* Attempt to get it working w/ JS (parsing will need to be async, can I do this without it becoming a virus?)
+* Maps stackframe to a piece of code
+* Absorb Miniature Octo Ironman
+* Either highlight in editor or draw independently
+* Human explanation of what it's doing and why.
+  e.g. "in order to define a class, we need to create a constant, create this instance, etc..."
 
 Unprioritized TODO
 ------------------
 
 * Interpreter
   * push more on that acceptance test.
+  * Interpreter: Break the parser tests back out. They were consolidated into one big test b/c it was too expensive to run the binary that many times, but now that it's using the server, it is much faster.
+  * Interpreter: Better tests on class with methods.
+  * Interpreter: Instance variable get/set
+  * Interpreter: Methods can take ordinal arguments
 * Parser
   * Check out `ruby_parser`, looks much smaller than Parser, so might be easier to bootstrap,
     and Ryan was really nice to me at RubyConf while Peter was kinda dismissive of this project.
