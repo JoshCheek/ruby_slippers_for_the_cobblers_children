@@ -99,6 +99,17 @@ Prioritized TODO
 * Maps stackframe to a piece of code
 * Absorb Miniature Octo Ironman
 * Either highlight in editor or draw independently
+  ```
+  // Highlighting. note that it's placing the range in the wrong place. Not sure why
+  editor.getValue(); // returns textual code to be sent to interpreter
+  ace.Range = ace.require('ace/range'); // makes the range code available
+  r = new ace.Range(4, 2, 4, 6); // creates a Range object on line 4, cols 2-6
+  s = editor.getSession(); // returns an EditSession
+  sr = r.toScreenRange(s);  // maps the underlying range to a range on the screen
+  n  = s.addMarker(sr, 'test-marker', 'MYMARKERTYPE', false) // adds the screen range to the editing session
+  $('.test-marker').css({background: 'green'}); // shitty way to add a background (gets overwritten when redrawn, I think
+  s.removeMarker(n); // remove the marker
+  ```
 * Human explanation of what it's doing and why.
   e.g. "in order to define a class, we need to create a constant, create this instance, etc..."
 
