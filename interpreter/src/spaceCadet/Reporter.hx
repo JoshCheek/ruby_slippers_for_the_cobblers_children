@@ -37,11 +37,12 @@ enum SpecEvent {
 // but seems better to wait until I need that feature than to try and guess right now.
 class StreamReporter implements Reporter {
   public var output:Output;
-  public var numSpecs   = 0;
-  public var numPassed  = 0;
-  public var numPending = 0;
-  public var numFailed  = 0;
-  public var numErrored = 0;
+  public var numSpecs      = 0;
+  public var numAssertions = 0;
+  public var numPassed     = 0;
+  public var numPending    = 0;
+  public var numFailed     = 0;
+  public var numErrored    = 0;
   public function new(output:Output) {
     this.output = output;
   }
@@ -52,27 +53,31 @@ class StreamReporter implements Reporter {
     specLine(Begin(name));
 
     var passAssertion = function(msg, pos) {
+      numAssertions++;
+      numPassed++;
       successMsgs.push(msg);
       specLine(PassAssertion(name, pos, successMsgs));
     }
 
     var onPass = function() {
-      numPassed++;
       specLine(EndPassing(name));
     }
 
     var onPending = function(msg, pos) {
+      numAssertions++;
       numPending++;
       if(msg == null) msg = "Not Implemented";
       specLine(EndPending(name, pos, msg));
     }
 
     var onFailure = function(msg, pos) {
+      numAssertions++;
       this.numFailed += 1;
       specLine(EndFailing(name, pos, successMsgs, msg));
     }
 
     var onUncaught = function(thrown, backtrace) {
+      numAssertions++;
       this.numErrored += 1;
       specLine(EndErrored(name, thrown, backtrace));
     }
@@ -92,12 +97,14 @@ class StreamReporter implements Reporter {
   public function finished() {
     function delimit() output.fgWhite.write(' | ').fgPop;
     output.writeln('')
-          .fgBlue  .write('Specs: ${numSpecs}'    ).yield(delimit).fgPop
-          .fgGreen .write('Passed: ${numPassed}'  ).yield(delimit).fgPop
-          .fgYellow.write('Pending: ${numPending}').yield(delimit).fgPop
-          .fgRed   .write('Failed: ${numFailed}'  ).yield(delimit).fgPop
-          .fgRed   .write('Errors: ${numErrored}' ).fgPop
-          .writeln('');
+          .fgBlue.write('Assertions: ${numAssertions}').yield(delimit).fgPop
+          .fgGreen.write('Passed: ${numPassed}').fgPop;
+
+    if(numPassed  != 0) output.yield(delimit).fgYellow.write('Pending: ${numPending}').fgPop;
+    if(numFailed  != 0) output.yield(delimit).fgRed.write('Failed: ${numFailed}').fgPop;
+    if(numErrored != 0) output.yield(delimit).fgRed.write('Errors: ${numErrored}').fgPop;
+
+    output.writeln('');
   }
 
   private function specLine(status:SpecEvent) {
