@@ -12,14 +12,19 @@ class RunTests {
     // SpaceCadet
       // define
       var root = new Description();
+
+      ruby.ParserSpec.describe(root);
+
       spaceCadet.RunningASuiteSpec.describe(root);
       spaceCadet.AssertionsSpec.describe(root);
       spaceCadet.BeforeBlocksSpec.describe(root);
       spaceCadet.ReporterSpec.describe(root);
+
       toplevel.OutputSpec.describe(root);
       toplevel.StringOutputSpec.describe(root);
       toplevel.EscapeStringSpec.describe(root);
       toplevel.InspectSpec.describe(root);
+
       // run
       var output   = new Output(Sys.stdout(), Sys.stderr());
       var reporter = new Reporter.StreamReporter(output);

@@ -13,7 +13,6 @@ class RunTests {
     }
 
     runner.add(new TestLanguageGoBag());
-    runner.add(new TestParser());
     runner.add(new TestSupport());
     runner.add(new TestBootstrappedWorld());
     runner.add(new TestWorld());
