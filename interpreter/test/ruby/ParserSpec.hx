@@ -5,7 +5,7 @@ using Lambda;
 class ParserSpec {
   public static function parses(a:spaceCadet.Asserter, rubyCode:String, expected:ExecutionState, ?c:haxe.PosInfos) {
     var actual = ruby.ParseRuby.fromCode(rubyCode);
-    a.eq(Std.string(expected), Std.string(actual), c);
+    a.eq(Inspect.call(expected), Inspect.call(actual), c);
   }
 
   public static function describe(d:spaceCadet.Description) {

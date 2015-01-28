@@ -18,8 +18,8 @@ class ParseRuby {
       case "true"                  : True;
       case "false"                 : False;
       case "self"                  : Self;
-      case "integer"               : Integer(ast.value);
-      case "float"                 : Float(ast.value);
+      case "integer"               : Integer(Std.parseInt(ast.value));
+      case "float"                 : Float(Std.parseFloat(ast.value));
       case "string"                : String(ast.value);
       case "expressions"           : Exprs(Start(ast.expressions.map(fromJson)));
       case "set_local_variable"    : SetLvar(FindRhs(ast.name, fromJson(ast.value)));
