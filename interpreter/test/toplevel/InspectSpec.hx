@@ -35,7 +35,7 @@ class FixtureClassInspectArity1 {
 
 
 
-class DescribeInspect {
+class InspectSpec {
   public static function inspect(str:Dynamic) {
     return Inspect.call(str);
   }

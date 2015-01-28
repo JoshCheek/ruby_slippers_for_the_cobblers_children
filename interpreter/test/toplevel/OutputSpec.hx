@@ -1,6 +1,6 @@
 package toplevel;
 
-class DescribeOutput {
+class OutputSpec {
   public static function describe(d:spaceCadet.Description) {
     var outstream : StringOutput;
     var errstream : StringOutput;

@@ -12,14 +12,14 @@ class RunTests {
     // SpaceCadet
       // define
       var root = new Description();
-      spaceCadet.DescribeRunningASuite.describe(root);
-      spaceCadet.DescribeAssertions.describe(root);
-      spaceCadet.DescribeBeforeBlocks.describe(root);
-      spaceCadet.DescribeReporter.describe(root);
-      toplevel.DescribeOutput.describe(root);
-      toplevel.DescribeStringOutput.describe(root);
-      toplevel.DescribeEscapeString.describe(root);
-      toplevel.DescribeInspect.describe(root);
+      spaceCadet.RunningASuiteSpec.describe(root);
+      spaceCadet.AssertionsSpec.describe(root);
+      spaceCadet.BeforeBlocksSpec.describe(root);
+      spaceCadet.ReporterSpec.describe(root);
+      toplevel.OutputSpec.describe(root);
+      toplevel.StringOutputSpec.describe(root);
+      toplevel.EscapeStringSpec.describe(root);
+      toplevel.InspectSpec.describe(root);
       // run
       var output   = new Output(Sys.stdout(), Sys.stderr());
       var reporter = new Reporter.StreamReporter(output);

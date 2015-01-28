@@ -1,7 +1,7 @@
 package spaceCadet;
 import spaceCadet.Reporter.StreamReporter;
 
-class DescribeReporter {
+class ReporterSpec {
   // not going to specify too much, b/c it's mostly all presentation and thus, volatile
   public static function describe(d:Description) {
     d.describe('Space Cadet StreamReporter', function(d) {

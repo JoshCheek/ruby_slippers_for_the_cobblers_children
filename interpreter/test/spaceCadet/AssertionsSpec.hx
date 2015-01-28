@@ -1,7 +1,7 @@
 package spaceCadet;
 
 // TODO: a.null, a.nNull, a.true, a.false
-class DescribeAssertions {
+class AssertionsSpec {
   public static var currentLine(get,never):Int;
   static function get_currentLine() {
     var stack     = haxe.CallStack.callStack();

@@ -1,6 +1,6 @@
 package toplevel;
 
-class DescribeEscapeString {
+class EscapeStringSpec {
   public static function esc(str) {
     return EscapeString.call(str);
   }

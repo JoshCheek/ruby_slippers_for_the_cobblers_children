@@ -1,6 +1,6 @@
 package spaceCadet;
 
-class DescribeRunningASuite {
+class RunningASuiteSpec {
   public static function describe(d:Description) {
     d.describe('running a Space Cadet test suite', function(d) {
       var noop = function(_:Dynamic) { };

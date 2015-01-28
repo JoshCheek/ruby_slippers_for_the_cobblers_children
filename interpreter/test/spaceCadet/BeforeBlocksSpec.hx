@@ -1,6 +1,6 @@
 package spaceCadet;
 
-class DescribeBeforeBlocks {
+class BeforeBlocksSpec {
   public static function describe(d:Description) {
     var noop = function(_:Dynamic) { };
 

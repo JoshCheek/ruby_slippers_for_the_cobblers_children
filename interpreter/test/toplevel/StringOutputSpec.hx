@@ -1,6 +1,6 @@
 package toplevel;
 
-class DescribeStringOutput {
+class StringOutputSpec {
   public static function construct(?str:String) {
     return new StringOutput(str);
   }
