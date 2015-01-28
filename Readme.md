@@ -101,6 +101,8 @@ Prioritized TODO
 * Either highlight in editor or draw independently
   ```
   // Highlighting. note that it's placing the range in the wrong place. Not sure why
+  // might get them to the right place: https://github.com/ajaxorg/ace/issues/2130#issuecomment-54609425
+  // might be necessary to keep them in right place if user edits/scrolls (probably turn this off during its execution, though)
   editor.getValue(); // returns textual code to be sent to interpreter
   ace.Range = ace.require('ace/range'); // makes the range code available
   r = new ace.Range(4, 2, 4, 6); // creates a Range object on line 4, cols 2-6
