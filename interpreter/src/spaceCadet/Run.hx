@@ -15,8 +15,9 @@ class Run {
     return opts;
   }
 
-  public static function run(desc:Description, rep:Reporter, ?opts:ReporterOptions) {
-    new Run(rep, opts)._run(desc, []);
+  public static function run(rootDesc:Description, rep:Reporter, ?opts:ReporterOptions) {
+    new Run(rep, opts)._run(rootDesc, []);
+    rep.finished();
   }
 
   private var reporter    : Reporter;

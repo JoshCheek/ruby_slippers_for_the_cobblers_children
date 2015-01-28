@@ -23,6 +23,7 @@ class DescData {
 class MockReporter implements Reporter {
   public var crnt          = new DescData();
   public var orderDeclared = [];
+  public var isFinished    = false;
   public function new() {}
 
   public function declareSpec(name, run) {
@@ -64,6 +65,7 @@ class MockReporter implements Reporter {
   }
 
   public function finished() {
+    isFinished = true;
   }
 
   public function wasDescribed(name) {

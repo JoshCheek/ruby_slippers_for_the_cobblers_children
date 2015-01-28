@@ -238,6 +238,12 @@ class DescribeRunningASuite {
         Run.run(desc, reporter, {failFast: true});
         a.streq(["d1", "d1d1", "d1d1s1", "d1d1s2"], reporter.orderDeclared);
       });
+
+      d.it('informs the reporter when its finished', function(a) {
+        a.eq(false, reporter.isFinished);
+        run();
+        a.eq(true, reporter.isFinished);
+      });
     });
   }
 }
