@@ -17,6 +17,7 @@ typedef RunSpecs = Void -> Void;
 interface Reporter {
   public function declareSpec(name:String, run:SpecCallbacks): Void;
   public function declareDescription(name:String, run:RunSpecs):Void;
+  public function finished():Void;
 }
 
 enum SpecEvent {
@@ -36,13 +37,17 @@ enum SpecEvent {
 // but seems better to wait until I need that feature than to try and guess right now.
 class StreamReporter implements Reporter {
   public var output:Output;
-  public var numFails  = 0;
-  public var numErrors = 0;
+  public var numSpecs   = 0;
+  public var numPassed  = 0;
+  public var numPending = 0;
+  public var numFailed  = 0;
+  public var numErrored = 0;
   public function new(output:Output) {
     this.output = output;
   }
 
   public function declareSpec(name, run:SpecCallbacks) {
+    numSpecs++;
     var successMsgs = [];
     specLine(Begin(name));
 
@@ -52,21 +57,23 @@ class StreamReporter implements Reporter {
     }
 
     var onPass = function() {
+      numPassed++;
       specLine(EndPassing(name));
     }
 
     var onPending = function(msg, pos) {
+      numPending++;
       if(msg == null) msg = "Not Implemented";
       specLine(EndPending(name, pos, msg));
     }
 
     var onFailure = function(msg, pos) {
-      this.numFails += 1;
+      this.numFailed += 1;
       specLine(EndFailing(name, pos, successMsgs, msg));
     }
 
     var onUncaught = function(thrown, backtrace) {
-      this.numErrors += 1;
+      this.numErrored += 1;
       specLine(EndErrored(name, thrown, backtrace));
     }
 
@@ -80,6 +87,17 @@ class StreamReporter implements Reporter {
           .indent
             .yield(run)
             .outdent;
+  }
+
+  public function finished() {
+    function delimit() output.fgWhite.write(' | ').fgPop;
+    output.writeln('')
+          .fgBlue  .write('Specs: ${numSpecs}'    ).yield(delimit).fgPop
+          .fgGreen .write('Passed: ${numPassed}'  ).yield(delimit).fgPop
+          .fgYellow.write('Pending: ${numPending}').yield(delimit).fgPop
+          .fgRed   .write('Failed: ${numFailed}'  ).yield(delimit).fgPop
+          .fgRed   .write('Errors: ${numErrored}' ).fgPop
+          .writeln('');
   }
 
   private function specLine(status:SpecEvent) {

@@ -63,6 +63,9 @@ class MockReporter implements Reporter {
     this.crnt   = oldDesc;
   }
 
+  public function finished() {
+  }
+
   public function wasDescribed(name) {
     return crnt.descriptions.exists(name);
   }

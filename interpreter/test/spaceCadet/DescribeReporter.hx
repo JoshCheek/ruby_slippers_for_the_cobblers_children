@@ -68,6 +68,11 @@ class DescribeReporter {
       // it includes the backtrace of failed specs
       // it omits SpaceCadet internals from the backtrace
 
+      d.it('prints summary info at the end', function(a) {
+        a.eq(false, ~/\d+ passed/.match(stdout.string));
+        reporter.finished();
+        a.eq(true,  ~/Passed: \d+/.match(stdout.string));
+      });
     });
   }
 }

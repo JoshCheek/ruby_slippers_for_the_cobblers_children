@@ -24,9 +24,10 @@ class RunTests {
       var output   = new Output(Sys.stdout(), Sys.stderr());
       var reporter = new Reporter.StreamReporter(output);
       Run.run(root, reporter, {failFast:true});
-      hadFailure = hadFailure || 0 != reporter.numFails;
+      hadFailure = hadFailure || 0 != reporter.numFailed;
+      hadFailure = hadFailure || 0 != reporter.numErrored;
 
-    // Exit status
+    // Finished
       if(hadFailure) Sys.exit(1);
   }
 }
