@@ -36,9 +36,10 @@ class FixtureClassInspectArity1 {
 
 
 class InspectSpec {
-  public static function inspect(str:Dynamic) {
-    return Inspect.call(str);
+  public static function inspectsTo(a:spaceCadet.Asserter, inspected:String, toInspect:Dynamic) {
+    a.eq(inspected, Inspect.call(toInspect));
   }
+
 
   // the Neko core implementation has an attribute "r" ...kinda iffy, but w/e
   @:access(EReg.r)
@@ -55,19 +56,19 @@ class InspectSpec {
       d.describe('on a type with an inspect function', function(d) {
         d.context('for a struct', function(d) {
           d.it("uses the inspect function, when it has 0 arity", function(a) {
-            a.eq("!!", inspect({inspect: function() { return "!!"; }}));
+            inspectsTo(a, "!!", {inspect: function() return "!!"});
           });
           d.it("ignores the inspect function, when it nonzero arity", function(a) {
-            a.eq("{inspect: function(??) { ?? }}", inspect({inspect: function(_:Int) { return "!!"; }}));
+            inspectsTo(a, "{inspect: function(??) { ?? }}", {inspect: function(_:Int) return "!!"});
           });
         });
         d.context('for an instance', function(d) {
           d.it("uses the inspect function, when it has arity 0", function(a) {
-            a.eq("!!", inspect(new FixtureClassInspectArity0("!!")));
+            inspectsTo(a, "!!", new FixtureClassInspectArity0("!!"));
           });
           d.it("ignores the inspect function, when it expects args", function(a) {
             a.pending("Apparently it can't figure out the class at runtime (Type.getClass returns null)");
-            a.eq("What goes here?", inspect(new FixtureClassInspectArity1("!!")));
+            inspectsTo(a, "What goes here?", new FixtureClassInspectArity1("!!"));
           });
         });
         d.context('when inspect function raises an error', function(d) {
@@ -81,91 +82,91 @@ class InspectSpec {
 
       d.describe("on null", function(d) {
         d.it('inspects to "null"', function(a) {
-          a.eq("null", inspect(null));
+          inspectsTo(a, "null", null);
         });
       });
 
       d.describe("on a Bool", function(d) {
         d.it('true -> "true"', function(a) {
-          a.eq("true", inspect(true));
+          inspectsTo(a, "true", true);
         });
         d.it('false -> "false"', function(a) {
-          a.eq("false", inspect(false));
+          inspectsTo(a, "false", false);
         });
       });
 
       d.describe("on an Int", function(d) {
         d.it("inspects to the literal", function(a) {
-          a.eq("0", inspect(0));
-          a.eq("1", inspect(1));
-          a.eq("-1", inspect(-1));
-          a.eq("1234567890", inspect(1234567890));
-          a.eq("-1234567890", inspect(-1234567890));
+          inspectsTo(a, "0", 0);
+          inspectsTo(a, "1", 1);
+          inspectsTo(a, "-1", -1);
+          inspectsTo(a, "1234567890", 1234567890);
+          inspectsTo(a, "-1234567890", -1234567890);
         });
       });
 
       d.describe("on a Float", function(d) {
         d.it('appends .0 when there are no values to the RHS of the point', function(a) {
-          a.eq("0.0", inspect(0.0));
-          a.eq("0.0", inspect(.0));
-          a.eq("1.0", inspect(1.0));
-          a.eq("-1.0", inspect(-1.0));
+          inspectsTo(a, "0.0", 0.0);
+          inspectsTo(a, "0.0", .0);
+          inspectsTo(a, "1.0", 1.0);
+          inspectsTo(a, "-1.0", -1.0);
         });
 
         d.it('displays normally when there are values to the RHS of the point', function(a) {
-          a.eq('123.456', inspect(123.456));
-          a.eq('-123.456', inspect(-123.456));
+          inspectsTo(a, '123.456', 123.456);
+          inspectsTo(a, '-123.456', -123.456);
         });
 
         d.it('reverts to scientific notation when the float is sufficiently large', function(a) {
-          a.eq('1e+50', inspect(1e+50));
-          a.eq('1e+50', inspect(1e50));
-          a.eq('1.23e+50', inspect(1.23e+50));
-          a.eq('1.23e+50', inspect(1.23e50));
-          a.eq('-1.23e+50', inspect(-1.23e50));
+          inspectsTo(a, '1e+50', 1e+50);
+          inspectsTo(a, '1e+50', 1e50);
+          inspectsTo(a, '1.23e+50', 1.23e+50);
+          inspectsTo(a, '1.23e+50', 1.23e50);
+          inspectsTo(a, '-1.23e+50', -1.23e50);
         });
       });
 
       d.describe("on String", function(d) {
         d.it("wraps strings in quotes and escapes them", function(a) {
-          a.eq('"a\\bc"', inspect("a\x08c"));
+          inspectsTo(a, '"a\\bc"', "a\x08c");
         });
         d.it("escapes double quotes to avoid delimiter confusion", function(a) {
-          a.eq("\"\\\"\"", inspect('"'));
+          inspectsTo(a, "\"\\\"\"", '"');
         });
         d.it("escapes escapes -- you should be able to paste the result into a source file and get the un-inspected version", function(a) {
-          a.eq("\"\\\\\"", inspect('\\'));
+          inspectsTo(a, "\"\\\\\"", '\\');
         });
       });
 
       d.describe("on an array", function(d) {
         d.it("wraps the array in brackets", function(a) {
-          a.eq("[]", inspect([]));
+          inspectsTo(a, "[]", []);
         });
         d.it("inspects each element, separating them with commas", function(a) {
-          a.eq('["a"]', inspect(["a"]));
-          a.eq('["a", "b"]', inspect(["a", "b"]));
-          a.eq('[["a"], ["b"]]', inspect([["a"], ["b"]]));
+          inspectsTo(a, '["a"]', ["a"]);
+          inspectsTo(a, '["a", "b"]', ["a", "b"]);
+          inspectsTo(a, '[["a"], ["b"]]', [["a"], ["b"]]);
         });
       });
 
       d.describe("on hashes", function(d) {
         d.it("inspects like the literal", function(a) {
-          a.eq('[]', inspect([]));
-          a.eq('["a" => "b"]', inspect(["a" => "b"]));
-          a.eq('["a" => "b", "c" => "d"]', inspect(["a" => "b", "c" => "d"]));
+          inspectsTo(a, '[]', []);
+          inspectsTo(a, '["a" => "b"]', ["a" => "b"]);
+          inspectsTo(a, '["a" => "b", "c" => "d"]', ["a" => "b", "c" => "d"]);
         });
         d.it("works for StringMap", function(a) {
-          a.eq('["a" => "b"]', inspect(["a" => "b"]));
+          inspectsTo(a, '["a" => "b"]', ["a" => "b"]);
         });
         d.it("works for IntMap", function(a) {
-          a.eq('[1 => "a"]', inspect([1 => "a"]));
+          inspectsTo(a, '[1 => "a"]', [1 => "a"]);
         });
         d.it("works for ObjectMap", function(a) {
-          a.eq('[{a: 1} => 2]', inspect([{a:1} => 2]));
+          inspectsTo(a, '[{a: 1} => 2]', [{a:1} => 2]);
         });
         d.it("works for EnumValueMap", function(a) {
-          a.eq('[KeyOne => 2]', inspect([KeyOne => 2]));
+          inspectsTo(a, '[KeyOne => 2]', [KeyOne => 2]);
         });
         d.it("works for WeakMap", function(a) {
           a.pending('I don\'t know how to get one of these');
@@ -179,29 +180,29 @@ class InspectSpec {
 
       d.describe("on an anonymous struct, it inspects each value", function(d) {
         d.it("inspects empty structs", function(a) {
-          a.eq("{}", inspect({}));
-          a.eq("{a: 1}", inspect({a: 1}));
-          a.eq("{a: 1, b: \"omg\"}", inspect({a: 1, b: "omg"}));
+          inspectsTo(a, "{}", {});
+          inspectsTo(a, "{a: 1}", {a: 1});
+          inspectsTo(a, "{a: 1, b: \"omg\"}", {a: 1, b: "omg"});
         });
       });
 
       d.describe("on typedefed struct, it inspects like anonymous ones, since I can't figure out how to get the type info off of it", function(d) {
         d.it("inspects empty structs", function(a) {
           var s0:TypeDefedStruct0 = {};
-          a.eq("{}", inspect(s0));
+          inspectsTo(a, "{}", s0);
 
           var s1:TypeDefedStruct1 = {x: 1};
-          a.eq("{x: 1}", inspect(s1));
+          inspectsTo(a, "{x: 1}", s1);
 
           var s2:TypeDefedStruct2 = {x: 1, y: "abc"};
-          a.eq("{x: 1, y: \"abc\"}", inspect(s2));
+          inspectsTo(a, "{x: 1, y: \"abc\"}", s2);
         });
       });
 
       d.describe('on functions', function(d) {
         d.it('returns a function looking thing with obvious "fuck if I know" indocators', function(a) {
-          a.eq('function(??) { ?? }', inspect(function() {}));
-          a.eq('function(??) { ?? }', inspect(function(a) return 1));
+          inspectsTo(a, 'function(??) { ?? }', function() {});
+          inspectsTo(a, 'function(??) { ?? }', function(a) return 1);
         });
       });
 
@@ -213,15 +214,15 @@ class InspectSpec {
           // a.eq('toplevel.FixtureEnum.ZeroArgs', inspect(ZeroArgs));
           // a.eq('toplevel.FixtureEnum.OneArg("abc")', inspect(OneArg("abc")));
           // a.eq('toplevel.FixtureEnum.TwoArgs("abc", "defg")', inspect(TwoArgs("abc", "defg")));
-          a.eq('ZeroArgs', inspect(ZeroArgs));
-          a.eq('OneArg("abc")', inspect(OneArg("abc")));
-          a.eq('TwoArgs("abc", "defg")', inspect(TwoArgs("abc", "defg")));
+          inspectsTo(a, 'ZeroArgs', ZeroArgs);
+          inspectsTo(a, 'OneArg("abc")', OneArg("abc"));
+          inspectsTo(a, 'TwoArgs("abc", "defg")', TwoArgs("abc", "defg"));
         });
       });
 
       d.describe("on unknown", function(d) {
         d.it('displays "Unknown(s)", where s is whatever Std.string returns', function(a) {
-          a.eq("Unknown(#abstract)", inspect(getUnknown()));
+          inspectsTo(a, "Unknown(#abstract)", getUnknown());
         });
       });
     });

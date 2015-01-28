@@ -1,11 +1,12 @@
 package ruby;
 import ruby.ds.Interpreter;
 using Lambda;
+using Inspect;
 
 class ParserSpec {
   public static function parses(a:spaceCadet.Asserter, rubyCode:String, expected:ExecutionState, ?c:haxe.PosInfos) {
     var actual = ruby.ParseRuby.fromCode(rubyCode);
-    a.eq(Inspect.call(expected), Inspect.call(actual), c);
+    a.eq(expected.inspect(), actual.inspect(), c);
   }
 
   public static function describe(d:spaceCadet.Description) {

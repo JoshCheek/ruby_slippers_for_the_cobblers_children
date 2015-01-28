@@ -7,6 +7,10 @@ using StringTools;
    But should suffice for most of my needs.
 */
 class Inspect {
+  // so you can say obj.inspect()
+  public inline static function inspect(self:Dynamic) call(self);
+
+  // so you can say Inspect.call(obj)
   public static function call(toInspect:Dynamic) {
     var inspected = itsInspectReturns(toInspect);
     if(inspected != null) return inspected;

@@ -1,4 +1,5 @@
 package spaceCadet;
+using Inspect;
 
 typedef PassAssertion  = String -> haxe.PosInfos -> Void;
 typedef ReportPassing  = Void   ->                  Void;
@@ -163,7 +164,7 @@ class StreamReporter implements Reporter {
           .fgPop
         .indent
           .fgWhite
-            .writeln('UNCAUGHT: ${Inspect.call(thrown)}')
+            .writeln('UNCAUGHT: ${thrown.inspect()}')
             .fgPop
           .yield(function() printBacktrace(backtrace))
           .outdent;
@@ -177,7 +178,7 @@ class StreamReporter implements Reporter {
           output.fgCyan.write(filename).fgPop
                 .fgWhite.write(":").fgPop
                 .fgBlue.writeln(Std.string(line)).fgPop;
-        case _: throw('I don\'t know what kind of stack item this is: ${Inspect.call(stackItem)}');
+        case _: throw('I don\'t know what kind of stack item this is: ${stackItem.inspect()}');
       }
     }
   }

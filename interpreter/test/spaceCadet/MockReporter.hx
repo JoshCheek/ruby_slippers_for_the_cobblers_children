@@ -1,5 +1,6 @@
 package spaceCadet;
 import spaceCadet.Reporter;
+using Inspect;
 
 typedef SpecState = {
   numSucceeded : Int,
@@ -97,7 +98,7 @@ class MockReporter implements Reporter {
 
   public function thrown(name) {
     if(didThrow(name)) return crnt.specifications.get(name).thrown;
-    throw('Yo, ${Inspect.call(name)} did not throw!');
+    throw('Yo, ${name.inspect()} did not throw!');
   }
 
   public function thrownLine(name) {
@@ -109,7 +110,7 @@ class MockReporter implements Reporter {
       }
     }
 
-    throw('Yo, ${Inspect.call(name)} did not throw!');
+    throw('Yo, ${name.inspect()} did not throw!');
   }
 
   // Sigh, this is so dumb.
