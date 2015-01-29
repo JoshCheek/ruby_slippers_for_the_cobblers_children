@@ -1,13 +1,15 @@
 package ruby;
 
-typedef Location = {
-  public var begin : Int;
-  public var end   : Int;
+typedef AstAttributes = {
+  var begin_loc : Int;
+  var end_loc   : Int;
 }
-
-typedef AstAttributes = { }
 class Ast {
-  public function new(?attributes:AstAttributes) {
+  public var begin_loc : Int;
+  public var end_loc   : Int;
+  public function new(attributes:AstAttributes) {
+    this.begin_loc = attributes.begin_loc;
+    this.end_loc   = attributes.end_loc;
   }
 
   public var isDefault   (get, never) : Bool;
@@ -280,11 +282,15 @@ enum ParameterType {
   Rest;
 }
 class Parameter {
-  public var name:String;
-  public var type:ParameterType;
-  public function new(name:String, type:ParameterType) {
-    this.name = name;
-    this.type = type;
+  public var name      : String;
+  public var type      : ParameterType;
+  public var begin_loc : Int;
+  public var end_loc   : Int;
+  public function new(name:String, type:ParameterType, begin_loc:Int, end_loc:Int) {
+    this.name      = name;
+    this.type      = type;
+    this.begin_loc = begin_loc;
+    this.end_loc   = end_loc;
   }
 }
 typedef DefAstAttributes = {
@@ -319,49 +325,50 @@ class Parse {
   }
 
   static function fromJson(ast:Dynamic):Ast {
-    if(ast == null) return new DefaultAst({});
+    if(ast == null) return new DefaultAst({begin_loc: -1, end_loc: -1});
     return switch(ast.type) {
-      case "nil"                   : new NilAst();
-      case "true"                  : new TrueAst();
-      case "false"                 : new FalseAst();
-      case "self"                  : new SelfAst();
-      case "integer"               : new IntegerAst({value: Std.parseInt(ast.value)});
-      case "float"                 : new FloatAst({value: Std.parseFloat(ast.value)});
-      case "string"                : new StringAst({value: ast.value});
-      case "expressions"           : new ExprsAst({expressions: ast.expressions.map(fromJson)});
-      case "set_local_variable"    : new SetLvarAst({name: ast.name, value: fromJson(ast.value)});
-      case "get_local_variable"    : new GetLvarAst({name: ast.name});
-      case "set_instance_variable" : new SetIvarAst({name: ast.name, value: fromJson(ast.value)});
-      case "get_instance_variable" : new GetIvarAst({name: ast.name});
+      case "nil"                   : new NilAst({begin_loc: begin_loc(ast), end_loc: end_loc(ast)});
+      case "true"                  : new TrueAst({begin_loc: begin_loc(ast), end_loc: end_loc(ast)});
+      case "false"                 : new FalseAst({begin_loc: begin_loc(ast), end_loc: end_loc(ast)});
+      case "self"                  : new SelfAst({begin_loc: begin_loc(ast), end_loc: end_loc(ast)});
+      case "integer"               : new IntegerAst({value: Std.parseInt(ast.value), begin_loc: begin_loc(ast), end_loc: end_loc(ast)});
+      case "float"                 : new FloatAst({value: Std.parseFloat(ast.value), begin_loc: begin_loc(ast), end_loc: end_loc(ast)});
+      case "string"                : new StringAst({value: ast.value, begin_loc: begin_loc(ast), end_loc: end_loc(ast)});
+      case "expressions"           : new ExprsAst({expressions: ast.expressions.map(fromJson), begin_loc: begin_loc(ast), end_loc: end_loc(ast)});
+      case "set_local_variable"    : new SetLvarAst({name: ast.name, value: fromJson(ast.value), begin_loc: begin_loc(ast), end_loc: end_loc(ast)});
+      case "get_local_variable"    : new GetLvarAst({name: ast.name, begin_loc: begin_loc(ast), end_loc: end_loc(ast)});
+      case "set_instance_variable" : new SetIvarAst({name: ast.name, value: fromJson(ast.value), begin_loc: begin_loc(ast), end_loc: end_loc(ast)});
+      case "get_instance_variable" : new GetIvarAst({name: ast.name, begin_loc: begin_loc(ast), end_loc: end_loc(ast)});
       case "send"                  : new SendAst({target    : fromJson(ast.target),
                                                   message   : ast.message,
-                                                  arguments : ast.args.map(fromJson)
-                                                 });
-      case "constant"              : new ConstAst({name: ast.name, ns: fromJson(ast.namespace)});
+                                                  arguments : ast.args.map(fromJson),
+                                                  begin_loc : begin_loc(ast),
+                                                  end_loc   : end_loc(ast)});
+      case "constant"              : new ConstAst({name: ast.name, ns: fromJson(ast.namespace), begin_loc: begin_loc(ast), end_loc: end_loc(ast)});
       case "class"                 : new OpenClassAst({ns         : fromJson(ast.name_lookup),
                                                        superclass : fromJson(ast.superclass),
                                                        body       : fromJson(ast.body),
-                                                      });
+                                                       begin_loc  : begin_loc(ast), end_loc: end_loc(ast)});
       case "method_definition"     : new DefAst({name:       ast.name,
                                                  parameters: ast.args.map(toParam),
-                                                 body:       fromJson(ast.body)
-                                               });
+                                                 body:       fromJson(ast.body),
+                                                begin_loc: begin_loc(ast), end_loc: end_loc(ast)});
       case _                       : throw("CAN'T PARSE: " + ast);
     }
   }
 
   private static function toParam(param:Dynamic):Parameter {
     switch(param.type) {
-      case "required_arg": return new Parameter(param.name, Required);
-      case "rest_arg":     return new Parameter(param.name, Rest);
+      case "required_arg": return new Parameter(param.name, Required, begin_loc(param), end_loc(param));
+      case "rest_arg":     return new Parameter(param.name, Rest, begin_loc(param), end_loc(param));
       case _: throw("Unknown arg type!: " + param);
     }
   }
 
-  // private static function locationFrom(ast:Dynamic) {
-  //   return {
-  //     begin: ast.location.begin,
-  //     end:   ast.location.end,
-  //   };
-  // }
+  private static function begin_loc(ast:Dynamic) {
+    return ast.location.begin;
+  }
+  private static function end_loc(ast:Dynamic) {
+    return ast.location.end;
+  }
 }
