@@ -15,6 +15,7 @@ class RunTests {
       ruby.ParserSpec.describe(root);
       ruby.LanguageGoBagSpec.describe(root);
       ruby.BootstrappedWorldSpec.describe(root);
+      ruby.WorldSpec.describe(root);
 
       spaceCadet.RunningASuiteSpec.describe(root);
       spaceCadet.AssertionsSpec.describe(root);
