@@ -64,7 +64,6 @@ class Ast {
   public function toExprs()     : ExprsAst     { throw("INVALID!"); return null; }
   public function toOpenClass() : OpenClassAst { throw("INVALID!"); return null; }
   public function toSend()      : SendAst      { throw("INVALID!"); return null; }
-  public function toValue()     : ValueAst     { throw("INVALID!"); return null; }
   public function toDef()       : DefAst       { throw("INVALID!"); return null; }
 }
 
@@ -275,12 +274,35 @@ class SendAst extends Ast {
   override public function toSend() return this;
 }
 
-class ValueAst extends Ast {
-  override public function get_isValue() return true;
-  override public function toValue() return this;
-}
 
+enum ParameterType {
+  Required;
+  Rest;
+}
+class Parameter {
+  public var name:String;
+  public var type:ParameterType;
+  public function new(name:String, type:ParameterType) {
+    this.name = name;
+    this.type = type;
+  }
+}
+typedef DefAstAttributes = {
+  > AstAttributes,
+  var name       : String;
+  var parameters : Array<Parameter>;
+  var body       : Ast;
+}
 class DefAst extends Ast {
+  public var name       : String;
+  public var parameters : Array<Parameter>;
+  public var body       : Ast;
+  public function new(attributes:DefAstAttributes) {
+    this.name       = attributes.name;
+    this.parameters = attributes.parameters;
+    this.body       = attributes.body;
+    super(attributes);
+  }
   override public function get_isDef() return true;
   override public function toDef() return this;
 }
@@ -320,18 +342,21 @@ class Parse {
                                                        superclass : fromJson(ast.superclass),
                                                        body       : fromJson(ast.body),
                                                       });
-      // case "method_definition"     : Def(Start(ast.name, ast.args.map(toArg), fromJson(ast.body)));
+      case "method_definition"     : new DefAst({name:       ast.name,
+                                                 parameters: ast.args.map(toParam),
+                                                 body:       fromJson(ast.body)
+                                               });
       case _                       : throw("CAN'T PARSE: " + ast);
     }
   }
 
-  // private static function toArg(arg:Dynamic):ArgType {
-  //   switch(arg.type) {
-  //     case "required_arg": return Required(arg.name);
-  //     case "rest_arg":     return Rest(arg.name);
-  //     case _: throw("Unknown arg type!: " + arg);
-  //   }
-  // }
+  private static function toParam(param:Dynamic):Parameter {
+    switch(param.type) {
+      case "required_arg": return new Parameter(param.name, Required);
+      case "rest_arg":     return new Parameter(param.name, Rest);
+      case _: throw("Unknown arg type!: " + param);
+    }
+  }
 
   // private static function locationFrom(ast:Dynamic) {
   //   return {

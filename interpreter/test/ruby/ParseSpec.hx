@@ -157,21 +157,32 @@ class ParseSpec {
       // d.describe('module definitions', function(d) {
       // });
 
-      // d.describe('method definitions', function(d) {
-      //   d.example('with no args or body', function(a) {
-      //     parses(a, "def bland_method; end", Def(Start("bland_method", [], Default)));
-      //   });
-      //   d.example('with a body', function(a) {
-      //     parses(a, "def hasbody; true; end", Def(Start("hasbody", [], True({begin:13, end:17}))));
-      //   });
-      //   d.example('with required and rest args', function(a) {
-      //     parses(a, "def hasargs(req, *rst); end",
-      //         Def(Start("hasargs",
-      //           [Required("req"), Rest("rst")],
-      //           Default
-      //         )));
-      //   });
-      // });
+      d.describe('method definitions', function(d) {
+        d.example('with no parameters or body', function(a) {
+          parsed = parse("def bland_method; end");
+          a.isTrue(parsed.isDef);
+          var def = parsed.toDef();
+          a.eq("bland_method", def.name);
+          a.eq(0, def.parameters.length);
+          a.isTrue(def.body.isDefault);
+        });
+        d.example('with a body', function(a) {
+          var def = parse("def hasbody; true; end").toDef();
+          a.isTrue(def.body.isTrue);
+        });
+        d.example('with required and rest args', function(a) {
+          var def = parse("def hasargs(req, *rst); end").toDef();
+          a.eq(2, def.parameters.length);
+
+          var req = def.parameters[0];
+          a.eq(req.type, Required);
+          a.eq('req', req.name);
+
+          var rest = def.parameters[1];
+          a.eq(rest.type, Rest);
+          a.eq('rst', rest.name);
+        });
+      });
     });
   }
 }
