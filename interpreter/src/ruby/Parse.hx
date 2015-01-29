@@ -135,22 +135,64 @@ class StringAst extends Ast {
   override public function toString() return this;
 }
 
+typedef GetLvarAstAttributes = {
+  > AstAttributes,
+  var name:String;
+}
 class GetLvarAst extends Ast {
+  public var name:String;
+  public function new(attributes:GetLvarAstAttributes) {
+    this.name = attributes.name;
+    super(attributes);
+  }
   override public function get_isGetLvar() return true;
   override public function toGetLvar() return this;
 }
 
+typedef SetLvarAstAttributes = {
+  > AstAttributes,
+  var name  : String;
+  var value : Ast;
+}
 class SetLvarAst extends Ast {
+  public var name  : String;
+  public var value : Ast;
+  public function new(attributes:SetLvarAstAttributes) {
+    this.name  = attributes.name;
+    this.value = attributes.value;
+    super(attributes);
+  }
   override public function get_isSetLvar() return true;
   override public function toSetLvar() return this;
 }
 
+typedef GetIvarAstAttributes = {
+  > AstAttributes,
+  var name:String;
+}
 class GetIvarAst extends Ast {
+  public var name:String;
+  public function new(attributes:GetIvarAstAttributes) {
+    this.name = attributes.name;
+    super(attributes);
+  }
   override public function get_isGetIvar() return true;
   override public function toGetIvar() return this;
 }
 
+typedef SetIvarAstAttributes = {
+  > AstAttributes,
+  var name  : String;
+  var value : Ast;
+}
 class SetIvarAst extends Ast {
+  public var name  : String;
+  public var value : Ast;
+  public function new(attributes:SetIvarAstAttributes) {
+    this.name  = attributes.name;
+    this.value = attributes.value;
+    super(attributes);
+  }
   override public function get_isSetIvar() return true;
   override public function toSetIvar() return this;
 }
@@ -235,10 +277,10 @@ class Parse {
       case "float"                 : new FloatAst({value: Std.parseFloat(ast.value)});
       case "string"                : new StringAst({value: ast.value});
       case "expressions"           : new ExprsAst({expressions: ast.expressions.map(fromJson)});
-      // case "set_local_variable"    : SetLvar(FindRhs(ast.name, fromJson(ast.value)));
-      // case "get_local_variable"    : GetLvar(Name(ast.name));
-      // case "set_instance_variable" : SetIvar(FindRhs(ast.name, fromJson(ast.value)));
-      // case "get_instance_variable" : GetIvar(Name(ast.name));
+      case "set_local_variable"    : new SetLvarAst({name: ast.name, value: fromJson(ast.value)});
+      case "get_local_variable"    : new GetLvarAst({name: ast.name});
+      case "set_instance_variable" : new SetIvarAst({name: ast.name, value: fromJson(ast.value)});
+      case "get_instance_variable" : new GetIvarAst({name: ast.name});
       // case "send"                  : Send(Start(fromJson(ast.target), ast.message, ast.args.map(fromJson)));
       case "constant"              : new ConstAst({name: ast.name, ns: fromJson(ast.namespace)});
       // case "class"                 : OpenClass(GetNs(fromJson(ast.name_lookup), fromJson(ast.superclass), fromJson(ast.body)));

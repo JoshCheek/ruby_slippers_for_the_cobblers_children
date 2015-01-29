@@ -94,17 +94,30 @@ class ParseSpec {
             a.eq(true, const.ns.toConst().ns.isDefault);
           });
         });
-        // d.example('setting and getting local vars', function(a) {
-        //   parsed = parse("a = 1; a").toExprs();
-        //   a.
-        //     exprs( [SetLvar(FindRhs("a", Integer(1))),
-        //             GetLvar(Name("a"))]));
-        // });
-        // d.example('setting and getting instance vars', function(a) {
-        //   parses(a, "@a = 1; @a",
-        //     exprs( [SetIvar(FindRhs("@a", Integer(1))),
-        //             GetIvar(Name("@a"))]));
-        // });
+        d.example('setting and getting local vars', function(a) {
+          var exprs = parse("a = 1; a").toExprs();
+          a.eq(2, exprs.length);
+
+          a.isTrue(exprs.get(0).isSetLvar);
+          var setlvar = exprs.get(0).toSetLvar();
+          a.eq('a', setlvar.name);
+          a.eq(1, setlvar.value.toInteger().value);
+
+          a.isTrue(exprs.get(1).isGetLvar);
+          a.eq('a', exprs.get(1).toGetLvar().name);
+        });
+        d.example('setting and getting instance vars', function(a) {
+          var exprs = parse("@a = 1; @a").toExprs();
+          a.eq(2, exprs.length);
+
+          a.isTrue(exprs.get(0).isSetIvar);
+          var setivar = exprs.get(0).toSetIvar();
+          a.eq('@a', setivar.name);
+          a.eq(1, setivar.value.toInteger().value);
+
+          a.isTrue(exprs.get(1).isGetIvar);
+          a.eq('@a', exprs.get(1).toGetIvar().name);
+        });
       });
 
       // d.describe('sending messages', function(d) {
