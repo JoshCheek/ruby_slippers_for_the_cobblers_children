@@ -29,7 +29,7 @@ class World {
     var tmp:Dynamic = klass;
     var typedClass:RClass = tmp;
     // or should this return null if its not a class?
-    if(typedClass.imeths == null) throw("Can't cast this, it's not a class: " + inspect(klass));
+    if(typedClass.imeths == null) throw("Can't cast this, it's not a class: " + sinspect(klass));
     return typedClass;
   }
 
@@ -78,8 +78,9 @@ class World {
       return "#<" + obj.klass.name + ">";
     }
   }
-  public function inspect(obj:RObject):String {
-    return World.sinspect(obj);
+
+  public function inspect():String {
+    return 'RB(THE WORLD!!)';
   }
 
   // faux attributes

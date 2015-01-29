@@ -62,7 +62,11 @@ class BootstrappedWorldSpec {
 
     d.context('OBJECT HIERARCHY', function(d) {
       function assertClassDef(a:spaceCadet.Asserter, self:RClass, name:String, superclass:RClass, world:ruby.World) {
+        trace('\n-----------------------------------------------------\n');
+        trace(Inspect.call(world));
+        trace(superclass.inspect());
         a.eq(name,             self.name);
+        throw("TMP");
         a.eq(world.classClass, self.klass);
         a.eq(superclass,       self.superclass);
         if(null == world.toplevelNamespace.constants[name])

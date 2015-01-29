@@ -19,7 +19,7 @@ class TestCase extends haxe.unit.TestCase {
   }
 
   function rInspect(val:RObject):String {
-    return world.inspect(val);
+    return ruby.World.sinspect(val);
   }
 
   function rEqual(l:RObject, r:RObject):Bool {

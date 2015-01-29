@@ -22,32 +22,32 @@ class Asserter {
   }
 
   public function eq<T>(a:T, b:T, ?pos:haxe.PosInfos) {
-    var msg = Std.string(a) + " == " + Std.string(b);
+    var msg = Inspect.call(a) + " == " + Inspect.call(b);
     eqm(a, b, msg, pos);
   }
 
   public function neq<T>(a:T, b:T, ?pos:haxe.PosInfos) {
-    var msg = Std.string(a) + " != " + Std.string(b);
+    var msg = Inspect.call(a) + " != " + Inspect.call(b);
     neqm(a, b, msg, pos);
   }
 
   public function streqm<T>(a:T, b:T, message, ?pos:haxe.PosInfos) {
-    if(Std.string(a) == Std.string(b)) onSuccess(message, pos);
-    else                               onFailure(message, pos);
+    if(Inspect.call(a) == Inspect.call(b)) onSuccess(message, pos);
+    else                                   onFailure(message, pos);
   }
 
   public function nstreqm<T>(a:T, b:T, message, ?pos:haxe.PosInfos) {
-    if(Std.string(a) != Std.string(b)) onSuccess(message, pos);
-    else                               onFailure(message, pos);
+    if(Inspect.call(a) != Inspect.call(b)) onSuccess(message, pos);
+    else                                   onFailure(message, pos);
   }
 
   public function streq<T>(a:T, b:T, ?pos:haxe.PosInfos) {
-    var msg = "Std.string(" + Std.string(a) + ") == Std.string(" + Std.string(b) + ")";
+    var msg = '${Inspect.call(a)}.inspect() == ${Inspect.call(b)}.inspect()';
     streqm(a, b, msg, pos);
   }
 
   public function nstreq<T>(a:T, b:T, ?pos:haxe.PosInfos) {
-    var msg = "Std.string(" + Std.string(a) + ") != Std.string(" + Std.string(b) + ")";
+    var msg = '${Inspect.call(a)}.inspect() == ${Inspect.call(b)}.inspect()';
     nstreqm(a, b, msg, pos);
   }
 
