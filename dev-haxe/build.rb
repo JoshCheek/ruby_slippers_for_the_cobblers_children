@@ -83,13 +83,15 @@ else
   cd source_dir
 end
 
-git 'submodule', 'update', '--init', '--recursive'
-
-
 step 'Verifying repo is unmodified'
 git 'status', '--short'
 sh 'test -z "$(git status --porcelain)"' or # I know this is stupid, but I spent a long time trying to find a better way -.-
   fail_script 'Working tree is dirty!'
+
+step 'Updating to correct branch and submodule'
+git 'checkout', 'development'
+git 'submodule', 'update', '--init', '--recursive'
+
 
 step 'Fixing Makefile to install locally'
 sed '-i', '', '-E', "/^INSTALL_DIR=/s,/usr,#{install_dir},", 'Makefile'
