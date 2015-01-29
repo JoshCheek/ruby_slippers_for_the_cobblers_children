@@ -49,19 +49,19 @@ class Asserter {
     nstreqm(a, b, msg, pos);
   }
 
-  public function t(val:Bool, ?pos:haxe.PosInfos) {
-    tm(val, 'Should have been true', pos);
+  public function isTrue(val:Bool, ?pos:haxe.PosInfos) {
+    isTruem(val, 'Should have been true', pos);
   }
 
-  public function tm(val:Bool, msg:String, ?pos:haxe.PosInfos) {
+  public function isTruem(val:Bool, msg:String, ?pos:haxe.PosInfos) {
     eqm(true, val, msg, pos);
   }
 
-  public function f(val:Bool, ?pos:haxe.PosInfos) {
-    fm(val, 'Should have been false', pos);
+  public function isFalse(val:Bool, ?pos:haxe.PosInfos) {
+    isFalsem(val, 'Should have been false', pos);
   }
 
-  public function fm(val:Bool, msg:String, ?pos:haxe.PosInfos) {
+  public function isFalsem(val:Bool, msg:String, ?pos:haxe.PosInfos) {
     eqm(false, val, msg, pos);
   }
 

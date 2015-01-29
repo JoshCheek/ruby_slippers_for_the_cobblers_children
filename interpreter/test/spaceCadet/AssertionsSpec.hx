@@ -113,42 +113,42 @@ class AssertionsSpec {
         a.eq("zomg", successMessage);
       });
 
-      d.specify("t fails when the value is not haxe true", function(a) {
-        asserter.t(false);
+      d.specify("isTrue fails when the value is not haxe true", function(a) {
+        asserter.isTrue(false);
         a.eq(currentLine-1, recordedLine);
         a.eq(null, successMessage);
 
-        asserter.t(true);
+        asserter.isTrue(true);
         a.eq(currentLine-1, recordedLine);
         a.eq(false, successMessage == null);
       });
 
-      d.specify("f fails when the value is not haxe false", function(a) {
-        asserter.f(true);
+      d.specify("isFalse fails when the value is not haxe false", function(a) {
+        asserter.isFalse(true);
         a.eq(currentLine-1, recordedLine);
         a.eq(null, successMessage);
 
-        asserter.f(false);
+        asserter.isFalse(false);
         a.eq(currentLine-1, recordedLine);
         a.eq(false, successMessage == null);
       });
 
-      d.specify("tm is the same as true, but with a custom message", function(a) {
-        asserter.tm(false, "msg1");
+      d.specify("isTruem is the same as true, but with a custom message", function(a) {
+        asserter.isTruem(false, "msg1");
         a.eq(currentLine-1, recordedLine);
 
-        asserter.tm(true, "msg2");
+        asserter.isTruem(true, "msg2");
         a.eq(currentLine-1, recordedLine);
 
         a.eq("msg1", failureMessage);
         a.eq("msg2", successMessage);
       });
 
-      d.specify("fm is the same as false, but with a custom message", function(a) {
-        asserter.fm(true, "msg1");
+      d.specify("isFalsem is the same as false, but with a custom message", function(a) {
+        asserter.isFalsem(true, "msg1");
         a.eq(currentLine-1, recordedLine);
 
-        asserter.fm(false, "msg2");
+        asserter.isFalsem(false, "msg2");
         a.eq(currentLine-1, recordedLine);
 
         a.eq("msg1", failureMessage);
