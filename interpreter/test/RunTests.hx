@@ -3,11 +3,6 @@ import spaceCadet.*;
 class RunTests {
   static function main() {
     var hadFailure = false;
-    // haxe.unit
-      var runner = new haxe.unit.TestRunner();
-      ruby.RunTests.addTests(runner);
-      hadFailure = hadFailure || !runner.run();
-
     // SpaceCadet
       // define
       var root = new Description();
