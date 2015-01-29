@@ -12,7 +12,6 @@ class RunTests {
       throw 'Need to set the port to find the server in env var $envVarName';
     }
 
-    runner.add(new TestLanguageGoBag());
     runner.add(new TestSupport());
     runner.add(new TestBootstrappedWorld());
     runner.add(new TestWorld());

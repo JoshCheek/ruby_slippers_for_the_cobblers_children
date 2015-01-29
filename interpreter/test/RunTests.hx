@@ -13,6 +13,7 @@ class RunTests {
       var root = new Description();
 
       ruby.ParserSpec.describe(root);
+      ruby.LanguageGoBagSpec.describe(root);
 
       spaceCadet.RunningASuiteSpec.describe(root);
       spaceCadet.AssertionsSpec.describe(root);
