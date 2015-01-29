@@ -13,7 +13,6 @@ class RunTests {
     }
 
     runner.add(new TestSupport());
-    runner.add(new TestBootstrappedWorld());
     runner.add(new TestWorld());
     runner.add(new TestInterpreter());
 
