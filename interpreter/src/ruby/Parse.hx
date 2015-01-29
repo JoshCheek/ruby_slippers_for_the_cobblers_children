@@ -235,7 +235,22 @@ class ExprsAst extends Ast {
   }
 }
 
+typedef OpenClassAstAttributes = {
+  > AstAttributes,
+  var ns         : Ast;
+  var superclass : Ast;
+  var body       : Ast;
+}
 class OpenClassAst extends Ast {
+  public var ns         : Ast;
+  public var superclass : Ast;
+  public var body       : Ast;
+  public function new(attributes:OpenClassAstAttributes) {
+    this.ns         = attributes.ns;
+    this.superclass = attributes.superclass;
+    this.body       = attributes.body;
+    super(attributes);
+  }
   override public function get_isOpenClass() return true;
   override public function toOpenClass() return this;
 }
@@ -296,12 +311,15 @@ class Parse {
       case "get_local_variable"    : new GetLvarAst({name: ast.name});
       case "set_instance_variable" : new SetIvarAst({name: ast.name, value: fromJson(ast.value)});
       case "get_instance_variable" : new GetIvarAst({name: ast.name});
-      case "send"                  : new SendAst({ target    : fromJson(ast.target),
-                                                   message   : ast.message,
-                                                   arguments : ast.args.map(fromJson)
+      case "send"                  : new SendAst({target    : fromJson(ast.target),
+                                                  message   : ast.message,
+                                                  arguments : ast.args.map(fromJson)
                                                  });
       case "constant"              : new ConstAst({name: ast.name, ns: fromJson(ast.namespace)});
-      // case "class"                 : OpenClass(GetNs(fromJson(ast.name_lookup), fromJson(ast.superclass), fromJson(ast.body)));
+      case "class"                 : new OpenClassAst({ns         : fromJson(ast.name_lookup),
+                                                       superclass : fromJson(ast.superclass),
+                                                       body       : fromJson(ast.body),
+                                                      });
       // case "method_definition"     : Def(Start(ast.name, ast.args.map(toArg), fromJson(ast.body)));
       case _                       : throw("CAN'T PARSE: " + ast);
     }

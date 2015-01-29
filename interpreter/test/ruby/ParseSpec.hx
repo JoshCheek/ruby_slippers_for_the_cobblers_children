@@ -132,40 +132,27 @@ class ParseSpec {
         });
       });
 
-      // d.describe('class definitions', function(d) {
-      //   d.it('parses the namespace, name, superclas, and body', function(a) {
-      //     parses(a, "class A::B < C
-      //                  1
-      //                end",
-      //        OpenClass(GetNs(
-      //          Const(GetNs(  Const(GetNs(Default, "A")), "B")),
-      //          Const(GetNs(Default, "C")),
-      //          Integer(1)
-      //        )));
-      //   });
+      d.describe('class definitions', function(d) {
+        d.it('parses the namespace, name, superclas, and body', function(a) {
+          parsed = parse("class A::B < C; 1; end");
+          a.isTrue(parsed.isOpenClass);
+          var klass = parsed.toOpenClass();
+          a.eq('B', klass.ns.toConst().name);
+          a.eq('A', klass.ns.toConst().ns.toConst().name);
+          a.eq('C', klass.superclass.toConst().name);
+          a.eq(1,   klass.body.toInteger().value);
+        });
 
-      //   d.it('parses defaults there is no namespace, superclass, or body', function(a) {
-      //     parses(a, "class A; end", OpenClass(GetNs(
-      //                                 Const(GetNs(Default, "A")),
-      //                                 Default,
-      //                                 Default
-      //                               )));
-      //   });
-
-      //   d.it('parses nested declarations', function(a) {
-      //     parses(a, "class A; class B; end; end",
-      //       OpenClass(GetNs(
-      //         Const(GetNs(Default, "A")),
-      //         Default,
-      //         OpenClass(GetNs(
-      //           Const(GetNs(Default, "B")),
-      //           Default,
-      //           Default
-      //         ))
-      //       ))
-      //     );
-      //   });
-      // });
+        d.it('parses defaults -- no namespace, superclass, or body', function(a) {
+          parsed = parse("class A; end");
+          a.isTrue(parsed.isOpenClass);
+          var klass = parsed.toOpenClass();
+          a.eq('A', klass.ns.toConst().name);
+          a.isTrue(klass.ns.toConst().ns.isDefault);
+          a.isTrue(klass.superclass.isDefault);
+          a.isTrue(klass.body.isDefault);
+        });
+      });
 
       // d.describe('module definitions', function(d) {
       // });
