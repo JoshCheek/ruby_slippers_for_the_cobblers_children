@@ -27,7 +27,7 @@ enum ExecutionState {
   Default;
   Nil       (loc:Location);
   Self;
-  True;
+  True      (loc:Location);
   False;
   Integer   (value:Int);
   Float     (value:Float);

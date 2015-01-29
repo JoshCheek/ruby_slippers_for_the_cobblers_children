@@ -15,7 +15,7 @@ class ParseRuby {
     if(ast == null) return Default;
     return switch(ast.type) {
       case "nil"                   : Nil(locationFrom(ast));
-      case "true"                  : True;
+      case "true"                  : True(locationFrom(ast));
       case "false"                 : False;
       case "self"                  : Self;
       case "integer"               : Integer(Std.parseInt(ast.value));

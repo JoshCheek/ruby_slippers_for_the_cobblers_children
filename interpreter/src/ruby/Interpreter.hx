@@ -90,10 +90,10 @@ class Interpreter {
     case Send(state):
       evalSend(sf, state);
 
-    case Self:  Pop(sf.binding.self);
-    case True:  Pop(world.rubyTrue);
-    case False: Pop(world.rubyFalse);
-    case Nil(loc):   Pop(world.rubyNil);
+    case Self:        Pop(sf.binding.self);
+    case True(loc):   Pop(world.rubyTrue);
+    case False:       Pop(world.rubyFalse);
+    case Nil(loc):    Pop(world.rubyNil);
     case String(val): Pop(world.stringLiteral(val));
     case Default:
       var iter = this.state.stack.iterator();

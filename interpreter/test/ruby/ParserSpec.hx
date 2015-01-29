@@ -18,7 +18,7 @@ class ParserSpec {
     d.describe('Parsing', function(d) {
       d.describe('literals', function(d) {
         d.example('nil',   function(a) parses(a, 'nil',   Nil({begin: 0, end: 3})));
-        d.example('true',  function(a) parses(a, 'true',  True));
+        d.example('true',  function(a) parses(a, 'true',  True({begin: 0, end: 4})));
         d.example('false', function(a) parses(a, 'false', False));
         d.example('self',  function(a) parses(a, 'self',  Self));
         d.example('integers', function(a) {
@@ -57,7 +57,9 @@ class ParserSpec {
 
       d.describe('sending messages', function(d) {
         d.it('parses the target, message, and arguments', function(a) {
-          parses(a, "true.something(false)", Send(Start(True, "something", [False])));
+          parses(a, "true.something(false)", Send(Start(True({begin:0, end:4}),
+                                                        "something",
+                                                        [False])));
         });
       });
 
@@ -104,7 +106,7 @@ class ParserSpec {
           parses(a, "def bland_method; end", Def(Start("bland_method", [], Default)));
         });
         d.example('with a body', function(a) {
-          parses(a, "def hasbody; true; end", Def(Start("hasbody", [], True)));
+          parses(a, "def hasbody; true; end", Def(Start("hasbody", [], True({begin:13, end:17}))));
         });
         d.example('with required and rest args', function(a) {
           parses(a, "def hasargs(req, *rst); end",

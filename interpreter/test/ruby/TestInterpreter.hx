@@ -148,7 +148,7 @@ class TestInterpreter extends ruby.support.TestCase {
     var ometh = world.objectClass.imeths['ometh'];
     assertEquals("ometh", ometh.name);
     assertEquals(0, ometh.args.length);
-    assertLooksKindaSimilar(ometh.body, Ruby(True));
+    assertLooksKindaSimilar(ometh.body, Ruby(True({begin:141, end:145})));
 
     // Object#meth_with_args
     var methWithArgs = world.objectClass.imeths['meth_with_args'];
