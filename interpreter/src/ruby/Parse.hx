@@ -240,7 +240,22 @@ class OpenClassAst extends Ast {
   override public function toOpenClass() return this;
 }
 
+typedef SendAstAttributes = {
+  > AstAttributes,
+  var target    : Ast;
+  var message   : String;
+  var arguments : Array<Ast>;
+}
 class SendAst extends Ast {
+  public var target    : Ast;
+  public var message   : String;
+  public var arguments : Array<Ast>;
+  public function new(attributes:SendAstAttributes) {
+    this.target    = attributes.target;
+    this.message   = attributes.message;
+    this.arguments = attributes.arguments;
+    super(attributes);
+  }
   override public function get_isSend() return true;
   override public function toSend() return this;
 }
@@ -281,7 +296,10 @@ class Parse {
       case "get_local_variable"    : new GetLvarAst({name: ast.name});
       case "set_instance_variable" : new SetIvarAst({name: ast.name, value: fromJson(ast.value)});
       case "get_instance_variable" : new GetIvarAst({name: ast.name});
-      // case "send"                  : Send(Start(fromJson(ast.target), ast.message, ast.args.map(fromJson)));
+      case "send"                  : new SendAst({ target    : fromJson(ast.target),
+                                                   message   : ast.message,
+                                                   arguments : ast.args.map(fromJson)
+                                                 });
       case "constant"              : new ConstAst({name: ast.name, ns: fromJson(ast.namespace)});
       // case "class"                 : OpenClass(GetNs(fromJson(ast.name_lookup), fromJson(ast.superclass), fromJson(ast.body)));
       // case "method_definition"     : Def(Start(ast.name, ast.args.map(toArg), fromJson(ast.body)));

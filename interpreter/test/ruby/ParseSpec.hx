@@ -120,13 +120,17 @@ class ParseSpec {
         });
       });
 
-      // d.describe('sending messages', function(d) {
-      //   d.it('parses the target, message, and arguments', function(a) {
-      //     parses(a, "true.something(false)", Send(Start(True({begin:0, end:4}),
-      //                                                   "something",
-      //                                                   [False])));
-      //   });
-      // });
+      d.describe('sending messages', function(d) {
+        d.it('parses the target, message, and arguments', function(a) {
+          parsed = parse("true.something(false)");
+          a.isTrue(parsed.isSend);
+          var send = parsed.toSend();
+          a.isTrue(send.target.isTrue);
+          a.eq("something", send.message);
+          a.eq(1, send.arguments.length);
+          a.isTrue(send.arguments[0].isFalse);
+        });
+      });
 
       // d.describe('class definitions', function(d) {
       //   d.it('parses the namespace, name, superclas, and body', function(a) {
