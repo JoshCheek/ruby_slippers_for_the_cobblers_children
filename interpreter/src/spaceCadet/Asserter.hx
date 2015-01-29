@@ -22,23 +22,21 @@ class Asserter {
   }
 
   public function eq<T>(a:T, b:T, ?pos:haxe.PosInfos) {
-    var msg = Inspect.call(a) + " == " + Inspect.call(b);
+    var msg = 'Expected ${Inspect.call(a)} == ${Inspect.call(b)}';
     eqm(a, b, msg, pos);
   }
 
   public function neq<T>(a:T, b:T, ?pos:haxe.PosInfos) {
-    var msg = Inspect.call(a) + " != " + Inspect.call(b);
+    var msg = 'Expected: ${Inspect.call(a)} != ${Inspect.call(b)}';
     neqm(a, b, msg, pos);
   }
 
   public function streqm<T>(a:T, b:T, message, ?pos:haxe.PosInfos) {
-    if(Inspect.call(a) == Inspect.call(b)) onSuccess(message, pos);
-    else                                   onFailure(message, pos);
+    eqm(Inspect.call(a), Inspect.call(b), message, pos);
   }
 
   public function nstreqm<T>(a:T, b:T, message, ?pos:haxe.PosInfos) {
-    if(Inspect.call(a) != Inspect.call(b)) onSuccess(message, pos);
-    else                                   onFailure(message, pos);
+    neqm(Inspect.call(a), Inspect.call(b), message, pos);
   }
 
   public function streq<T>(a:T, b:T, ?pos:haxe.PosInfos) {
@@ -52,8 +50,7 @@ class Asserter {
   }
 
   public function t(val:Bool, ?pos:haxe.PosInfos) {
-    var msg = 'Should have been true';
-    tm(val, msg, pos);
+    tm(val, 'Should have been true', pos);
   }
 
   public function tm(val:Bool, msg:String, ?pos:haxe.PosInfos) {
@@ -61,8 +58,7 @@ class Asserter {
   }
 
   public function f(val:Bool, ?pos:haxe.PosInfos) {
-    var msg = 'Should have been false';
-    fm(val, msg, pos);
+    fm(val, 'Should have been false', pos);
   }
 
   public function fm(val:Bool, msg:String, ?pos:haxe.PosInfos) {
