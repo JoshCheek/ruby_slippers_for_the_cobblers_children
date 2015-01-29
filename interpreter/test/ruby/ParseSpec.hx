@@ -15,6 +15,21 @@ class ParseSpec {
     d.before(function(a) parsed = null);
 
     d.describe('Parsing', function(d) {
+
+      d.describe('expressions', function(d) {
+        d.it('parses single expressions', function(a) {
+          a.isTrue(parse('nil').isNil);
+        });
+        d.it('parses multiple expressions', function(a) {
+          parsed = parse('9;4');
+          a.isTrue(parsed.isExprs);
+          var exprs = parsed.toExprs();
+          a.eq(2, exprs.length);
+          a.eq(9, exprs.get(0).toInteger().value);
+          a.eq(4, exprs.get(1).toInteger().value);
+        });
+      });
+
       d.describe('literals', function(d) {
         d.example('nil',   function(a) {
           parsed = parse('nil');
@@ -61,31 +76,36 @@ class ParseSpec {
         });
       });
 
-      // d.describe('variables', function(d) {
-      //   d.context('Constant', function(a) {
-      //     d.example('with no namespace', function(a) {
-      //       parsed = parse("A").toConst;
-      //       a.eq("A", parsed.name);
-      //       a.eq(true, parsed.ns.ns.isDefault);
-      //     });
-      //     d.example('with a namespace', function(a) {
-      //       parsed = parse("A::B").toConst;
-      //       a.eq("B", parsed.name);
-      //       a.eq("A", parsed.ns.name);
-      //       a.eq(true, parsed.ns.ns.isDefault);
-      //     });
-      //   });
-      //   d.it('setting and getting local vars', function(a) {
-      //     parses(a, "a = 1; a",
-      //       exprs( [SetLvar(FindRhs("a", Integer(1))),
-      //               GetLvar(Name("a"))]));
-      //   });
-      //   d.it('setting and getting instance vars', function(a) {
-      //     parses(a, "@a = 1; @a",
-      //       exprs( [SetIvar(FindRhs("@a", Integer(1))),
-      //               GetIvar(Name("@a"))]));
-      //   });
-      // });
+
+      d.describe('variables', function(d) {
+        d.context('Constant', function(a) {
+          d.example('with no namespace', function(a) {
+            parsed = parse("A");
+            a.isTrue(parsed.isConst);
+            var const = parsed.toConst();
+            a.eq("A", const.name);
+            a.eq(true, const.ns.isDefault);
+          });
+          d.example('with a namespace', function(a) {
+            parsed = parse("A::B");
+            var const = parsed.toConst();
+            a.eq("B", const.name);
+            a.eq("A", const.ns.toConst().name);
+            a.eq(true, const.ns.toConst().ns.isDefault);
+          });
+        });
+        // d.example('setting and getting local vars', function(a) {
+        //   parsed = parse("a = 1; a").toExprs();
+        //   a.
+        //     exprs( [SetLvar(FindRhs("a", Integer(1))),
+        //             GetLvar(Name("a"))]));
+        // });
+        // d.example('setting and getting instance vars', function(a) {
+        //   parses(a, "@a = 1; @a",
+        //     exprs( [SetIvar(FindRhs("@a", Integer(1))),
+        //             GetIvar(Name("@a"))]));
+        // });
+      });
 
       // d.describe('sending messages', function(d) {
       //   d.it('parses the target, message, and arguments', function(a) {

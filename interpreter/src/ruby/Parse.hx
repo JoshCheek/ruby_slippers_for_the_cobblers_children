@@ -155,14 +155,42 @@ class SetIvarAst extends Ast {
   override public function toSetIvar() return this;
 }
 
+typedef ConstAstAttributes = {
+  > AstAttributes,
+  var name : String;
+  var ns   : Ast;
+}
 class ConstAst extends Ast {
+  public var name : String;
+  public var ns   : Ast;
+  public function new(attributes:ConstAstAttributes) {
+    this.name = attributes.name;
+    this.ns   = attributes.ns;
+    super(attributes);
+  }
   override public function get_isConst() return true;
   override public function toConst() return this;
 }
 
+typedef ExprsAstAttributes = {
+  > AstAttributes,
+  var expressions:Array<Ast>;
+}
 class ExprsAst extends Ast {
+  var expressions : Array<Ast>;
+  public function new(attributes:ExprsAstAttributes) {
+    this.expressions = attributes.expressions;
+    super(attributes);
+  }
   override public function get_isExprs() return true;
   override public function toExprs() return this;
+
+  public var length(get, never):Int;
+  function get_length() return expressions.length;
+
+  public function get(index:Int) {
+    return expressions[index];
+  }
 }
 
 class OpenClassAst extends Ast {
@@ -206,13 +234,13 @@ class Parse {
       case "integer"               : new IntegerAst({value: Std.parseInt(ast.value)});
       case "float"                 : new FloatAst({value: Std.parseFloat(ast.value)});
       case "string"                : new StringAst({value: ast.value});
-      // case "expressions"           : Exprs(Start(ast.expressions.map(fromJson)));
+      case "expressions"           : new ExprsAst({expressions: ast.expressions.map(fromJson)});
       // case "set_local_variable"    : SetLvar(FindRhs(ast.name, fromJson(ast.value)));
       // case "get_local_variable"    : GetLvar(Name(ast.name));
       // case "set_instance_variable" : SetIvar(FindRhs(ast.name, fromJson(ast.value)));
       // case "get_instance_variable" : GetIvar(Name(ast.name));
       // case "send"                  : Send(Start(fromJson(ast.target), ast.message, ast.args.map(fromJson)));
-      // case "constant"              : Const(GetNs(fromJson(ast.namespace), ast.name));
+      case "constant"              : new ConstAst({name: ast.name, ns: fromJson(ast.namespace)});
       // case "class"                 : OpenClass(GetNs(fromJson(ast.name_lookup), fromJson(ast.superclass), fromJson(ast.body)));
       // case "method_definition"     : Def(Start(ast.name, ast.args.map(toArg), fromJson(ast.body)));
       case _                       : throw("CAN'T PARSE: " + ast);
