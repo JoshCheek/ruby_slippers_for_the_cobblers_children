@@ -26,6 +26,7 @@ class Inspect {
         // might be useful: Type.getSuperClass(c:Class<Dynamic>):Class<Dynamic>
         if( klass==String) return inspectString(toInspect);
         if( klass==Array)  return inspectArray(toInspect);
+        if( klass==List)   return inspectList(toInspect);
         if( haxe.ds.StringMap    == klass ||
             haxe.ds.IntMap       == klass ||
             haxe.ds.ObjectMap    == klass ||
@@ -108,5 +109,12 @@ class Inspect {
     var constructor = Type.enumConstructor(instance);
     if(inspectedParams.length == 0) return constructor;
     else return '$constructor(${inspectedParams.join(", ")})';
+  }
+
+  private static function inspectList(toInspect:List<Dynamic>) {
+    var inspectedElements = [];
+    for(element in toInspect)
+      inspectedElements.push(call(element));
+    return "(" + inspectedElements.join(", ") + ")";
   }
 }

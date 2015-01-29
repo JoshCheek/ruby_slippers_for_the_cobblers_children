@@ -150,6 +150,17 @@ class InspectSpec {
         });
       });
 
+      d.describe("on a list", function(d) {
+        d.it('inspects like a lisp list, with each of its elements inspected', function(a) {
+          inspectsTo(a, '()', new List());
+          var l = new List();
+          l.push("a");
+          inspectsTo(a, '("a")', l);
+          l.push("x");
+          inspectsTo(a, '("x", "a")', l);
+        });
+      });
+
       d.describe("on hashes", function(d) {
         d.it("inspects like the literal", function(a) {
           inspectsTo(a, '[]', []);
