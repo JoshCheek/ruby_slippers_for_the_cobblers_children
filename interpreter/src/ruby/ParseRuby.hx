@@ -14,7 +14,7 @@ class ParseRuby {
   static function fromJson(ast:Dynamic):ExecutionState {
     if(ast == null) return Default;
     return switch(ast.type) {
-      case "nil"                   : Nil;
+      case "nil"                   : Nil(locationFrom(ast));
       case "true"                  : True;
       case "false"                 : False;
       case "self"                  : Self;
@@ -40,5 +40,12 @@ class ParseRuby {
       case "rest_arg":     return Rest(arg.name);
       case _: throw("Unknown arg type!: " + arg);
     }
+  }
+
+  private static function locationFrom(ast:Dynamic) {
+    return {
+      begin: ast.location.begin,
+      end:   ast.location.end,
+    };
   }
 }

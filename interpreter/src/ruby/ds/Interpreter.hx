@@ -18,10 +18,14 @@ enum EvaluationResult {
   Pop      (returnValue:RObject);
 }
 
+typedef Location = {
+  public var begin : Int;
+  public var end   : Int;
+}
 
 enum ExecutionState {
   Default;
-  Nil;
+  Nil       (loc:Location);
   Self;
   True;
   False;

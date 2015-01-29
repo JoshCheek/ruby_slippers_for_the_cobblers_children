@@ -93,7 +93,7 @@ class Interpreter {
     case Self:  Pop(sf.binding.self);
     case True:  Pop(world.rubyTrue);
     case False: Pop(world.rubyFalse);
-    case Nil:   Pop(world.rubyNil);
+    case Nil(loc):   Pop(world.rubyNil);
     case String(val): Pop(world.stringLiteral(val));
     case Default:
       var iter = this.state.stack.iterator();

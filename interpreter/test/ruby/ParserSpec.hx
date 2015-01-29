@@ -3,6 +3,7 @@ import ruby.ds.Interpreter;
 using Lambda;
 using Inspect;
 
+// god I fucking hate ADTs
 class ParserSpec {
   public static function parses(a:spaceCadet.Asserter, rubyCode:String, expected:ExecutionState, ?c:haxe.PosInfos) {
     var actual = ruby.ParseRuby.fromCode(rubyCode);
@@ -16,7 +17,7 @@ class ParserSpec {
   public static function describe(d:spaceCadet.Description) {
     d.describe('Parsing', function(d) {
       d.describe('literals', function(d) {
-        d.example('nil',   function(a) parses(a, 'nil',   Nil));
+        d.example('nil',   function(a) parses(a, 'nil',   Nil({begin: 0, end: 3})));
         d.example('true',  function(a) parses(a, 'true',  True));
         d.example('false', function(a) parses(a, 'false', False));
         d.example('self',  function(a) parses(a, 'self',  Self));
