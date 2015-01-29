@@ -5,7 +5,6 @@ class RunTests {
     var hadFailure = false;
     // haxe.unit
       var runner = new haxe.unit.TestRunner();
-      toplevel.RunTests.addTests(runner);
       ruby.RunTests.addTests(runner);
       hadFailure = hadFailure || !runner.run();
 
@@ -20,6 +19,7 @@ class RunTests {
       spaceCadet.BeforeBlocksSpec.describe(root);
       spaceCadet.ReporterSpec.describe(root);
 
+      toplevel.StackSpec.describe(root);
       toplevel.OutputSpec.describe(root);
       toplevel.StringOutputSpec.describe(root);
       toplevel.EscapeStringSpec.describe(root);
