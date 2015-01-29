@@ -103,7 +103,7 @@ class AssertionsSpec {
         a.eq(false, successMessage==null);
       });
 
-      d.specify("nstreqm is the same as nstreq, but with a custom message",function(a) {
+      d.specify("nstreqm is the same as nstreq, but with a custom message", function(a) {
         asserter.nstreqm({}, {}, "zomg");
         a.eq(currentLine-1, recordedLine);
         a.eq(null, successMessage);
@@ -111,6 +111,48 @@ class AssertionsSpec {
         asserter.nstreqm({}, {a:1}, "zomg");
         a.eq(currentLine-1, recordedLine);
         a.eq("zomg", successMessage);
+      });
+
+      d.specify("t fails when the value is not haxe true", function(a) {
+        asserter.t(false);
+        a.eq(currentLine-1, recordedLine);
+        a.eq(null, successMessage);
+
+        asserter.t(true);
+        a.eq(currentLine-1, recordedLine);
+        a.eq(false, successMessage == null);
+      });
+
+      d.specify("f fails when the value is not haxe false", function(a) {
+        asserter.f(true);
+        a.eq(currentLine-1, recordedLine);
+        a.eq(null, successMessage);
+
+        asserter.f(false);
+        a.eq(currentLine-1, recordedLine);
+        a.eq(false, successMessage == null);
+      });
+
+      d.specify("tm is the same as true, but with a custom message", function(a) {
+        asserter.tm(false, "msg1");
+        a.eq(currentLine-1, recordedLine);
+
+        asserter.tm(true, "msg2");
+        a.eq(currentLine-1, recordedLine);
+
+        a.eq("msg1", failureMessage);
+        a.eq("msg2", successMessage);
+      });
+
+      d.specify("fm is the same as false, but with a custom message", function(a) {
+        asserter.fm(true, "msg1");
+        a.eq(currentLine-1, recordedLine);
+
+        asserter.fm(false, "msg2");
+        a.eq(currentLine-1, recordedLine);
+
+        a.eq("msg1", failureMessage);
+        a.eq("msg2", successMessage);
       });
     });
   }

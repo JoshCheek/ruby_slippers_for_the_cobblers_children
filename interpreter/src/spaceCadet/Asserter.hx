@@ -51,6 +51,24 @@ class Asserter {
     nstreqm(a, b, msg, pos);
   }
 
+  public function t(val:Bool, ?pos:haxe.PosInfos) {
+    var msg = 'Should have been true';
+    tm(val, msg, pos);
+  }
+
+  public function tm(val:Bool, msg:String, ?pos:haxe.PosInfos) {
+    eqm(true, val, msg, pos);
+  }
+
+  public function f(val:Bool, ?pos:haxe.PosInfos) {
+    var msg = 'Should have been false';
+    fm(val, msg, pos);
+  }
+
+  public function fm(val:Bool, msg:String, ?pos:haxe.PosInfos) {
+    eqm(false, val, msg, pos);
+  }
+
   public function pending(reason="Not Implemented", ?pos:haxe.PosInfos) {
     onPending(reason, pos);
   }
