@@ -5,28 +5,17 @@ bin = Binary.new main:        'RunTests',
                  outstream:   $stdout,
                  errstream:   $stderr,
                  help_screen: <<HELPSCREEN
-Usage: #$0 [a|r|t|h]
+Usage: #$0
 
-Command:
- %{green} a%{none}[ll]      - (DEFAULT) Run all tests
- %{green} r%{none}[uby]     - Run tests on ruby package (the interpreter itself)
- %{green} t%{none}[oplevel] - Run tests on toplevel modules
- %{green} h%{none}[elp]     - Show this help screen
-
+Runs the test suite.
 HELPSCREEN
 
 
 # process args and errors
+bin.show_help = true if ARGV.delete('-h') || ARGV.delete('--help')
 ARGV.each do |arg|
-  case arg
-  when /^a(ll)?$/i      then bin.main = 'RunTests'
-  when /^r(uby)?$/i     then bin.main = 'ruby.RunTests'
-  when /^t(oplevel)?$/i then bin.main = 'toplevel.RunTests'
-  when /^h(elp)?$/i     then bin.show_help = true
-  when /^(-h|--help)$/  then bin.show_help = true
-  else bin.show_help = true
-       bin.add_error "Unknown argument #{arg.inspect}"
-  end
+  bin.show_help = true
+  bin.add_error "Unknown argument #{arg.inspect}"
 end
 
 if 1 < ARGV.count
