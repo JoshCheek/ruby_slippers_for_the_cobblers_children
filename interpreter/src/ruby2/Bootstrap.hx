@@ -140,41 +140,6 @@ class Bootstrap {
     objectSpace.push(stringClass);
     objectSpace.push(symbolClass);
 
-    // core methods
-
-    // FIXME: Putting this here b/c it will get me further
-    // but really it goes on Kernel, which doesn't exist yet,
-    // b/c we have no modules yet
-    var meth:RMethod;
-    objectClass.imeths["class"] = meth = new RMethod();
-    meth.klass = objectClass; // FIXME: SHOULD BE METHOD CLASS
-    meth.ivars = new InternalMap();
-    meth.name  = "class";
-    meth.args  = [];
-    meth.body  = Internal(Core.lookupClass);
-
-    // TODO: move this into Ruby, only allocate needs to be haxe level
-    klassClass.imeths["new"] = meth = new RMethod();
-    meth.klass = objectClass; // FIXME: SHOULD BE METHOD CLASS
-    meth.ivars = new InternalMap();
-    meth.name  = "new";
-    meth.args  = [Rest("rest")];
-    meth.body  = Internal(Core.allocate);
-
-    objectClass.imeths['puts'] = meth = new RMethod();
-    meth.klass = objectClass; // FIXME: SHOULD BE METHOD CLASS
-    meth.ivars = new InternalMap();
-    meth.name  = "puts";
-    meth.args  = [Rest('rest')];
-    meth.body  = Internal(Core.puts);
-
-    basicObjectClass.imeths['initialize'] = meth = new RMethod();
-    meth.klass = objectClass;  // FIXME: SHOULD BE METHOD CLASS
-    meth.ivars = new InternalMap();
-    meth.name  = "initialize";
-    meth.args  = [];
-    meth.body  = Internal(Core.initialize);
-
     // the data structure
     return {
       objectSpace       : objectSpace,
