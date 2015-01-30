@@ -1,4 +1,4 @@
-package ruby2.ds;
+package ruby2;
 
 // How do I access a backtrace?
 // do I need to get a posinfos, or is that handled somehow by the throw?
@@ -9,7 +9,7 @@ class Errors {
   }
 }
 
-class NothingToEvaluateError extends Errors {
+class NothingToEvaluate extends Errors {
   public function new(msg:String) {
     super(msg);
   }

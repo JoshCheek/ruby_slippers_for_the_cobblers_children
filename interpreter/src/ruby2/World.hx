@@ -29,6 +29,10 @@ class World {
   public var rcString          : RClass;
   public var rcSymbol          : RClass;
 
+  public static function bootstrap():World {
+    return ruby2.Bootstrap.bootstrap();
+  }
+
   public function new(?initializer:World->Void) {
     if(initializer != null) initializer(this);
   }

@@ -8,7 +8,7 @@ class RunTests2 {
     ruby2.ParseSpec.describe(root);
     ruby2.LanguageGoBagSpec.describe(root);
     ruby2.BootstrappedWorldSpec.describe(root);
-    // ruby2.InterpreterSpec.describe(root);
+    ruby2.InterpreterSpec.describe(root);
 
     // run
     var output   = new Output(Sys.stdout(), Sys.stderr());
