@@ -12,6 +12,23 @@ class Ast {
     this.end_loc   = attributes.end_loc;
   }
 
+  // emits a json-friendly inspection since it can be hard to
+  // look at these things, and this way you can run it through jq
+  public function inspect() {
+    var klass     = Type.getClass(this);
+    var inspected = '{"type": ${Inspect.call(Type.getClassName(klass))}';
+    var fields    = Type.getInstanceFields(klass).filter(function(name) {
+      return !~/^(is[A-Z]|to[A-Z]|get_|inspect)/.match(name);
+    });
+
+    for(name in fields) {
+      var value = Reflect.getProperty(this, name);
+      inspected += ', ${Inspect.call(name)}: ${Inspect.call(value)}';
+    }
+
+    return inspected + "}";
+  }
+
   public var isDefault   (get, never) : Bool;
   public var isNil       (get, never) : Bool;
   public var isSelf      (get, never) : Bool;

@@ -16,6 +16,15 @@ class ParseSpec {
 
     d.describe('Parsing', function(d) {
 
+      d.describe('inspect', function(d) {
+        d.specify('is hopefully valid json, with the class as a "type" field', function(a) {
+          var inspected = parse("nil").inspect();
+          a.eq('{', inspected.charAt(0));
+          a.eq('}', inspected.charAt(inspected.length-1));
+          a.isTrue(~/"type": "ruby.NilAst"/.match(inspected));
+        });
+      });
+
       d.describe('expressions', function(d) {
         d.it('parses single expressions, tracking location information', function(a) {
           parsed = parse('nil');
