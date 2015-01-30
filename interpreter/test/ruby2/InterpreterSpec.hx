@@ -36,26 +36,26 @@ class InterpreterSpec {
         assertThrows(a, function() interpreter.pushAst(null));
       });
 
-      // d.it('currentExpression is nil by default', function(a) {
-      //   a.eq(world.rubyNil, interpreter.currentExpression);
-      // });
+      d.it('currentExpression is nil by default', function(a) {
+        a.eq(world.rNil, interpreter.currentExpression);
+      });
 
       // d.it('interprets a single expression', function(a) {
       //   pushCode("true");
-      //   a.eq(world.rubyTrue, interpreter.nextExpression());
+      //   a.eq(world.rTrue, interpreter.nextExpression());
       // });
 
       // d.specify('evaluating an expression updates the current expression', function(a) {
       //   pushCode("true");
-      //   a.eq(world.rubyNil, interpreter.currentExpression);
+      //   a.eq(world.rNil, interpreter.currentExpression);
       //   interpreter.nextExpression();
-      //   a.eq(world.rubyTrue, interpreter.currentExpression);
+      //   a.eq(world.rTrue, interpreter.currentExpression);
       // });
 
       // d.it('interprets multiple expressions', function(a) {
       //   pushCode("nil\ntrue\nfalse");
-      //   a.eq(world.rubyNil, interpreter.nextExpression());
-      //   a.eq(world.rubyTrue, interpreter.nextExpression());
+      //   a.eq(world.rNil, interpreter.nextExpression());
+      //   a.eq(world.rTrue, interpreter.nextExpression());
       // });
 
       // d.it('throws if asked for expressions after being finished', function(a) {
@@ -79,10 +79,10 @@ class InterpreterSpec {
       // d.it('evalutes special constants', function(a) {
       //   pushCode("nil\ntrue\nfalse\nself");
       //   assertNextExpressions(a, [
-      //     world.rubyNil,
-      //     world.rubyTrue,
-      //     world.rubyFalse,
-      //     world.main
+      //     world.rNil,
+      //     world.rTrue,
+      //     world.rFalse,
+      //     world.rMain
       //   ]);
       // });
 
@@ -156,11 +156,11 @@ class InterpreterSpec {
       //     world.intern("ameth"), // ends class
 
       //     world.intern("ometh"),
-      //     world.rubyTrue,
-      //     world.rubyTrue,
+      //     world.rTrue,
+      //     world.rTrue,
 
       //     world.intern("nobody_meth"),
-      //     world.rubyNil,
+      //     world.rNil,
 
       //     world.intern("meth_with_args"),
       //   ]);
@@ -200,9 +200,9 @@ class InterpreterSpec {
       //   assertNextExpressions(a, [
       //     world.stringLiteral('abc'),
       //     world.stringClass,
-      //     world.rubyNil,
-      //     world.rubyNil.klass,
-      //     world.rubyNil.klass,
+      //     world.rNil,
+      //     world.rNil.klass,
+      //     world.rNil.klass,
       //   ]);
       // });
 

@@ -13,7 +13,7 @@ class World {
   public var toplevelNamespace : RClass;
   public var printedToStdout   : Array<String>;
 
-  // important objects
+  // important objects -- prefixed with r b/c their names tend to collide w/ keywords
   public var rToplevelBinding  : RBinding;
   public var rMain             : RObject;
   public var rNil              : RObject;
