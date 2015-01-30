@@ -1,13 +1,15 @@
 package ruby2;
+import ruby2.Parse;
+import ruby2.ast.Ast;
 using Inspect;
 
 class ParseSpec {
   public static function parse(rubyCode:String) {
-    return ruby2.Parse.fromString(rubyCode);
+    return Parse.fromString(rubyCode);
   }
 
   public static function describe(d:spaceCadet.Description) {
-    var parsed:Parse.Ast;
+    var parsed:Ast;
     d.before(function(a) parsed = null);
 
     d.describe('Parsing', function(d) {
@@ -17,7 +19,7 @@ class ParseSpec {
           var inspected = parse("nil").inspect();
           a.eq('{', inspected.charAt(0));
           a.eq('}', inspected.charAt(inspected.length-1));
-          a.isTrue(~/"type": "ruby2.NilAst"/.match(inspected));
+          a.isTrue(~/"type": "ruby2.ast.NilAst"/.match(inspected));
         });
       });
 
