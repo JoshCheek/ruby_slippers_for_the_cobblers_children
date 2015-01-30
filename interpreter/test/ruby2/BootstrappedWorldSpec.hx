@@ -1,6 +1,6 @@
 package ruby2;
 
-import ruby2.ds.Objects;
+import ruby2.Objects;
 using Lambda;
 using Inspect;
 
@@ -19,71 +19,67 @@ class BootstrappedWorldSpec {
   // ObjectSpace tracks clases, symbols, instances, bindings
   public static function describe(d:spaceCadet.Description) {
     d.describe('A bootstrapped world', function(d) {
-      var worldDs     : ruby2.ds.World;
-      var world       : ruby2.World;
-      var interpreter : ruby2.Interpreter;
+      var world : ruby2.World;
 
       d.before(function(a) {
-        worldDs     = ruby2.Bootstrap.bootstrap();
-        world       = new ruby2.World(worldDs);
-        interpreter = world.interpreter;
+        world = ruby2.Bootstrap.bootstrap();
       });
 
       d.context('Execution environment', function(d) {
         d.specify('toplevelNamespace is Object', function(a) {
-          a.eq(world.objectClass, world.toplevelNamespace);
+          a.eq(world.rcObject, world.toplevelNamespace);
         });
 
         d.describe('toplevelBinding', function(d) {
           d.it('assertions', function(a) {
-            var tlb = world.toplevelBinding;
-            a.eq(tlb.self, world.main); // is the main object
-            a.eq(tlb.defTarget, world.objectClass); // it defines methods on Object
-            a.eq(true, tlb.lvars.empty()); // it initializes with no local vars
-            assertInObjectSpace(a, tlb, world); // it is tracked in ObjectSpace
+            var tlb = world.rToplevelBinding;
+            a.eq(tlb.self, world.rMain);         // is the main object
+            a.eq(tlb.defTarget, world.rcObject); // it defines methods on Object
+            a.eq(true, tlb.lvars.empty());       // it initializes with no local vars
+            assertInObjectSpace(a, tlb, world);  // it is tracked in ObjectSpace
           });
         });
 
-        d.describe('main', function(a) {
+        d.describe('rMain', function(a) {
           d.it('is an object, it is in object space', function(a) {
-            a.eq(world.objectClass, world.main.klass);
-            assertInObjectSpace(a, world.main, world);
+            a.eq(world.rcObject, world.rMain.klass);
+            assertInObjectSpace(a, world.rMain, world);
           });
         });
       });
 
       d.context('Special objects', function(d) {
         d.example('nil, true, false', function(a) {
-          a.eq('NilClass',   world.rubyNil.klass.name);
-          a.eq('TrueClass',  world.rubyTrue.klass.name);
-          a.eq('FalseClass', world.rubyFalse.klass.name);
-          assertInObjectSpace(a, world.rubyNil, world);
-          assertInObjectSpace(a, world.rubyTrue, world);
-          assertInObjectSpace(a, world.rubyFalse, world);
+          a.eq('NilClass',   world.rNil.klass.name);
+          a.eq('TrueClass',  world.rTrue.klass.name);
+          a.eq('FalseClass', world.rFalse.klass.name);
+          assertInObjectSpace(a, world.rNil, world);
+          assertInObjectSpace(a, world.rTrue, world);
+          assertInObjectSpace(a, world.rFalse, world);
         });
       });
 
       d.context('Object hierarchy', function(d) {
         function assertClassDef(a:spaceCadet.Asserter, self:RClass, name:String, superclass:RClass, world:ruby2.World) {
-          a.eq(name,             self.name);
-          a.eq(world.classClass, self.klass);
-          a.eq(superclass,       self.superclass);
+          a.eq(name,          self.name);
+          a.eq(world.rcClass, self.klass);
+          a.eq(superclass,    self.superclass);
           if(null == world.toplevelNamespace.constants[name])
             throw "Need to put the class in the toplevel namespace!";
           a.eq(cast(self, RObject), world.toplevelNamespace.constants[name]);
           assertInObjectSpace(a, self, world);
         }
         d.specify('lots of assertions, just stuck here for the transition to spaceCadet', function(a) {
-          assertClassDef(a, world.classClass,       "Class",       world.moduleClass, world);
-          assertClassDef(a, world.moduleClass,      "Module",      world.objectClass, world);
-          assertClassDef(a, world.objectClass,      "Object",      world.basicObjectClass, world);
-          assertClassDef(a, world.basicObjectClass, "BasicObject", null, world);
-          assertClassDef(a, world.rubyNil.klass,    "NilClass",    world.objectClass, world);
-          assertClassDef(a, world.rubyTrue.klass,   "TrueClass",   world.objectClass, world);
-          assertClassDef(a, world.rubyFalse.klass,  "FalseClass",  world.objectClass, world);
+          assertClassDef(a, world.rcClass,       "Class",       world.rcModule,      world);
+          assertClassDef(a, world.rcModule,      "Module",      world.rcObject,       world);
+          assertClassDef(a, world.rcObject,      "Object",      world.rcBasicObject, world);
+          assertClassDef(a, world.rcBasicObject, "BasicObject", null,                world);
+          assertClassDef(a, world.rNil.klass,    "NilClass",    world.rcObject,       world);
+          assertClassDef(a, world.rTrue.klass,   "TrueClass",   world.rcObject,       world);
+          assertClassDef(a, world.rFalse.klass,  "FalseClass",  world.rcObject,       world);
 
-          assertClassDef(a, world.stringClass, "String", world.objectClass, world);
-          assertClassDef(a, world.symbolClass, "Symbol", world.objectClass, world);
+          assertClassDef(a, world.rcString, "String", world.rcObject, world);
+          assertClassDef(a, world.rcSymbol, "Symbol", world.rcObject, world);
         });
       });
     });

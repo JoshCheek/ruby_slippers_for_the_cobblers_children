@@ -1,4 +1,4 @@
-package ruby2.ds;
+package ruby2;
 
 // Using this instead of a typedef, b/c w/ the typedef,
 // we lose the metainfo, and thus lose array access (bracket notation)

@@ -1,9 +1,9 @@
 package ruby2;
-import ruby2.ds.InternalMap;
-import ruby2.ds.Objects;
+import ruby2.InternalMap;
+import ruby2.Objects;
 
 class Bootstrap {
-  public static function bootstrap():ruby2.ds.World {
+  public static function bootstrap():ruby2.World {
     // a whole new world
     var objectSpace:Array<RObject> = [];
     var symbols = new InternalMap();
@@ -140,28 +140,24 @@ class Bootstrap {
     objectSpace.push(stringClass);
     objectSpace.push(symbolClass);
 
-    // the data structure
-    return {
-      objectSpace       : objectSpace,
-      symbols           : symbols,
-      toplevelNamespace : toplevelNamespace,
-      currentExpression : rubyNil,
-      stack             : new List(),
-      printedToStdout   : [],
+    return new World(function(world) {
+      world.objectSpace       = objectSpace;
+      world.symbols           = symbols;
+      world.toplevelNamespace = toplevelNamespace;
+      world.printedToStdout   = [];
 
-      toplevelBinding   : toplevelBinding,
-      main              : main,
-      rubyNil           : rubyNil,
-      rubyTrue          : rubyTrue,
-      rubyFalse         : rubyFalse,
+      world.rToplevelBinding   = toplevelBinding;
+      world.rMain              = main;
+      world.rNil               = rubyNil;
+      world.rTrue              = rubyTrue;
+      world.rFalse             = rubyFalse;
 
-      basicObjectClass  : basicObjectClass,
-      objectClass       : objectClass,
-      moduleClass       : moduleClass,
-      klassClass        : klassClass,
-      stringClass       : stringClass,
-      symbolClass       : symbolClass,
-    }
-
+      world.rcBasicObject      = basicObjectClass;
+      world.rcObject           = objectClass;
+      world.rcModule           = moduleClass;
+      world.rcClass            = klassClass;
+      world.rcString           = stringClass;
+      world.rcSymbol           = symbolClass;
+    });
   }
 }

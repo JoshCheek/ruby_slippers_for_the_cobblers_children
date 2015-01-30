@@ -29,14 +29,13 @@ class World {
   public var rcString          : RClass;
   public var rcSymbol          : RClass;
 
-  public function new(world:ruby2.ds.World) {
-    this.world       = world;
-    this.interpreter = new ruby2.Interpreter(this, world);
+  public function new(?initializer:World->Void) {
+    if(initializer != null) initializer(this);
   }
 
   public function eachObject(klass:RClass):Array<RObject> {
     var selected = [];
-    for(obj in world.objectSpace)
+    for(obj in objectSpace)
       if(obj.klass == klass)
         selected.push(obj);
     return selected;

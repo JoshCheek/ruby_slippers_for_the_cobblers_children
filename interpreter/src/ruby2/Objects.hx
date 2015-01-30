@@ -1,5 +1,4 @@
-package ruby2.ds;
-import ruby2.ds.Interpreter;
+package ruby2;
 using Inspect;
 
 class RObject {
@@ -50,8 +49,8 @@ enum ArgType {
   Rest(name:String);
 }
 enum ExecutableType {
-  Ruby(ast:ExecutionState);
-  Internal(fn:RBinding -> ruby2.World -> EvaluationResult);
+  // Ruby(ast:ExecutionState);
+  // Internal(fn:RBinding -> ruby2.World -> EvaluationResult);
 }
 class RMethod extends RObject {
   public var name : String;
