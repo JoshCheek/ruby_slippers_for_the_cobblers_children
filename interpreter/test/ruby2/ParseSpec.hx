@@ -6,10 +6,6 @@ class ParseSpec {
     return ruby2.Parse.fromString(rubyCode);
   }
 
-  // public static function exprs(exprs) {
-  //   return Exprs(Start(exprs));
-  // }
-
   public static function describe(d:spaceCadet.Description) {
     var parsed:Parse.Ast;
     d.before(function(a) parsed = null);

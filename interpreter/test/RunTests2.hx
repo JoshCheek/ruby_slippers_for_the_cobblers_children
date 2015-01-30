@@ -6,9 +6,9 @@ class RunTests2 {
 
     // define
     ruby2.ParseSpec.describe(root);
-    // ruby2.LanguageGoBagSpec.describe(root);
-    // ruby2.BootstrappedWorldSpec.describe(root);
-    // ruby2.WorldSpec.describe(root);
+    ruby2.LanguageGoBagSpec.describe(root);
+    ruby2.BootstrappedWorldSpec.describe(root);
+    ruby2.WorldSpec.describe(root);
     // ruby2.InterpreterSpec.describe(root);
 
     // run
