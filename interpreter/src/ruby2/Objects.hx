@@ -7,7 +7,8 @@ class RObject {
 
   public function new() {}
   public function inspect() {
-    var klassname = klass.inspect();
+    var klassname = null;
+    try klass.inspect() catch(_:Dynamic) { } // -.-
     if(klass == null) klassname = 'Object without a klass!!';
     return 'RB(#<${klassname}>)';
   }

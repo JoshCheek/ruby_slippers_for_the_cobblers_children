@@ -71,6 +71,7 @@ enum ExprsEvaluationState {
 
 enum StringEvaluationState {
   CreateString;
+  ThenReturn; // god, if I name this Return, it blows the fuck up :(
 }
 
 enum Instruction {
@@ -166,8 +167,9 @@ class Compile {
           PushClassString,
           AllocateObject(RString),
           SetAttribute("value"),
-          Return,
+          AdvanceState(ThenReturn),
         ] },
+        ThenReturn => { index: 0, instructions: [Instruction.Return] },
       ];
       return {
         name:         'StringEvaluation',
@@ -279,12 +281,8 @@ class Interpreter {
           }
           var value:Dynamic;
           switch(valueStack.pop()) {
-            case Data(data):
-              trace('DATA(${Inspect.call(data)})');
-              value = data;
-            case Obj(object):
-              trace('OBJ(${Inspect.call(object)})');
-              value = object;
+            case Data(data):  value = data;
+            case Obj(object): value = object;
           }
           Reflect.setProperty(self, name, value);
           valueStack.push(Obj(self));
