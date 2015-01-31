@@ -1,6 +1,6 @@
 package ruby2;
 
-// import ruby2.Objects;
+import ruby2.Objects;
 import ruby2.Interpreter;
 import ruby2.World;
 // import ruby2.InternalMap;
@@ -66,25 +66,27 @@ class InterpreterSpec {
       //   assertThrows(a, function() interpreter.nextExpression());
       // });
 
-      // function assertNextExpressions(a:spaceCadet.Asserter, expected:Array<RObject>, ?c:haxe.PosInfos) {
-      //   var actual:Array<RObject> = [];
-      //   while(interpreter.isInProgress)
-      //     actual.push(interpreter.nextExpression());
-      //   for(pair in expected.zip(actual)) a.streq(pair.l, pair.r);
-      //   if(expected.length <= actual.length) return;
-      //   a.eqm(1,2, 'Expected at least ${expected.length} expressions, but there were ${actual.length}', c);
-      // }
+      function assertNextExpressions(a:spaceCadet.Asserter, interpreter:Interpreter, expected:Array<RObject>, ?c:haxe.PosInfos) {
+        var actual:Array<RObject> = [];
+        while(interpreter.isInProgress) {
+          var expr = interpreter.nextExpression();
+          actual.push(expr);
+        }
+        for(pair in expected.zip(actual)) a.streq(pair.l, pair.r);
+        if(expected.length <= actual.length) return;
+        a.eqm(1,2, 'Expected at least ${expected.length} expressions, but there were ${actual.length}', c);
+      }
 
-      // // we're ignoring fixnums and symbols for now
-      // d.it('evalutes special constants', function(a) {
-      //   pushCode("nil\ntrue\nfalse\nself");
-      //   assertNextExpressions(a, [
-      //     world.rNil,
-      //     world.rTrue,
-      //     world.rFalse,
-      //     world.rMain
-      //   ]);
-      // });
+      // we're ignoring fixnums and symbols for now
+      d.it('evalutes special constants', function(a) {
+        var interpreter = interpreterFor("nil\ntrue\nfalse\nself");
+        assertNextExpressions(a, interpreter, [
+          world.rNil,
+          world.rTrue,
+          world.rFalse,
+          world.rMain
+        ]);
+      });
 
       // d.it('evaluates a string literal', function(a) {
       //   pushCode('"Josh"');

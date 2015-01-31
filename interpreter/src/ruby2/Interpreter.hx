@@ -60,6 +60,10 @@ enum FalseEvaluatoinState {
   EvaluateFalse;
 }
 
+enum SelfEvaluatoinState {
+  EvaluateSelf;
+}
+
 enum ExprsEvaluationState {
   PushExpressions;
   Return;
@@ -70,6 +74,7 @@ enum Instruction {
   PushNil;
   PushTrue;
   PushFalse;
+  PushSelf;
   EvalAst(ast:Ast);
   Emit;
   AdvanceState<T>(stateType:T);
@@ -108,17 +113,17 @@ class Compile {
         currentState: states.get(EvaluateTrue),
       }
 
-
     } else if(ast.isFalse) {
       var states = [
         EvaluateFalse => { index: 0, instructions: [PushFalse, Return] }
       ];
       return {
-        name:         'TrueEvaluation',
+        name:         'FalseEvaluation',
         description:  'Evaluates to false',
         states:       states,
         currentState: states.get(EvaluateFalse),
       }
+
 
 
     } else if(ast.isNil) {
@@ -126,10 +131,22 @@ class Compile {
         EvaluateNil => { index: 0, instructions: [PushNil, Return] }
       ];
       return {
-        name:         'TrueEvaluation',
+        name:         'NilEvaluation',
         description:  'Evaluates to nil',
         states:       states,
         currentState: states.get(EvaluateNil),
+      }
+
+
+    } else if(ast.isSelf) {
+      var states = [
+        EvaluateSelf => { index: 0, instructions: [PushSelf, Return] }
+      ];
+      return {
+        name:         'SelfEvaluation',
+        description:  'Evaluates to self',
+        states:       states,
+        currentState: states.get(EvaluateSelf),
       }
 
 
@@ -161,10 +178,14 @@ class Interpreter {
   public var stackFrames : Stack<StackFrame<Dynamic>>;
   public var valueStack  : Stack<RObject>;
 
+  public var currentExpression (default, null):RObject;
+  public var isInProgress      (default, null):Bool;
+
   public function new(world, ast) {
     this.world             = world;
     this.currentExpression = world.rNil;
     this.valueStack        = new Stack();
+    this.isInProgress      = true;
 
     this.stackFrames = new Stack();
     stackFrames.push(new StackFrame({
@@ -181,22 +202,13 @@ class Interpreter {
     }));
   }
 
-  public var currentExpression(default, null):RObject;
-
   public function nextExpression():RObject {
-    var frame      = stackFrames.peek;
-    // trace("!!!!!!!!!!!!!!!!!");
-    // trace('FRAME: ${Inspect.call(frame)}');
-    // trace("!!!!!!!!!!!!!!!!!");
-    var evaluation = frame.evaluation;
-    var state      = evaluation.currentState;
-
-    // trace("");
-    // trace("-----------------");
-
     var foundExpression = false;
     while(!foundExpression) {
-      // trace('  ${state}');
+      var frame      = stackFrames.peek;
+      var evaluation = frame.evaluation;
+      var state      = evaluation.currentState;
+      // trace('  ${state}\033[47m/\033[49m${Inspect.call(state.instructions[state.index])}');
 
       switch(state.instructions[state.index++]) {
         case PushNil:
@@ -205,6 +217,8 @@ class Interpreter {
           valueStack.push(world.rTrue);
         case PushFalse:
           valueStack.push(world.rFalse);
+        case PushSelf:
+          valueStack.push(frame.self);
         case EvalAst(ast):
           stackFrames.push(new StackFrame({
             binding:    stackFrames.peek.binding,
@@ -215,7 +229,6 @@ class Interpreter {
         case PushReturned:
           valueStack.push(stackFrames.peek.returned);
         case Return:
-          // trace('\033[34m[POPPING ${Inspect.call(stackFrames.peek)}\033[39m');
           stackFrames.pop();
           currentExpression         = valueStack.pop();
           stackFrames.peek.returned = currentExpression;
@@ -226,15 +239,17 @@ class Interpreter {
           foundExpression   = true;
         case AdvanceState(nextState):
           state.index             = 0;
-          state                   = evaluation.states.get(nextState);
-          evaluation.currentState = state;
+          evaluation.currentState = evaluation.states.get(nextState);
         case Pop:
           valueStack.pop();
       }
-      // case GotoState(nextState):
-      //   evaluation.currentState = evaluation.states[nextState];
-      //   evaluation.currentState.index = 0;
     }
+
+    if(stackFrames.length == 1)
+      isInProgress = false;
+
+    // trace("\033[34mRETURNING " + Inspect.call(currentExpression) +
+    //     "\033[35mIN PROGRESS: " + isInProgress + "\033[33m");
 
     return currentExpression;
   }
