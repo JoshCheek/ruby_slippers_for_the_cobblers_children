@@ -52,11 +52,11 @@ class InterpreterSpec {
         a.eq(world.rTrue, interpreter.currentExpression);
       });
 
-//       d.it('interprets multiple expressions', function(a) {
-//         var interpreter = interpreterFor("nil\ntrue\nfalse");
-//         a.eq(world.rNil, interpreter.nextExpression());
-//         a.eq(world.rTrue, interpreter.nextExpression());
-//       });
+      d.it('interprets multiple expressions', function(a) {
+        var interpreter = interpreterFor("nil\ntrue\nfalse");
+        a.eq(world.rNil,  interpreter.nextExpression());
+        a.eq(world.rTrue, interpreter.nextExpression());
+      });
 
       // d.it('throws if asked for expressions after being finished', function(a) {
       //   assertThrows(a, function() interpreter.nextExpression());

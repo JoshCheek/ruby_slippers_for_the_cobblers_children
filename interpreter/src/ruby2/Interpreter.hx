@@ -21,6 +21,10 @@ class StackFrame<T> {
     this.returned   = attrs.returned;
   }
 
+  public function inspect() {
+    return 'new StackFrame({binding: ${World.inspectObj(binding)}}, ast: ${Inspect.call(ast)}, evaluation: ${Inspect.call(evaluation)}, returned: ${Inspect.call(returned)}})';
+  }
+
   // -----------------
   inline function get_self()      return binding.self;
   inline function get_defTarget() return binding.defTarget;
@@ -39,22 +43,40 @@ typedef EvaluationState<T> = {
   public var instructions : Array<Instruction>;
 }
 
-enum Instruction {
-  Pop;
-  PushNil;
-  PushTrue;
-  Return;
-  Emit;
-  AdvanceState<T>(stateType:T);
-}
-
+// as in a "null object" -- perhaps rename to noop or NilLoop might be nice
 enum NullEvaluationState {
   Null;
+}
+
+enum NilEvaluationState {
+  EvaluateNil;
 }
 
 enum TrueEvaluatoinState {
   EvaluateTrue;
 }
+
+enum FalseEvaluatoinState {
+  EvaluateFalse;
+}
+
+enum ExprsEvaluationState {
+  PushExpressions;
+  Return;
+}
+
+enum Instruction {
+  Pop;
+  PushNil;
+  PushTrue;
+  PushFalse;
+  EvalAst(ast:Ast);
+  Emit;
+  AdvanceState<T>(stateType:T);
+  Return;
+  PushReturned;
+}
+
 
 class Compile {
   public static function nullEvaluation():Evaluation<NullEvaluationState> {
@@ -85,8 +107,48 @@ class Compile {
         states:       states,
         currentState: states.get(EvaluateTrue),
       }
+
+
+    } else if(ast.isFalse) {
+      var states = [
+        EvaluateFalse => { index: 0, instructions: [PushFalse, Return] }
+      ];
+      return {
+        name:         'TrueEvaluation',
+        description:  'Evaluates to false',
+        states:       states,
+        currentState: states.get(EvaluateFalse),
+      }
+
+
+    } else if(ast.isNil) {
+      var states = [
+        EvaluateNil => { index: 0, instructions: [PushNil, Return] }
+      ];
+      return {
+        name:         'TrueEvaluation',
+        description:  'Evaluates to nil',
+        states:       states,
+        currentState: states.get(EvaluateNil),
+      }
+
+
     } else if(ast.isExprs) {
-      throw("DEFINE EXPRS");
+      var exprsAst        = ast.toExprs();
+      var pushExpressions = [for(i in 0...exprsAst.length) EvalAst(exprsAst.get(i))];
+      pushExpressions.push(AdvanceState(ExprsEvaluationState.Return));
+      var states = [
+        PushExpressions => {index: 0, instructions: pushExpressions},
+        Return          => {index: 0, instructions: [PushReturned, Return]},
+      ];
+      return {
+        name:         'ExprsEvaluation',
+        description:  'Evaluates a list of expressions',
+        states:       states,
+        currentState: states.get(PushExpressions),
+      }
+
+
     } else {
       throw('NO COMPILATION INSTRUCTION YET FOR ${ast.inspect()}');
     }
@@ -123,6 +185,9 @@ class Interpreter {
 
   public function nextExpression():RObject {
     var frame      = stackFrames.peek;
+    // trace("!!!!!!!!!!!!!!!!!");
+    // trace('FRAME: ${Inspect.call(frame)}');
+    // trace("!!!!!!!!!!!!!!!!!");
     var evaluation = frame.evaluation;
     var state      = evaluation.currentState;
 
@@ -138,17 +203,31 @@ class Interpreter {
           valueStack.push(world.rNil);
         case PushTrue:
           valueStack.push(world.rTrue);
+        case PushFalse:
+          valueStack.push(world.rFalse);
+        case EvalAst(ast):
+          stackFrames.push(new StackFrame({
+            binding:    stackFrames.peek.binding,
+            ast:        ast,
+            evaluation: Compile.call(ast),
+            returned:   world.rNil,
+          }));
+        case PushReturned:
+          valueStack.push(stackFrames.peek.returned);
         case Return:
-          currentExpression = valueStack.pop();
-          foundExpression   = true;
-          state.index       = 0;
+          // trace('\033[34m[POPPING ${Inspect.call(stackFrames.peek)}\033[39m');
           stackFrames.pop();
+          currentExpression         = valueStack.pop();
+          stackFrames.peek.returned = currentExpression;
+          foundExpression           = true;
+          state.index               = 0;
         case Emit:
           currentExpression = valueStack.peek;
           foundExpression   = true;
         case AdvanceState(nextState):
-          state.index       = 0;
-          evaluation.currentState = evaluation.states.get(nextState);
+          state.index             = 0;
+          state                   = evaluation.states.get(nextState);
+          evaluation.currentState = state;
         case Pop:
           valueStack.pop();
       }
