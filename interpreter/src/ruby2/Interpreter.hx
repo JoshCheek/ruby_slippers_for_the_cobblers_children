@@ -40,10 +40,11 @@ typedef EvaluationState<T> = {
 }
 
 enum Instruction {
+  Pop;
   PushNil;
   PushTrue;
   Return;
-  EmitValue;
+  Emit;
   AdvanceState<T>(stateType:T);
 }
 
@@ -60,7 +61,7 @@ class Compile {
     var states = [
       Null => {
         index: 0,
-        instructions: [PushNil, EmitValue, AdvanceState(Null)],
+        instructions: [PushNil, Emit, Pop, AdvanceState(Null)],
       }
     ];
     return {
@@ -84,6 +85,8 @@ class Compile {
         states:       states,
         currentState: states.get(EvaluateTrue),
       }
+    } else if(ast.isExprs) {
+      throw("DEFINE EXPRS");
     } else {
       throw('NO COMPILATION INSTRUCTION YET FOR ${ast.inspect()}');
     }
@@ -92,9 +95,9 @@ class Compile {
 
 
 class Interpreter {
-  var world       : World;
-  var stackFrames : Stack<StackFrame<Dynamic>>;
-  var valueStack  : Stack<RObject>;
+  public var world       : World;
+  public var stackFrames : Stack<StackFrame<Dynamic>>;
+  public var valueStack  : Stack<RObject>;
 
   public function new(world, ast) {
     this.world             = world;
@@ -123,20 +126,35 @@ class Interpreter {
     var evaluation = frame.evaluation;
     var state      = evaluation.currentState;
 
+    // trace("");
+    // trace("-----------------");
+
     var foundExpression = false;
     while(!foundExpression) {
+      // trace('  ${state}');
+
       switch(state.instructions[state.index++]) {
+        case PushNil:
+          valueStack.push(world.rNil);
         case PushTrue:
           valueStack.push(world.rTrue);
         case Return:
           currentExpression = valueStack.pop();
           foundExpression   = true;
-        case i:
-          trace(Inspect.call(i));
-        // case GotoState(nextState):
-        //   evaluation.currentState = evaluation.states[nextState];
-        //   evaluation.currentState.index = 0;
+          state.index       = 0;
+          stackFrames.pop();
+        case Emit:
+          currentExpression = valueStack.peek;
+          foundExpression   = true;
+        case AdvanceState(nextState):
+          state.index       = 0;
+          evaluation.currentState = evaluation.states.get(nextState);
+        case Pop:
+          valueStack.pop();
       }
+      // case GotoState(nextState):
+      //   evaluation.currentState = evaluation.states[nextState];
+      //   evaluation.currentState.index = 0;
     }
 
     return currentExpression;

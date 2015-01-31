@@ -32,6 +32,15 @@ class InterpreterSpec {
         a.eq(world.rNil, interpreterFor("true").currentExpression);
       });
 
+      d.it('returns nil when asked for the next expression when there is nothign to interpret', function(a) {
+        var interpreter = interpreterFor("true");
+        a.eq(world.rTrue, interpreter.nextExpression());
+        for(i in 0...10)
+          a.eq(world.rNil,  interpreter.nextExpression());
+        a.eq(1, interpreter.stackFrames.length); // doesn't accidentally grow
+        a.eq(1, interpreter.valueStack.length);  // doesn't accidentally grow
+      });
+
       d.it('interprets a single expression', function(a) {
         a.eq(world.rTrue, interpreterFor("true").nextExpression());
       });
@@ -43,11 +52,11 @@ class InterpreterSpec {
         a.eq(world.rTrue, interpreter.currentExpression);
       });
 
-      // d.it('interprets multiple expressions', function(a) {
-      //   pushCode("nil\ntrue\nfalse");
-      //   a.eq(world.rNil, interpreter.nextExpression());
-      //   a.eq(world.rTrue, interpreter.nextExpression());
-      // });
+//       d.it('interprets multiple expressions', function(a) {
+//         var interpreter = interpreterFor("nil\ntrue\nfalse");
+//         a.eq(world.rNil, interpreter.nextExpression());
+//         a.eq(world.rTrue, interpreter.nextExpression());
+//       });
 
       // d.it('throws if asked for expressions after being finished', function(a) {
       //   assertThrows(a, function() interpreter.nextExpression());
