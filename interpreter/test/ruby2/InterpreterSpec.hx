@@ -10,17 +10,13 @@ using ruby2.LanguageGoBag;
 
 class InterpreterSpec {
   public static function describe(d:spaceCadet.Description) {
-    var world       : World;
-    var interpreter : Interpreter;
+    var world:World;
 
-    d.before(function(a) {
-      world       = World.bootstrap();
-      interpreter = new Interpreter(world);
-    });
+    d.before(function(a) world = World.bootstrap());
 
-    function pushCode(rawCode:String):Void {
+    function interpreterFor(rawCode:String):Interpreter {
       var ast = Parse.fromString(rawCode);
-      interpreter.pushAst(ast);
+      return new Interpreter(world, ast);
     }
 
     function assertThrows(a:spaceCadet.Asserter, fn) {
@@ -32,25 +28,20 @@ class InterpreterSpec {
 
 
     d.describe('ruby2.Interpreter', function(d) {
-      d.it('blows up when given no code', function(a) {
-        assertThrows(a, function() interpreter.pushAst(null));
+      d.specify('currentExpression is nil by default', function(a) {
+        a.eq(world.rNil, interpreterFor("true").currentExpression);
       });
 
-      d.it('currentExpression is nil by default', function(a) {
+      d.it('interprets a single expression', function(a) {
+        a.eq(world.rTrue, interpreterFor("true").nextExpression());
+      });
+
+      d.specify('evaluating an expression updates the current expression', function(a) {
+        var interpreter = interpreterFor("true");
         a.eq(world.rNil, interpreter.currentExpression);
+        interpreter.nextExpression();
+        a.eq(world.rTrue, interpreter.currentExpression);
       });
-
-      // d.it('interprets a single expression', function(a) {
-      //   pushCode("true");
-      //   a.eq(world.rTrue, interpreter.nextExpression());
-      // });
-
-      // d.specify('evaluating an expression updates the current expression', function(a) {
-      //   pushCode("true");
-      //   a.eq(world.rNil, interpreter.currentExpression);
-      //   interpreter.nextExpression();
-      //   a.eq(world.rTrue, interpreter.currentExpression);
-      // });
 
       // d.it('interprets multiple expressions', function(a) {
       //   pushCode("nil\ntrue\nfalse");
