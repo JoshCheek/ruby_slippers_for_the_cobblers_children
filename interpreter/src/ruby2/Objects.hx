@@ -7,21 +7,23 @@ class RObject {
 
   public function new() {}
   public function inspect() {
-    return 'RB(#<${klass.inspect()}>)';
+    var klassname = klass.inspect();
+    if(klass == null) klassname = 'Object without a klass!!';
+    return 'RB(#<${klassname}>)';
   }
 }
 
 class RString extends RObject {
   public var value:String;
   override public function inspect() {
-    return 'RB(${value.inspect()})';
+    return 'RB(#<String: ${value.inspect()}>)';
   }
 }
 
 class RSymbol extends RObject {
   public var name:String;
   override public function inspect() {
-    return 'RB(:${name.inspect()})';
+    return 'RB(<Symbol: :${name.inspect()}>)';
   }
 }
 
@@ -31,7 +33,7 @@ class RClass extends RObject {
   public var constants  : InternalMap<RObject>;
   public var imeths     : InternalMap<RMethod>;
   override public function inspect() {
-    return 'RB(${EscapeString.call(name)})';
+    return 'RB(#<Class: ${EscapeString.call(name)}>)';
   }
 }
 
@@ -65,6 +67,6 @@ class RMethod extends RObject {
 class RArray extends RObject {
   public var elements : Array<RObject>;
   override public function inspect() {
-    return 'RB(${elements.inspect()})';
+    return 'RB(#<Array: ${elements.inspect()}>)';
   }
 }
