@@ -13,7 +13,7 @@ abstract Colour(String) from String to String {
   var FgWhite   = "\033[37m";
 }
 
-class Output {
+class Printer {
   var outstream   : haxe.io.Output;
   var errstream   : haxe.io.Output;
   var colourStack : Stack<String>;
@@ -50,7 +50,7 @@ class Output {
     return this;
   }
 
-  public var resetln(get, never):Output;
+  public var resetln(get, never):Printer;
   public function get_resetln() {
     write("\r\033[2K");
     indentNext = true;
@@ -62,28 +62,28 @@ class Output {
     return this;
   }
 
-  public var indent(get, never):Output;
+  public var indent(get, never):Printer;
   public function get_indent() {
     indentDepth++;
     return this;
   }
 
-  public var outdent(get, never):Output;
+  public var outdent(get, never):Printer;
   public function get_outdent() {
     if(indentDepth == 0) throw "Cannot outdent, there is no indentation!";
     indentDepth--;
     return this;
   }
 
-  public var fgPop     (get, never):Output;
-  public var fgBlack   (get, never):Output;
-  public var fgRed     (get, never):Output;
-  public var fgGreen   (get, never):Output;
-  public var fgYellow  (get, never):Output;
-  public var fgBlue    (get, never):Output;
-  public var fgMagenta (get, never):Output;
-  public var fgCyan    (get, never):Output;
-  public var fgWhite   (get, never):Output;
+  public var fgPop     (get, never):Printer;
+  public var fgBlack   (get, never):Printer;
+  public var fgRed     (get, never):Printer;
+  public var fgGreen   (get, never):Printer;
+  public var fgYellow  (get, never):Printer;
+  public var fgBlue    (get, never):Printer;
+  public var fgMagenta (get, never):Printer;
+  public var fgCyan    (get, never):Printer;
+  public var fgWhite   (get, never):Printer;
 
   function pushColour(colour:Colour) {
     colourStack.push(colour);

@@ -19,13 +19,13 @@ class RunTests {
       spaceCadet.ReporterSpec.describe(root);
 
       toplevel.StackSpec.describe(root);
-      toplevel.OutputSpec.describe(root);
+      toplevel.PrinterSpec.describe(root);
       toplevel.StringOutputSpec.describe(root);
       toplevel.EscapeStringSpec.describe(root);
       toplevel.InspectSpec.describe(root);
 
       // run
-      var output   = new Output(Sys.stdout(), Sys.stderr());
+      var output   = new Printer(Sys.stdout(), Sys.stderr());
       var reporter = new Reporter.StreamReporter(output);
       Run.run(root, reporter, {failFast:true});
       hadFailure = hadFailure || 0 != reporter.numFailed;

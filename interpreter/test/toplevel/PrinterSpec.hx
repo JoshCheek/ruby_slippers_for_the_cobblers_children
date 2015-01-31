@@ -1,16 +1,16 @@
 package toplevel;
 
-class OutputSpec {
+class PrinterSpec {
   public static function describe(d:spaceCadet.Description) {
     var outstream : StringOutput;
     var errstream : StringOutput;
-    var output    : Output;
+    var output    : Printer;
     var assertOut : String -> (Void -> Void) -> Void;
 
     d.before(function(a) {
       outstream = new StringOutput();
       errstream = new StringOutput();
-      output    = new Output(outstream, errstream);
+      output    = new Printer(outstream, errstream);
       assertOut = function(s, f) {
         a.eq("", outstream.string);
         a.eq("", errstream.string);
@@ -20,7 +20,7 @@ class OutputSpec {
       }
     });
 
-    d.describe('Space Cadet Output', function(d) {
+    d.describe('Printer', function(d) {
       d.specify("#write writes its messages to the output stream without a newline", function(a) {
         assertOut("a", function() output.write("a"));
       });

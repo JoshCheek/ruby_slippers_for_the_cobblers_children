@@ -7,14 +7,14 @@ class ReporterSpec {
     d.describe('Space Cadet StreamReporter', function(d) {
       var stdout   : StringOutput;
       var stderr   : StringOutput;
-      var output   : Output;
+      var output   : Printer;
       var reporter : StreamReporter;
       var pos      = function(?p:haxe.PosInfos) { return p; }();
 
       d.before(function(a) {
         stdout   = new StringOutput();
         stderr   = new StringOutput();
-        output   = new Output(stdout, stderr);
+        output   = new Printer(stdout, stderr);
         reporter = new StreamReporter(output);
       });
 

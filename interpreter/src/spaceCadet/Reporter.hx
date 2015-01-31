@@ -37,14 +37,14 @@ enum SpecEvent {
 // I think it will need to pass the runDesc a callback in order to truly be able to handle async,
 // but seems better to wait until I need that feature than to try and guess right now.
 class StreamReporter implements Reporter {
-  public var output:Output;
+  public var output:Printer;
   public var numSpecs      = 0;
   public var numAssertions = 0;
   public var numPassed     = 0;
   public var numPending    = 0;
   public var numFailed     = 0;
   public var numErrored    = 0;
-  public function new(output:Output) {
+  public function new(output:Printer) {
     this.output = output;
   }
 
