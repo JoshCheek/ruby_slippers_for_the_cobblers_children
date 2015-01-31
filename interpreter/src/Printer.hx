@@ -13,6 +13,11 @@ abstract Colour(String) from String to String {
   var FgWhite   = "\033[37m";
 }
 
+abstract StringOrDynamic(String) from String to String {
+  public function new(string) this = string;
+  @:from public static function fromDynamic(obj:Dynamic) return new StringOrDynamic(Inspect.call(obj));
+}
+
 class Printer {
   public static function nullPrinter():Printer {
     return new Printer(new StringOutput(), new StringOutput());
@@ -81,6 +86,18 @@ class Printer {
     if(indentDepth == 0) throw "Cannot outdent, there is no indentation!";
     indentDepth--;
     return this;
+  }
+
+  public function d(?typeOrMessage:StringOrDynamic, ?message:StringOrDynamic) {
+    return fgMagenta.write("|").fgPop
+            .yield(function() {
+              if(typeOrMessage == null && message == null)
+                writeln('')
+              else if(typeOrMessage != null && message == null)
+                fgCyan.write(' ' + typeOrMessage).fgPop.writeln("")
+              else
+                fgMagenta.write(' ' + typeOrMessage).fgPop.fgCyan.write(' ' + message).fgPop.writeln("");
+            });
   }
 
   public var fgPop     (get, never):Printer;

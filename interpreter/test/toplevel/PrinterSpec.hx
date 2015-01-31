@@ -54,6 +54,29 @@ class PrinterSpec {
         a.eq("1234", outstream.string);
       });
 
+      d.specify('#d optionally takes a (Type,Message), (Message), or nothing, and prints them as debug output... but to normal output, so they don\'t interleave.', function(a) {
+        printer.d("THE TYPE", "TYPED MESSAGE");
+        printer.d();
+        printer.d("UNTYPED MESSAGE");
+
+        var lines = outstream.string.split("\n");
+
+        a.eq(4, lines.length); // there's a trailing newline, and split gives an empty string to the RHS of it
+        a.isTrue(~/THE TYPE/.match(lines[0]));
+        a.isTrue(~/TYPED MESSAGE/.match(lines[0]));
+        a.isFalse(~/T/.match(lines[1])); // didn't print whatevs
+        a.isTrue(~/UNTYPED MESSAGE/.match(lines[2]));
+      });
+
+      d.specify('#d will inspect the message if it isn\'t a string', function(a) {
+        printer.d({a: 1}).d("msg", {b: 2});
+        // a.p.d({only: "object"}).d().d("message", {with: "object"}).d("just message").d("category", "and message");
+        throw("zomg");
+        var lines = outstream.string.split("\n");
+        a.isTrue(~/\{a: 1\}/.match(lines[0]));
+        a.isTrue(~/[^"]msg[^"].*?\{b: 2\}/.match(lines[1]));
+      });
+
       d.describe("colour stack", function(d) {
         d.specify("fgBlack pushes black onto the colour stack", function(a) {
           printer.fgBlack.write("X").fgPop.write("Y");
