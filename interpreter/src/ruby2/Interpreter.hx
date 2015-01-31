@@ -22,7 +22,7 @@ class StackFrame<T> {
   }
 
   public function inspect() {
-    return 'new StackFrame({binding: ${World.inspectObj(binding)}}, ast: ${Inspect.call(ast)}, evaluation: ${Inspect.call(evaluation)}, returned: ${Inspect.call(returned)}})';
+    return 'new StackFrame({binding: ..., ast: ${Inspect.call(ast)}, evaluation: ..., returned: ${Inspect.call(returned)}})';
   }
 
   // -----------------
