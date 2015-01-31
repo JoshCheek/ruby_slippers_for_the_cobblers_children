@@ -12,9 +12,9 @@ class RunTests2 {
 
 
     // run
-    var output   = new Printer(Sys.stdout(), Sys.stderr());
-    var reporter = new Reporter.StreamReporter(output);
-    Run.run(root, reporter, {failFast:true});
+    var printer  = new Printer(Sys.stdout(), Sys.stderr());
+    var reporter = new Reporter.StreamReporter(printer);
+    Run.run(root, reporter, {failFast:true, printer: printer});
 
     // Finished
     var hadFailure = false;

@@ -14,6 +14,10 @@ abstract Colour(String) from String to String {
 }
 
 class Printer {
+  public static function nullPrinter():Printer {
+    return new Printer(new StringOutput(), new StringOutput());
+  }
+
   var outstream   : haxe.io.Output;
   var errstream   : haxe.io.Output;
   var colourStack : Stack<String>;

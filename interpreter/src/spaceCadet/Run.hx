@@ -5,13 +5,15 @@ class TestFinished {
 }
 
 typedef ReporterOptions = {
-  @:optional var failFast:Bool;
+  @:optional var failFast : Bool;
+  @:optional var printer  : Printer;
 }
 
 class Run {
   public static function withDefaults(?opts:ReporterOptions) {
     if(opts == null) opts = {};
     if(opts.failFast == null) opts.failFast = false;
+    if(opts.printer  == null) opts.printer  = Printer.nullPrinter();
     return opts;
   }
 
@@ -56,7 +58,8 @@ class Run {
       var asserter = new Asserter(
         reportAssertionPass,
         onFailure,
-        onPending);
+        onPending,
+        opts.printer);
 
       try {
         for(block in beforeBlocks) block(asserter);

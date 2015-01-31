@@ -19,16 +19,24 @@ class AssertionsSpec {
       var failureMessage : String = null;
       var pendingMessage : String = null;
       var recordedLine   : Int    = -1;
+      var printer        : Printer;
+      var asserter       : Asserter;
       var onSuccess = function(m, p) { successMessage = m; recordedLine = p.lineNumber; };
       var onFailure = function(m, p) { failureMessage = m; recordedLine = p.lineNumber; };
       var onPending = function(m, p) { pendingMessage = m; recordedLine = p.lineNumber; };
-      var asserter  = new Asserter(onSuccess, onFailure, onPending);
 
       d.before(function(a) {
         recordedLine   = -1;
         successMessage = null;
         failureMessage = null;
         pendingMessage = null;
+        printer        = Printer.nullPrinter();
+        trace('\n\nPRINTER: ${printer.inspect()}\n');
+        asserter       = new Asserter(onSuccess, onFailure, onPending, printer);
+      });
+
+      d.specify('.p returns the printer', function(a) {
+        a.eq(asserter.p, printer);
       });
 
       // positive assertions

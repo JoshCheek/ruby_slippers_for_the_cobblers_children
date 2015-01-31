@@ -4,11 +4,13 @@ class Asserter {
   private var onSuccess : String -> haxe.PosInfos -> Void;
   private var onFailure : String -> haxe.PosInfos -> Void;
   private var onPending : String -> haxe.PosInfos -> Void;
+  public  var p         : Printer; // so specs can output with colour and indentation
 
-  public function new(onSuccess, onFailure, onPending) {
+  public function new(onSuccess, onFailure, onPending, printer) {
     this.onSuccess = onSuccess;
     this.onFailure = onFailure;
     this.onPending = onPending;
+    this.p         = printer;
   }
 
   public function eqm<T>(a:T, b:T, message, ?pos:haxe.PosInfos) {
