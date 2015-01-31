@@ -21,6 +21,10 @@ class PrinterSpec {
     });
 
     d.describe('Printer', function(d) {
+      d.it('inspects without fucking blowing up', function(a) {
+        a.isTrue(~/#<Printer/.match(output.inspect()));
+      });
+
       d.specify("#write writes its messages to the output stream without a newline", function(a) {
         assertOut("a", function() output.write("a"));
       });

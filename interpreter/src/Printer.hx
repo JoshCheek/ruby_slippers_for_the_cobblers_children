@@ -27,6 +27,10 @@ class Printer {
     this.colourStack = new Stack();
   }
 
+  public function inspect() {
+    return '#<Printer outstream=${Inspect.call(outstream)}, errstream=${Inspect.call(errstream)}>';
+  }
+
   public function writeln(message:String) {
     if(!message.endsWith("\n")) message += "\n";
     write(message);
