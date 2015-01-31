@@ -88,10 +88,13 @@ class InterpreterSpec {
         ]);
       });
 
-      // d.it('evaluates a string literal', function(a) {
-      //   pushCode('"Josh"');
-      //   a.streq(interpreter.nextExpression(), world.stringLiteral("Josh"));
-      // });
+      d.it('evaluates a string literal', function(a) {
+        var interpreter = interpreterFor('"Josh"');
+        var str = interpreter.nextExpression();
+        a.eq(world.rcString, str.klass);
+        a.streq(str.ivars, new InternalMap());
+        a.eq("Josh", cast(str).value);
+      });
 
       // d.it('sets and gets local variables', function(a) {
       //   pushCode("var1 = 'b'

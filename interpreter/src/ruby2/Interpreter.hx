@@ -69,12 +69,20 @@ enum ExprsEvaluationState {
   Return;
 }
 
+enum StringEvaluationState {
+  CreateString;
+}
+
 enum Instruction {
   Pop;
   PushNil;
   PushTrue;
   PushFalse;
   PushSelf;
+  PushClassString;
+  PushData(data:Dynamic);
+  AllocateObject(structure:Class<RObject>);
+  SetAttribute(name:String);
   EvalAst(ast:Ast);
   Emit;
   AdvanceState<T>(stateType:T);
@@ -150,6 +158,25 @@ class Compile {
       }
 
 
+    } else if(ast.isString) {
+      // trace('STRING VALUE: ${Inspect.call(ast.toString().value)}');
+      var states = [
+        CreateString => { index: 0, instructions: [
+          PushData(ast.toString().value),
+          PushClassString,
+          AllocateObject(RString),
+          SetAttribute("value"),
+          Return,
+        ] },
+      ];
+      return {
+        name:         'StringEvaluation',
+        description:  'Evaluates a string literal',
+        states:       states,
+        currentState: states.get(CreateString),
+      }
+
+
     } else if(ast.isExprs) {
       var exprsAst        = ast.toExprs();
       var pushExpressions = [for(i in 0...exprsAst.length) EvalAst(exprsAst.get(i))];
@@ -173,10 +200,16 @@ class Compile {
 }
 
 
+// it's so fucking stupid that we need this
+enum ValueStackType {
+  Obj(_:RObject);
+  Data(_:Dynamic);
+}
+
 class Interpreter {
   public var world       : World;
   public var stackFrames : Stack<StackFrame<Dynamic>>;
-  public var valueStack  : Stack<RObject>;
+  public var valueStack  : Stack<ValueStackType>;
 
   public var currentExpression (default, null):RObject;
   public var isInProgress      (default, null):Bool;
@@ -205,20 +238,56 @@ class Interpreter {
   public function nextExpression():RObject {
     var foundExpression = false;
     while(!foundExpression) {
-      var frame      = stackFrames.peek;
-      var evaluation = frame.evaluation;
-      var state      = evaluation.currentState;
-      // trace('  ${state}\033[47m/\033[49m${Inspect.call(state.instructions[state.index])}');
+      var frame       = stackFrames.peek;
+      var evaluation  = frame.evaluation;
+      var state       = evaluation.currentState;
+      var instruction = state.instructions[state.index];
+      // trace('  ${state}\033[45m/\033[49m${Inspect.call(instruction)}');
+      state.index++;
 
-      switch(state.instructions[state.index++]) {
+      switch(instruction) {
+        case Pop:
+          valueStack.pop();
         case PushNil:
-          valueStack.push(world.rNil);
+          valueStack.push(Obj(world.rNil));
         case PushTrue:
-          valueStack.push(world.rTrue);
+          valueStack.push(Obj(world.rTrue));
         case PushFalse:
-          valueStack.push(world.rFalse);
+          valueStack.push(Obj(world.rFalse));
         case PushSelf:
-          valueStack.push(frame.self);
+          valueStack.push(Obj(frame.self));
+        case PushClassString:
+          valueStack.push(Obj(world.rcString));
+        case PushData(data):
+          valueStack.push(Data(data));
+        case AllocateObject(structure):
+          var instance = Type.createInstance(structure, []);
+          switch(valueStack.pop()) {
+            case Obj(klass):
+              instance.klass = cast(klass); // FIXME -- how about pop methods for each of these to handle the stupid fkn enum. Then we add a type for Class, and do popClass. If you do popObject, that will work for either a Class or an Obj
+              instance.ivars = new InternalMap();
+            case value:
+              throw('ERROR! Expected Obj type, got: ${Inspect.call(value)}');
+          }
+          valueStack.push(Obj(instance));
+        case SetAttribute(name):
+          var self:RObject = null;
+          switch(valueStack.pop()) {
+            case Obj(object): self = object;
+            case value:
+              throw('ERROR! Can only return objects. But tried to return: ${Inspect.call(value)}');
+          }
+          var value:Dynamic;
+          switch(valueStack.pop()) {
+            case Data(data):
+              trace('DATA(${Inspect.call(data)})');
+              value = data;
+            case Obj(object):
+              trace('OBJ(${Inspect.call(object)})');
+              value = object;
+          }
+          Reflect.setProperty(self, name, value);
+          valueStack.push(Obj(self));
         case EvalAst(ast):
           stackFrames.push(new StackFrame({
             binding:    stackFrames.peek.binding,
@@ -227,21 +296,30 @@ class Interpreter {
             returned:   world.rNil,
           }));
         case PushReturned:
-          valueStack.push(stackFrames.peek.returned);
+          valueStack.push(Obj(stackFrames.peek.returned));
         case Return:
           stackFrames.pop();
-          currentExpression         = valueStack.pop();
-          stackFrames.peek.returned = currentExpression;
-          foundExpression           = true;
-          state.index               = 0;
+          switch(valueStack.pop()) {
+            case Obj(object):
+              this.currentExpression    = object;
+              stackFrames.peek.returned = object;
+              foundExpression           = true;
+              state.index               = 0;
+            case value:
+              throw('ERROR! Can only return objects. But tried to return: ${Inspect.call(value)}');
+          }
+        // should this just go away, and we explicitly handle the case where the stack is empty?
         case Emit:
-          currentExpression = valueStack.peek;
-          foundExpression   = true;
+          switch(valueStack.peek) {
+            case Obj(object):
+              this.currentExpression = object;
+              foundExpression        = true;
+            case value:
+              throw('ERROR! Can only emit objects. But tried to emit: ${Inspect.call(value)}');
+          }
         case AdvanceState(nextState):
           state.index             = 0;
           evaluation.currentState = evaluation.states.get(nextState);
-        case Pop:
-          valueStack.pop();
       }
     }
 
