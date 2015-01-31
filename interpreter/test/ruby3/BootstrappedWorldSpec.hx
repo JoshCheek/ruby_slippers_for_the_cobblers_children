@@ -1,11 +1,11 @@
 package ruby3;
 
-import ruby3.Objects;
+import ruby3.Object;
 using Lambda;
 using Inspect;
 
 class BootstrappedWorldSpec {
-  static function assertInObjectSpace(a:spaceCadet.Asserter, obj:RObject, world:ruby3.World, ?pos:haxe.PosInfos):Void {
+  static function assertInObjectSpace(a:spaceCadet.Asserter, obj:Object, world:ruby3.World, ?pos:haxe.PosInfos):Void {
     var found = null;
     for(potential in world.objectSpace)
       if(potential == obj) {

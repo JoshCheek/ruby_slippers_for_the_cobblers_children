@@ -5,10 +5,10 @@ class RunTests3 {
     var root = new Description();
 
     // define
-    ruby3.ParseSpec.describe(root);
-    ruby3.LanguageGoBagSpec.describe(root);
+    // ruby3.ParseSpec.describe(root);
+    // ruby3.LanguageGoBagSpec.describe(root);
     ruby3.BootstrappedWorldSpec.describe(root);
-    ruby3.InterpreterSpec.describe(root);
+    // ruby3.InterpreterSpec.describe(root);
 
 
     // run
