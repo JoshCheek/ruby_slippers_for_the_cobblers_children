@@ -13,4 +13,8 @@ class StringOutput extends haxe.io.Output {
   public override function writeString(s:String):Void {
     string += s;
   }
+
+  public function inspect() {
+    return '#<StringOutput string=${Inspect.call(string)}>';
+  }
 }

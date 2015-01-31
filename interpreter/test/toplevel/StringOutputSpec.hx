@@ -15,7 +15,6 @@ class StringOutputSpec {
         strio = construct();
       });
 
-
       d.it("Implements Output", function(a) {
         // passes if typechecker allows it to compile
         var o:haxe.io.Output = construct();
@@ -54,6 +53,13 @@ class StringOutputSpec {
         strio.writeString("\033[31m");
         a.eq("\033[31m", strio.string);
       });
+
+      d.it('inspects with info about its string', function(a) {
+        strio.writeString("hello");
+        a.isTrue(~/StringOutput/.match(strio.inspect()));
+        a.isTrue(~/hello/.match(strio.inspect()));
+      });
+
     });
   }
 }
