@@ -31,12 +31,22 @@ class AssertionsSpec {
         failureMessage = null;
         pendingMessage = null;
         printer        = Printer.nullPrinter();
-        trace('\n\nPRINTER: ${printer.inspect()}\n');
         asserter       = new Asserter(onSuccess, onFailure, onPending, printer);
       });
 
-      d.specify('.p returns the printer', function(a) {
+      d.specify('#p returns the printer', function(a) {
         a.eq(asserter.p, printer);
+      });
+
+      d.specify('#d forwards to the printer\'s debug output', function(a) {
+        var outstream = new StringOutput();
+        var errstream = new StringOutput();
+        printer  = new Printer(outstream, errstream);
+        asserter = new Asserter(onSuccess, onFailure, onPending, printer);
+        asserter.d({a:1}).d("category",{b:2}).d().d("category").d("category", "message");
+        // just generally, types all worked out, and soemthing got printed from each arg
+        a.isTrue(~/category/.match(outstream.string));
+        a.isTrue(~/message/.match(outstream.string));
       });
 
       // positive assertions

@@ -13,6 +13,10 @@ class Asserter {
     this.p         = printer;
   }
 
+  public function d(?typeOrMessage:Printer.StringOrDynamic, ?message:Printer.StringOrDynamic):Printer {
+    return p.d(typeOrMessage, message);
+  }
+
   public function eqm<T>(a:T, b:T, message, ?pos:haxe.PosInfos) {
     if(a == b) onSuccess(message, pos);
     else       onFailure(message, pos);

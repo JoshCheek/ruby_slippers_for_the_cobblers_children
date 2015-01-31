@@ -71,7 +71,6 @@ class PrinterSpec {
       d.specify('#d will inspect the message if it isn\'t a string', function(a) {
         printer.d({a: 1}).d("msg", {b: 2});
         // a.p.d({only: "object"}).d().d("message", {with: "object"}).d("just message").d("category", "and message");
-        throw("zomg");
         var lines = outstream.string.split("\n");
         a.isTrue(~/\{a: 1\}/.match(lines[0]));
         a.isTrue(~/[^"]msg[^"].*?\{b: 2\}/.match(lines[1]));
