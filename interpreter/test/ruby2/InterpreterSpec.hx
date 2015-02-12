@@ -3,6 +3,7 @@ package ruby2;
 import ruby2.Objects;
 import ruby2.Interpreter;
 import ruby2.World;
+using Inspect;
 // import ruby2.InternalMap;
 // import ruby2.Errors;
 
@@ -32,7 +33,7 @@ class InterpreterSpec {
         a.eq(world.rNil, interpreterFor("true").currentExpression);
       });
 
-      d.it('returns nil when asked for the next expression when there is nothign to interpret', function(a) {
+      d.it('returns nil when asked for the next expression when there is nothing to interpret', function(a) {
         var interpreter = interpreterFor("true");
         a.eq(world.rTrue, interpreter.nextExpression());
         for(i in 0...10)
@@ -96,21 +97,65 @@ class InterpreterSpec {
         a.eq("Josh", cast(str).value);
       });
 
-      // d.it('sets and gets local variables', function(a) {
-      //   pushCode("var1 = 'b'
-      //            'c'
-      //            var1
-      //            var2 = 'd'
-      //            var1 = 'e'
-      //            var2
-      //            var1
-      //            ");
-      //   var rStrs = ['b', 'b', 'c', 'b', 'd', 'd', 'e', 'e', 'd', 'e'].map(function(str) {
-      //     var obj:RObject = world.stringLiteral(str); // *sigh*
-      //     return obj;
-      //   });
-      //   assertNextExpressions(a, rStrs);
-      // });
+      // TODO
+      // if false
+      //   a = 1
+      // end
+      // p a # => nil
+      d.it('sets and gets local variables', function(a) {
+        var interpreter = interpreterFor("var1 = 'b'
+                                          'c'
+                                          var1
+                                          var2 = 'd'
+                                          var1 = 'e'
+                                          var2
+                                          var1
+                                          "
+        );
+
+        var assertLocal = function(name, obj:RObject) {
+          var bnd = world.rToplevelBinding;
+          a.eq(obj, bnd.getLocal(name));
+        }
+
+        var assertString = function(name:String, value:RObject) {
+          a.eq('RB(#<String: ${name.inspect()}>)',
+               value.inspect());
+        };
+
+        var strB;
+
+        // expr="b", var1=nil
+        strB = interpreter.nextExpression();
+        assertString("b", strB);
+        assertLocal("var1", world.rNil);
+
+        // expr="b", var1="b"
+        strB = interpreter.nextExpression();
+        assertString("b", strB);
+        assertLocal("var1", strB);
+
+        // expr='c', var1='b'
+        var strC = interpreter.nextExpression();
+        assertString("c", strC);
+        assertLocal("var1", strB);
+
+        // expr='b', var1='b'
+        strB = interpreter.nextExpression();
+        assertString("b", strB);
+        assertLocal("var1", strB);
+
+        // there is no var2
+        a.isFalse(interpreter.stackFrames.peek.binding.lvars.exists('var2'));
+
+        // drain
+        while(interpreter.isInProgress) // DUPLICATED IN assertNextExpressions
+          interpreter.nextExpression();
+
+        // var1='e', var2='d'
+        assertString("e", interpreter.stackFrames.peek.binding.lvars.get('var1'));
+        assertString("d", interpreter.stackFrames.peek.binding.lvars.get('var2'));
+      });
 
       // d.example('more local vars', function(a) {
       //   pushCode("a = 'x'; b = a");

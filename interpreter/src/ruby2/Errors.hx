@@ -14,3 +14,9 @@ class NothingToEvaluate extends Errors {
     super(msg);
   }
 }
+
+class AskedForUninitializedVariable extends Errors {
+  public function new(name:String) {
+    super('No variable: ${Inspect.call(name)}');
+  }
+}

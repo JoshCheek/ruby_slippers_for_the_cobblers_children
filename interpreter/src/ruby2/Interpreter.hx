@@ -74,6 +74,16 @@ enum StringEvaluationState {
   ThenReturn; // god, if I name this Return, it blows the fuck up :(
 }
 
+enum SetLvarState {
+  DeclareVar;
+  EvalRhs;
+  Assign;
+}
+
+enum GetLvarState {
+  GetVar;
+}
+
 enum Instruction {
   Pop;
   PushNil;
@@ -89,6 +99,9 @@ enum Instruction {
   AdvanceState<T>(stateType:T);
   Return;
   PushReturned;
+  AssignLvar(name:String);
+  DeclareLvar(name:String);
+  PushLvar(name:String);
 }
 
 
@@ -160,7 +173,6 @@ class Compile {
 
 
     } else if(ast.isString) {
-      // trace('STRING VALUE: ${Inspect.call(ast.toString().value)}');
       var states = [
         CreateString => { index: 0, instructions: [
           PushData(ast.toString().value),
@@ -192,6 +204,50 @@ class Compile {
         description:  'Evaluates a list of expressions',
         states:       states,
         currentState: states.get(PushExpressions),
+      }
+
+
+    } else if(ast.isSetLvar) {
+      var setLvarAst = ast.toSetLvar();
+
+      var states = [
+        DeclareVar => {index: 0, instructions: [
+          DeclareLvar(setLvarAst.name),
+          AdvanceState(SetLvarState.EvalRhs),
+        ]},
+        EvalRhs => {index: 0, instructions: [
+          EvalAst(setLvarAst.value),
+          PushReturned,
+          AdvanceState(SetLvarState.Assign),
+        ]},
+        Assign => {index: 0, instructions: [
+          AssignLvar(setLvarAst.name),
+          PushReturned,
+          Instruction.Return,
+        ]},
+      ];
+      return {
+        name:         'SetLvarEvaluation',
+        description:  'Sets a local variable',
+        states:       states,
+        currentState: states.get(DeclareVar),
+      }
+
+
+    } else if(ast.isGetLvar) {
+      var getLvarAst = ast.toGetLvar();
+
+      var states = [
+        GetVar => {index: 0, instructions: [
+          PushLvar(getLvarAst.name),
+          Return
+        ]},
+      ];
+      return {
+        name:         'GetLvarEvaluation',
+        description:  'Gets a local variable',
+        states:       states,
+        currentState: states.get(GetVar),
       }
 
 
@@ -244,7 +300,10 @@ class Interpreter {
       var evaluation  = frame.evaluation;
       var state       = evaluation.currentState;
       var instruction = state.instructions[state.index];
-      // trace('  ${state}\033[45m/\033[49m${Inspect.call(instruction)}');
+      // trace('-------------------');
+      // trace('\033[35m${Inspect.call(state)}');
+      // trace('\033[36m${Inspect.call(instruction)}');
+      // trace('\033[34m${Inspect.call(stackFrames)}');
       state.index++;
 
       switch(instruction) {
@@ -296,7 +355,8 @@ class Interpreter {
         case PushReturned:
           valueStack.push(Obj(stackFrames.peek.returned));
         case Return:
-          stackFrames.pop();
+          var value = stackFrames.pop();
+          // If there is nothing to pop, it probably means that something is trying to return without having set the return value
           switch(valueStack.pop()) {
             case Obj(object):
               this.currentExpression    = object;
@@ -318,6 +378,21 @@ class Interpreter {
         case AdvanceState(nextState):
           state.index             = 0;
           evaluation.currentState = evaluation.states.get(nextState);
+        case DeclareLvar(name):
+          if(!frame.binding.lvars.exists(name))
+            frame.binding.lvars.set(name, world.rNil);
+        case AssignLvar(name):
+          var value = valueStack.pop();
+          switch(value) {
+            case Obj(obj):
+              // introduce setLocal on binding?
+              frame.binding.lvars.set(name, obj);
+            case value:
+              throw('ERROR! Can only assign objects. But tried to assign: ${Inspect.call(value)}');
+          }
+        case(PushLvar(name)):
+          var value = frame.binding.getLocal(name);
+          valueStack.push(Obj(value));
       }
     }
 

@@ -1,4 +1,5 @@
 package ruby2;
+import ruby2.Errors;
 using Inspect;
 
 class RObject {
@@ -44,6 +45,11 @@ class RBinding extends RObject {
   public var lvars     : InternalMap<RObject>;
   override public function inspect() {
     return 'RB(#<Binding for ${defTarget.inspect()}>)';
+  }
+  public function getLocal(name:String):RObject {
+    var value = lvars.get(name);
+    if(value == null) throw new AskedForUninitializedVariable(name);
+    return value;
   }
 }
 
