@@ -5,7 +5,7 @@ using Lambda;
 using Inspect;
 
 class BootstrappedWorldSpec {
-  static function assertInObjectSpace(a:spaceCadet.Asserter, obj:RObject, world:ruby4.World, ?pos:haxe.PosInfos):Void {
+  static function assertInObjectSpace(a:spaceCadet.Asserter, ref:RObjectRef, world:ruby4.World, ?pos:haxe.PosInfos):Void {
     var found = null;
     for(potential in world.objectSpace)
       if(potential == obj) {

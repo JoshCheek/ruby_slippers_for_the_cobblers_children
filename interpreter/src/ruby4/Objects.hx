@@ -1,50 +1,47 @@
 package ruby4;
-using Inspect;
 
-class RObject {
-  public var klass:RClass;
-  public var ivars:InternalMap<RObject>;
+// Use "ref" to refer to the object, it'll be the object id in most cases
+// this will facilitate immutabilty b/c it offers a layer of indirection:
+// instead of pointing at that specific version of that object, it points
+// to the id, which will still match.
+//
+// Calling it a ref instead of id, b/c if we add in Integers, we might use
+// MRI's integer trick and not instantiate them.
+//
+// Technically these offer no type safety, I don't think, but it's more communicative.
+typedef RObjectRef = Int;
+typedef RClassRef  = Int;
+typedef RMethodRef = Int;
 
-  public function new() {}
-  public function inspect() {
-    var klassname = null;
-    try klass.inspect() catch(_:Dynamic) { } // -.-
-    if(klass == null) klassname = 'Object without a klass!!';
-    return 'RB(#<${klassname}>)';
-  }
+typedef RObject = {
+  var object_id : RObjectRef;
+  var klass     : RClassRef;
+  var ivars     : InternalMap<RObjectRef>;
 }
 
-class RString extends RObject {
-  public var value:String;
-  override public function inspect() {
-    return 'RB(#<String: ${value.inspect()}>)';
-  }
+typedef RString = {
+  > RObject,
+  var value:String;
 }
 
-class RSymbol extends RObject {
-  public var name:String;
-  override public function inspect() {
-    return 'RB(<Symbol: :${name.inspect()}>)';
-  }
+typedef RSymbol = {
+  > RObject,
+  var name:String;
 }
 
-class RClass extends RObject {
-  public var name       : String;
-  public var superclass : RClass;
-  public var constants  : InternalMap<RObject>;
-  public var imeths     : InternalMap<RMethod>;
-  override public function inspect() {
-    return 'RB(#<Class: ${EscapeString.call(name)}>)';
-  }
+typedef RClass = {
+  > RObject,
+  var name       : String;
+  var superclass : RClassRef;
+  var constants  : InternalMap<RObjectRef>;
+  var imeths     : InternalMap<RMethodRef>;
 }
 
-class RBinding extends RObject {
-  public var self      : RObject;
-  public var defTarget : RClass;
-  public var lvars     : InternalMap<RObject>;
-  override public function inspect() {
-    return 'RB(#<Binding for ${defTarget.inspect()}>)';
-  }
+typedef RBinding = {
+  > RObject,
+  var self      : RObjectRef;
+  var defTarget : RClassRef;
+  var lvars     : InternalMap<RObjectRef>;
 }
 
 enum ArgType {
@@ -55,19 +52,14 @@ enum ExecutableType {
   // Ruby(ast:ExecutionState);
   // Internal(fn:RBinding -> ruby4.World -> EvaluationResult);
 }
-class RMethod extends RObject {
-  public var name : String;
-  public var args : Array<ArgType>; // rename to params
-  public var body : ExecutableType;
-  override public function inspect() {
-    return 'RB(#<Method ${name.inspect()}(${args.inspect()})>)';
-  }
+typedef RMethod = {
+  > RObject,
+  var name : String;
+  var args : Array<ArgType>; // rename to params
+  var body : ExecutableType;
 }
 
-
-class RArray extends RObject {
-  public var elements : Array<RObject>;
-  override public function inspect() {
-    return 'RB(#<Array: ${elements.inspect()}>)';
-  }
+typedef RArray = {
+  > RObject,
+  var elements:Array<RObjectRef>;
 }
