@@ -36,6 +36,7 @@ Possible libraries and platforms for creating the user interface.
     * great demos of FlxNape, a physics engine
 * Drawing on the canvas directly
   * [2D Grapphics with the HTML Canvas](https://www.youtube.com/playlist?list=PLD3FC8B16E1D7C4B0&feature=view_all)
+* Drawing in Three.js https://twitter.com/josh_cheek/status/571232192874942466
 * WebGL
 * D3.js
 * Elm

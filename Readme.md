@@ -22,6 +22,9 @@ another tool I created and use daily. It's aim wasn't quite as ambitious,
 but its method is similar: provide a labratory to perform experiments with
 a maximum of feedback and a minimum of effort.
 
+[Here](https://vimeo.com/99541348)
+is an exerpt of what it looks like when I teach the object model in class.
+
 ### Goal (what)
 
 * A Ruby interpreter with a **visual/interactive interface**.
@@ -31,6 +34,7 @@ a maximum of feedback and a minimum of effort.
 * Experiment by submitting your own code,
   seeing how it is interpreted,
   tweaking it and observing the difference.
+https://vimeo.com/99541348
 
 ### Implementation (How)
 
