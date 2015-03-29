@@ -1,0 +1,98 @@
+Experiment: Ruby style boolable on nil
+  abstract BoolObj<T> from T {
+    toBool return this != null;
+  }
+
+
+
+Special object ids
+  includes/ruby/ruby.h:384
+  nil.object_id    # => 8
+  true.object_id   # => 20
+  false.object_id  # => 0
+  0x14             # => 20
+  0.object_id      # => 1
+  -1.object_id     # => -1
+
+  :"".object_id  # => 2968
+  :""            # => :""
+
+  1.object_id  # => 3
+  2.object_id  # => 5
+  3.object_id  # => 7
+  4.object_id  # => 9
+
+  RUBY_Qfalse = 0x00  # => 0
+  RUBY_Qtrue  = 0x14  # => 20
+  RUBY_Qnil   = 0x08  # => 8
+
+SpaceCadet
+  √ Rename Output -> Printer
+  √ asserter gets the printer as well
+  full backtrace on failures, too
+  colour file/lineno differently in failures
+  Always show pending/fail/error, just colour them if they are nonzero
+  Asserter#matches
+AST
+  rename inspect() to toString()
+
+
+asts to objs
+
+function assertInObjectSpace(obj:RObject, ?pos:haxe.PosInfos):Void {
+  currentTest.done = true;
+  for(potential in world.objectSpace)
+    if(potential == obj) return;
+  currentTest.success = false;
+  currentTest.error = "Expected "+ rInspect(obj) + " to be in ObjectSpace, but it wasn't!";
+    throw currentTest;
+}
+
+// sigh, constantly fucking fighting this type system, and making some shitty tradeoffs.
+// e.g. instead of returning a subtype of Errors, we can only catch Errors, b/c no way that I can tell
+// what type you're catching at compile time or fucking something
+function assertThrows(fn:Void->Void, ?c:PosInfos):Void {
+	currentTest.done     = true;
+  try { fn(); } catch(e:Errors) return;
+  currentTest.success  = false;
+  currentTest.error    = "Expected " + Errors + " to be thrown";
+  currentTest.posInfos = c;
+  throw currentTest;
+}
+
+function assertNextExpressions(expected:Array<RObject>, ?c:PosInfos) {
+  currentTest.done = true;
+  var actual:Array<RObject> = [];
+  while(interpreter.isInProgress) {
+    actual.push(interpreter.nextExpression());
+  };
+  for(pair in expected.zip(actual)) rAssertEq(pair.l, pair.r);
+  if(expected.length <= actual.length) return
+  currentTest.success  = false;
+  currentTest.error    = "Expected at least " + expected.length + " expressions, but there were " + actual.length;
+  currentTest.posInfos = c;
+  throw currentTest;
+}
+
+function testAssertNextExpressions() {
+  var ast = ParseRuby.fromCode("true; nil; true");
+  // fewer
+  interpreter.pushCode(ast);
+  assertNextExpressions([world.rubyTrue, world.rubyNil]);
+
+  // exact (last true is b/c the list itself evaluates to the last expression in it)
+  interpreter.pushCode(ast);
+  assertNextExpressions([world.rubyTrue, world.rubyNil, world.rubyTrue, world.rubyTrue]);
+
+  // more
+  interpreter.pushCode(ast);
+  try assertNextExpressions([
+        world.rubyTrue,
+        world.rubyNil,
+        world.rubyTrue,
+        world.rubyTrue,
+        world.rubyTrue,
+      ])
+  catch(x:haxe.unit.TestStatus) return;
+  throw("Should have raised because we expected more expressions");
+}
