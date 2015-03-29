@@ -229,3 +229,21 @@ List of notes / links that might be helpful
 * [Javascript programming game](http://alexnisnevich.github.io/untrusted/) A take on what it might be like to use games to teach programming
 * [Time Travel For Debugging at Rubyconf](http://confreaks.com/videos/4818-RubyConf2014-a-partial-multiverse-model-of-time-travel-for-debugging) "With only a few restrictions and side-effects we will learn how to construct and use a time machine."
 * [Codingame](http://www.codingame.com/ide/754417c54da4822e560181e9ab49be8d02ca97) Michael sent me
+
+Rendering the frontend
+----------------------
+
+I've given up on flash. Looking at writing this in js instead.
+
+* [codeschool.org course on game programming](http://codeschool.org/game-programming/)
+  includes info like how to work with 2D and 3D structures, and example game codebases.
+
+Possible libraries and platforms for creating the user interface.
+
+* Drawing on the canvas directly
+  * [2D Grapphics with the HTML Canvas](https://www.youtube.com/playlist?list=PLD3FC8B16E1D7C4B0&feature=view_all)
+* Drawing in Three.js https://twitter.com/josh_cheek/status/571232192874942466
+* WebGL
+* Elm
+* paper.js
+* mathbox2 - http://acko.net/files/pres/siggraph-2014-bof/online.html
