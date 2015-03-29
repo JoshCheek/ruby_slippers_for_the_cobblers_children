@@ -141,7 +141,6 @@ Interpreter Notes
     I haven't looked into it yet. Got the link from the [rebuttal](https://gist.github.com/nateberkopec/11dbcf0ee7f2c08450ea)
     of Brian's post. UPDATE: it costs $200 and is for Ruby 1.8 YorickPeterse has an excellent rebuttal of why it's bad for RubySpec to die.
     It's really annoying that MRI sees itself as "whatever the fuck we happened to do is what Ruby is".
-
 * Inspiration
   * [Omniscient Debugger](http://www.lambdacs.com/debugger/) Holy shit, this doesn't even sound all that hard!
   * [Not sure](http://pchiusano.blogspot.com/2013/05/the-future-of-software-end-of-apps-and.html),
@@ -159,17 +158,28 @@ Interpreter Notes
 Frontend Notes
 --------------
 
-
 * Potential drawing libraries / platforms
   * Drawing on the canvas directly
     * [2D Grapphics with the HTML Canvas](https://www.youtube.com/playlist?list=PLD3FC8B16E1D7C4B0&feature=view_all)
-  * Drawing in Three.js https://twitter.com/josh_cheek/status/571232192874942466
   * WebGL
   * Elm
   * paper.js
+    * /Users/josh/deleteme/paperjs_workshop (Joanne's workshop)
+  * three.js
+    * Giles' tutorial
+      * https://vimeo.com/91755738
+    * examples
+      * http://threejs.org/examples/#raytracing_sandbox
+      * https://www.leiainc.com/
+      * http://www.sitepoint.com/building-earth-with-webgl-javascript/?utm_source=javascriptweekly&utm_medium=email
   * mathbox2 - http://acko.net/files/pres/siggraph-2014-bof/online.html
-  * [Local state is harmful](http://scattered-thoughts.net/blog/2014/02/17/local-state-is-harmful/)
-    haven't figured out its point, but I imagine this conclusion is drawn from a deeper principle
+  * JS Game Engines
+    * https://github.com/showcases/javascript-game-engines
+* Working with js
+  * https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial                                   // Canvas tutorial
+  * https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_usage                       // Canvas basic usage
+  * https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent                                         // keyboard events
+  * https://developer.mozilla.org/en-US/docs/Web/API/EventTarget.addEventListener                          // binding callback to event
 * Embedding into Miniature Octo Ironman
   * Ability to display in the code editor what the browser is currently interpreting
     (e.g. highlighting current expression)
@@ -189,6 +199,15 @@ Frontend Notes
     ```
   * Human explanation of what it's doing and why.
     e.g. "in order to define a class, we need to create a constant, create this instance, etc..."
+* Binary with Atom Shell
+  * For making native GUI apps by treating them like the browser (builds on Chromium)
+  * forum
+    * https://discuss.atom.io/c/atom-shell
+  * repo
+    * https://github.com/atom/atom-shell
+  * example app (mine's in deleteme folder, I think)
+    * https://github.com/dougnukem/hello-atom
+    * https://github.com/atom/atom-shell/blob/master/docs/tutorial/quick-start.md
 * Getting better at the domain
   * Ability to see what they're interested in without getting spammed
     (e.g. "show me only code executing in my file")
@@ -198,6 +217,8 @@ Frontend Notes
   * The [7 stages of action](https://en.wikipedia.org/wiki/Seven_stages_of_action)
   * [Thoughts and links](http://lighttable.com/2014/05/16/pain-we-forgot/) about tools like these, from authors of Light Table.
   * [Example Centric programming](http://www.subtext-lang.org/OOPSLA04.pdf)
+  * [Local state is harmful](http://scattered-thoughts.net/blog/2014/02/17/local-state-is-harmful/)
+    haven't figured out its point, but I imagine this conclusion is drawn from a deeper principle
 * Other cool tools that could serve as inspiration
   * UX for [Bing search](http://blogs.msdn.com/b/visualstudio/archive/2014/02/17/introducing-bing-code-search-for-c.aspx)
   * [Wolfram Deployment API](https://www.wolfram.com/universal-deployment-system/)
