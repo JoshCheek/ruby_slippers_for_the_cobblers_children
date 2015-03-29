@@ -1,11 +1,17 @@
-Testing
--------
+Environment
+-----------
 
-* Test framework: [Mocha](http://mochajs.org)
-* Assertion Library: [Chai](http://chaijs.com)
-* Someone's "getting started" walkthrough http://brianstoner.com/blog/testing-in-nodejs-with-mocha/
-* Another "getting started" walkthrough http://robdodson.me/blog/2012/05/27/testing-backbone-boilerplate-with-mocha-and-chai/
-* Fake server with [sinon](http://thejsguy.com/2015/01/12/jasmine-vs-mocha-chai-and-sinon.html)
+* Interpreter (like MRI) [Nodejs](https://nodejs.org/) or [Iojs](https://iojs.org/en/index.html)
+* Package manager (like Rubygems) [Npm](https://www.npmjs.com)
+* Build tool (like Rake or Make)
+  * [Gulp](https://www.npmjs.com/package/gulp) here is a
+    [sample gulpfile.js](https://github.com/megawac/generator-babel-node/blob/5ed278c9f9e18e1f9ffbab60a9f87fd958da0f5d/app/templates/gulpfile.js)
+* Testing
+  * Test framework: [Mocha](http://mochajs.org)
+  * Assertion Library: [Chai](http://chaijs.com)
+  * Someone's "getting started" walkthrough http://brianstoner.com/blog/testing-in-nodejs-with-mocha/
+  * Another "getting started" walkthrough http://robdodson.me/blog/2012/05/27/testing-backbone-boilerplate-with-mocha-and-chai/
+  * Fake server with [sinon](http://thejsguy.com/2015/01/12/jasmine-vs-mocha-chai-and-sinon.html)
 
 Plan
 ----
@@ -28,6 +34,7 @@ Plan
   * sweet.js
     * macros
     * http://sweetjs.org/
+* Get the tools installed
 * Get it parsing
 
 Javascript Resources
