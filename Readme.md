@@ -57,6 +57,43 @@ is an exerpt of what it looks like when I teach the object model in class.
   handle only one file). Of course, that's exponentially more ambitious than
   this project is at present.
 
+Running
+-------
+
+* Install parser dependencies
+  * You will need Ruby. I'll leave that to you O.o
+  * `cd parser`
+  * `bundle` if this fails, you may need to first `gem install bundler`
+    if this fails, probably your Ruby is installed at a global level or something.
+  * `cd ..`
+  * `rake parser:test`
+* Start the parser server `$ rake parser:server:start`
+* Hit it with curl `curl --silent localhost:3003 -d 'puts "hello, world"'`
+* I like to pile the output of that through [jq](https://stedolan.github.io/jq/) for readability
+  ```ruby
+  $ curl --silent localhost:3003 -d 'puts "hello, world"' | jq .
+  {
+    "type": "send",
+    "target": null,
+    "message": "puts",
+    "args": [
+      {
+        "type": "string",
+        "value": "hello, world",
+        "location": {
+          "filename": "(eval)",
+          "begin": 5,
+          "end": 19
+        }
+      }
+    ],
+    "location": {
+      "filename": "(eval)",
+      "begin": 0,
+      "end": 19
+    }
+  }
+  ```
 
 Parser Notes
 ------------
@@ -93,7 +130,18 @@ Interpreter Notes
   which would require them to explore other ways of doing things that they normally wouldn't be exposed to.
 * Potentially relevant
   * List of [Rubinius bytecodes](http://rubini.us/doc/en/virtual-machine/instructions/)
-  * Would be cool if we could get [RubySpec](https://github.com/rubyspec/rubyspec) to run against it.
+  * [RubySpec](https://github.com/rubyspec/rubyspec), Brian's work to formally define Ruby's behaviour.
+    Looks like [this](https://github.com/ruby/ruby/blob/1026907467ea3d5441e1bfa95f5f37b431a684f3/spec/default.mspec) is integration for MRI.
+  * [I think this is where Ruby's specification starts](https://github.com/ruby/ruby/blob/trunk/test/runner.rb)
+    as in you can presumably do something like `ruby test/runner.rb` decided to go look at it to see if it seemed viable as a test suite
+    (as in "doesn't depend on a C implementation"),
+    and it looks like it should be runnable. Depending on how serious I get,
+    probably worth hitting that one and RubySpec simultaneously for a bit.
+  * [Official Ruby Spec](http://www.iso.org/iso/iso_catalogue/catalogue_tc/catalogue_detail.htm?csnumber=59579)
+    I haven't looked into it yet. Got the link from the [rebuttal](https://gist.github.com/nateberkopec/11dbcf0ee7f2c08450ea)
+    of Brian's post. UPDATE: it costs $200 and is for Ruby 1.8 YorickPeterse has an excellent rebuttal of why it's bad for RubySpec to die.
+    It's really annoying that MRI sees itself as "whatever the fuck we happened to do is what Ruby is".
+
 * Inspiration
   * [Omniscient Debugger](http://www.lambdacs.com/debugger/) Holy shit, this doesn't even sound all that hard!
   * [Not sure](http://pchiusano.blogspot.com/2013/05/the-future-of-software-end-of-apps-and.html),
