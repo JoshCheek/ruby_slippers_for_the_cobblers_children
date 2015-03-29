@@ -13,6 +13,23 @@ Tooling
 * Build tool (like Rake or Make)
   * [Gulp](https://www.npmjs.com/package/gulp) here is a
     [sample gulpfile.js](https://github.com/megawac/generator-babel-node/blob/5ed278c9f9e18e1f9ffbab60a9f87fd958da0f5d/app/templates/gulpfile.js)
+  * Alternatively, [Broccoli](http://broccolijs.com/) sounds nice, too (though I can't necessarily look at that code and tell you what is going to happen)
+  * And even though they were kind of shitting on cake in [this](http://blog.cozycloud.cc/technic/2014/06/18/task-runners-comparison/) article,
+    it seemed the most straightforward to me.
+  * I'll run a test later to see which one is able to handle my task of generating package.json from a less shitty file format.
+
+    Test will be to take this object with comments in it, and generate package.json
+    ```javascript
+    // https://docs.npmjs.com/files/package.json
+    { "name":         "ruby_slippers_for_the_cobblers_children",
+      // "version":      "0.0.1",
+      "dependencies": {
+      },
+      "scripts": {
+        "test": "gulp test"
+      }
+    }
+    ```
 * Testing
   * Test framework: [Mocha](http://mochajs.org)
   * Assertion Library: [Chai](http://chaijs.com)

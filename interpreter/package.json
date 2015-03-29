@@ -1,6 +1,6 @@
-{
-  "name":         "ruby_slippers_for_the_cobblers_children",
-  "version":      "0.0.1",
+// https://docs.npmjs.com/files/package.json
+{ "name":         "ruby_slippers_for_the_cobblers_children",
+  // "version":      "0.0.1",
   "dependencies": {
   },
   "scripts": {
