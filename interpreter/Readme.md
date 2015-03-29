@@ -1,10 +1,15 @@
+Testing
+-------
+
+* Test framework: [Mocha](http://mochajs.org)
+* Assertion Library: [Chai](http://chaijs.com)
+* Someone's "getting started" walkthrough http://brianstoner.com/blog/testing-in-nodejs-with-mocha/
+* Another "getting started" walkthrough http://robdodson.me/blog/2012/05/27/testing-backbone-boilerplate-with-mocha-and-chai/
+* Fake server with [sinon](http://thejsguy.com/2015/01/12/jasmine-vs-mocha-chai-and-sinon.html)
+
 Plan
 ----
 
-* Find a good test suite (jasmine?)
-  * http://robdodson.me/blog/2012/05/27/testing-backbone-boilerplate-with-mocha-and-chai/
-  * http://mochajs.org/
-  * http://chaijs.com/
 * Pick a transpiler
   * esprima
     * parses js
