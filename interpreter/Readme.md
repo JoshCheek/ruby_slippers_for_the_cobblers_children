@@ -1,5 +1,5 @@
-Environment
------------
+Tooling
+-------
 
 * Interpreter (like MRI) [Nodejs](https://nodejs.org/) or [Iojs](https://iojs.org/en/index.html)
 * Package manager (like Rubygems) [Npm](https://www.npmjs.com)
@@ -12,29 +12,21 @@ Environment
   * Someone's "getting started" walkthrough http://brianstoner.com/blog/testing-in-nodejs-with-mocha/
   * Another "getting started" walkthrough http://robdodson.me/blog/2012/05/27/testing-backbone-boilerplate-with-mocha-and-chai/
   * Fake server with [sinon](http://thejsguy.com/2015/01/12/jasmine-vs-mocha-chai-and-sinon.html)
+  * Possibly [Karma](https://www.npmjs.com/package/karma), a test runner, but I can't tell if it can run tests in the shell,
+    or if its just for the browser (and one of these things I read said that mocha had its own runner, anyway)
+  * Code coverage (like simplecov) [istanbul](https://github.com/gotwarlost/istanbul) though, tbh,
+    I've never been super impressed by these, and I've never been concerned that I was lacking coverage.
+* Better JavaScript
+  * Macros [sweet.js](http://sweetjs.org/) oh god this is going to cost me a log of time and make my code incomprehensible O.o
+  * [babel](https://babeljs.io) transpiles javascript
+  * [Coffeescript ](http://coffeescript.org/) Going to hold off on this for a bit,
+    b/c babel and sweet.js seem too wonderful, but I really love the overall lack of syntax.
 
 Plan
 ----
 
-* Pick a transpiler
-  * esprima
-    * parses js
-    * https://www.npmjs.com/package/esprima
-  * acorn
-    * "supports the entirety of the ES6 spec and is 2x faster than esprima" (https://github.com/babel/babel/issues/581#issuecomment-72745404)
-    * https://www.npmjs.com/package/acorn
-  * recast
-    * Lib for rewriting JavaScript code
-    * https://github.com/benjamn/recast
-  * traceur
-    * transpiler
-    * http://google.github.io/traceur-compiler/demo/repl.html#%2F%2F%20Options%3A%20--async-functions%0A%0Afunction%20timeout(ms)%20%7B%0A%20%20return%20new%20Promise((res)%20%3D%3E%20setTimeout(res%2C%20ms))%3B%0A%7D%0A%0Aasync%20function%20f()%20%7B%0A%20%20console.log(1)%3B%0A%20%20await%20timeout(1000)%3B%0A%20%20console.log(2)%3B%0A%20%20await%20timeout(1000)%3B%0A%20%20console.log(3)%3B%0A%7D%0A%0Af()%0A%0A
-  * babel (6to5)
-    * https://babeljs.io
-  * sweet.js
-    * macros
-    * http://sweetjs.org/
 * Get the tools installed
+* Get a simple test in place that uses these tools, to see how they fit together
 * Get it parsing
 
 Javascript Resources
