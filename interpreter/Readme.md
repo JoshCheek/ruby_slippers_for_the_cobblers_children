@@ -37,7 +37,17 @@ Installation
 $ npm install --global   gulp
 $ npm install --save-dev gulp
 $ npm install --save-dev gulp-babel
+$ npm install --save-dev gulp-mocha
 ```
+
+Building
+--------
+
+```
+$ gulp       # generates output files via babel
+$ gulp mocha # run tests
+```
+
 
 Javascript Resources
 --------------------
