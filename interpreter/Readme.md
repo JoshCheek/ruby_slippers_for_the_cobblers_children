@@ -1,3 +1,10 @@
+Plan
+----
+
+* Get the tools installed
+* Get a simple test in place that uses these tools, to see how they fit together
+* Get it parsing
+
 Tooling
 -------
 
@@ -22,12 +29,15 @@ Tooling
   * [Coffeescript ](http://coffeescript.org/) Going to hold off on this for a bit,
     b/c babel and sweet.js seem too wonderful, but I really love the overall lack of syntax.
 
-Plan
-----
+Installation
+------------
 
-* Get the tools installed
-* Get a simple test in place that uses these tools, to see how they fit together
-* Get it parsing
+```
+# https://github.com/gulpjs/gulp/blob/3457d0ffc95f6fd971f513a8cec4ee9e0bcc0c28/docs/getting-started.md
+$ npm install --global   gulp
+$ npm install --save-dev gulp
+$ npm install --save-dev gulp-babel
+```
 
 Javascript Resources
 --------------------
