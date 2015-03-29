@@ -9,8 +9,7 @@ gulp.task('default', function() {
              .pipe(gulp.dest('dist'));
 });
 
-gulp.task('mocha', function() {
+gulp.task('test', function() {
   return gulp.src('test.js', {read: false})
              .pipe(mocha({reporter: 'nyan'}));
 });
-
