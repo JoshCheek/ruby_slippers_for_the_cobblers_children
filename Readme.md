@@ -192,7 +192,16 @@ Game ideas
     * Not able to use the mouse (just have to figure out how to disable the mouse in the Ace editor)
 * Trace This Variable
   * ie "@a was set in #initialize, from local var "a", that came from param the param that came from X.new(1)"
-
+* "bridge the gap"
+  show an object model,
+  user writes code to get to it
+* Simon
+  * watch interpreter trace the path of execution
+  * you reproduce it
+* Be the ruby interpreter
+  * you are given some code,
+  * some controls, then you use the controls to specify what the interpreter would do
+  * (remove the keyboard syntax as a barrier to the object model)
 
 List of notes / links that might be helpful
 -------------------------------------------
