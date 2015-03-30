@@ -1,9 +1,1 @@
-// https://docs.npmjs.com/files/package.json
-{ "name":         "ruby_slippers_for_the_cobblers_children",
-  // "version":      "0.0.1",
-  "dependencies": {
-  },
-  "scripts": {
-    "test": "gulp test"
-  }
-}
+{"private":true,"name":"ruby_slippers_for_the_cobblers_children","scripts":{"test":"gulp test"},"devDependencies":{"gulp":"~3.8","babel":"~4.7","mocha":"~2.2"}}

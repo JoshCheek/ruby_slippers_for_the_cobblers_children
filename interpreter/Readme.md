@@ -11,25 +11,29 @@ Tooling
 * Interpreter (like MRI) [Nodejs](https://nodejs.org/) or [Iojs](https://iojs.org/en/index.html)
 * Package manager (like Rubygems) [Npm](https://www.npmjs.com)
 * Build tool (like Rake or Make)
-  * [Gulp](https://www.npmjs.com/package/gulp) here is a
-    [sample gulpfile.js](https://github.com/megawac/generator-babel-node/blob/5ed278c9f9e18e1f9ffbab60a9f87fd958da0f5d/app/templates/gulpfile.js)
-  * Alternatively, [Broccoli](http://broccolijs.com/) sounds nice, too (though I can't necessarily look at that code and tell you what is going to happen)
-  * And even though they were kind of shitting on cake in [this](http://blog.cozycloud.cc/technic/2014/06/18/task-runners-comparison/) article,
-    it seemed the most straightforward to me.
-  * I'll run a test later to see which one is able to handle my task of generating package.json from a less shitty file format.
 
-    Test will be to take this object with comments in it, and generate package.json
-    ```javascript
-    // https://docs.npmjs.com/files/package.json
-    { "name":         "ruby_slippers_for_the_cobblers_children",
-      // "version":      "0.0.1",
-      "dependencies": {
-      },
-      "scripts": {
-        "test": "gulp test"
-      }
-    }
-    ```
+  Okay, apparently [Gulp](https://www.npmjs.com/package/gulp)
+  is supposed to be better than
+  [Grunt](https://www.npmjs.com/package/grunt),
+  according to the like 5 blogs / articles that I read.
+  But after about 4 hours, I couldn't get it to fucking generate a JSON file from a JavaScript object,
+  and I found the process of trying to figure out how to do so to be incredibly frustrating and opque.
+
+  I also looked at [Broccoli](https://www.npmjs.com/package/broccoli),
+  but it says its a "client-side asset builder", which, really,
+  is about what Gulp was ("asset builder", not "build system", like it bills itself).
+  Further, I'm not dealing with client-side stuff at this point, so ignoring that one.
+
+  Would have tried [Cake](https://www.npmjs.com/package/cake), too,
+  but it says its for "A fork of CoffeeScript's cake utility so that it might be used with e.g. coffee-script-redux"
+  And it became rather unclear to me what the relationship was between Coffeescript and Coffeescript Redux.
+  The main Coffeescript page says nothing about it, and when I went to install Coffeescript,
+  it issued me six warnings that made it unclear if it would work correctly,
+  and its main page hadn't been worked on in close to a month.
+  Probably best to avoid depending on that one.
+
+  So... fuck all that shit, I'll stick with tools I know: Ruby and maybe Rake at some point, we'll see.
+  Side note: literally wrote the code in under 2 min and it did the right thing the first time.
 * Testing
   * Test framework: [Mocha](http://mochajs.org)
   * Assertion Library: [Chai](http://chaijs.com)
