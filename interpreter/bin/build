@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+require 'json'
+
+class Build
+  attr_reader :root_dir, :package_hash
+  def initialize(root_dir:, package_hash:{})
+    @root_dir, @package_hash = root_dir, package_hash
+  end
+
+  def package_json
+    JSON.dump(package_hash)
+  end
+
+  def package_file
+    File.join root_dir, 'package.json'
+  end
+end
+
+build = Build.new(
+  root_dir: File.expand_path('../..', __FILE__),
+
+  # Docs for this file: https://docs.npmjs.com/files/package.json
+  package_hash: {
+    private: true, # prevent npm from publishing this
+    name:    "ruby_slippers_for_the_cobblers_children",
+    scripts: {
+      test: "gulp test"
+    },
+    devDependencies: {
+      gulp:  "~3.8",
+      babel: "~4.7",
+      mocha: "~2.2",
+    },
+  },
+)
+
+File.write build.package_file, build.package_json
