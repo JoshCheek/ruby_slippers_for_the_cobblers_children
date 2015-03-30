@@ -26,5 +26,11 @@ gulp.task('test', function() {
 
 gulp.task('package', function() {
   // gulp.dest('package.json').end(new JsonFile())
-  return new JsonFile().pipe(gulp.dest('package.json'));
+  // return new JsonFile().pipe(gulp.dest('package.json'));
+
+  var dest = gulp.dest('package.json');
+  return function(writer, data, encoding, callback) {
+    dest(writer, "OMG", encoding, callback)
+  };
+
 });
