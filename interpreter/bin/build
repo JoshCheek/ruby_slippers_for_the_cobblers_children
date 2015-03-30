@@ -24,7 +24,8 @@ build = Build.new(
     private: true, # prevent npm from publishing this
     name:    "ruby_slippers_for_the_cobblers_children",
     scripts: {
-      test: "gulp test"
+      test: "gulp test",
+      exec: 'exec',
     },
     devDependencies: {
       gulp:  "~3.8",
