@@ -5,6 +5,47 @@ Plan
 * Get a simple test in place that uses these tools, to see how they fit together
 * Get it parsing
 
+
+Installing and building
+-----------------------
+
+```
+# ensure package.json is generated (generating b/c JSON can't deal with things like comments)
+$ bin/build
+
+# install needed node modules
+$ npm install
+```
+
+Locating Source Code
+--------------------
+
+* local modules: node_modules/...
+* global modules /usr/local/lib/node_modules/npm
+* npm /usr/local/lib/node_modules/npm
+* node ...fuck if I know, I wound up having to go to the github repo...
+* v8 https://chromium.googlesource.com/v8/v8.git (locally: /Users/josh/ref/javascript/v8)
+
+Running code in the npm environment
+-----------------------------------
+
+Had to add a [hacky script](https://github.com/npm/npm/issues/7429) to enable this,
+it mediocrely works. Could probably build a better one by comparing pre and post environments,
+and then loading that from bin/build.
+
+```
+$ which babel
+/usr/local/bin/babel
+
+
+$ npm run exec -- which babel ^/dev/null
+
+> ruby_slippers_for_the_cobblers_children@ exec /Users/josh/code/ruby_slippers_for_the_cobblers_children/interpreter
+> exec which babel
+
+/Users/josh/code/ruby_slippers_for_the_cobblers_children/interpreter/node_modules/.bin/babel
+```
+
 Tooling
 -------
 
@@ -49,30 +90,27 @@ Tooling
   * [babel](https://babeljs.io) transpiles javascript
   * [Coffeescript ](http://coffeescript.org/) Going to hold off on this for a bit,
     b/c babel and sweet.js seem too wonderful, but I really love the overall lack of syntax.
-
-Installation
-------------
-
-```
-# https://github.com/gulpjs/gulp/blob/3457d0ffc95f6fd971f513a8cec4ee9e0bcc0c28/docs/getting-started.md
-$ npm install --global   gulp
-$ npm install --save-dev gulp
-$ npm install --save-dev gulp-babel
-$ npm install --save-dev gulp-mocha
-```
-
-Building
---------
-
-```
-$ gulp       # generates output files via babel
-$ gulp mocha # run tests
-```
-
+* Feedback -- omg, this took so long for me to realize, wasn't until someone suggested a
+  [debugger](https://twitter.com/andrewjorczak/status/582379551302545408) that I realized.
+  * Node's [debug guide](http://www.joyent.com/developers/node/debug)
+  * Node's [debugger api](https://nodejs.org/api/debugger.html)
+  * [Big list](http://stackoverflow.com/questions/1911015/how-to-debug-node-js-applications) of options
+    * debuggers (for client and command-line)
+    * "dev tools"
+    * better stack traces
+    * fancy loggers
+    * profilers
+    * benchmarks
+  * "debug" -- looks like a logging tool
+  * Chrome's [dev tools](https://developer.chrome.com/devtools)
 
 Javascript Resources
 --------------------
 
+* Style guilde
+  * https://github.com/airbnb/javascript
+* Good intro to the language
+  * http://speakingjs.com/es5/ch01.html
 * language overview
   * http://ecma262-5.com/ELS5_Section_4.htm#Section_4.3.19
 * Array reference
@@ -89,3 +127,28 @@ Javascript Resources
   * http://jakearchibald.com/2014/es7-async-functions/
   * http://calculist.org/blog/2011/12/14/why-coroutines-wont-work-on-the-web/
   * https://github.com/lukehoban/ecmascript-asyncawait/issues/7
+* Feature [compatibility chart](http://kangax.github.io/compat-table/es6/)
+* [v8](https://developers.google.com/v8/)
+  * [Debugger protocol](https://code.google.com/p/v8-wiki/wiki/DebuggerProtocol)
+* Ecmascript [standard](http://www.ecma-international.org/publications/standards/Ecma-262.htm)
+* Metaprogramming
+  * A nice walkthrough http://www.slideshare.net/danwrong/metaprogramming-javascript
+  * http://www.2ality.com/2011/01/reflection-and-meta-programming-in.html
+  * http://www.2ality.com/2014/12/es6-proxies.html
+  * http://www.htmlgoodies.com/tutorials/web_graphics/object-reflection-in-javascript.html
+* Draft of ES6 standard https://people.mozilla.org/~jorendorff/es6-draft.html
+* Stream handbook https://github.com/substack/stream-handbook
+
+JavaScript Notes
+----------------
+
+Notes from going through http://speakingjs.com/es5/index.html
+
+* Keywords: arguments break case catch class const continue debugger default delete do else enum export extends false finally for function
+  if implements import in instanceof interface let new null package private protected public return static super switch this throw
+  true try typeof var void while
+* [Automatic Semicolon Insertion](http://speakingjs.com/es5/ch07.html#automatic_semicolon_insertion)
+* Useful feedback:
+  * typeof, instanceof
+* Reflection
+  * `function() { return Array.prototype.slice.call(arguments) }`

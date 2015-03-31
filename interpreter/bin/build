@@ -20,6 +20,7 @@ build = Build.new(
   root_dir: File.expand_path('../..', __FILE__),
 
   # Docs for this file: https://docs.npmjs.com/files/package.json
+  # Docs for NPM https://docs.npmjs.com/ (nice big list of things you can do)
   package_hash: {
     private: true, # prevent npm from publishing this
     name:    "ruby_slippers_for_the_cobblers_children",
