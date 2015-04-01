@@ -7,7 +7,6 @@
     "env": "env"
   },
   "devDependencies": {
-    "gulp": "~3.8",
     "babel": "~4.7",
     "mocha": "~2.2"
   },
