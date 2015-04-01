@@ -13,40 +13,41 @@ var assert = require("assert") // node/lib/assert.js
 describe('Parse', ()=>{
   describe('expressions', ()=>{
     it('parses single expressions, tracking location information', (done)=>{
-      // {"type":"nil","location":{"filename":"(eval)","begin":0,"end":3}}
       parse('nil', (parsed) => {
         assert.equal('nil', parsed.type);
         assert.equal(0,     parsed.location.begin);
         assert.equal(3,     parsed.location.end);
         done()
-      });
-    });
-  });
-});
+      })
+    })
+
+    it('parses multiple expressions, tracking location information for each', (done) => {
+      parse('9;4', (parsed) => {
+        assert.equal('expressions', parsed.type)
+        assert.equal(0,             parsed.location.begin)
+        assert.equal(3,             parsed.location.end)
+        assert.equal(2,             parsed.expressions.length)
+
+        let exprs = parsed.expressions
+
+        let first = exprs[0]
+        assert.equal('integer', first.type)
+        assert.equal(9,         first.value)
+        assert.equal(0,         first.location.begin)
+        assert.equal(1,         first.location.end)
+
+        let second = exprs[1]
+        assert.equal('integer', second.type)
+        assert.equal(4,         second.value)
+        assert.equal(2,         second.location.begin)
+        assert.equal(3,         second.location.end)
+        done()
+      })
+    })
+  })
+})
 
 /*
-        d.it('parses multiple expressions, tracking location information for each', function(a) {
-          parsed = parse('9;4');
-
-          a.isTrue(parsed.isExprs);
-          a.eq(0, parsed.begin_loc);
-          a.eq(3, parsed.end_loc);
-
-          var exprs = parsed.toExprs();
-          a.eq(2, exprs.length);
-
-          var first = exprs.get(0).toInteger();
-          a.eq(9, first.value);
-          a.eq(0, first.begin_loc);
-          a.eq(1, first.end_loc);
-
-          var second = exprs.get(1).toInteger();
-          a.eq(4, second.value);
-          a.eq(2, second.begin_loc);
-          a.eq(3, second.end_loc);
-        });
-      });
-
       d.describe('literals', function(d) {
         d.example('nil',   function(a) {
           parsed = parse('nil');
