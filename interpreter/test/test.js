@@ -199,33 +199,37 @@ describe('Parse', ()=>{
       })
     })
   })
+
+  describe('sending messages', function() {
+    it('parses the target, message, and arguments', function(done) {
+      parse("true.something(false)", (parsed) => {
+        assert.equal('send', parsed.type)
+        assert.equal(0,  parsed.location.begin)
+        assert.equal(21, parsed.location.end)
+
+        // target
+        let target = parsed.target
+        assert.equal('true', target.type)
+        assert.equal(0,      target.location.begin)
+        assert.equal(4,      target.location.end)
+
+        // message
+        assert.equal("something", parsed.message)
+
+        // arguments
+        assert.equal(1, parsed.args.length)
+        let arg = parsed.args[0]
+        assert.equal('false', arg.type)
+        assert.equal(15,      arg.location.begin)
+        assert.equal(20,      arg.location.end)
+        done()
+      })
+    })
+  })
 })
 
 
 /*
-      d.describe('sending messages', function(d) {
-        d.it('parses the target, message, and arguments', function(a) {
-          parsed = parse("true.something(false)");
-          a.isTrue(parsed.isSend);
-          a.eq(0,  parsed.begin_loc);
-          a.eq(21, parsed.end_loc);
-          var send = parsed.toSend();
-
-          // target
-          var target = send.target.toTrue();
-          a.eq(0, target.begin_loc);
-          a.eq(4, target.end_loc);
-
-          // message
-          a.eq("something", send.message);
-
-          // arguments
-          a.eq(1, send.arguments.length);
-          var arg = send.arguments[0].toFalse();
-          a.eq(15, arg.begin_loc);
-          a.eq(20, arg.end_loc);
-        });
-      });
 
       d.describe('class definitions', function(d) {
         d.it('parses the namespace, name, superclas, and body', function(a) {
