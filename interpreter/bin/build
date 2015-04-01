@@ -25,7 +25,7 @@ build = Build.new(
     private: true, # prevent npm from publishing this
     name:    "ruby_slippers_for_the_cobblers_children",
     scripts: {
-      test: "gulp test",
+      test: "node node_modules/.bin/_mocha test.js",
       exec: 'exec',
     },
     devDependencies: {
@@ -36,4 +36,13 @@ build = Build.new(
   },
 )
 
+# package.json
 File.write build.package_file, build.package_json
+
+# transpiling
+system 'mkdir -p dist'
+system 'babel src/app.js -o dist/app.js'
+
+# tests
+system 'npm test'
+
