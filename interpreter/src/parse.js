@@ -12,19 +12,15 @@ function parse(rawCode, cb) {
     headers: { 'Content-Length': rawCode.length }
   }
 
-  var req = http.request(options, function(res) {
+  var req = http.request(options, (res) => {
     res.setEncoding('utf8');
-    res.on('data', function (chunk) {
-      responseBody += chunk
-    });
-    res.on('end', function () {
-      cb(JSON.parse(responseBody))
-    });
-  });
+    res.on('data', (chunk) => responseBody += chunk)
+    res.on('end',  ()      => cb(JSON.parse(responseBody)))
+  })
 
   req.on('error', function(e) {
     console.log('problem with request: ' + e.message);
-  });
+  })
 
   // write data to request body
   req.write(rawCode);

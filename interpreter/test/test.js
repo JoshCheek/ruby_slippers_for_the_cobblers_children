@@ -13,7 +13,7 @@ var assert = require("assert") // node/lib/assert.js
 describe('Parse', ()=>{
   describe('expressions', ()=>{
     it('parses single expressions, tracking location information', (done)=>{
-      //{"type":"nil","location":{"filename":"(eval)","begin":0,"end":3}}
+      // {"type":"nil","location":{"filename":"(eval)","begin":0,"end":3}}
       parse('nil', (parsed) => {
         assert.equal('nil', parsed.type);
         assert.equal(0,     parsed.location.begin);
