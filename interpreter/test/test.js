@@ -226,49 +226,53 @@ describe('Parse', ()=>{
       })
     })
   })
+
+  describe('class definitions', function() {
+    it('parses the namespace, name, superclas, and body', function(done) {
+      parse("class A::B < C; 1; end", (parsed) => {
+        assert.equal(parsed.isOpenClass)
+        assert.equal('class', parsed.type)
+        assert.equal(0,       parsed.location.begin)
+        assert.equal(22,      parsed.location.end)
+
+        // namespace
+        assert.equal('B', parsed.name_lookup.name)
+        assert.equal(6,   parsed.name_lookup.location.begin)
+        assert.equal(10,  parsed.name_lookup.location.end)
+        assert.equal('A', parsed.name_lookup.namespace.name)
+
+        // superclass
+        assert.equal('C', parsed.superclass.name)
+        assert.equal(13,  parsed.superclass.location.begin)
+        assert.equal(14,  parsed.superclass.location.end)
+
+        // body
+        assert.equal(1,   parsed.body.value)
+        assert.equal(16,  parsed.body.location.begin)
+        assert.equal(17,  parsed.body.location.end)
+        done()
+      })
+    })
+
+    it('parses defaults -- no namespace, superclass, or body', function(done) {
+      parse("class A; end", (parsed) => {
+        assert.equal('class',    parsed.type)
+        assert.equal('constant', parsed.name_lookup.type)
+        assert.equal('A',        parsed.name_lookup.name)
+        assert.equal(null,       parsed.name_lookup.namespace)
+        assert.equal(null,       parsed.superclass)
+        assert.equal(null,       parsed.body)
+        done()
+      })
+    })
+  })
+
+  describe('module definitions', function() {
+  });
 })
 
 
 /*
-
-      d.describe('class definitions', function(d) {
-        d.it('parses the namespace, name, superclas, and body', function(a) {
-          parsed = parse("class A::B < C; 1; end");
-          a.isTrue(parsed.isOpenClass);
-          var klass = parsed.toOpenClass();
-          a.eq(0,  klass.begin_loc);
-          a.eq(22, klass.end_loc);
-
-          // namespace
-          a.eq('B', klass.ns.toConst().name);
-          a.eq(6,   klass.ns.begin_loc);
-          a.eq(10,  klass.ns.end_loc);
-          a.eq('A', klass.ns.toConst().ns.toConst().name);
-
-          // superclass
-          a.eq('C', klass.superclass.toConst().name);
-          a.eq(13,  klass.superclass.begin_loc);
-          a.eq(14,  klass.superclass.end_loc);
-
-          // body
-          a.eq(1,   klass.body.toInteger().value);
-          a.eq(16,  klass.body.begin_loc);
-          a.eq(17,  klass.body.end_loc);
-        });
-
-        d.it('parses defaults -- no namespace, superclass, or body', function(a) {
-          parsed = parse("class A; end");
-          a.isTrue(parsed.isOpenClass);
-          var klass = parsed.toOpenClass();
-          a.eq('A', klass.ns.toConst().name);
-          a.isTrue(klass.ns.toConst().ns.isDefault);
-          a.isTrue(klass.superclass.isDefault);
-          a.isTrue(klass.body.isDefault);
-        });
-      });
-
-      // d.describe('module definitions', function(d) {
-      // });
 
       d.describe('method definitions', function(d) {
         d.example('with no parameters or body', function(a) {
