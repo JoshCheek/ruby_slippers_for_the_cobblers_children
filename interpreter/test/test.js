@@ -1,5 +1,5 @@
-var parse  = require("../src/parse") // there's gotta be a batter way!
-var assert = require("assert")       // node/lib/assert.js
+var parse  = require("parse")
+var assert = require("assert") // node/lib/assert.js
 
 // describe('Array', function(){
 //   describe('#indexOf()', function(){
