@@ -17,11 +17,12 @@ class Build
 end
 
 root_dir = File.expand_path('../..', __FILE__)
-build    = Build.new(
-  root_dir: root_dir,
-
+Dir.chdir root_dir
+build = Build.new(
   # Docs for this file: https://docs.npmjs.com/files/package.json
   # Docs for NPM https://docs.npmjs.com/ (nice big list of things you can do)
+  root_dir: root_dir,
+
   package_hash: {
     private: true, # prevent npm from publishing this
     name:    "ruby_slippers_for_the_cobblers_children",
