@@ -16,8 +16,9 @@ class Build
   end
 end
 
-build = Build.new(
-  root_dir: File.expand_path('../..', __FILE__),
+root_dir = File.expand_path('../..', __FILE__)
+build    = Build.new(
+  root_dir: root_dir,
 
   # Docs for this file: https://docs.npmjs.com/files/package.json
   # Docs for NPM https://docs.npmjs.com/ (nice big list of things you can do)
@@ -25,14 +26,16 @@ build = Build.new(
     private: true, # prevent npm from publishing this
     name:    "ruby_slippers_for_the_cobblers_children",
     scripts: {
-      test: "node node_modules/.bin/_mocha test",
+      test: "babel-node node_modules/.bin/_mocha test",
       exec: 'exec',
+      env:  'env',
     },
     devDependencies: {
       gulp:  "~3.8",
       babel: "~4.7",
       mocha: "~2.2",
     },
+    files: ['src'],
   },
 )
 
