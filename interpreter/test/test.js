@@ -36,74 +36,89 @@ describe('Parse', ()=>{
       })
     })
   })
+
+  describe('literals', function() {
+    it('nil',   function(done) {
+      parse('nil', (parsed) => {
+        assert.equal('nil', parsed.type)
+        assert.equal(0,     parsed.location.begin)
+        assert.equal(3,     parsed.location.end)
+        done()
+      })
+    })
+    it('true',  function(done) {
+      parse('true', (parsed) => {
+        assert.equal('true', parsed.type)
+        assert.equal(0,      parsed.location.begin)
+        assert.equal(4,      parsed.location.end)
+        done()
+      })
+    })
+    it('false', function(done) {
+      parse('false', (parsed) => {
+        assert.equal('false', parsed.type)
+        assert.equal(0,       parsed.location.begin)
+        assert.equal(5,       parsed.location.end)
+        done()
+      })
+    })
+    it('self',  function(done) {
+      parse('self', (parsed) => {
+        assert.equal('self', parsed.type)
+        assert.equal(0,      parsed.location.begin)
+        assert.equal(4,      parsed.location.end)
+        done()
+      })
+    })
+    it('positive integers', function(done) {
+      parse('1', (parsed) => {
+        assert.equal('integer', parsed.type)
+        assert.equal(1,         parsed.value)
+        assert.equal(0,         parsed.location.begin)
+        assert.equal(1,         parsed.location.end)
+        done()
+      })
+    })
+    it('negative integers', function(done) {
+      parse('-123', (parsed) => {
+        assert.equal('integer', parsed.type)
+        assert.equal(-123,      parsed.value)
+        assert.equal(0,         parsed.location.begin)
+        assert.equal(4,         parsed.location.end)
+        done()
+      })
+    })
+    it('negative float', function(done) {
+      parse('-12.34', (parsed) => {
+        assert.equal('float', parsed.type)
+        assert.equal(-12.34,  parsed.value)
+        assert.equal(0,       parsed.location.begin)
+        assert.equal(6,       parsed.location.end)
+        done()
+      })
+    })
+    it('positive float', function(done) {
+      parse('1.0', (parsed) => {
+        assert.equal('float', parsed.type)
+        assert.equal(1.0,     parsed.value)
+        assert.equal(0,       parsed.location.begin)
+        assert.equal(3,       parsed.location.end)
+        done()
+      })
+    })
+    it('string', function(done) {
+      parse('"abc"', (parsed) => {
+        assert.equal('string', parsed.type)
+        assert.equal("abc",    parsed.value)
+        assert.equal(0,        parsed.location.begin)
+        assert.equal(5,        parsed.location.end)
+        done()
+      })
+    })
+  })
 })
 
 /*
-      d.describe('literals', function(d) {
-        d.example('nil',   function(a) {
-          parsed = parse('nil');
-          a.isTrue(parsed.isNil);
-          parsed.toNil();
-          a.eq(0, parsed.begin_loc);
-          a.eq(3, parsed.end_loc);
-        });
-        d.example('true',  function(a) {
-          parsed = parse('true');
-          a.isTrue(parsed.isTrue);
-          parsed.toTrue();
-          a.eq(0, parsed.begin_loc);
-          a.eq(4, parsed.end_loc);
-        });
-        d.example('false', function(a) {
-          parsed = parse('false');
-          a.isTrue(parsed.isFalse);
-          parsed.toFalse();
-          a.eq(0, parsed.begin_loc);
-          a.eq(5, parsed.end_loc);
-        });
-        d.example('self',  function(a) {
-          parsed = parse('self');
-          a.isTrue(parsed.isSelf);
-          parsed.toSelf();
-          a.eq(0, parsed.begin_loc);
-          a.eq(4, parsed.end_loc);
-        });
-        d.example('integers', function(a) {
-          parsed = parse('1');
-          a.isTrue(parsed.isInteger);
-          a.eq(1, parsed.toInteger().value);
-          a.eq(0, parsed.begin_loc);
-          a.eq(1, parsed.end_loc);
-
-          parsed = parse('-123');
-          a.isTrue(parsed.isInteger);
-          a.eq(-123, parsed.toInteger().value);
-          a.eq(0, parsed.begin_loc);
-          a.eq(4, parsed.end_loc);
-        });
-        d.example('float', function(a) {
-          parsed = parse('-12.34');
-          a.isTrue(parsed.isFloat);
-          a.eq(-12.34, parsed.toFloat().value);
-          a.eq(0, parsed.begin_loc);
-          a.eq(6, parsed.end_loc);
-
-          parsed = parse('1.0');
-          a.isTrue(parsed.isFloat);
-          a.eq(1.0, parsed.toFloat().value);
-          a.eq(0, parsed.begin_loc);
-          a.eq(3, parsed.end_loc);
-        });
-        d.example('string', function(a) {
-          parsed = parse('"abc"');
-          a.isTrue(parsed.isString);
-          a.eq("abc", parsed.toString().value);
-          a.eq(0, parsed.begin_loc);
-          a.eq(5, parsed.end_loc);
-        });
-      });
-
-
       d.describe('variables', function(d) {
         d.context('Constant', function(a) {
           d.example('with no namespace', function(a) {
