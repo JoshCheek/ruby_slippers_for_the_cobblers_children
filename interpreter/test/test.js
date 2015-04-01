@@ -269,49 +269,47 @@ describe('Parse', ()=>{
 
   describe('module definitions', function() {
   });
+
+  describe('method definitions', function() {
+    it('with no parameters or body', function(done) {
+      parse("def bland_method; end", (parsed) => {
+        assert.equal('method_definition', parsed.type)
+        assert.equal(0,                   parsed.location.begin)
+        assert.equal(21,                  parsed.location.end)
+
+        assert.equal("bland_method", parsed.name)        // name
+        assert.equal(0,              parsed.args.length) // parameters
+        assert.equal(null,           parsed.body)        // body
+        done()
+      })
+    })
+
+    it('with a body', function(done) {
+      parse("def hasbody; true; end", (parsed) => {
+        assert.equal('true', parsed.body.type)
+        assert.equal(13,     parsed.body.location.begin)
+        assert.equal(17,     parsed.body.location.end)
+        done()
+      })
+    })
+
+    it('with required and rest args', function(done) {
+      parse("def hasargs(req, *rst); end", (parsed) => {
+        assert.equal(2, parsed.args.length)
+
+        let req = parsed.args[0]
+        assert.equal('required_arg', req.type)
+        assert.equal('req',          req.name)
+        assert.equal(12,             req.location.begin)
+        assert.equal(15,             req.location.end)
+
+        let rest = parsed.args[1]
+        assert.equal('rest_arg', rest.type)
+        assert.equal('rst',      rest.name)
+        assert.equal(17,         rest.location.begin)
+        assert.equal(21,         rest.location.end)
+        done()
+      })
+    })
+  })
 })
-
-
-/*
-
-      d.describe('method definitions', function(d) {
-        d.example('with no parameters or body', function(a) {
-          parsed = parse("def bland_method; end");
-          a.isTrue(parsed.isDef);
-          a.eq(0,  parsed.begin_loc);
-          a.eq(21, parsed.end_loc);
-
-          var def = parsed.toDef();
-          a.eq("bland_method", def.name); // name
-          a.eq(0, def.parameters.length); // parameters
-          a.isTrue(def.body.isDefault);   // body
-          a.eq(-1, def.body.begin_loc);
-          a.eq(-1, def.body.end_loc);
-        });
-        d.example('with a body', function(a) {
-          var def = parse("def hasbody; true; end").toDef();
-          a.isTrue(def.body.isTrue);
-          a.eq(13, def.body.begin_loc);
-          a.eq(17, def.body.end_loc);
-        });
-        d.example('with required and rest args', function(a) {
-          var def = parse("def hasargs(req, *rst); end").toDef();
-          a.eq(2, def.parameters.length);
-
-          var req = def.parameters[0];
-          a.eq(req.type, Required);
-          a.eq('req', req.name);
-          a.eq(12, req.begin_loc);
-          a.eq(15, req.end_loc);
-
-          var rest = def.parameters[1];
-          a.eq(rest.type, Rest);
-          a.eq('rst', rest.name);
-          a.eq(17, rest.begin_loc);
-          a.eq(21, rest.end_loc);
-        });
-      });
-    });
-  }
-}
-*/
