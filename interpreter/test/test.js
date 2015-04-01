@@ -116,83 +116,93 @@ describe('Parse', ()=>{
       })
     })
   })
+
+  describe('variables', () => {
+    context('Constant', () => {
+      it('with no namespace', (done) => {
+        parse("A", (parsed) => {
+          assert.equal('constant', parsed.type)
+          assert.equal("A",        parsed.name)
+          assert.equal(null,       parsed.namespace)
+          assert.equal(0,          parsed.location.begin)
+          assert.equal(1,          parsed.location.end)
+          done()
+        })
+      })
+
+      it('with a namespace', (done) => {
+        parse("A::B", (parsed) => {
+          assert.equal('constant', parsed.type)
+          assert.equal("B",        parsed.name)
+          assert.equal(0,          parsed.location.begin)
+          assert.equal(4,          parsed.location.end)
+
+          var aClass = parsed.namespace
+          assert.equal('constant', aClass.type)
+          assert.equal("A",        aClass.name)
+          assert.equal(0,          aClass.location.begin)
+          assert.equal(1,          aClass.location.end)
+          done()
+        })
+      })
+    })
+
+    it('setting and getting local vars', (done) => {
+      parse("a = 1; a", (parsed) => {
+        assert.equal('expressions', parsed.type)
+        assert.equal(2,             parsed.expressions.length)
+
+        // setter
+        let setlvar = parsed.expressions[0]
+        assert.equal('set_local_variable', setlvar.type)
+        assert.equal('a',                  setlvar.name)
+        assert.equal(0,                    setlvar.location.begin)
+        assert.equal(5,                    setlvar.location.end)
+
+        assert.equal('integer', setlvar.value.type)
+        assert.equal(1,         setlvar.value.value)
+        assert.equal(4,         setlvar.value.location.begin)
+        assert.equal(5,         setlvar.value.location.end)
+
+        // getter
+        let getlvar = parsed.expressions[1]
+        assert.equal('get_local_variable', getlvar.type)
+        assert.equal('a',                  getlvar.name)
+        assert.equal(7,                    getlvar.location.begin)
+        assert.equal(8,                    getlvar.location.end)
+        done()
+      })
+    })
+
+    it('setting and getting instance vars', (done) => {
+      parse("@a = 1; @a", (parsed) => {
+        assert.equal(2, parsed.expressions.length)
+
+        // setter
+        let setivar = parsed.expressions[0]
+        assert.equal('set_instance_variable', setivar.type)
+        assert.equal('@a',                    setivar.name)
+        assert.equal(0,                       setivar.location.begin)
+        assert.equal(6,                       setivar.location.end)
+
+        assert.equal(1,                       setivar.value.value)
+        assert.equal(5,                       setivar.value.location.begin)
+        assert.equal(6,                       setivar.value.location.end)
+
+        // getter
+        let getivar = parsed.expressions[1]
+        assert.equal('get_instance_variable', getivar.type)
+        assert.equal('@a',                    getivar.name)
+        assert.equal(8,                       getivar.location.begin)
+        assert.equal(10,                      getivar.location.end)
+        done()
+      })
+    })
+  })
 })
 
+
 /*
-      d.describe('variables', function(d) {
-        d.context('Constant', function(a) {
-          d.example('with no namespace', function(a) {
-            parsed = parse("A");
-            a.isTrue(parsed.isConst);
-            var const = parsed.toConst();
-            a.eq("A", const.name);
-            a.eq(true, const.ns.isDefault);
-            a.eq(0, parsed.begin_loc);
-            a.eq(1, parsed.end_loc);
-          });
-          d.example('with a namespace', function(a) {
-            parsed = parse("A::B");
-            var const = parsed.toConst();
-            a.eq("B", const.name);
-            a.eq(0, parsed.begin_loc);
-            a.eq(4, parsed.end_loc);
-
-            var aClass = const.ns.toConst();
-            a.eq("A", aClass.name);
-            a.eq(0, aClass.begin_loc);
-            a.eq(1, aClass.end_loc);
-
-            a.eq(true, aClass.ns.isDefault);
-            a.eq(-1, aClass.ns.begin_loc);
-            a.eq(-1, aClass.ns.end_loc);
-          });
-        });
-        d.example('setting and getting local vars', function(a) {
-          var exprs = parse("a = 1; a").toExprs();
-          a.eq(2, exprs.length);
-
-          // setter
-          a.isTrue(exprs.get(0).isSetLvar);
-          var setlvar = exprs.get(0).toSetLvar();
-          a.eq('a', setlvar.name);
-          a.eq(0, setlvar.begin_loc);
-          a.eq(5, setlvar.end_loc);
-
-          a.eq(1, setlvar.value.toInteger().value);
-          a.eq(4, setlvar.value.begin_loc);
-          a.eq(5, setlvar.value.end_loc);
-
-          // getter
-          var getlvar = exprs.get(1).toGetLvar();
-          a.isTrue(getlvar.isGetLvar);
-          a.eq('a', getlvar.name);
-          a.eq(7, getlvar.begin_loc);
-          a.eq(8, getlvar.end_loc);
-        });
-        d.example('setting and getting instance vars', function(a) {
-          var exprs = parse("@a = 1; @a").toExprs();
-          a.eq(2, exprs.length);
-
-          // setter
-          a.isTrue(exprs.get(0).isSetIvar);
-          var setivar = exprs.get(0).toSetIvar();
-          a.eq('@a', setivar.name);
-          a.eq(0, setivar.begin_loc);
-          a.eq(6, setivar.end_loc);
-
-          a.eq(1, setivar.value.toInteger().value);
-          a.eq(5, setivar.value.begin_loc);
-          a.eq(6, setivar.value.end_loc);
-
-          // getter
-          var getivar = exprs.get(1).toGetIvar();
-          a.isTrue(getivar.isGetIvar);
-          a.eq('@a', getivar.name);
-          a.eq(8,  getivar.begin_loc);
-          a.eq(10, getivar.end_loc);
-        });
-      });
-
       d.describe('sending messages', function(d) {
         d.it('parses the target, message, and arguments', function(a) {
           parsed = parse("true.something(false)");
