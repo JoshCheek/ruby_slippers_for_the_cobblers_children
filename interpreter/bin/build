@@ -40,8 +40,7 @@ build = Build.new(
 File.write build.package_file, build.package_json
 
 # transpiling
-system 'mkdir -p dist'
-system 'babel src/app.js -o dist/app.js'
+system 'babel src -o interpreter.js'
 
 # tests
 system 'npm test'
