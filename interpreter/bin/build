@@ -27,7 +27,7 @@ build = Build.new(
     private: true, # prevent npm from publishing this
     name:    "ruby_slippers_for_the_cobblers_children",
     scripts: {
-      test: "NODE_PATH=src babel-node node_modules/.bin/_mocha test",
+      test: "NODE_PATH=src mocha --compilers js:babel/register",
       exec: 'exec',
       env:  'env',
     },
