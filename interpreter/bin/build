@@ -8,7 +8,7 @@ class Build
   end
 
   def package_json
-    JSON.dump(package_hash)
+    JSON.pretty_generate(package_hash)
   end
 
   def package_file
