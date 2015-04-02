@@ -35,18 +35,20 @@ let babel       = require('babel'),
 
 // used arrow-functions as a reference
 // https://github.com/babel/babel/blob/cfff7aa6fb257cf39a85e7b06a5c49e8501ea32b/src/babel/transformation/transformers/es6/arrow-functions.js
-let rawTransformer = (node) => {
-  console.log("MADE IT INTO THE TRANSFORMER!!!");
-  // console.log(`TRANSFORM CALLED WITH ${inspect(node)}`)
-  types.ensureBlock(node)
+var rawTransformer = {
+  Omg: function Omg(node) {
+    throw new Error("MADE IT INTO THE TRANSFORMER!!!");
+    // console.log(`TRANSFORM CALLED WITH ${inspect(node)}`)
+    types.ensureBlock(node)
 
-  node._aliasFunction = "omg"
-  node.expression     = false
-  node.type           = "FunctionExpression"
-  return node
+    node._aliasFunction = "omg"
+    node.expression     = false
+    node.type           = "FunctionExpression"
+    return node
+  }
 }
 
-// rawTransformer.check = isOmg
+// check: isOmg,
 rawTransformer.check = function(node, opts) {
   // if(node.type === 'File')
   //   console.log(inspect(node.tokens))
@@ -68,10 +70,14 @@ transform.namespaces[namespace].push(key)
 transform.transformerNamespaces[key] = namespace
 transform.transformers[key]          = new Transformer(key, rawTransformer)
 
+console.log(transform.transformers[key])
+console.log(transform.transformers['es6.arrowFunctions'])
+
 
 // ==========  idk  ==========
 // https://github.com/babel/babel/blob/01a2aa7dd188f9a6701cbe743c87a36043f1c2a9/src/babel/types/index.js#L14
 types.isOmg = function isOmg(node, opts) {
+  throw new Error("MADE IT INTO IS OMG");
   return types.is('Omg', node, opts, false)
 }
 types.assertOmg = function(node, opts) {
@@ -102,12 +108,11 @@ types.assertOmg = function(node, opts) {
 //
 // currently used values:
 // $ ruby -r pp -r yaml -e 'pp YAML.load(File.read "/Users/josh/code/ruby_slippers_for_the_cobblers_children/experiments/node_modules/babel/lib/babel/types/visitor-keys.json").values.flatten.uniq.sort'
-//
-// alternate argument arguments attributes block blocks body callee cases children closingElement consequent
-// declaration declarations defaults discriminant elementType elements expression expressions extends filter
-// finalizer guardedHandlers handler handlers id implements init key label left name namespace object
-// openingElement param params program properties property qualification quasi quasis rest returnType
-// right source specifiers superClass superTypeParameters tag test typeAnnotation typeParameters types update value
+// > alternate argument arguments attributes block blocks body callee cases children closingElement consequent
+// > declaration declarations defaults discriminant elementType elements expression expressions extends filter
+// > finalizer guardedHandlers handler handlers id implements init key label left name namespace object
+// > openingElement param params program properties property qualification quasi quasis rest returnType
+// > right source specifiers superClass superTypeParameters tag test typeAnnotation typeParameters types update value
 //
 // For a better breakdown, see babel_nodes.rb
 //
@@ -115,38 +120,32 @@ types.assertOmg = function(node, opts) {
 // visitor key:  "ArrowFunctionExpression": ["params", "defaults", "rest", "body", "returnType"],
 // builder key:  "ArrowFunctionExpression": { "params": null, "body": null },
 // alias   key:  "ArrowFunctionExpression": ["Scopable", "Function", "Expression"],
-// types.VISITOR_KEYS['Omg'] = ['name', '', 'minus', 'call']
-// each(t.VISITOR_KEYS, function (keys, type) {
-//   if (t.BUILDER_KEYS[type]) return;
-//
-//   var defs = {};
-//   each(keys, function (key) {
-//     defs[key] = null;
-//   });
-//   t.BUILDER_KEYS[type] = defs;
-// });
-//
-// each(t.BUILDER_KEYS, function (keys, type) {
-//   t[type[0].toLowerCase() + type.slice(1)] = function () {
-//     var node = {};
-//     node.start = null;
-//     node.type = type;
-//
-//     var i = 0;
-//
-//     for (var key in keys) {
-//       var arg = arguments[i++];
-//       if (arg === undefined) arg = keys[key];
-//       node[key] = arg;
-//     }
-//
-//     return node;
-//   };
-// });
+// let visitorKeys = ['name']
+// let visitorKeys = ['name', 'operator', 'operator', 'call']
+let visitorKeys = ['name', 'operator', 'operator']
+// let visitorKeys = ['left', 'right']
+types.VISITOR_KEYS['Omg'] = visitorKeys
+
+var defs = {};
+visitorKeys.forEach(function(key) { defs[key] = null })
+types.BUILDER_KEYS['Omg'] = defs
+
+types['omg'] = function () {
+  var node   = {};
+  node.start = null;
+  node.type  = 'Omg';
+  var i = 0;
+  for (var key in keys) {
+    var arg = arguments[i++];
+    if (arg === undefined) arg = keys[key];
+    node[key] = arg;
+  }
+  return node;
+}
 
 
 // ==========  transform some code  ==========
 let code = 'a <- b',            // this is what I'd ultimately like to transform
 // let code = '(a) <- b.c(); a',            // this is what I'd ultimately like to transform
     opts = { modules: "common" }; // seems to determine output format (eg won't wrap in an anon fn)
-console.log(babel.transform(code, opts))
+console.log(babel.transform(code, opts).ast.program.body)
