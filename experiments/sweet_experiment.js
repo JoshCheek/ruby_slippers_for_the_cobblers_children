@@ -1,14 +1,12 @@
-macro id {
-  rule {
-    // after the macro name, match:
-    // (1) a open paren
-    // (2) a single token and bind it to `$x`
-    // (3) a close paren
-    ($x)
-  } => {
-    // just return the token that is bound to `$x`
-    $x
+macro unless {
+  rule infix { return $value:expr | $guard:expr } => {
+    if (!($guard)) {
+      return $value;
+    }
   }
 }
 
-id (a)
+function foo(x) {
+  return true unless x > 42;
+  return false;
+}
