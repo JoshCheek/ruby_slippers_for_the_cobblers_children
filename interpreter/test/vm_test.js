@@ -13,7 +13,7 @@ describe('VM', () => {
     it('returns nil when asked for the next expression when there is nothing to interpret', (done) => {
       interpreterFor("true", (vm, world) => {
         assert.equal(world.rTrue, vm.nextExpression())
-        for(i in [0,1,2,3,4,5,6,7,8,9,10])
+        for(let i in [0,1,2,3,4,5,6,7,8,9,10])
           assert.equal(world.rNil,  vm.nextExpression())
         assert.equal(1, vm.stackFrames.length); // doesn't accidentally grow
         assert.equal(1, vm.valueStack.length);  // doesn't accidentally grow

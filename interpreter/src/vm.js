@@ -11,7 +11,7 @@ VM.prototype.currentExpression = function() {
 }
 
 VM.prototype.nextExpression = function() {
-  let rTrue = this.rTrue
+  let rTrue = this.world.rTrue
   let tmpBullshit = function(ast) {
     switch(ast.type) {
       case "true": return rTrue;
@@ -19,26 +19,61 @@ VM.prototype.nextExpression = function() {
     }
   }
 
+
   return tmpBullshit(this.world.ast)
 }
 
 
 VM.bootstrap = function(ast) {
+  // All Objects
+  let allObjects = {}
+  allObjects.size = function() { Object.keys(this).length }
+
+  let nextObjectId = 1
+  allObjects.track = function(toTrack) {
+    toTrack.objectId = nextObjectId
+    ++nextObjectId
+    return toTrack
+  }
+
+
   // helpers
   let instantiate = function(klass) {
-    return { class: klass, instance_variables: {} }
+    let instance = { class: klass.objectId, instanceVariables: {} }
+    allObjects.track(instance)
+    if(klass.internalInit)
+      klass.internalInit(instance)
+    return instance
   }
 
-  // Class and Object
-  let rClass = {
-    instance_variables: {},
-  }
-  rClass.class = rClass
+  // BasicObject, Object, Class
+  let rClass  = allObjects.track({instanceVariables: {}})
+  rClass.class = rClass.objectId
 
-  let rObject = {
-    instance_variables: {},
-    class:              rClass,
+  let rBasicObject = allObjects.track({
+    class:             rClass.objectId,
+    instanceVariables: {},
+  })
+
+  let rObject = allObjects.track({
+    class:             rClass.objectId,
+    instanceVariables: {},
+  })
+
+  rClass.internalInit = function(newClass) {
+    newClass.constants       = {}
+    newClass.instanceMethods = {}
+    newClass.superclass      = rObject.objectId
   }
+
+  rClass.internalInit(rBasicObject)
+  rClass.internalInit(rObject)
+  rClass.internalInit(rClass)
+
+  rObject.constants["BasicObject"] = rBasicObject.objectId
+  rObject.constants["Object"]      = rObject.objectId
+  rObject.constants["Class"]       = rClass.objectId
+
 
   // true
   let rTrueClass = instantiate(rClass)
@@ -48,8 +83,8 @@ VM.bootstrap = function(ast) {
   let main = instantiate(rObject)
   let toplevelBinding = {
     localVariables: {},
-    self:           main,
-    returnValue:    rTrue
+    self:           main.objectId,
+    returnValue:    rTrue.objectId,
   }
   let callstack = [toplevelBinding]
 
