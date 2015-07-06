@@ -8,36 +8,36 @@ var interpreterFor = (rawCode, callback) => {
   });
 }
 
-describe('VM', () => {
-  describe('ruby.VM', function() {
-    it('returns nil when asked for the next expression when there is nothing to interpret', (done) => {
-      interpreterFor("true", (vm, world) => {
-        assert.equal(world.rTrue, vm.nextExpression())
-        for(let i in [0,1,2,3,4,5,6,7,8,9,10])
-          assert.equal(world.rNil,  vm.nextExpression())
-        assert.equal(1, world.callstack.length); // doesn't accidentally grow
-        done()
-      })
-    });
+describe('ruby.VM', function() {
+  it('returns nil when asked for the next expression when there is nothing to interpret', (done) => {
+    interpreterFor("true", (vm, world) => {
+      assert.equal(world.rTrue, vm.nextExpression())
+      for(let i in [0,1,2,3,4,5,6,7,8,9,10])
+        assert.equal(world.rNil,  vm.nextExpression())
+      assert.equal(1, world.callstack.length); // doesn't accidentally grow
+      done()
+    })
+  });
 
-    it('currentExpression starts at nil, and is updated whenever an expression completes', (done) => {
-      interpreterFor("true", (vm, world) => {
-        assert.equal(world.rNil, vm.currentExpression())
-        vm.nextExpression()
-        assert.equal(world.rTrue, vm.currentExpression())
-        done()
-      })
+  it('currentExpression starts at nil, and is updated whenever an expression completes', (done) => {
+    interpreterFor("true", (vm, world) => {
+      assert.equal(world.rNil, vm.currentExpression())
+      vm.nextExpression()
+      assert.equal(world.rTrue, vm.currentExpression())
+      done()
     })
   })
+
+  it.skip('interprets multiple expressions', (done) => {
+    interpreterFor("nil\ntrue\nfalse", (vm, world) => {
+      assert.equal(world.rNil,  vm.nextExpression());
+      assert.equal(world.rTrue, vm.nextExpression());
+      done()
+    })
+  });
 })
 
 /*
-    it('interprets multiple expressions', function(a) {
-      var interpreter = interpreterFor("nil\ntrue\nfalse");
-      a.eq(world.rNil,  interpreter.nextExpression());
-      a.eq(world.rTrue, interpreter.nextExpression());
-    });
-
     // d.it('throws if asked for expressions after being finished', function(a) {
     //   assertThrows(a, function() interpreter.nextExpression());
 

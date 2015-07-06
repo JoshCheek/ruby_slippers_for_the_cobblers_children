@@ -24,7 +24,7 @@ VM.prototype.advanceState = function() {
       case "true":
         this.currentBinding().returnValue = rTrue.objectId
         return rTrue
-      default: throw(`Unexpected ast: ${ast}`)
+      default: throw(new Error(`Unexpected ast: ${ast.type}`))
     }
   }
 
@@ -35,7 +35,7 @@ VM.prototype.advanceState = function() {
       return tmpBullshit.call(this, this.world.ast)
     case "finished":
       return this.world.rNil
-    default: throw(`Unexpected state: ${this.world.state}`)
+    default: throw(new Error(`Unexpected state: ${this.world.state}`))
   }
 }
 
