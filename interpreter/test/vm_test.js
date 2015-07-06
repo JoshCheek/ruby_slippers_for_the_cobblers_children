@@ -20,11 +20,11 @@ describe('VM', () => {
       })
     });
 
-    it.skip('currentExpression starts at nil, and is updated whenever an expression completes', (done) => {
+    it('currentExpression starts at nil, and is updated whenever an expression completes', (done) => {
       interpreterFor("true", (vm, world) => {
-        assert.eq(world.rNil, vm.currentExpression())
+        assert.equal(world.rNil, vm.currentExpression())
         vm.nextExpression()
-        assert.eq(world.rTrue, vm.currentExpression())
+        assert.equal(world.rTrue, vm.currentExpression())
         done()
       })
     })

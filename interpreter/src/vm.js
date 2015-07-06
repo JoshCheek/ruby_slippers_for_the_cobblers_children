@@ -11,7 +11,7 @@ VM.prototype.currentExpression = function() {
   return this.lookup(id)
 }
 
-VM.prototype.lookup = (id) => {
+VM.prototype.lookup = function(id) {
   return this.world.allObjects[id]
 }
 
@@ -21,7 +21,9 @@ VM.prototype.advanceState = function() {
 
   let tmpBullshit = function(ast) {
     switch(ast.type) {
-      case "true": return rTrue
+      case "true":
+        this.currentBinding().returnValue = rTrue.objectId
+        return rTrue
       default: throw(`Unexpected ast: ${ast}`)
     }
   }
@@ -44,14 +46,14 @@ VM.prototype.nextExpression = function() {
 
 VM.bootstrap = function(ast) {
   // All Objects
-  let allObjects = {}
-  allObjects.size = function() { Object.keys(this).length }
-
   let nextObjectId = 1
-  allObjects.track = function(toTrack) {
-    toTrack.objectId = nextObjectId
-    ++nextObjectId
-    return toTrack
+  let allObjects = {
+    track: function(toTrack) {
+      allObjects[nextObjectId] = toTrack
+      toTrack.objectId = nextObjectId
+      ++nextObjectId
+      return toTrack
+    }
   }
 
 
@@ -107,17 +109,18 @@ VM.bootstrap = function(ast) {
   let toplevelBinding = {
     localVariables: {},
     self:           main.objectId,
-    returnValue:    rTrue.objectId,
+    returnValue:    rNil.objectId,
   }
   let callstack = [toplevelBinding]
 
   // put it all together
   let world = {
-    ast:       ast,
-    state:     {name: "start"},
-    rNil:      rNil,
-    rTrue:     rTrue,
-    callstack: callstack,
+    ast:        ast,
+    state:      {name: "start"},
+    rNil:       rNil,
+    rTrue:      rTrue,
+    callstack:  callstack,
+    allObjects: allObjects
   }
 
   return new VM(world)
