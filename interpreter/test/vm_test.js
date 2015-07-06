@@ -1,37 +1,31 @@
+var ruby   = require("ruby")
 var assert = require('assert')
 
-describe('Interpreter', () => {
-  describe('ruby2.Interpreter', function() {
-    it.skip('currentExpression is nil by default', (done) => {
-      interpreterFor("true", (interpreter) => {
-        assert.eq(world.rNil, interpreter.currentExpression)
-        done()
-      })
-    })
+var interpreterFor = (rawCode, callback) => {
+  ruby.parse(rawCode, (ast) => {
+    let vm = ruby.VM.bootstrap(ast)
+    callback(vm, vm.world)
+  });
+}
 
-    it.skip('returns nil when asked for the next expression when there is nothing to interpret', (done) => {
-      interpreterFor("true", (interpreter) => {
-        assert.equal(world.rTrue, interpreter.nextExpression())
+describe('VM', () => {
+  describe('ruby.VM', function() {
+    it('returns nil when asked for the next expression when there is nothing to interpret', (done) => {
+      interpreterFor("true", (vm, world) => {
+        assert.equal(world.rTrue, vm.nextExpression())
         for(i in [0,1,2,3,4,5,6,7,8,9,10])
-          assert.equal(world.rNil,  interpreter.nextExpression())
-        assert.equal(1, interpreter.stackFrames.length); // doesn't accidentally grow
-        assert.equal(1, interpreter.valueStack.length);  // doesn't accidentally grow
+          assert.equal(world.rNil,  vm.nextExpression())
+        assert.equal(1, vm.stackFrames.length); // doesn't accidentally grow
+        assert.equal(1, vm.valueStack.length);  // doesn't accidentally grow
         done()
       })
     });
 
-    it.skip('interprets a single expression', (done) => {
-      interpreterFor("true", (interpreter) => {
-        assert.equal(world.rTrue, interpreter.nextExpression());
-        done()
-      })
-    });
-
-    it.skip('evaluating an expression updates the current expression', (done) => {
-      interpreterFor("true", (interpreter) => {
-        assert.equal(world.rNil, interpreter.currentExpression)
-        interpreter.nextExpression()
-        assert.equal(world.rTrue, interpreter.currentExpression)
+    it.skip('currentExpression starts at nil, and is updated whenever an expression completes', (done) => {
+      interpreterFor("true", (vm, world) => {
+        assert.eq(world.rNil, vm.currentExpression())
+        vm.nextExpression()
+        assert.eq(world.rTrue, vm.currentExpression())
         done()
       })
     })
