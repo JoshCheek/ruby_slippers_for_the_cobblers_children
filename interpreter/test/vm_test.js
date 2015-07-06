@@ -15,8 +15,7 @@ describe('VM', () => {
         assert.equal(world.rTrue, vm.nextExpression())
         for(let i in [0,1,2,3,4,5,6,7,8,9,10])
           assert.equal(world.rNil,  vm.nextExpression())
-        assert.equal(1, vm.stackFrames.length); // doesn't accidentally grow
-        assert.equal(1, vm.valueStack.length);  // doesn't accidentally grow
+        assert.equal(1, world.callstack.length); // doesn't accidentally grow
         done()
       })
     });

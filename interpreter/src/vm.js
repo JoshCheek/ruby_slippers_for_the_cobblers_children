@@ -7,20 +7,38 @@ VM.prototype.currentBinding = function() {
 }
 
 VM.prototype.currentExpression = function() {
-  return this.world.currentBinding.returnValue
+  const id = this.currentBinding().returnValue
+  return this.lookup(id)
 }
 
-VM.prototype.nextExpression = function() {
+VM.prototype.lookup = (id) => {
+  return this.world.allObjects[id]
+}
+
+
+VM.prototype.advanceState = function() {
   let rTrue = this.world.rTrue
+
   let tmpBullshit = function(ast) {
     switch(ast.type) {
-      case "true": return rTrue;
+      case "true": return rTrue
       default: throw(`Unexpected ast: ${ast}`)
     }
   }
 
+  const state = this.world.state
+  switch(state.name) {
+    case "start":
+      this.world.state = {name: "finished"}
+      return tmpBullshit.call(this, this.world.ast)
+    case "finished":
+      return this.world.rNil
+    default: throw(`Unexpected state: ${this.world.state}`)
+  }
+}
 
-  return tmpBullshit(this.world.ast)
+VM.prototype.nextExpression = function() {
+  return this.advanceState()
 }
 
 
@@ -79,6 +97,11 @@ VM.bootstrap = function(ast) {
   let rTrueClass = instantiate(rClass)
   let rTrue      = instantiate(rTrueClass)
 
+  // nil
+  let rNilClass = instantiate(rClass)
+  let rNil      = instantiate(rNilClass)
+
+
   // callstack
   let main = instantiate(rObject)
   let toplevelBinding = {
@@ -91,6 +114,8 @@ VM.bootstrap = function(ast) {
   // put it all together
   let world = {
     ast:       ast,
+    state:     {name: "start"},
+    rNil:      rNil,
     rTrue:     rTrue,
     callstack: callstack,
   }
