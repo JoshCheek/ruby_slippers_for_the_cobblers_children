@@ -1,10 +1,9 @@
-let http = require('http')
+const http = require('http')
 
 module.exports = parse
 function parse(rawCode, cb) {
   // HTTP code largely lifted from https://nodejs.org/api/http.html#http_http_request_options_callback
-  let responseBody = ''
-  let options = {
+  const options = {
     hostname: 'localhost',
     port:     3003,
     path:     '/',
@@ -12,7 +11,9 @@ function parse(rawCode, cb) {
     headers: { 'Content-Length': rawCode.length }
   }
 
-  var req = http.request(options, (res) => {
+  // append cunks to the response, parse them as JSON at the end of the request
+  let responseBody = ''
+  const req = http.request(options, (res) => {
     res.setEncoding('utf8');
     res.on('data', (chunk) => responseBody += chunk)
     res.on('end',  ()      => cb(JSON.parse(responseBody)))

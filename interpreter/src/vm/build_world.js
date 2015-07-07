@@ -3,7 +3,7 @@ module.exports = buildWorld
 function buildWorld(ast) {
   // All Objects
   let nextObjectId = 1
-  let allObjects = {
+  const allObjects = {
     track: function(toTrack) {
       allObjects[nextObjectId] = toTrack
       toTrack.objectId = nextObjectId
@@ -14,8 +14,8 @@ function buildWorld(ast) {
 
 
   // helpers
-  let instantiate = function(klass) {
-    let instance = { class: klass.objectId, instanceVariables: {} }
+  const instantiate = function(klass) {
+    const instance = { class: klass.objectId, instanceVariables: {} }
     allObjects.track(instance)
     if(klass.internalInit)
       klass.internalInit(instance)
@@ -23,15 +23,15 @@ function buildWorld(ast) {
   }
 
   // BasicObject, Object, Class
-  let rClass  = allObjects.track({instanceVariables: {}})
+  const rClass  = allObjects.track({instanceVariables: {}})
   rClass.class = rClass.objectId
 
-  let rBasicObject = allObjects.track({
+  const rBasicObject = allObjects.track({
     class:             rClass.objectId,
     instanceVariables: {},
   })
 
-  let rObject = allObjects.track({
+  const rObject = allObjects.track({
     class:             rClass.objectId,
     instanceVariables: {},
   })
@@ -52,25 +52,25 @@ function buildWorld(ast) {
 
 
   // true
-  let rTrueClass = instantiate(rClass)
-  let rTrue      = instantiate(rTrueClass)
+  const rTrueClass = instantiate(rClass)
+  const rTrue      = instantiate(rTrueClass)
 
   // nil
-  let rNilClass = instantiate(rClass)
-  let rNil      = instantiate(rNilClass)
+  const rNilClass = instantiate(rClass)
+  const rNil      = instantiate(rNilClass)
 
 
   // callstack
-  let main = instantiate(rObject)
-  let toplevelBinding = {
+  const main = instantiate(rObject)
+  const toplevelBinding = {
     localVariables: {},
     self:           main.objectId,
     returnValue:    rNil.objectId,
   }
-  let callstack = [toplevelBinding]
+  const callstack = [toplevelBinding]
 
   // put it all together
-  let world = {
+  const world = {
     ast:        ast,
     statestack: [{name: "start", registers: {}}],
     rNil:       rNil,

@@ -1,5 +1,5 @@
-var parse  = require("parse")
-var assert = require("assert") // https://github.com/joyent/node/blob/9010dd26529cea60b7ee55ddae12688f81a09fcb/lib/assert.js
+const parse  = require("parse")
+const assert = require("assert") // https://github.com/joyent/node/blob/9010dd26529cea60b7ee55ddae12688f81a09fcb/lib/assert.js
 
 describe('Parse', ()=>{
   describe('expressions', ()=>{
@@ -19,15 +19,15 @@ describe('Parse', ()=>{
         assert.equal(3,             parsed.location.end)
         assert.equal(2,             parsed.expressions.length)
 
-        let exprs = parsed.expressions
+        const exprs = parsed.expressions
 
-        let first = exprs[0]
+        const first = exprs[0]
         assert.equal('integer', first.type)
         assert.equal(9,         first.value)
         assert.equal(0,         first.location.begin)
         assert.equal(1,         first.location.end)
 
-        let second = exprs[1]
+        const second = exprs[1]
         assert.equal('integer', second.type)
         assert.equal(4,         second.value)
         assert.equal(2,         second.location.begin)
@@ -137,7 +137,7 @@ describe('Parse', ()=>{
           assert.equal(0,          parsed.location.begin)
           assert.equal(4,          parsed.location.end)
 
-          var aClass = parsed.namespace
+          const aClass = parsed.namespace
           assert.equal('constant', aClass.type)
           assert.equal("A",        aClass.name)
           assert.equal(0,          aClass.location.begin)
@@ -153,7 +153,7 @@ describe('Parse', ()=>{
         assert.equal(2,             parsed.expressions.length)
 
         // setter
-        let setlvar = parsed.expressions[0]
+        const setlvar = parsed.expressions[0]
         assert.equal('set_local_variable', setlvar.type)
         assert.equal('a',                  setlvar.name)
         assert.equal(0,                    setlvar.location.begin)
@@ -165,7 +165,7 @@ describe('Parse', ()=>{
         assert.equal(5,         setlvar.value.location.end)
 
         // getter
-        let getlvar = parsed.expressions[1]
+        const getlvar = parsed.expressions[1]
         assert.equal('get_local_variable', getlvar.type)
         assert.equal('a',                  getlvar.name)
         assert.equal(7,                    getlvar.location.begin)
@@ -179,7 +179,7 @@ describe('Parse', ()=>{
         assert.equal(2, parsed.expressions.length)
 
         // setter
-        let setivar = parsed.expressions[0]
+        const setivar = parsed.expressions[0]
         assert.equal('set_instance_variable', setivar.type)
         assert.equal('@a',                    setivar.name)
         assert.equal(0,                       setivar.location.begin)
@@ -190,7 +190,7 @@ describe('Parse', ()=>{
         assert.equal(6,                       setivar.value.location.end)
 
         // getter
-        let getivar = parsed.expressions[1]
+        const getivar = parsed.expressions[1]
         assert.equal('get_instance_variable', getivar.type)
         assert.equal('@a',                    getivar.name)
         assert.equal(8,                       getivar.location.begin)
@@ -208,7 +208,7 @@ describe('Parse', ()=>{
         assert.equal(21, parsed.location.end)
 
         // target
-        let target = parsed.target
+        const target = parsed.target
         assert.equal('true', target.type)
         assert.equal(0,      target.location.begin)
         assert.equal(4,      target.location.end)
@@ -218,7 +218,7 @@ describe('Parse', ()=>{
 
         // arguments
         assert.equal(1, parsed.args.length)
-        let arg = parsed.args[0]
+        const arg = parsed.args[0]
         assert.equal('false', arg.type)
         assert.equal(15,      arg.location.begin)
         assert.equal(20,      arg.location.end)
@@ -297,13 +297,13 @@ describe('Parse', ()=>{
       parse("def hasargs(req, *rst); end", (parsed) => {
         assert.equal(2, parsed.args.length)
 
-        let req = parsed.args[0]
+        const req = parsed.args[0]
         assert.equal('required_arg', req.type)
         assert.equal('req',          req.name)
         assert.equal(12,             req.location.begin)
         assert.equal(15,             req.location.end)
 
-        let rest = parsed.args[1]
+        const rest = parsed.args[1]
         assert.equal('rest_arg', rest.type)
         assert.equal('rst',      rest.name)
         assert.equal(17,         rest.location.begin)

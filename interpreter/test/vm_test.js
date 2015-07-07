@@ -1,9 +1,9 @@
-var ruby   = require("ruby")
-var assert = require('assert')
+const ruby   = require("ruby")
+const assert = require('assert')
 
-var interpreterFor = (rawCode, callback) => {
+const interpreterFor = (rawCode, callback) => {
   ruby.parse(rawCode, (ast) => {
-    let vm = ruby.VM.bootstrap(ast)
+    const vm = ruby.VM.bootstrap(ast)
     callback(vm, vm.world)
   });
 }

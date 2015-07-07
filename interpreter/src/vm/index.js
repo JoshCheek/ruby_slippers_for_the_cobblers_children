@@ -2,7 +2,7 @@ const stateMachines = {
   step: require('./state_machines')
 }
 
-var VM = function(world) {
+const VM = function(world) {
   this.world = world
 }
 
@@ -29,7 +29,7 @@ VM.prototype.lookup = function(id) {
   return this.world.allObjects[id]
 }
 
-var buildWorld = require('./build_world')
+const buildWorld = require('./build_world')
 VM.bootstrap = function(ast) {
   return new VM(buildWorld(ast))
 }
