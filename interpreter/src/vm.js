@@ -53,11 +53,10 @@ VM.prototype.stepMain = function(state) {
       return actions.advance("running")
 
     case "running":
-      const substack    = state.substateStack
-      if(substack.length == 0)
-        return actions.advance("finished")
+      const substack        = state.substateStack
+      if(substack.length == 0) return actions.advance("finished")
       const state           = substack[substack.length-1]
-      const expressionFound = this.handleStepResult(substack, state, this.stepRunning(state))
+      const expressionFound = this.handleStepResult(substack, state, this.stepAst(state))
       return actions.noop(expressionFound)
 
     case "finished":
@@ -91,19 +90,44 @@ VM.prototype.astMachine = function(ast) {
     registers: {},
   }
 
+  // note to self: these fall through
   switch(ast.type) {
-    case "true": return state
+    case "expressions":
+      state.substateStack = []
+      state.expressions = ast.expressions.map((child) => this.astMachine(child))
+    case "nil":
+    case "true":
+    case "false":
+      break
     default: throw(new Error(`Unexpected ast: ${ast.type}`))
   }
+  return state
 }
 
-VM.prototype.stepRunning = function(state) {
+VM.prototype.stepAst = function(state) {
   const actions = this.step.actions
   switch(state.ast.type) {
     case "true":
       this.currentBinding().returnValue = this.world.rTrue.objectId
       return actions.pop(true);
-    default: throw(new Error(`Unexpected ast: ${ast.type}`))
+
+    case "nil":
+      this.currentBinding().returnValue = this.world.rNil.objectId
+      return actions.pop(true)
+
+    case "expressions":
+      const substack = state.substateStack
+      if(substack.length == 0 && state.expressions.length == 0)
+        return actions.pop(true)
+
+      if(substack.length == 0)
+        substack.push(state.expressions.shift())
+
+      const state           = substack[substack.length-1]
+      const expressionFound = this.handleStepResult(substack, state, this.stepAst(state))
+      return actions.noop(expressionFound)
+
+    default: throw(new Error(`Unexpected ast: ${JSON.stringify(state.ast)}`))
   }
 }
 
