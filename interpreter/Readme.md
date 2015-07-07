@@ -104,9 +104,21 @@ Tooling
   * "debug" -- looks like a logging tool
   * Chrome's [dev tools](https://developer.chrome.com/devtools)
 
+Potentially useful in the future
+--------------------------------
+
+* [Flow types](http://flowtype.org/) Type checking (if I can conditionally add it, that's cool,
+  but I wound up warring with both Haxe and Elm's type checkers, and am basically over static typing)
+* [How to use babel in prod](https://gist.github.com/rauchg/93d8b831e286bcb30d84) I think.
+  People here advocate webpack over browserify, and babel-runtime over the work this guy put in.
+  IDK, I'm cool with it if I can understand what it does.
+* [nodemon](https://github.com/remy/nodemon) File watching / restarting.
+
+
 Javascript Resources
 --------------------
 
+* [Esprima syntax visualization](http://esprima.googlecode.com/git-history/harmony/demo/parse.html)
 * Style guilde
   * https://github.com/airbnb/javascript
 * Good intro to the language
@@ -138,6 +150,7 @@ Javascript Resources
   * http://www.htmlgoodies.com/tutorials/web_graphics/object-reflection-in-javascript.html
 * Draft of ES6 standard https://people.mozilla.org/~jorendorff/es6-draft.html
 * Stream handbook https://github.com/substack/stream-handbook
+* [Automatic semicolon insertion](http://speakingjs.com/es5/ch07.html#automatic_semicolon_insertion)
 
 JavaScript Notes
 ----------------
@@ -152,3 +165,189 @@ Notes from going through http://speakingjs.com/es5/index.html
   * typeof, instanceof
 * Reflection
   * `function() { return Array.prototype.slice.call(arguments) }`
+* [Where does node.js require look for modules?](http://www.bennadel.com/blog/2169-where-does-node-js-and-require-look-for-modules.htm)
+  * `./node_modules/utils.js`
+  * `./node_modules/utils/index.js`
+  * `./node_modules/utils/package.json`
+  * Some secret other locations that I can't seem to get it to tell me. For the author, they were in `require.paths`, but that doesn't work anymore. The author's were:
+  * `/usr/local/lib/node`
+  * `/Users/ben/.node_modules`
+  * `/Users/ben/.node_libraries`
+  * `/usr/local/Cellar/node/0.4.5/lib/node`
+
+How Ruby Works
+--------------
+
+* Constants: http://cirw.in/blog/constant-lookup.html
+* Initialization:
+  * `ruby.c`    - toplevel init, iirc
+  * `eval.c`    - `ruby_setup`, the initial setup (calls the others, like setting up main and such, which are mostly defined in vm.c)
+  * `vm.c`      - `Init_VM`, `Init_top_self` (main), etc
+* Data structures
+  * `includes/ruby/ruby.h` - RBasic, RObject, RClass
+  * `vm_core.h`
+    * `rb_vm_struct`
+    * `rb_thread_status`, `rb_thread_t` -- these seem to be as important as the vm
+    * `rb_control_frame_t`, `rb_block_t`
+    * `rb_proc_t`, `rb_env_t`, `rb_binding_t`
+    * instruction sequences: `rb_iseq_location_struct`, `rb_iseq_struct`
+    * `rb_call_info_t`: info about method call
+      * [Argument types](https://github.com/ruby/ruby/blob/fe94eaa5aed12408167a67930504093e3fa56c25/vm_core.h#L267)
+
+        ```
+        def m(a1, a2, ..., aM,                    # mandatory
+              b1=(...), b2=(...), ..., bN=(...),  # optional
+              *c,                                 # rest
+              d1, d2, ..., dO,                    # post
+              e1:(...), e2:(...), ..., eK:(...),  # keyword
+              **f,                                # keyword_rest
+              &g)                                 # block
+        >
+
+        lead_num     = M
+        opt_num      = N
+        rest_start   = M+N
+        post_start   = M+N+(*1)
+        post_num     = O
+        keyword_num  = K
+        block_start  = M+N+(*1)+O+K
+        keyword_bits = M+N+(*1)+O+K+(&1)
+        size         = M+N+O+(*1)+K+(&1)+(**1) // parameter size.
+        ```
+* Bytecode / Compilation
+  * `insns.def` has MRI bytecodes
+  * `compile.c` has `iseq_compile_each`, about 2k lines of instructions
+* GC
+
+
+Js / Ruby interop
+-----------------
+
+Might be able to maintain a fork of parser that is basically the same thing,
+but with the unused languages and features removed, and possibly find the
+toplevel parsing of the expressions, and add in a new node-type for vm bytecodes,
+that allows me to write internal methods in Ruby, using the vm's bytecodes.
+
+Thinking through shit
+---------------------
+
+Given this code:
+
+```ruby
+class User
+  def initialize(name)
+    self.name = name
+  end
+
+  def name
+    @name
+  end
+
+  def name=(name)
+    @name = name
+  end
+end
+
+user = User.new("Josh")
+puts user.name
+```
+
+A rough approximation of what needs to happen:
+
+```
+start
+running
+  expressions ->
+    class :User ->
+      find the class ->
+        find namespace (none exists, so Object)
+        find superclass (none exists, so Object)
+        within namespace, look at constants for :User
+        :User dne ->
+          create a new Class
+          set superclass to Object since it is not provided
+          set its name to cref::name
+        return User
+      open User ->
+        push binding (self: User, deftarget: User, returnValue: nil)
+        push User onto crefs
+      eval body ->
+        def (3x) ->
+          in deftarget (User), look at the instance methods
+          set the method name as the key
+          set the code as the body
+        set bindings return value to method name
+      close User ->
+        pop the binding
+        set next bindings return value
+    set local :user ->
+      get locals
+      initialize variable ->
+        look up :user in locals
+        it dne -> set it to nil
+      eval rhs ->
+        send User.new("Josh") ->
+          lookup constant ->
+            no namespace, so start in Object
+            look at its constants
+            we find :User
+            set returnValue
+          receiver = returnValue
+          eval args ->
+            "Josh" ->
+              create new string
+              set return value
+          lookup method ->
+            follow receivers class pointer to get Class
+            set methods to Users instance methods
+            lookup :new
+            find it
+            create binding
+              match arg names to values
+              set these as locals on the binding
+              set self to be User
+              set returnValue to be nil
+            push binding
+            eval code -> ...
+            pop binding, copy return value
+      set local :user to equal current return value
+    send :puts
+     true literal
+     string literal
+     send
+       eval target
+         ->
+
+teardown
+  -> at_exit hooks
+     report errors
+     close streams and things
+     set exit status
+
+finish
+```
+
+Might be worth having bytecodes, right now the code for these
+things winds up in a big case statement, written for each machine:
+
+```
+defs:
+  lookup:   array of strings (keys), eg ["currentBinding", "returnValue"]
+  register: string, eg "methodName", stored as a key on the current machine
+  literal:  int, array, object, string
+
+bytecodes:
+  use_machine <namespace_lookup>
+  load <from_lookup> <to_register>
+  save <from_register> <to_lookup>
+  copy <from_register> <to_register>
+  ary_push <value_register> <array_register>
+  ary_pop <array_register> <value_register>
+  ary_get <array_register> <int_register> <to_register>
+  ary_set <array_register> <int_register> <from_register>
+  set <register> <literal>
+  inc <int_register>
+  dec <int_register>
+  label <label>
+  jump <label>
+```
