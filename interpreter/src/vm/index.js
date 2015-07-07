@@ -17,6 +17,10 @@ VM.prototype.currentExpression = function() {
   return this.lookup(id)
 }
 
+VM.prototype.setCurrentExpression = function(value) {
+  this.currentBinding().returnValue = value.objectId
+}
+
 VM.prototype.lookup = function(id) {
   return this.world.allObjects[id]
 }
@@ -60,7 +64,7 @@ VM.prototype.stepMain = function(state) {
       return actions.noop(expressionFound)
 
     case "finished":
-      this.currentBinding().returnValue = this.world.rNil.objectId
+      this.setCurrentExpression(this.world.rNil)
       return actions.noop(true)
 
     default: throw(new Error(`Unexpected state: ${JSON.stringify(state)}`))
@@ -108,11 +112,11 @@ VM.prototype.stepAst = function(state) {
   const actions = this.step.actions
   switch(state.ast.type) {
     case "true":
-      this.currentBinding().returnValue = this.world.rTrue.objectId
+      this.setCurrentExpression(this.world.rTrue)
       return actions.pop(true);
 
     case "nil":
-      this.currentBinding().returnValue = this.world.rNil.objectId
+      this.setCurrentExpression(this.world.rNil)
       return actions.pop(true)
 
     case "expressions":
