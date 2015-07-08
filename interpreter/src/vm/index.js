@@ -1,7 +1,5 @@
-const buildWorld = require('./build_world')
-const stateMachines = {
-  step: require('./state_machines')
-}
+import buildWorld from './build_world';
+import step from './state_machines';
 
 export default class VM {
   constructor(world) {
@@ -18,7 +16,7 @@ export default class VM {
 
   nextExpression() {
     const statestack = this.world.statestack
-    while(!stateMachines.step(this, statestack)) { }
+    while(!step(this, statestack)) { }
     return this.currentExpression()
   }
 
