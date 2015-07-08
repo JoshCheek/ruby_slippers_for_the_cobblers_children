@@ -1,7 +1,6 @@
 const http = require('http')
 
-module.exports = parse
-function parse(rawCode, cb) {
+export default function parse(rawCode, cb) {
   // HTTP code largely lifted from https://nodejs.org/api/http.html#http_http_request_options_callback
   const options = {
     hostname: 'localhost',

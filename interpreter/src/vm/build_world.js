@@ -1,6 +1,4 @@
-module.exports = buildWorld
-
-function buildWorld(ast) {
+export default function buildWorld(ast) {
   // All Objects
   let nextObjectId = 1
   const allObjects = {
