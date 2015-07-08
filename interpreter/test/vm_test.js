@@ -1,4 +1,4 @@
-import * as ruby from 'ruby';
+import * as ruby from '../src/ruby';
 import assert from 'assert';
 
 const interpreterFor = (rawCode, callback) => {

@@ -2,7 +2,7 @@
   "private": true,
   "name": "ruby_slippers_for_the_cobblers_children",
   "scripts": {
-    "test": "NODE_PATH=src mocha --compilers js:babel/register",
+    "test": "mocha --compilers js:babel/register",
     "exec": "exec",
     "env": "env"
   },
