@@ -41,7 +41,8 @@ class Defs
       children:       str.split(/^(?=\w)/)
                          .map { |machine_def|
                            first, *rest = machine_def.strip.lines.map { |l| l.gsub /^  /, "" }
-                           child_name,  *arg_names = first.split(/\s+|\s*:\s*/).map(&:intern)
+                           child_name, *arg_names = first.split(/\s+|\s*:\s*/).map(&:intern)
+
                            if rest.first.start_with? '>'
                              child_desc = rest.first[/(?<=> ).*/]
                              rest = rest.drop(1)
@@ -51,15 +52,14 @@ class Defs
                            rest            = rest.drop(instr_lines.length)
                            child_namespace = namespace
                            child_namespace += [name] unless name == :root
-                           parse rest.join("\n"),
-                                 name:        child_name,
-                                 description: child_desc,
-                                 arg_names:   arg_names,
-                                 namespace:   child_namespace
-                         }
-                         .each_with_object({}) { |defn, children|
-                           children[defn[:name]] = defn
-                         },
+                           [ child_name, parse( rest.join("\n"),
+                                                name: child_name,
+                                                description: child_desc,
+                                                arg_names: arg_names,
+                                                namespace: child_namespace
+                                              )
+                           ]
+                         }.to_h
     }
   end
 
