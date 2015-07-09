@@ -5,21 +5,20 @@ const Machine  = require("./machine")
 
 // loaded this way to prevent modification to the sate from affecting the template
 function load(target) {
-  let machine = (name) => new Machine(world, load.normalize(name))
-  target.main            = (world) => machine("main")
-  target.ast             = (world) => machine("ast")
-  target.ast_nil         = (world) => machine("ast.nil")
-  target.true            = (world) => machine("ast.true")
-  target.ast_false       = (world) => machine("ast.false")
-  target.ast_expressions = (world) => machine("ast.expressions")
+  let machine = (world, name) => {
+    let template = require("./machines/" + name)
+    return new Machine(world, normalize(template))
+  }
+  target.main            = (world) => machine(world, "main")
+  target.ast             = (world) => machine(world, "ast")
+  target.ast_nil         = (world) => machine(world, "ast.nil")
+  target.true            = (world) => machine(world, "ast.true")
+  target.ast_false       = (world) => machine(world, "ast.false")
+  target.ast_expressions = (world) => machine(world, "ast.expressions")
+  return target
 }
 
-load.requireMachine = function(name) {
-  const template = require("./machines/" + name)
-  return normalize(template)
-}
-
-load.normalize = function(template) {
+function normalize(template) {
   // type / extends
   template.type = template.type || "concrete"
   if(template.type !== "concrete") throw(new Error(`Figure out type: ${template.type}`))
@@ -27,8 +26,10 @@ load.normalize = function(template) {
 
   // registers
   template.registers = template.registers || {}
+  let registers      = template.registers
+
   for(let name in registers) {
-    attributes = registers[name]
+    let attributes = registers[name]
     attributes.type = attributes.type || "any"
 
     let init = function(value) {
@@ -51,10 +52,15 @@ load.normalize = function(template) {
   if(!states.start) throw(new Error("Probably all machines need a start state"))
 
   for(let name in states) {
-    let state = states[name]
-    state.setup = state.setup || []
-    state.body  = state.body  || []
+    let state             = states[name]
+    state.currentSubstate = "setup"
+    state.setup           = state.setup || []
+    state.body            = state.body  || []
   }
+
+  // starting state
+  template.currentState = "start"
+  template.instructionPointer = 0
 
   return template;
 }

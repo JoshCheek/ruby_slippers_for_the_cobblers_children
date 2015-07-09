@@ -72,13 +72,13 @@ function buildWorld(ast) {
 
   // put it all together
   const world = {
-    mainMachine: Machines.main(),
     ast:         ast,
     rNil:        rNil,
     rTrue:       rTrue,
     callstack:   callstack,
     allObjects:  allObjects
   }
+  world.mainMachine = Machines.main(world)
 
   return world
 }

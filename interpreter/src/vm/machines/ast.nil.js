@@ -8,11 +8,12 @@ const machine = {
   states: {
     start: {
       body: [
-        ["globalToRegister", "rNil", "@nil"],        // @nil = $rNil
-        ["registerToGlobal", "@nil", "returnValue"], // $returnValue = @nil
+        ["globalToRegister", "$rNil", "@nil"],        // @nil = $rNil
+        ["registerToGlobal", "@nil", "$returnValue"], // $returnValue = @nil
         ["switchStateTo", "finished"],               // goto :finished
       ]
     },
   }
 }
-export machine
+
+module.exports = machine

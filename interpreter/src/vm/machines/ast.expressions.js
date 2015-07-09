@@ -16,13 +16,16 @@ const machine = {
     },
     running: {
       body: [
-        ["for_in", "@expression", "@expressions"],      // @expressions.each { |@expression|
-        ["getKey", "@childArgs", "ast", "@expression"], // @childArgs.ast = @expressions
-        ["initMachine", "@child", "@childArgs"],        // @child.init @childArgs
-        ["runMachine", "@child"],                       //   @child.run
-        ["end"],                                        // end
-        ["switchStateTo", "finished"],                  // "goto :finished"
+        ["for_in", "@expression", "@expressions"],       // @expressions.each { |@expression|
+        ["setKey", "@childArgs", "ast", "@expression"],  //   @childArgs.ast = @expressions
+        ["initMachine", "@child", "@childArgs"],         //   @child.init @childArgs
+        ["runMachine", "@child"],                        //   @child.run
+        ["end"],                                         // end
+        ["globalToRegister", "$returnValue", "@result"], // @result = $returnValue
+        ["registerToGlobal", "@result", "$returnValue"], // $returnValue = @result (set it to declare that we resulted in a value)
+        ["switchStateTo", "finished"],                   // "goto :finished"
       ]
     }
   }
 }
+module.exports = machine

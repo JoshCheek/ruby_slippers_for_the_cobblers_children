@@ -8,11 +8,11 @@ const machine = {
   states: {
     start: {
       body: [
-        ["globalToRegister", "rTrue", "@true"],       // @true = $rTrue
-        ["registerToGlobal", "@true", "returnValue"], // $returnValue = @true
+        ["globalToRegister", "$rTrue", "@true"],       // @true = $rTrue
+        ["registerToGlobal", "@true", "$returnValue"], // $returnValue = @true
         ["switchStateTo", "finished"],                // goto :finished
       ]
     },
   }
 }
-export machine
+module.exports = machine

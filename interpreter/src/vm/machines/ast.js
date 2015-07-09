@@ -28,4 +28,4 @@ const machine = {
     },
   }
 }
-export machine
+module.exports = machine
