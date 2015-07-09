@@ -4,7 +4,7 @@ RSpec.describe Defs do
   def assert_machine(machine, assertions)
     assertions.each do |attr, expected|
       case attr
-      when :name, :namespace, :desc, :arg_names, :register_names
+      when :name, :namespace, :description, :arg_names, :register_names
         actual = machine.__send__ attr
         msg = "Expected\n#{machine.inspect.gsub(/^/, '  ')}.#{attr}\n"\
               "    to eq   #{expected.inspect}\n"\
@@ -48,13 +48,13 @@ RSpec.describe Defs do
         /reemit
     DEFS
 
-    expect(root.desc).to_not be_empty
+    expect(root.description).to_not be_empty
     assert_machine root, name: :root, namespace: []
 
     assert_machine root[:main],
       name:         :main,
       namespace:    [],
-      desc:         "The main machine, kicks everything else off",
+      description:         "The main machine, kicks everything else off",
       arg_names:    [],
       register_names:    [],
       # instructions: [
@@ -66,7 +66,7 @@ RSpec.describe Defs do
     assert_machine root[:emit],
       name:         :emit,
       namespace:    [],
-      desc:         "Machine: /emit",
+      description:         "Machine: /emit",
       arg_names:    [:@value],
       register_names:    [],
       # instructions: [
@@ -78,7 +78,7 @@ RSpec.describe Defs do
     assert_machine root[:reemit],
       name:         :reemit,
       namespace:    [],
-      desc:         "Machine: /reemit",
+      description:         "Machine: /reemit",
       arg_names:    [],
       register_names:    [],
       # instructions: [
@@ -90,7 +90,7 @@ RSpec.describe Defs do
     assert_machine root[:ast],
       name:         :ast,
       namespace:    [],
-      desc:         "Interpreters for language constructs",
+      description:         "Interpreters for language constructs",
       arg_names:    [:@ast],
       register_names:    [],
       # instructions: [
@@ -101,7 +101,7 @@ RSpec.describe Defs do
         nil: {
           name:         :nil,
           namespace:    [:ast],
-          desc:         "Machine: /ast/nil",
+          description:         "Machine: /ast/nil",
           arg_names:    [],
           register_names:    [],
           # instructions: [
@@ -113,7 +113,7 @@ RSpec.describe Defs do
         expressions: {
           name:         :expressions,
           namespace:    [:ast],
-          desc:         "Machine: /ast/expressions",
+          description:         "Machine: /ast/expressions",
           arg_names:    [:@ast],
           # register_names: [:@expression],
           # instructions: [

@@ -3,7 +3,7 @@ class Defs
     new parse(string)
   end
 
-  ATTRIBUTES = [:name, :namespace, :arg_names, :desc, :register_names].freeze
+  ATTRIBUTES = [:name, :namespace, :arg_names, :description, :register_names].freeze
 
   def initialize(defn)
     @defn = defn
@@ -31,9 +31,9 @@ class Defs
 
   attr_reader :children
 
-  def self.parse(str, name: :root, args: [], namespace: [], desc: "Machine: /")
+  def self.parse(str, name: :root, args: [], namespace: [], description: "Machine: /")
     { name:           name,
-      desc:           desc || "Machine: #{["", *namespace, name].join '/'}",
+      description:    description || "Machine: #{["", *namespace, name].join '/'}",
       arg_names:      args,
       register_names: [],
       instructions:   [],
@@ -52,10 +52,10 @@ class Defs
                            child_namespace = namespace
                            child_namespace += [name] unless name == :root
                            parse rest.join("\n"),
-                                 name:      child_name,
-                                 desc:      child_desc,
-                                 args:      args,
-                                 namespace: child_namespace
+                                 name:        child_name,
+                                 description: child_desc,
+                                 args:        args,
+                                 namespace:   child_namespace
                          }
                          .each_with_object({}) { |defn, children|
                            children[defn[:name]] = defn
