@@ -1,20 +1,18 @@
 "use strict";
 
-module.exports = load
-const Machine  = require("./machine"),
-      machine  = (world, name) => {
-        let template = require("./machines/" + name)()
+const Machine      = require("./machine"),
+      loadMachine  = (world, name) => {
+        let template = require(`./machines/${name}`)()
         return new Machine(world, normalize(template))
       }
 
-// loaded this way to prevent modification to the sate from affecting the template
-function load(target) {
-  target.main            = (world) => machine(world, "main")
-  target.ast             = (world) => machine(world, "ast")
-  target.ast_nil         = (world) => machine(world, "ast.nil")
-  target.true            = (world) => machine(world, "ast.true")
-  target.ast_false       = (world) => machine(world, "ast.false")
-  target.ast_expressions = (world) => machine(world, "ast.expressions")
+export default function load(target) {
+  target.main            = (world) => loadMachine(world, "main")
+  target.ast             = (world) => loadMachine(world, "ast")
+  target.ast_nil         = (world) => loadMachine(world, "ast.nil")
+  target.true            = (world) => loadMachine(world, "ast.true")
+  target.ast_false       = (world) => loadMachine(world, "ast.false")
+  target.ast_expressions = (world) => loadMachine(world, "ast.expressions")
   return target
 }
 
