@@ -1,6 +1,4 @@
-module.exports = step
-
-function step(vm, statestack) {
+export default function step(vm, statestack) {
   const state       = statestack[statestack.length-1]
   const resultState = stepMain(vm, state)
   return handleStepResult(vm, statestack, state, resultState)

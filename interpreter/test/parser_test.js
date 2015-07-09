@@ -1,5 +1,5 @@
-const parse  = require("parse")
-const assert = require("assert") // https://github.com/joyent/node/blob/9010dd26529cea60b7ee55ddae12688f81a09fcb/lib/assert.js
+import parse from '../src/parse';
+import assert from 'assert'; // https://github.com/joyent/node/blob/9010dd26529cea60b7ee55ddae12688f81a09fcb/lib/assert.js
 
 describe('Parse', ()=>{
   describe('expressions', ()=>{

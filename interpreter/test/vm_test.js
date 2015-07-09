@@ -1,5 +1,5 @@
-const ruby   = require("ruby")
-const assert = require('assert')
+import * as ruby from '../src/ruby';
+import assert from 'assert';
 
 const interpreterFor = (rawCode, callback) => {
   ruby.parse(rawCode, (ast) => {
