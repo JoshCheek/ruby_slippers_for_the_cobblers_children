@@ -73,15 +73,64 @@ class Defs
   #   for @expression in @ast.expressions
   #     /ast(@expression)
   #   /reemit
-  def self.parse_instrs(instrs)
-    parsed = []
-    # return instrs
-    # but got ["/ast($ast)"]
+  def self.parse_instrs(raw_instructions)
+    implicit_vars = []
+    instructions  = []
 
-    if instrs == ["/machineName()"]
-      [[:runMachine, [:machineName], []]]
-    else
-      [[:globalToRegister, :ast, :@_1], [:runMachine, [:ast], [:@_1]]]
+    if raw_instructions == ["/machineName()"]
+      return [[:runMachine, [:machineName], []]]
     end
+
+    state = { instructions: [], implicit_registers: [] }
+    raw_instructions.each { | instr| parse_instr instr, state }
+    state.fetch :instructions
+  end
+
+  def self.parse_instr(instr, state)
+    if run_machine? instr
+      parse_run_machine instr, state
+    else
+      return instr
+      raise "What to do with: #{instr.inspect}"
+    end
+  end
+
+  def self.run_machine?(instr)
+    instr.start_with? "/"
+  end
+
+  def self.global?(name)
+    name.start_with? "$"
+  end
+
+  def self.global_name(name)
+    name[1..-1].intern
+  end
+
+  def self.add_implicit(state)
+    registers = state.fetch :implicit_registers
+    i = registers.last.to_s[/\d+/].to_i.next
+    register = :"@_#{i}"
+    registers << register
+    register
+  end
+
+  # /ast($ast)
+  def self.parse_run_machine(instr, state)
+    raw_path, *args = instr.chomp(")").split("(")
+    machine_path = raw_path.split("/").reject(&:empty?).map(&:intern)
+
+    args = args.map { |arg|
+      if global? arg
+        global   = global_name arg
+        register = add_implicit(state)
+        state[:instructions] << [:globalToRegister, global, register]
+        register
+      else
+        raise "What kind of arg is this: #{arg.inspect}"
+      end
+    }
+
+    state[:instructions] << [:runMachine, machine_path, args]
   end
 end
