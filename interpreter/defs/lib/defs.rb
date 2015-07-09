@@ -35,21 +35,12 @@ class Defs
 
   attr_reader :children
 
-  def self.description_for(attrs)
-    ns   = attrs.fetch :namespace
-    name = attrs.fetch :name
-    desc = attrs.fetch :desc, nil
-    desc = "Machine: " << ["", *ns, name].join("/")
-  end
-
-  def self.parse(body, attrs)
-    namespace    = attrs.fetch :namespace
-    current_args = attrs.fetch :args
+  def self.parse(body, args:, namespace:, desc:nil, **attrs)
     current_name = attrs.fetch :name
 
     { name:           current_name,
-      desc:           description_for(attrs),
-      arg_names:      current_args,
+      desc:           desc || "Machine: #{["", *namespace, current_name].join '/'}",
+      arg_names:      args,
       register_names: [],
       instructions:   [],
       namespace:      namespace,
@@ -60,7 +51,7 @@ class Defs
                           first, *rest = machine_def.lines.map { |l| l.gsub /^  /, "" }
                           name,  *args = first.split(/\s+|\s*:\s*/).map(&:intern)
                           if rest.first.start_with? '>'
-                            desc = rest.first[/(?<=> ).*/]
+                            child_desc = rest.first[/(?<=> ).*/]
                             rest = rest.drop(1)
                           end
 
@@ -70,7 +61,7 @@ class Defs
                           child_namespace += [current_name] unless current_name == :root
                           parse rest.join("\n"),
                                 name:      name,
-                                desc:      desc,
+                                desc:      child_desc,
                                 args:      args,
                                 namespace: child_namespace
                         }
