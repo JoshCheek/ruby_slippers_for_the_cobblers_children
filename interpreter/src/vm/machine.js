@@ -22,7 +22,7 @@ export default class Machine {
         args        = call.slice(1),
         instruction = instructions[name]
 
-    console.log(`${inspect(instruction)} ${inspect(instructions)}`)
+    // console.log(`${inspect(instruction)} ${inspect(instructions)}`)
 
     instruction.apply(this, args)
   }

@@ -50,6 +50,26 @@ function normalize(template) {
   states.finish   = states.finish || {}
   if(!states.start) throw(new Error("Probably all machines need a start state"))
 
+  const normalizeAsm = (asmSequence) => {
+    // Temporary hack (hopefully ;)
+    forloop = {start: -1, end: -1, breaks: []}
+    asmSequence.forEach((asm, index) => {
+      if(asm[0] === 'for_in') {
+        asm.index = 0
+        forloop.start = index
+      } else if(asm[0] === 'end') {
+        asm.startIndex = forloop.start
+        forloop.end    = index
+        asmSequence[forloop.start].endIndex = index
+        forloop.breaks.forEach((breakIndex) =>
+          asmSequence[breakIndex].endIndex = index
+        )
+      } else if(asm[0] === 'break_if_eq') {
+        forloop.breaks.push(index)
+      }
+    })
+  }
+
   for(var name in states) {
     let state             = states[name]
     state.currentSubstate = "setup"

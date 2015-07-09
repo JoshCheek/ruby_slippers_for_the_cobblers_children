@@ -5,7 +5,7 @@ export default () => {
     registers: {
       "@ast":        {type: "hash", init: {}, hide: true, arg: true},
       "@expression": {},
-      "@node_type":  {type: :"hash"},
+      "@node_type":  {type: "hash"},
       "@child":      {type: "machine", init: "ast"},
       "@childArgs":  {type: "hash", init: {}},
     },
@@ -30,3 +30,15 @@ export default () => {
     }
   }
 }
+
+// @i = 0
+// @length = @expressions.length
+// label loop
+//   @done = (@i == @length)
+//   jump_to_if endloop, @done
+//   @expression = @expressions[@i]
+//   @childArgs[:ast] = @expressions
+//   @child.init @childArgs
+//   @child.run
+//   @i++
+// label endloop

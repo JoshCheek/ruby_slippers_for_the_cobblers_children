@@ -26,6 +26,7 @@ export default {
 
   // @machine.init @args
   initMachine: function(machineRegister, argsRegister) {
+    console.log(machineRegister, argsRegister)
     throw(new Error("Figure out how to implement me!"))
   },
 
@@ -42,17 +43,24 @@ export default {
 
   // @ary.each { |@register|
   for_in: function(aryName, register) {
-    throw(new Error("Figure out how to implement me!"))
+    // console.log(this.state)
+    // check the index, if it's too far, jump to the end
+    // otherwise, set the first arg to be the current item in the second arg
+    // and then increment the index
     this.state.instructionPointer++
+    throw(new Error("Figure out how to implement me!"))
   },
 
   end: function() {
+    // update the instructionPointer to be the start index
     throw(new Error("Figure out how to implement me!"))
     this.state.instructionPointer++
   },
 
   // break if @register1 == @register2
   break_if_eq: function(register1, register2) {
+    // compare the two things, if they are equal,
+    // set the instructionPointer to be the `end` index
     throw(new Error("Figure out how to implement me!"))
   },
 
