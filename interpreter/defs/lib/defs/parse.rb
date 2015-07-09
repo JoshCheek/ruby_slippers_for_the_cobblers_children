@@ -14,27 +14,25 @@ class Defs
       self.namespace  = namespace
     end
 
-      require 'pp'
     def call
-      str                        = remove_comments def_string
-      first, *rest               = str.strip.lines.map { |l| l.gsub(/^  /, "").chomp }
-      self.name, *self.arg_names = first.split(/\s+|\s*:\s*/).map(&:intern)
+      lines = remove_comments(def_string).lines.map { |line| outdent(line).chomp }
 
-      if rest.first.start_with? '>'
-        self.description = rest.first[/(?<=> ).*/]
-        rest = rest.drop(1)
+      self.name, self.arg_names  = parse_declaration lines.shift
+
+      if lines.first.start_with? '>'
+        self.description = lines.shift[/(?<=> ).*/]
       end
 
-      raw_instrs = rest.take_while { |line| line !~ /^\w+:/ }
-      rest       = rest.drop(raw_instrs.length)
+      raw_instrs = []
+      raw_instrs << lines.shift while lines.any? && lines.first !~ /^\w+:/
+
       self.instructions = parse_instrs(raw_instrs)
+      self.children     = parse_children(lines.join "\n")
 
-      self.children = rest.join("\n")
-                          .split(/^(?=\w)/)
-                          .map { |s| Parse.call s.strip, child_namespace }
-                          .map { |c| [c[:name], c] }
-                          .to_h
+      to_h
+    end
 
+    def to_h
       { name:           name,
         arg_names:      arg_names,
         description:    description,
@@ -48,6 +46,22 @@ class Defs
     private
 
     attr_accessor :def_string, :name, :arg_names, :namespace, :description, :instructions, :children
+
+    def parse_children(children_str)
+      children_str.split(/^(?=\w)/)
+                  .map { |s| Parse.call s.strip, child_namespace }
+                  .map { |c| [c[:name], c] }
+                  .to_h
+    end
+
+    def parse_declaration(line)
+      tokens = line.split(/\s+|\s*:\s*/).map(&:intern)
+      [tokens.shift, tokens]
+    end
+
+    def outdent(line)
+      line.sub /^  /, ""
+    end
 
     def description
       @description || "Machine: #{machine_path}"

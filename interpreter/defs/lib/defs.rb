@@ -26,6 +26,7 @@ class Defs
     attrs = ATTRIBUTES.map do |name|
       "\n  #{name}: #{@defn.fetch(name).inspect}"
     end
+    attrs << "\n  children: #{children.keys}"
     "#<#{self.class}:#{attrs.join}\n>"
   end
 
