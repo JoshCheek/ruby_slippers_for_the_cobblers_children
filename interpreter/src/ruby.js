@@ -1,4 +1,4 @@
-module.exports = {
-  parse: require("./parse"),
-  VM:    require("./vm"),
-}
+import parse from './parse';
+import VM from './vm';
+
+export {parse, VM};
