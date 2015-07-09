@@ -91,10 +91,10 @@ RSpec.describe Defs do
       description:         "Interpreters for language constructs",
       arg_names:    [:@ast],
       register_names:    [],
-      # instructions: [
-      #   [:getKey, :@_1, :@ast, :type],
-      #   [:becomeMachine, [:ast, :@_1], :@_2],
-      # ],
+      instructions: [
+        [:getKey, :@_1, :@ast, :type],
+        [:becomeMachine, [:ast, :@_1]],
+      ],
       children: {
         nil: {
           name:         :nil,
