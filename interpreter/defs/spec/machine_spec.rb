@@ -48,7 +48,8 @@ RSpec.describe Defs do
         /reemit
     DEFS
 
-    assert_machine root, name: :root, desc: "machine: /", namespace: []
+    expect(root.desc).to_not be_empty
+    assert_machine root, name: :root, namespace: []
 
     assert_machine root[:main],
       name:         :main,
@@ -65,7 +66,7 @@ RSpec.describe Defs do
     assert_machine root[:emit],
       name:         :emit,
       namespace:    [],
-      desc:         "machine: /emit",
+      desc:         "Machine: /emit",
       arg_names:    [:@value],
       register_names:    [],
       # instructions: [
@@ -77,7 +78,7 @@ RSpec.describe Defs do
     assert_machine root[:reemit],
       name:         :reemit,
       namespace:    [],
-      desc:         "machine: /reemit",
+      desc:         "Machine: /reemit",
       arg_names:    [],
       register_names:    [],
       # instructions: [
@@ -100,7 +101,7 @@ RSpec.describe Defs do
         nil: {
           name:         :nil,
           namespace:    [:ast],
-          desc:         "machine: /ast/nil",
+          desc:         "Machine: /ast/nil",
           arg_names:    [],
           register_names:    [],
           # instructions: [
@@ -112,7 +113,7 @@ RSpec.describe Defs do
         expressions: {
           name:         :expressions,
           namespace:    [:ast],
-          desc:         "machine: /ast/expressions",
+          desc:         "Machine: /ast/expressions",
           arg_names:    [:@ast],
           # register_names: [:@expression],
           # instructions: [

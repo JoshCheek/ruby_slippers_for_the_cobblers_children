@@ -1,55 +1,10 @@
 class Defs
-  def self.parse(body,
-                 current_name=:root,
-                 current_desc=nil,
-                 current_args=[],
-                 namespace=[])
-    machines = body
-      .split(/^(?=\w)/)
-      .map(&:strip)
-      .map { |machine_def|
-        first, *rest = machine_def.lines
-        name, arg_string = first.split(/\s*:\s*/, 2)
-        name = name.intern
-        args = arg_string.split.map(&:intern)
-
-        rest.map! { |line| line.gsub(/^  /, "") }
-        if rest.first.start_with? '>'
-          desc = rest.first[/(?<=> ).*/]
-          rest = rest.drop(1)
-        end
-
-        instr_lines  = rest.take_while { |line| line !~ /^\w+:/ }
-        # instructions = p
-        rest         = rest.drop(instr_lines.length)
-        child_namespace = namespace
-        child_namespace += [current_name] unless current_name == :root
-        parse rest.join("\n"), name, desc, args, child_namespace
-      }
-      .each_with_object({}) { |defn, children|
-        children[defn[:name]] = defn
-      }
-
-    current_desc ||=
-      "machine: " <<
-        if current_name == :root
-          '/'
-        else
-          [*namespace, current_name].map { |n| "/#{n}" }.join("")
-        end
-
-    {name:         current_name,
-     desc:         current_desc,
-     arg_names:    current_args,
-     register_names:    [],
-     instructions: [],
-     namespace:    namespace,
-     children:     machines,
-    }
-  end
-
   def self.from_string(string)
-    new parse(string)
+    new parse string,
+              name:      :root,
+              desc:      "Container for all the machines",
+              args:      [],
+              namespace: []
   end
 
   ATTRIBUTES = [:name, :namespace, :arg_names, :desc, :register_names].freeze
@@ -79,4 +34,45 @@ class Defs
   private
 
   attr_reader :children
+
+  def self.parse(body, attrs)
+    namespace    = attrs.fetch :namespace
+    current_args = attrs.fetch :args
+    current_name = attrs.fetch :name
+    current_desc = attrs.fetch :desc, nil
+    current_desc ||= "Machine: " << [*namespace, current_name].inject("") { |d, n| "#{d}/#{n}" }
+
+    { name:           current_name,
+      desc:           current_desc,
+      arg_names:      current_args,
+      register_names: [],
+      instructions:   [],
+      namespace:      namespace,
+      children:       body
+                        .split(/^(?=\w)/)
+                        .map(&:strip)
+                        .map { |machine_def|
+                          first, *rest = machine_def.lines.map { |l| l.gsub /^  /, "" }
+                          name,  *args = first.split(/\s+|\s*:\s*/).map(&:intern)
+                          if rest.first.start_with? '>'
+                            desc = rest.first[/(?<=> ).*/]
+                            rest = rest.drop(1)
+                          end
+
+                          instr_lines     = rest.take_while { |line| line !~ /^\w+:/ }
+                          rest            = rest.drop(instr_lines.length)
+                          child_namespace = namespace
+                          child_namespace += [current_name] unless current_name == :root
+                          parse rest.join("\n"),
+                                name:      name,
+                                desc:      desc,
+                                args:      args,
+                                namespace: child_namespace
+                        }
+                        .each_with_object({}) { |defn, children|
+                          children[defn[:name]] = defn
+                        },
+    }
+  end
+
 end
