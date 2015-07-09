@@ -25,21 +25,8 @@ class Defs
     #     /ast(@expression)
     #   /reemit
     def call
-      if raw_instructions == ["/machineName()"]
-        return [[:runMachine, [:machineName], []]]
-      end
-
-      raw_instructions.each { | instr| parse_instr instr }
+      raw_instructions.each { | instr| parse_instruction instr }
       instructions
-    end
-
-    def parse_instr(instr)
-      if run_machine? instr
-        parse_run_machine instr
-      else
-        return instr
-        raise "What to do with: #{instr.inspect}"
-      end
     end
 
     def run_machine?(instr)
@@ -61,12 +48,21 @@ class Defs
       register
     end
 
+    def parse_instruction(instr)
+      if run_machine? instr
+        parse_run_machine instr
+      else
+        return instr
+        raise "What to do with: #{instr.inspect}"
+      end
+    end
+
     # /ast($ast)
     def parse_run_machine(instr)
       raw_path, *args = instr.chomp(")").split("(")
       machine_path = raw_path.split("/").reject(&:empty?).map(&:intern)
 
-      args = args.map { |arg|
+      args = args.map do |arg|
         if global? arg
           global   = global_name arg
           register = new_implicit_register
@@ -75,7 +71,7 @@ class Defs
         else
           raise "What kind of arg is this: #{arg.inspect}"
         end
-      }
+      end
 
       instructions << [:runMachine, machine_path, args]
     end
