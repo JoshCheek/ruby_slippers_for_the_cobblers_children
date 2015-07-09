@@ -31,17 +31,17 @@ class Defs
 
   attr_reader :children
 
-  def self.parse(str, name: :root, args: [], namespace: [], description: "Machine: /")
+  def self.parse(str, name: :root, arg_names: [], namespace: [], description: "Machine: /")
     { name:           name,
       description:    description || "Machine: #{["", *namespace, name].join '/'}",
-      arg_names:      args,
+      arg_names:      arg_names,
       register_names: [],
       instructions:   [],
       namespace:      namespace,
       children:       str.split(/^(?=\w)/)
                          .map { |machine_def|
                            first, *rest = machine_def.strip.lines.map { |l| l.gsub /^  /, "" }
-                           child_name,  *args = first.split(/\s+|\s*:\s*/).map(&:intern)
+                           child_name,  *arg_names = first.split(/\s+|\s*:\s*/).map(&:intern)
                            if rest.first.start_with? '>'
                              child_desc = rest.first[/(?<=> ).*/]
                              rest = rest.drop(1)
@@ -54,7 +54,7 @@ class Defs
                            parse rest.join("\n"),
                                  name:        child_name,
                                  description: child_desc,
-                                 args:        args,
+                                 arg_names:   arg_names,
                                  namespace:   child_namespace
                          }
                          .each_with_object({}) { |defn, children|
