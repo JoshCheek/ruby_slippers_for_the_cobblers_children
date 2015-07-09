@@ -1,14 +1,14 @@
 "use strict";
 
 module.exports = load
-const Machine  = require("./machine")
+const Machine  = require("./machine"),
+      machine  = (world, name) => {
+        let template = require("./machines/" + name)()
+        return new Machine(world, normalize(template))
+      }
 
 // loaded this way to prevent modification to the sate from affecting the template
 function load(target) {
-  let machine = (world, name) => {
-    let template = require("./machines/" + name)
-    return new Machine(world, normalize(template))
-  }
   target.main            = (world) => machine(world, "main")
   target.ast             = (world) => machine(world, "ast")
   target.ast_nil         = (world) => machine(world, "ast.nil")
@@ -28,8 +28,9 @@ function normalize(template) {
   template.registers = template.registers || {}
   let registers      = template.registers
 
-  for(let name in registers) {
+  for(var name in registers) {
     let attributes = registers[name]
+    if(!attributes) console.log(template, registers, name)
     attributes.type = attributes.type || "any"
 
     let init = function(value) {
@@ -51,7 +52,7 @@ function normalize(template) {
   states.finish   = states.finish || {}
   if(!states.start) throw(new Error("Probably all machines need a start state"))
 
-  for(let name in states) {
+  for(var name in states) {
     let state             = states[name]
     state.currentSubstate = "setup"
     state.setup           = state.setup || []
