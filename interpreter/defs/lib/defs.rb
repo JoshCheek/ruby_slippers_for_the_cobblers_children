@@ -1,6 +1,6 @@
 class Defs
   def self.from_string(string)
-    new parse_body(string)
+    new parse_body(string.gsub(/^\s*#.*\n/, ''))
   end
 
   ATTRIBUTES = [:name, :namespace, :arg_names, :description, :register_names, :instructions].freeze
@@ -61,9 +61,27 @@ class Defs
     parse_body body, name: name, desc: desc, args: args, ns: ns, instrs: parse_instrs(instrs)
   end
 
+  # /ast($ast)
+  #   globalToRegister :ast :@_1
+  #   runMachine [:ast] [:@_1]
+  #
+  # $currentBinding.returnValue <- @value
+  #
+  # $foundExpression <- $rTrue
+  # self <- /ast/@ast.type
+  #   /emit($rNil)
+  #   for @expression in @ast.expressions
+  #     /ast(@expression)
+  #   /reemit
   def self.parse_instrs(instrs)
-    instrs
+    parsed = []
+    # return instrs
     # but got ["/ast($ast)"]
-    [[:globalToRegister, :ast, :@_1], [:runMachine, [:ast], [:@_1]]]
+
+    if instrs == ["/machineName()"]
+      [[:runMachine, [:machineName], []]]
+    else
+      [[:globalToRegister, :ast, :@_1], [:runMachine, [:ast], [:@_1]]]
+    end
   end
 end

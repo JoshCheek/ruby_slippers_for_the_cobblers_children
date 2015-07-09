@@ -50,12 +50,12 @@ RSpec.describe Defs do
     assert_machine root, name: :root, namespace: []
 
     assert_machine root[:main],
-      name:         :main,
-      namespace:    [],
-      description:         "The main machine, kicks everything else off",
-      arg_names:    [],
-      register_names:    [],
-      instructions: [
+      name:           :main,
+      namespace:      [],
+      description:    "The main machine, kicks everything else off",
+      arg_names:      [],
+      register_names: [],
+      instructions:   [
         [:globalToRegister, :ast, :@_1],
         [:runMachine, [:ast], [:@_1]],
       ],
@@ -132,6 +132,35 @@ RSpec.describe Defs do
           # ],
           children: {}
         },
+      }
+  end
+
+  it 'ignores comments: any line beginning with a hash' do
+    root = Defs.from_string <<-DEFS.gsub(/^    /, "")
+    # comment
+    n:
+    # comment
+      # comment
+        # comment
+      > d
+      # comment
+      /machineName()
+      # comment
+    # comment
+    DEFS
+
+    assert_machine root,
+      name: :root,
+      children: {
+        n: {
+          name:           :n,
+          description:    "d",
+          register_names: [],
+          instructions: [
+            [:runMachine, [:machineName], []],
+          ],
+          children: {}
+        }
       }
   end
 end
