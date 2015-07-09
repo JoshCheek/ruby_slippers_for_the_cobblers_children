@@ -41,6 +41,10 @@ class Defs
       name.start_with? "@"
     end
 
+    def hash_with_key?(expr)
+      expr.include? "."
+    end
+
     def set_value?(instr)
       instr.include? "<-"
     end
@@ -73,10 +77,19 @@ class Defs
           #   +["$currentBinding.returnValue <- @value"]
     def parse_set_value(instr)
       to_set, value  = split instr, /\s*<-\s*/
-      hash, key      = split to_set, "."
-      value_register = value_to_register value
-      hash_register  = value_to_register hash
-      instructions << [:setKey, hash_register, key.to_s.intern, value_register]
+      if hash_with_key? to_set
+        hash, key      = split to_set, "."
+        hash_register  = value_to_register hash
+        value_register = value_to_register value
+        instructions << [:setKey, hash_register, key.to_s.intern, value_register]
+      elsif global? to_set
+        global   = global_name(to_set)
+        register = value_to_register(value)
+        instructions << [:registerToGlobal, register, global]
+      else
+        return instr
+        raise "What is this: #{to_set.inspect}"
+      end
     end
 
     def split(str, delimiter)

@@ -79,10 +79,10 @@ RSpec.describe Defs do
       description:         "Machine: /reemit",
       arg_names:    [],
       register_names:    [],
-      # instructions: [
-      #   [:globalToRegister, :rTrue, :@_1],
-      #   [:registerToGlobal, :@_1, :foundExpression],
-      # ],
+      instructions: [
+        [:globalToRegister, :rTrue, :@_1],
+        [:registerToGlobal, :@_1, :foundExpression],
+      ],
       children: {}
 
     assert_machine root[:ast],
