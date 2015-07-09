@@ -37,6 +37,14 @@ class Defs
       name.start_with? "$"
     end
 
+    def register?(name)
+      name.start_with? "@"
+    end
+
+    def set_value?(instr)
+      instr.include? "<-"
+    end
+
     def global_name(name)
       name[1..-1].intern
     end
@@ -51,9 +59,43 @@ class Defs
     def parse_instruction(instr)
       if run_machine? instr
         parse_run_machine instr
+      elsif set_value? instr
+        parse_set_value instr
       else
-        return instr
+        instructions << instr
+        return
         raise "What to do with: #{instr.inspect}"
+      end
+    end
+
+          # -[[:globalToRegister, :currentBinding, :@_1],
+          #     - [:setKey, :@_1, :returnValue, :@value]]
+          #   +["$currentBinding.returnValue <- @value"]
+    def parse_set_value(instr)
+      to_set, value  = split instr, /\s*<-\s*/
+      hash, key      = split to_set, "."
+      value_register = value_to_register value
+      hash_register  = value_to_register hash
+      instructions << [:setKey, hash_register, key.to_s.intern, value_register]
+    end
+
+    def split(str, delimiter)
+      left, right, *rest = str.split(delimiter)
+      raise "What is this: #{rest.inspect}" if rest.any?
+      [left, right]
+    end
+
+    def value_to_register(value)
+      if register? value
+        value.intern
+      elsif global? value
+        global   = global_name value
+        register = new_implicit_register
+        instructions << [:globalToRegister, global, register]
+        register
+      else
+        return value
+        raise "What kind of arg is this: #{value.inspect}"
       end
     end
 
@@ -61,18 +103,7 @@ class Defs
     def parse_run_machine(instr)
       raw_path, *args = instr.chomp(")").split("(")
       machine_path = raw_path.split("/").reject(&:empty?).map(&:intern)
-
-      args = args.map do |arg|
-        if global? arg
-          global   = global_name arg
-          register = new_implicit_register
-          instructions << [:globalToRegister, global, register]
-          register
-        else
-          raise "What kind of arg is this: #{arg.inspect}"
-        end
-      end
-
+      args         = args.map { |arg| value_to_register arg }
       instructions << [:runMachine, machine_path, args]
     end
   end

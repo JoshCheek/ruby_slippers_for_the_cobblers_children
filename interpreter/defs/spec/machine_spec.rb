@@ -67,10 +67,10 @@ RSpec.describe Defs do
       description:         "Machine: /emit",
       arg_names:    [:@value],
       register_names:    [],
-      # instructions: [
-      #   [:globalToRegister, :currentBinding, :@_1],
-      #   [:setKey, :@_1, :returnValue, :@value],
-      # ],
+      instructions: [
+        [:globalToRegister, :currentBinding, :@_1],
+        [:setKey, :@_1, :returnValue, :@value],
+      ],
       children: {}
 
     assert_machine root[:reemit],
