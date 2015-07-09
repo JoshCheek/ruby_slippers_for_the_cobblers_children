@@ -44,6 +44,8 @@ $ npm run exec -- which babel ^/dev/null
 > exec which babel
 
 /Users/josh/code/ruby_slippers_for_the_cobblers_children/interpreter/node_modules/.bin/babel
+
+$ env NODE_PATH=src mocha --compilers js:babel/register --watch
 ```
 
 Tooling
