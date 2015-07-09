@@ -3,7 +3,7 @@ class Defs
     new parse(string)
   end
 
-  ATTRIBUTES = [:name, :namespace, :arg_names, :description, :register_names].freeze
+  ATTRIBUTES = [:name, :namespace, :arg_names, :description, :register_names, :instructions].freeze
 
   def initialize(defn)
     @defn = defn
@@ -31,12 +31,12 @@ class Defs
 
   attr_reader :children
 
-  def self.parse(str, name: :root, arg_names: [], namespace: [], description: "Machine: /")
+  def self.parse(str, name: :root, arg_names: [], namespace: [], description: "Machine: /", instructions: [])
     { name:           name,
       description:    description || "Machine: #{["", *namespace, name].join '/'}",
       arg_names:      arg_names,
       register_names: [],
-      instructions:   [],
+      instructions:   instructions,
       namespace:      namespace,
       children:       str.split(/^(?=\w)/)
                          .map { |machine_def|
@@ -48,19 +48,24 @@ class Defs
                              rest = rest.drop(1)
                            end
 
-                           instr_lines     = rest.take_while { |line| line !~ /^\w+:/ }
-                           rest            = rest.drop(instr_lines.length)
-                           child_namespace = namespace
-                           child_namespace += [name] unless name == :root
+                           raw_instrs = rest.take_while { |line| line !~ /^\w+:/ }
+                           rest        = rest.drop(raw_instrs.length)
                            [ child_name, parse( rest.join("\n"),
-                                                name: child_name,
-                                                description: child_desc,
-                                                arg_names: arg_names,
-                                                namespace: child_namespace
+                                                name:         child_name,
+                                                description:  child_desc,
+                                                arg_names:    arg_names,
+                                                namespace:    namespace + (name == :root ? [] : [name]),
+                                                instructions: parse_instructions(raw_instrs),
                                               )
                            ]
                          }.to_h
     }
+  end
+
+  def self.parse_instructions(raw_instructions)
+    raw_instructions
+    # but got ["/ast($ast)"]
+    [[:globalToRegister, :ast, :@_1], [:runMachine, [:ast], [:@_1]]]
   end
 
 end

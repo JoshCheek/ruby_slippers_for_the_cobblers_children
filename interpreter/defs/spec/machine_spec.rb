@@ -4,14 +4,12 @@ RSpec.describe Defs do
   def assert_machine(machine, assertions)
     assertions.each do |attr, expected|
       case attr
-      when :name, :namespace, :description, :arg_names, :register_names
+      when :name, :namespace, :description, :arg_names, :register_names, :instructions
         actual = machine.__send__ attr
         msg = "Expected\n#{machine.inspect.gsub(/^/, '  ')}.#{attr}\n"\
               "    to eq   #{expected.inspect}\n"\
               "    but got #{actual.inspect}"
         expect(actual).to eq(expected), msg
-      when :instructions
-        # FIXME
       when :children
         expected.each do |child_name, child_assertions|
           assert_machine machine[child_name], child_assertions
@@ -57,10 +55,10 @@ RSpec.describe Defs do
       description:         "The main machine, kicks everything else off",
       arg_names:    [],
       register_names:    [],
-      # instructions: [
-      #   [:globalToRegister, :ast, :@_1],
-      #   [:runMachine, [:ast], [:@_1]],
-      # ],
+      instructions: [
+        [:globalToRegister, :ast, :@_1],
+        [:runMachine, [:ast], [:@_1]],
+      ],
       children: {}
 
     assert_machine root[:emit],
