@@ -5,10 +5,12 @@ class Defs
     end
 
     def initialize(raw_instructions)
-      @raw_instructions = raw_instructions
+      self.implicit_registers = []
+      self.instructions       = []
+      self.raw_instructions   = raw_instructions
     end
 
-    attr_accessor :raw_instructions
+    attr_accessor :raw_instructions, :instructions, :implicit_registers
 
     # /ast($ast)
     #   globalToRegister :ast :@_1
@@ -27,14 +29,13 @@ class Defs
         return [[:runMachine, [:machineName], []]]
       end
 
-      state = { instructions: [], implicit_registers: [] }
-      raw_instructions.each { | instr| parse_instr instr, state }
-      state.fetch :instructions
+      raw_instructions.each { | instr| parse_instr instr }
+      instructions
     end
 
-    def parse_instr(instr, state)
+    def parse_instr(instr)
       if run_machine? instr
-        parse_run_machine instr, state
+        parse_run_machine instr
       else
         return instr
         raise "What to do with: #{instr.inspect}"
@@ -53,31 +54,30 @@ class Defs
       name[1..-1].intern
     end
 
-    def add_implicit(state)
-      registers = state.fetch :implicit_registers
-      i = registers.last.to_s[/\d+/].to_i.next
+    def new_implicit_register
+      i = implicit_registers.last.to_s[/\d+/].to_i.next
       register = :"@_#{i}"
-      registers << register
+      implicit_registers << register
       register
     end
 
     # /ast($ast)
-    def parse_run_machine(instr, state)
+    def parse_run_machine(instr)
       raw_path, *args = instr.chomp(")").split("(")
       machine_path = raw_path.split("/").reject(&:empty?).map(&:intern)
 
       args = args.map { |arg|
         if global? arg
           global   = global_name arg
-          register = add_implicit(state)
-          state[:instructions] << [:globalToRegister, global, register]
+          register = new_implicit_register
+          instructions << [:globalToRegister, global, register]
           register
         else
           raise "What kind of arg is this: #{arg.inspect}"
         end
       }
 
-      state[:instructions] << [:runMachine, machine_path, args]
+      instructions << [:runMachine, machine_path, args]
     end
   end
 end
