@@ -1,7 +1,7 @@
 require 'defs/parse_instructions'
 class Defs
-  class Parse
-    def self.root(def_string)
+  class ParseMachine
+    def self.from_root(def_string)
       defn_with_root = "root:\n  > Machine /\n" << def_string.gsub(/^/, '  ')
       call defn_with_root
     end
@@ -47,7 +47,7 @@ class Defs
 
     def parse_children(children_str)
       children_str.split(/^(?=\w)/)
-                  .map { |s| Parse.call s.strip, child_namespace }
+                  .map { |s| ParseMachine.call s.strip, child_namespace }
                   .map { |c| [c[:name], c] }
                   .to_h
     end

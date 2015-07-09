@@ -1,8 +1,8 @@
-require 'defs/parse'
+require 'defs/parse_machine'
 
 class Defs
   def self.from_string(def_string)
-    new Parse.root(def_string)
+    new ParseMachine.from_root(def_string)
   end
 
   ATTRIBUTES = [:name, :namespace, :arg_names, :description, :register_names, :instructions].freeze
