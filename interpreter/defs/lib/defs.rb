@@ -35,15 +35,20 @@ class Defs
 
   attr_reader :children
 
+  def self.description_for(attrs)
+    ns   = attrs.fetch :namespace
+    name = attrs.fetch :name
+    desc = attrs.fetch :desc, nil
+    desc = "Machine: " << ["", *ns, name].join("/")
+  end
+
   def self.parse(body, attrs)
     namespace    = attrs.fetch :namespace
     current_args = attrs.fetch :args
     current_name = attrs.fetch :name
-    current_desc = attrs.fetch :desc, nil
-    current_desc ||= "Machine: " << [*namespace, current_name].inject("") { |d, n| "#{d}/#{n}" }
 
     { name:           current_name,
-      desc:           current_desc,
+      desc:           description_for(attrs),
       arg_names:      current_args,
       register_names: [],
       instructions:   [],
