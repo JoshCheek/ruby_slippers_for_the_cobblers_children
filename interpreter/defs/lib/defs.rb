@@ -31,43 +31,39 @@ class Defs
 
   attr_reader :children
 
-  def self.parse_body(str, name: :root, args: [], namespace: [], desc: "Machine: /", instructions: [])
-    child_namespace = [*namespace, name]
-    child_namespace.pop if name == :root
+  def self.parse_body(str, name: :root, args: [], ns: [], desc: "Machine: /", instrs: [])
+    child_ns = [*ns, name].tap { |ns| ns.pop if name == :root }
     { name:           name,
-      description:    desc || "Machine: #{["", *namespace, name].join '/'}",
+      description:    desc || "Machine: #{["", *ns, name].join '/'}",
       arg_names:      args,
       register_names: [],
-      instructions:   instructions,
-      namespace:      namespace,
-      children:       str.split(/^(?=\w)/).map { |s| parse_machine s.strip, child_namespace }.map { |c| [c[:name], c] }.to_h
+      instructions:   instrs,
+      namespace:      ns,
+      children:       str.split(/^(?=\w)/)
+                         .map { |s| parse_defn s.strip, child_ns }
+                         .map { |c| [c[:name], c] }
+                         .to_h
     }
   end
 
-  def self.parse_machine(str, namespace)
+  def self.parse_defn(str, ns)
     first, *rest = str.strip.lines.map { |l| l.gsub /^  /, "" }
-    child_name, *arg_names = first.split(/\s+|\s*:\s*/).map(&:intern)
+    name,  *args = first.split(/\s+|\s*:\s*/).map(&:intern)
 
     if rest.first.start_with? '>'
-      child_desc = rest.first[/(?<=> ).*/]
+      desc = rest.first[/(?<=> ).*/]
       rest = rest.drop(1)
     end
 
-    raw_instrs = rest.take_while { |line| line !~ /^\w+:/ }
-    rest        = rest.drop(raw_instrs.length)
-    parse_body( rest.join("\n"),
-                name:         child_name,
-                desc:         child_desc,
-                args:         arg_names,
-                namespace:    namespace,
-                instructions: parse_instructions(raw_instrs),
-              )
+    instrs = rest.take_while { |line| line !~ /^\w+:/ }
+    body   = rest.drop(instrs.length).join("\n")
+
+    parse_body body, name: name, desc: desc, args: args, ns: ns, instrs: parse_instrs(instrs)
   end
 
-  def self.parse_instructions(raw_instructions)
-    raw_instructions
+  def self.parse_instrs(instrs)
+    instrs
     # but got ["/ast($ast)"]
     [[:globalToRegister, :ast, :@_1], [:runMachine, [:ast], [:@_1]]]
   end
-
 end
