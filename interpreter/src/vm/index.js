@@ -1,15 +1,15 @@
-const stateMachines = {
-  step: require('./state_machines')
-}
+const buildWorld = require('./build_world')
 
 const VM = function(world) {
   this.world = world
 }
 
+VM.bootstrap = function(ast) {
+  return new VM(buildWorld(ast))
+}
+
 VM.prototype.nextExpression = function() {
-  const statestack  = this.world.statestack
-  while(!stateMachines.step(this, statestack)) { }
-  return this.currentExpression()
+  return this.world.mainMachine.nextExpression()
 }
 
 VM.prototype.currentBinding = function() {
@@ -27,11 +27,6 @@ VM.prototype.setCurrentExpression = function(value) {
 
 VM.prototype.lookup = function(id) {
   return this.world.allObjects[id]
-}
-
-const buildWorld = require('./build_world')
-VM.bootstrap = function(ast) {
-  return new VM(buildWorld(ast))
 }
 
 module.exports = VM

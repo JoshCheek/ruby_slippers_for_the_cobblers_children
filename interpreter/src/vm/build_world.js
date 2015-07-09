@@ -1,4 +1,5 @@
 module.exports = buildWorld
+const Machines = require("./load_machines")({})
 
 function buildWorld(ast) {
   // All Objects
@@ -71,12 +72,12 @@ function buildWorld(ast) {
 
   // put it all together
   const world = {
-    ast:        ast,
-    statestack: [{name: "start", registers: {}}],
-    rNil:       rNil,
-    rTrue:      rTrue,
-    callstack:  callstack,
-    allObjects: allObjects
+    mainMachine: Machines.main(),
+    ast:         ast,
+    rNil:        rNil,
+    rTrue:       rTrue,
+    callstack:   callstack,
+    allObjects:  allObjects
   }
 
   return world
