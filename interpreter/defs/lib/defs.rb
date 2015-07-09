@@ -2,7 +2,7 @@ require 'defs/parse'
 
 class Defs
   def self.from_string(def_string)
-    new Parse.new(def_string).call
+    new Parse.root(def_string)
   end
 
   ATTRIBUTES = [:name, :namespace, :arg_names, :description, :register_names, :instructions].freeze

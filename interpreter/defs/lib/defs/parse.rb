@@ -1,48 +1,68 @@
 class Defs
   class Parse
-    def initialize(def_string)
-      @def_string = def_string
+    def self.root(def_string)
+      defn_with_root = "root:\n  > Machine /\n" << def_string.gsub(/^/, '  ')
+      call defn_with_root
     end
 
+    def self.call(def_string, namespace=[])
+      new(def_string, namespace).call
+    end
+
+    def initialize(def_string, namespace)
+      self.def_string = def_string
+      self.namespace  = namespace
+    end
+
+      require 'pp'
     def call
-      defn = remove_comments(@def_string)
-      parse_body defn
+      str                        = remove_comments def_string
+      first, *rest               = str.strip.lines.map { |l| l.gsub(/^  /, "").chomp }
+      self.name, *self.arg_names = first.split(/\s+|\s*:\s*/).map(&:intern)
+
+      if rest.first.start_with? '>'
+        self.description = rest.first[/(?<=> ).*/]
+        rest = rest.drop(1)
+      end
+
+      raw_instrs = rest.take_while { |line| line !~ /^\w+:/ }
+      rest       = rest.drop(raw_instrs.length)
+      self.instructions = parse_instrs(raw_instrs)
+
+      self.children = rest.join("\n")
+                          .split(/^(?=\w)/)
+                          .map { |s| Parse.call s.strip, child_namespace }
+                          .map { |c| [c[:name], c] }
+                          .to_h
+
+      { name:           name,
+        arg_names:      arg_names,
+        description:    description,
+        register_names: [],
+        instructions:   instructions,
+        namespace:      namespace,
+        children:       children,
+      }
     end
 
     private
 
+    attr_accessor :def_string, :name, :arg_names, :namespace, :description, :instructions, :children
+
+    def description
+      @description || "Machine: #{machine_path}"
+    end
+
+    def machine_path
+      ["", *child_namespace].join("/")
+    end
+
+    def child_namespace
+      [*namespace, name].tap { |ns| ns.pop if name == :root }
+    end
+
     def remove_comments(string)
       string.gsub(/^\s*#.*\n/, '')
-    end
-
-    def parse_body(str, name: :root, args: [], ns: [], desc: "Machine: /", instrs: [])
-      child_ns = [*ns, name].tap { |ns| ns.pop if name == :root }
-      { name:           name,
-        description:    desc || "Machine: #{["", *ns, name].join '/'}",
-        arg_names:      args,
-        register_names: [],
-        instructions:   instrs,
-        namespace:      ns,
-        children:       str.split(/^(?=\w)/)
-                           .map { |s| parse_defn s.strip, child_ns }
-                           .map { |c| [c[:name], c] }
-                           .to_h
-      }
-    end
-
-    def parse_defn(str, ns)
-      first, *rest = str.strip.lines.map { |l| l.gsub /^  /, "" }
-      name,  *args = first.split(/\s+|\s*:\s*/).map(&:intern)
-
-      if rest.first.start_with? '>'
-        desc = rest.first[/(?<=> ).*/]
-        rest = rest.drop(1)
-      end
-
-      instrs = rest.take_while { |line| line !~ /^\w+:/ }
-      body   = rest.drop(instrs.length).join("\n")
-
-      parse_body body, name: name, desc: desc, args: args, ns: ns, instrs: parse_instrs(instrs)
     end
 
     # /ast($ast)
