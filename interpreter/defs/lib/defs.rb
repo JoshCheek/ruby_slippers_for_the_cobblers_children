@@ -1,6 +1,6 @@
 class Defs
   def self.from_string(string)
-    new parse(string)
+    new parse_body(string)
   end
 
   ATTRIBUTES = [:name, :namespace, :arg_names, :description, :register_names, :instructions].freeze
@@ -31,35 +31,37 @@ class Defs
 
   attr_reader :children
 
-  def self.parse(str, name: :root, arg_names: [], namespace: [], description: "Machine: /", instructions: [])
+  def self.parse_body(str, name: :root, args: [], namespace: [], desc: "Machine: /", instructions: [])
+    child_namespace = [*namespace, name]
+    child_namespace.pop if name == :root
     { name:           name,
-      description:    description || "Machine: #{["", *namespace, name].join '/'}",
-      arg_names:      arg_names,
+      description:    desc || "Machine: #{["", *namespace, name].join '/'}",
+      arg_names:      args,
       register_names: [],
       instructions:   instructions,
       namespace:      namespace,
-      children:       str.split(/^(?=\w)/)
-                         .map { |machine_def|
-                           first, *rest = machine_def.strip.lines.map { |l| l.gsub /^  /, "" }
-                           child_name, *arg_names = first.split(/\s+|\s*:\s*/).map(&:intern)
-
-                           if rest.first.start_with? '>'
-                             child_desc = rest.first[/(?<=> ).*/]
-                             rest = rest.drop(1)
-                           end
-
-                           raw_instrs = rest.take_while { |line| line !~ /^\w+:/ }
-                           rest        = rest.drop(raw_instrs.length)
-                           [ child_name, parse( rest.join("\n"),
-                                                name:         child_name,
-                                                description:  child_desc,
-                                                arg_names:    arg_names,
-                                                namespace:    namespace + (name == :root ? [] : [name]),
-                                                instructions: parse_instructions(raw_instrs),
-                                              )
-                           ]
-                         }.to_h
+      children:       str.split(/^(?=\w)/).map { |s| parse_machine s.strip, child_namespace }.map { |c| [c[:name], c] }.to_h
     }
+  end
+
+  def self.parse_machine(str, namespace)
+    first, *rest = str.strip.lines.map { |l| l.gsub /^  /, "" }
+    child_name, *arg_names = first.split(/\s+|\s*:\s*/).map(&:intern)
+
+    if rest.first.start_with? '>'
+      child_desc = rest.first[/(?<=> ).*/]
+      rest = rest.drop(1)
+    end
+
+    raw_instrs = rest.take_while { |line| line !~ /^\w+:/ }
+    rest        = rest.drop(raw_instrs.length)
+    parse_body( rest.join("\n"),
+                name:         child_name,
+                desc:         child_desc,
+                args:         arg_names,
+                namespace:    namespace,
+                instructions: parse_instructions(raw_instrs),
+              )
   end
 
   def self.parse_instructions(raw_instructions)
