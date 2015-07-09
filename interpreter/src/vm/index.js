@@ -15,7 +15,7 @@ export default class VM {
 
   nextExpression() {
     const statestack = this.world.statestack
-    while(!this.world.mainMachine.step(this, statestack)) { }
+    while(!this.world.mainMachine.step()) { }
     return this.currentExpression()
   }
 
