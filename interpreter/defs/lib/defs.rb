@@ -38,30 +38,28 @@ class Defs
       register_names: [],
       instructions:   [],
       namespace:      namespace,
-      children:       str
-                        .split(/^(?=\w)/)
-                        .map(&:strip)
-                        .map { |machine_def|
-                          first, *rest = machine_def.lines.map { |l| l.gsub /^  /, "" }
-                          child_name,  *args = first.split(/\s+|\s*:\s*/).map(&:intern)
-                          if rest.first.start_with? '>'
-                            child_desc = rest.first[/(?<=> ).*/]
-                            rest = rest.drop(1)
-                          end
+      children:       str.split(/^(?=\w)/)
+                         .map { |machine_def|
+                           first, *rest = machine_def.strip.lines.map { |l| l.gsub /^  /, "" }
+                           child_name,  *args = first.split(/\s+|\s*:\s*/).map(&:intern)
+                           if rest.first.start_with? '>'
+                             child_desc = rest.first[/(?<=> ).*/]
+                             rest = rest.drop(1)
+                           end
 
-                          instr_lines     = rest.take_while { |line| line !~ /^\w+:/ }
-                          rest            = rest.drop(instr_lines.length)
-                          child_namespace = namespace
-                          child_namespace += [name] unless name == :root
-                          parse rest.join("\n"),
-                                name:      child_name,
-                                desc:      child_desc,
-                                args:      args,
-                                namespace: child_namespace
-                        }
-                        .each_with_object({}) { |defn, children|
-                          children[defn[:name]] = defn
-                        },
+                           instr_lines     = rest.take_while { |line| line !~ /^\w+:/ }
+                           rest            = rest.drop(instr_lines.length)
+                           child_namespace = namespace
+                           child_namespace += [name] unless name == :root
+                           parse rest.join("\n"),
+                                 name:      child_name,
+                                 desc:      child_desc,
+                                 args:      args,
+                                 namespace: child_namespace
+                         }
+                         .each_with_object({}) { |defn, children|
+                           children[defn[:name]] = defn
+                         },
     }
   end
 
