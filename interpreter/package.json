@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "babel": "~4.7",
+    "jshint": "^2.8.0",
     "mocha": "~2.2"
   },
   "files": [
