@@ -1,0 +1,37 @@
+main:
+  > The main machine, kicks everything else off
+  /ast($ast)
+
+emit: @value
+  $currentBinding.returnValue <- @value
+
+reemit:
+  $foundExpression <- $rTrue
+
+ast: @ast
+  > Interpreters for language constructs
+
+  self <- /ast/*[@ast.type]
+
+  nil:
+    /emit($rNil)
+
+  false:
+    /emit($rFalse)
+
+  true:
+    /emit($rTrue)
+
+  expressions: @ast
+    for @expression in @ast.expressions
+      /ast(@expression)
+    /reemit
+
+  # class: @ast
+  #   @class      <- /ast/constant(@ast.name_lookup)
+  #   @superclass <- /ast/constant(@ast.superclass)
+  #   if! @class
+  #     @class <- /reopen(@ast.name_lookup, @superclass)
+  #   /pushBinding(@class)
+  #   /ast(@ast.body)
+  #   /reemit
