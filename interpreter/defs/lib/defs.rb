@@ -1,10 +1,6 @@
 class Defs
   def self.from_string(string)
-    new parse string,
-              name:      :root,
-              desc:      "Container for all the machines",
-              args:      [],
-              namespace: []
+    new parse(string)
   end
 
   ATTRIBUTES = [:name, :namespace, :arg_names, :desc, :register_names].freeze
@@ -35,21 +31,19 @@ class Defs
 
   attr_reader :children
 
-  def self.parse(body, args:, namespace:, desc:nil, **attrs)
-    current_name = attrs.fetch :name
-
-    { name:           current_name,
-      desc:           desc || "Machine: #{["", *namespace, current_name].join '/'}",
+  def self.parse(str, name: :root, args: [], namespace: [], desc: "Machine: /")
+    { name:           name,
+      desc:           desc || "Machine: #{["", *namespace, name].join '/'}",
       arg_names:      args,
       register_names: [],
       instructions:   [],
       namespace:      namespace,
-      children:       body
+      children:       str
                         .split(/^(?=\w)/)
                         .map(&:strip)
                         .map { |machine_def|
                           first, *rest = machine_def.lines.map { |l| l.gsub /^  /, "" }
-                          name,  *args = first.split(/\s+|\s*:\s*/).map(&:intern)
+                          child_name,  *args = first.split(/\s+|\s*:\s*/).map(&:intern)
                           if rest.first.start_with? '>'
                             child_desc = rest.first[/(?<=> ).*/]
                             rest = rest.drop(1)
@@ -58,9 +52,9 @@ class Defs
                           instr_lines     = rest.take_while { |line| line !~ /^\w+:/ }
                           rest            = rest.drop(instr_lines.length)
                           child_namespace = namespace
-                          child_namespace += [current_name] unless current_name == :root
+                          child_namespace += [name] unless name == :root
                           parse rest.join("\n"),
-                                name:      name,
+                                name:      child_name,
                                 desc:      child_desc,
                                 args:      args,
                                 namespace: child_namespace
