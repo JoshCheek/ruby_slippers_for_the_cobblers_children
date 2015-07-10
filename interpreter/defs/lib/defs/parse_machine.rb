@@ -34,7 +34,6 @@ class Defs
       { name:           name,
         arg_names:      arg_names,
         description:    description,
-        register_names: [],
         instructions:   instructions,
         namespace:      namespace,
         children:       children,

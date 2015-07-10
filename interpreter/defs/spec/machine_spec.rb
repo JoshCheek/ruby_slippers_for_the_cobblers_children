@@ -35,7 +35,6 @@ RSpec.describe Defs do
       namespace:      [],
       description:    "The main machine, kicks everything else off",
       arg_names:      [],
-      register_names: [],
       instructions:   [
         [:globalToRegister, :ast, :@_1],
         [:runMachine, [:ast], [:@_1]],
@@ -47,7 +46,6 @@ RSpec.describe Defs do
       namespace:    [],
       description:         "Machine: /emit",
       arg_names:    [:@value],
-      register_names:    [],
       instructions: [
         [:globalToRegister, :currentBinding, :@_1],
         [:setKey, :@_1, :returnValue, :@value],
@@ -59,7 +57,6 @@ RSpec.describe Defs do
       namespace:    [],
       description:         "Machine: /reemit",
       arg_names:    [],
-      register_names:    [],
       instructions: [
         [:globalToRegister, :rTrue, :@_1],
         [:registerToGlobal, :@_1, :foundExpression],
@@ -71,7 +68,6 @@ RSpec.describe Defs do
       namespace:    [],
       description:         "Interpreters for language constructs",
       arg_names:    [:@ast],
-      register_names:    [],
       instructions: [
         [:getKey, :@_1, :@ast, :type],
         [:becomeMachine, [:ast, :@_1]],
@@ -82,7 +78,6 @@ RSpec.describe Defs do
           namespace:    [:ast],
           description:         "Machine: /ast/nil",
           arg_names:    [],
-          register_names:    [],
           instructions: [
             [:globalToRegister, :rNil, :@_1],
             [:runMachine, [:emit], [:@_1]],
@@ -94,7 +89,6 @@ RSpec.describe Defs do
           namespace:    [:ast],
           description:         "Machine: /ast/expressions",
           arg_names:    [:@ast],
-          # register_names: [:@expression],
           instructions: [
             [:setInt, :@_1, 0],
             [:getKey, :@_2, :@ast, :expressions],
@@ -136,7 +130,6 @@ RSpec.describe Defs do
         n: {
           name:           :n,
           description:    "d",
-          register_names: [],
           instructions: [
             [:runMachine, [:machineName], []],
           ],
@@ -165,7 +158,6 @@ RSpec.describe Defs do
         namespace:      [],
         arg_names:      [:@arg1],
         description:    "desc1",
-        register_names: [],
         instructions:   [[:runMachine, [:machine1], []]],
         children: {
           n2: {
@@ -173,7 +165,6 @@ RSpec.describe Defs do
             namespace:      [:n1],
             arg_names:      [:@arg2],
             description:    "desc2",
-            register_names: [],
             instructions:   [[:runMachine, [:machine2], []]],
             children:       {}
           }
@@ -202,7 +193,7 @@ RSpec.describe Defs do
   def assert_machine(machine, assertions)
     assertions.each do |attr, expected|
       case attr
-      when :name, :namespace, :description, :arg_names, :register_names, :instructions
+      when :name, :namespace, :description, :arg_names, :instructions
         actual = machine.__send__ attr
         msg = "Expected\n#{machine.inspect.gsub(/^/, '  ')}.#{attr}\n"\
               "    to eq   #{expected.inspect}\n"\

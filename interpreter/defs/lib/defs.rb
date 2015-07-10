@@ -6,7 +6,7 @@ class Defs
     new ParseMachine.from_root(def_string)
   end
 
-  ATTRIBUTES = [:name, :namespace, :arg_names, :description, :register_names, :instructions].freeze
+  ATTRIBUTES = [:name, :namespace, :arg_names, :description, :instructions].freeze
 
   def initialize(defn)
     @defn = defn
