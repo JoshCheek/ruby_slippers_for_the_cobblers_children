@@ -1,9 +1,11 @@
 #!/usr/bin/env ruby
 
 # validate args
-infile, outfile, *rest = ARGV
+infile, outfile, template, *rest = ARGV
+template ||= "HERE"
 if !(infile && outfile && rest.empty?)
-  $stderr.puts "Expected args: infile or dash (stdin), outfile or dash(stdout)"
+  $stderr.puts "Expected args: infile or dash (stdin), outfile or dash(stdout), [template]"
+  $stderr.puts "  Example template: 'export default function buildMachines() { HERE }'"
   exit 1
 end
 
@@ -33,8 +35,10 @@ rescue Errno::ENOENT
 end
 
 # write result
+result = template.sub("HERE", json)
+result << "\n" unless result.end_with? "\n"
 if outfile == '-'
-  $stdout.puts json
+  $stdout.puts result
 else
-  File.write outfile, json
+  File.write outfile, result
 end

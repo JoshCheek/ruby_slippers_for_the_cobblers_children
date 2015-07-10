@@ -22,13 +22,16 @@ end
 namespace :interpreter do
   desc 'Run interpreter test suite (server needs to be running)'
   task :test do
-    sh 'interpreter/bin/test'
+    # sh 'interpreter/bin/test'
     sh 'mrspec interpreter/defs -I interpreter/defs/lib interpreter/defs/spec'
   end
 
   desc 'Generate the machine definitions'
   task :definitions do
-    sh 'interpreter/defs/bin/generate  interpreter/the_machines.definitions  interpreter/src/vm/machine_definitions.json'
+    infile   = "interpreter/the_machines.definitions"
+    outfile  = "interpreter/src/vm/machine_definitions.js"
+    template = "export default () => { return HERE }".shellescape
+    sh "interpreter/defs/bin/generate  #{infile}  #{outfile}  #{template}"
   end
 end
 
