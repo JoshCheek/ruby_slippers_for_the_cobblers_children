@@ -145,6 +145,42 @@ RSpec.describe Defs do
       }
   end
 
+  it 'converts the thing to JSON' do
+    root = Defs.from_string <<-DEFS.gsub(/^    /, "")
+    n1: @arg1
+      > desc1
+      /machine1()
+
+      n2: @arg2
+        > desc2
+        /machine2()
+    DEFS
+
+    json_data = root.as_json
+    expect(json_data.to_json).to eq root.to_json
+    expect(json_data[:name]).to eq :root
+    expect(json_data[:children]).to eq \
+      n1: {
+        name:           :n1,
+        namespace:      [],
+        arg_names:      [:@arg1],
+        description:    "desc1",
+        register_names: [],
+        instructions:   [[:runMachine, [:machine1], []]],
+        children: {
+          n2: {
+            name:           :n2,
+            namespace:      [:n1],
+            arg_names:      [:@arg2],
+            description:    "desc2",
+            register_names: [],
+            instructions:   [[:runMachine, [:machine2], []]],
+            children:       {}
+          }
+        }
+      }
+  end
+
   def assert_instructions_equal(expected_instrs, actual_instrs)
     expected_instrs.zip(actual_instrs).each.with_index do |(einstr, ainstr), index|
       next if einstr == ainstr

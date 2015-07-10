@@ -1,3 +1,4 @@
+require 'json'
 require 'defs/parse_machine'
 
 class Defs
@@ -28,6 +29,17 @@ class Defs
     end
     attrs << "\n  children: #{children.keys}"
     "#<#{self.class}:#{attrs.join}\n>"
+  end
+
+  def to_json
+    as_json.to_json
+  end
+
+  def as_json
+    children   = children().map { |k, v| [k, v.as_json] }.to_h
+    key_values = ATTRIBUTES.map { |name| [name, @defn.fetch(name)] }
+    key_values << [:children, children]
+    key_values.to_h
   end
 
   private
