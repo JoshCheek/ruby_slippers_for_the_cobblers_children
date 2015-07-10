@@ -25,6 +25,11 @@ namespace :interpreter do
     sh 'interpreter/bin/test'
     sh 'mrspec interpreter/defs -I interpreter/defs/lib interpreter/defs/spec'
   end
+
+  desc 'Generate the machine definitions'
+  task :definitions do
+    sh 'interpreter/defs/bin/generate  interpreter/the_machines.definitions  interpreter/src/vm/machine_definitions.json'
+  end
 end
 
 # parser tasks
