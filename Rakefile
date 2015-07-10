@@ -23,6 +23,7 @@ namespace :interpreter do
   desc 'Run interpreter test suite (server needs to be running)'
   task :test do
     sh 'interpreter/bin/test'
+    sh 'mrspec interpreter/defs -I interpreter/defs/lib interpreter/defs/spec'
   end
 end
 
