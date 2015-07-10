@@ -7,7 +7,7 @@ class Defs
     def initialize(raw_instructions)
       self.implicit_registers = []
       self.instructions       = []
-      self.raw_instructions   = raw_instructions
+      self.raw_instructions   = raw_instructions.dup
     end
 
     attr_accessor :raw_instructions, :instructions, :implicit_registers
@@ -25,7 +25,9 @@ class Defs
     #     /ast(@expression)
     #   /reemit
     def call
-      raw_instructions.each { |instr| parse_instruction instr }
+      until raw_instructions.empty?
+        parse_instruction raw_instructions.shift
+      end
       instructions
     end
 
@@ -69,9 +71,57 @@ class Defs
       register
     end
 
+    def for_loop?(instr)
+      instr.start_with?("for ")
+    end
+
+    def new_counter(initial_value)
+      raise "handle_this: #{initial_value.inspect}" unless initial_value.kind_of? Fixnum
+      register = new_implicit_register
+      instructions << [:setInt, register, initial_value]
+      register
+    end
+
     def parse_instruction(instr)
       if no_instruction? instr
         # noop
+      elsif for_loop? instr
+        # for @expression in @ast.expressions
+        #   /ast(@expression)
+        # [[:setInt, :@_1, 0],
+        #  [:getKey, :@_2, :@ast, :expressions],
+        #  [:getKey, :@_3, :@_2, :length],
+        #  [:label, :forloop],
+        #    [:eq, :@_4, :@_1, :@_3],
+        #    [:jumpToIf, :forloop_end, :@_4],
+        #    [:getKey, :@expression, :@_2, :@_1],
+        #    [:runMachine, [:ast], [:@expression]],
+        #    [:add, :@_1, 1],
+        #    [:jumpTo, :forloop],
+        #  [:label, :forloop_end]]
+        kw_for, var, kw_in, collection_expr, *rest = instr.split
+        raise instr unless kw_for == "for" && kw_in == "in" && rest.empty?
+        index_register      = new_counter(0)
+        collection_register = value_to_register(collection_expr)
+        length_register     = value_to_register "#{collection_register}.length"
+
+        # @_1 = index_register      | i = 0
+        # @_2 = collection_register | @ast.expressions
+        # @_3 = length_register     | @ast.expressions.length
+        instructions << [:label, :forloop]
+          eq_register = new_implicit_register
+          instructions << [:eq, eq_register, index_register, length_register]
+          instructions << [:jumpToIf, :forloop_end, eq_register]
+          instructions << [:getKey, var.intern, collection_register, index_register]
+
+          while raw_instructions.any? && raw_instructions.first.start_with?("  ")
+            parse_instruction raw_instructions.shift[2..-1]
+          end
+
+          instructions << [:add, index_register, 1]
+          instructions << [:jumpTo, :forloop]
+        instructions << [:label, :forloop_end]
+
       elsif run_machine? instr
         parse_run_machine instr
       elsif become_machine? instr
@@ -84,8 +134,6 @@ class Defs
       elsif set_value? instr
         parse_set_value instr
       else
-        instructions << instr
-        return
         raise "What to do with: #{instr.inspect}"
       end
     end

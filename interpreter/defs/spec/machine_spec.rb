@@ -1,25 +1,6 @@
 require 'defs'
 
 RSpec.describe Defs do
-  def assert_machine(machine, assertions)
-    assertions.each do |attr, expected|
-      case attr
-      when :name, :namespace, :description, :arg_names, :register_names, :instructions
-        actual = machine.__send__ attr
-        msg = "Expected\n#{machine.inspect.gsub(/^/, '  ')}.#{attr}\n"\
-              "    to eq   #{expected.inspect}\n"\
-              "    but got #{actual.inspect}"
-        expect(actual).to eq(expected), msg
-      when :children
-        expected.each do |child_name, child_assertions|
-          assert_machine machine[child_name], child_assertions
-        end
-      else
-        raise "No assertion for #{attr.inspect}"
-      end
-    end
-  end
-
   it 'parses this thing' do
     root = Defs.from_string <<-DEFS.gsub(/^    /, "")
     main:
@@ -102,10 +83,10 @@ RSpec.describe Defs do
           description:         "Machine: /ast/nil",
           arg_names:    [],
           register_names:    [],
-          # instructions: [
-          #   [:globalToRegister, :rNil, :@_1],
-          #   [:runMachine, [:emit], [:@_1]],
-          # ],
+          instructions: [
+            [:globalToRegister, :rNil, :@_1],
+            [:runMachine, [:emit], [:@_1]],
+          ],
           children: {}
         },
         expressions: {
@@ -114,22 +95,22 @@ RSpec.describe Defs do
           description:         "Machine: /ast/expressions",
           arg_names:    [:@ast],
           # register_names: [:@expression],
-          # instructions: [
-          #   [:setInt, :@_1, 0],
-          #   [:getKey, :@_2, :@ast, :expressions],
-          #   [:getKey, :@_3, :@_2,  :length],
+          instructions: [
+            [:setInt, :@_1, 0],
+            [:getKey, :@_2, :@ast, :expressions],
+            [:getKey, :@_3, :@_2,  :length],
 
-          #   [:label, :forloop],
-          #     [:eq, :@_4, :@_1, :@_3], # var4 = (index == length)
-          #     [:jumpToIf, :forloop_end, :@_4],
-          #     [:getKey, :@expression, :@_2, :@_1],
-          #     [:runMachine, [:ast], [:@expression]],
-          #     [:add, :@_1, 1],
-          #     [:jumpTo, :forloop],
-          #   [:label, :forloop_end],
+            [:label, :forloop],
+              [:eq, :@_4, :@_1, :@_3], # var4 = (index == length)
+              [:jumpToIf, :forloop_end, :@_4],
+              [:getKey, :@expression, :@_2, :@_1],
+              [:runMachine, [:ast], [:@expression]],
+              [:add, :@_1, 1],
+              [:jumpTo, :forloop],
+            [:label, :forloop_end],
 
-          #   [:runMachine, [:reemit], []],
-          # ],
+            [:runMachine, [:reemit], []],
+          ],
           children: {}
         },
       }
@@ -163,4 +144,46 @@ RSpec.describe Defs do
         }
       }
   end
+
+  def assert_instructions_equal(expected_instrs, actual_instrs)
+    expected_instrs.zip(actual_instrs).each.with_index do |(einstr, ainstr), index|
+      next if einstr == ainstr
+      dim       = "\e[38;5;243m"
+      red       = "\e[31m"
+      blue      = "\e[34m"
+      matches   = expected_instrs.take(index).map { |instrs| "  #{instrs.inspect},\n" }.join
+      missing   = "  " << einstr.inspect << ",\n"
+      present   = "  " << ainstr.inspect << ",\n"
+      remaining = expected_instrs.drop(index.next).map { |instrs| "  #{instrs.inspect},\n" }.join
+
+      msg = "Expected the instructions to be equal, but they aren't :(\n"
+      msg << "#{dim}[#{matches}#{red}#{missing}#{blue}#{present}#{dim}  ...\n#{remaining}#{red}"
+      expect(ainstr).to eq(einstr), msg
+    end
+    expect(actual_instrs.length).to eq expected_instrs.length
+  end
+
+  def assert_machine(machine, assertions)
+    assertions.each do |attr, expected|
+      case attr
+      when :name, :namespace, :description, :arg_names, :register_names, :instructions
+        actual = machine.__send__ attr
+        msg = "Expected\n#{machine.inspect.gsub(/^/, '  ')}.#{attr}\n"\
+              "    to eq   #{expected.inspect}\n"\
+              "    but got #{actual.inspect}"
+        if attr != :instructions
+          expect(actual).to eq(expected), msg
+        else
+          assert_instructions_equal expected, actual
+        end
+      when :children
+        expected.each do |child_name, child_assertions|
+          assert_machine machine[child_name], child_assertions
+        end
+      else
+        raise "No assertion for #{attr.inspect}"
+      end
+    end
+  end
+
 end
