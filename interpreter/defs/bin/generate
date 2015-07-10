@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+
+# validate args
+infile, outfile, *rest = ARGV
+if !(infile && outfile && rest.empty?)
+  $stderr.puts "Expected args: infile or dash (stdin), outfile or dash(stdout)"
+  exit 1
+end
+
+# load lib
+$LOAD_PATH.unshift File.expand_path('../lib', __dir__)
+require 'defs'
+
+# read input
+if infile == '-'
+  input = $stdin.read
+else
+  input = File.read infile
+end
+
+# convert
+defs  = Defs.from_string input
+json  = defs.to_json
+
+
+# pretty print it if available
+begin
+  require 'open3'
+  out, err, status = Open3.capture3("jq", ".", stdin_data: json)
+  json = out if status.success?
+rescue Errno::ENOENT
+  # noop, they don't have jq, just use our output
+end
+
+# write result
+if outfile == '-'
+  $stdout.puts json
+else
+  File.write outfile, json
+end
