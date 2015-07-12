@@ -6,6 +6,7 @@ RSpec.describe Defs do
     main:
       > The main machine, kicks everything else off
       /ast($ast)
+      /ast/nil
 
     emit: @value
       $currentBinding.returnValue <- @value
@@ -38,6 +39,7 @@ RSpec.describe Defs do
       instructions:   [
         [:globalToRegister, :ast, :@_1],
         [:runMachine, [:ast], [:@_1]],
+        [:runMachine, [:ast, :nil], []],
       ],
       children: {}
 
