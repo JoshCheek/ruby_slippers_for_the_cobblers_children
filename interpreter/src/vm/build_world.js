@@ -1,4 +1,7 @@
-const Machines = require("./load_machines")({})
+"use strict";
+
+const defineMachine = require("./machine_definitions"),
+      Machine       = require("./machine")
 
 export default function buildWorld(ast) {
   // All Objects
@@ -51,13 +54,13 @@ export default function buildWorld(ast) {
   rObject.constants["Class"]       = rClass.objectId
 
 
-  // true
-  const rTrueClass = instantiate(rClass)
-  const rTrue      = instantiate(rTrueClass)
-
   // nil
   const rNilClass = instantiate(rClass)
   const rNil      = instantiate(rNilClass)
+
+  // true
+  const rTrueClass = instantiate(rClass)
+  const rTrue      = instantiate(rTrueClass)
 
 
   // callstack
@@ -67,17 +70,19 @@ export default function buildWorld(ast) {
     self:           main.objectId,
     returnValue:    rNil.objectId,
   }
-  const callstack = [toplevelBinding]
 
   // put it all together
   const world = {
-    ast:         ast,
-    rNil:        rNil,
-    rTrue:       rTrue,
-    callstack:   callstack,
-    allObjects:  allObjects
+    ast:            ast,
+    rNil:           rNil,
+    rTrue:          rTrue,
+    currentBinding: toplevelBinding,
+    allObjects:     allObjects
   }
-  world.mainMachine = Machines.main(world)
+
+  // not quite right, should be a data structure, not an object.
+  world.rootMachine = new Machine(world, defineMachine())
+  world.mainMachine = world.rootMachine.child("main")
 
   return world
 }

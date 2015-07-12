@@ -1,71 +1,141 @@
+"use strict"
+
+import {inspect} from "util"
+
+let log = (key, value) =>
+  console.log(`  -- \u001b[34m${key}:\u001b[0m ${inspect(value)}`)
+
 export default {
-  // @register1 = @hashRegister.key
-  getKey: function(valueRegister, key, hashRegister) {
-    this.state.registers[valueRegister] = this.state.registers[hashRegister][key]
-    this.state.instructionPointer++
+  // eg [ "setInt", "@count", 0 ]
+  setInt: (world, machine, registers, register, initialValue) => {
+    registers[register] = initialValue
   },
 
-  // @hash[:key] = @value
-  setKey: function(hashRegister, key, valueRegister) {
-    this.state.registers[hashRegister][key] = this.state.registers[valueRegister]
-    this.state.instructionPointer++
+  // eg [ "add", "@count", 1 ]
+  add: (world, machine, registers, register, quantity) => {
+    if(typeof quantity !== 'number')
+      throw(new Error(`Not a numeber! ${quantity}`))
+    registers[register] += quantity
   },
 
-  // @register = $worldValue
-  globalToRegister: function(worldAttr, register) {
-    // console.log(this)
-    this.state.registers[register] = this.world[worldAttr]
-    this.state.instructionPointer++
+  // eg [ "eq", "@areEqual", "@userName", "@prospectName" ]
+  eq: (world, machine, registers, toRegister, left, right) => {
+    const from   = registers[left],
+          to     = registers[right]
+          result = (from == to)
+    registers[toRegister] = result
   },
 
-  // $worldValue = @registerValue
-  registerToGlobal: function(register, worldAttr) {
-    this.world[worldAttr] = this.state.registers[register]
-    this.state.instructionPointer++
+  // eg [ "getKey", "@name", "@user", "name" ]
+  // note that key may be a direct key, or may be a register
+  // (ie calling a key we don't know its value)
+  getKey: (world, machine, registers, toRegister, hashRegister, key) => {
+    log("registers", registers)
+    log("toRegister", toRegister)
+    log("hashRegister", hashRegister)
+    let prevKey = key
+    log("key", key)
+    if(key[0] === '@') key = registers[key]
+    if(prevKey != key)
+      log("key updated to", key)
+    log("registers[hashRegister]", registers[hashRegister])
+
+    registers[toRegister] = registers[hashRegister][key]
   },
 
-  // @machine.init @args
-  initMachine: function(machineRegister, argsRegister) {
-    console.log(machineRegister, argsRegister)
-    throw(new Error("Figure out how to implement me!"))
+
+  // "true": {
+  //   "name": "true",
+  //   "namespace": [
+  //     "ast"
+  //   ],
+  //   "arg_names": [],
+  //   "description": "Machine: /ast/true",
+  //   "instructions": [
+  //  [ "globalToRegister", "rTrue", "@_1" ],
+  //  [ "runMachine", [ "emit" ], [ "@_1" ]
+  //  ]
+  //   ],
+  //   "children": {}
+  // },
+
+  // eg [ "globalToRegister", "ast", "@_1" ]
+  globalToRegister: (world, machine, registers, globalName, registerName) => {
+    log("global Name", globalName)
+    log("global Value", world[globalName])
+    log("registerName", registerName)
+    registers[registerName] = world[globalName]
   },
 
-  // @machine.run
-  runMachine: function(machineRegister) {
-    throw(new Error("Figure out how to implement me!"))
+  // eg [ "jumpTo", "forloop" ]
+  jumpTo: (world, machine, registers, label) => {
+    machine.setInstructionPointer(machine.labels[label])
   },
 
-  // goto stateName
-  switchStateTo: function(stateName) {
-    this.state.currentState = stateName
-    this.state.instructionPointer = 0
+  // eg [ "jumpToIf", "forloop_end", "@_4" ]
+  jumpToIf: (world, machine, registers, label, conditionRegister) => {
+    if(registers[conditionRegister])
+      machine.setInstructionPointer(machine.labels[label])
   },
 
-  // @ary.each { |@register|
-  for_in: function(aryName, register) {
-    // console.log(this.state)
-    // check the index, if it's too far, jump to the end
-    // otherwise, set the first arg to be the current item in the second arg
-    // and then increment the index
-    this.state.instructionPointer++
-    throw(new Error("Figure out how to implement me!"))
+  // eg [ "label", "forloop_end" ]
+  label: (world, machine, registers, label) => {
+    // noop
   },
 
-  end: function() {
-    // update the instructionPointer to be the start index
-    throw(new Error("Figure out how to implement me!"))
-    this.state.instructionPointer++
+  // eg [ "registerToGlobal", "@_1", "foundExpression" ]
+  registerToGlobal: (world, machine, registers, registerName, globalName) => {
+    world[globalName] = registers[registers]
   },
 
-  // break if @register1 == @register2
-  break_if_eq: function(register1, register2) {
-    // compare the two things, if they are equal,
-    // set the instructionPointer to be the `end` index
-    throw(new Error("Figure out how to implement me!"))
+  // eg [ "setKey", "@_1", "returnValue", "@value" ]
+  setKey: (world, machine, registers, hashRegister, key, valueRegister) => {
+    log('key', key)
+    log('valueRegister', valueRegister)
+    if(key[0] === '@') key = registers[key]
+    registers[hashRegister][key] = registers[valueRegister]
   },
 
-  // self = @register
-  reify: function(register) {
-    throw(new Error("Figure out how to implement me!"))
+  // self <- /ast/@ast.type
+  // eg [ "becomeMachine", [ "ast", "@dynamicName"]],
+  becomeMachine: (world, machine, registers, path) => {
+    let newMachine = world.rootMachine
+    path.forEach((name) => {
+      if(name[0] === "@")
+        newMachine = newMachine.child(registers[name])
+      else
+        newMachine = newMachine.child(name)
+    })
+
+    machine.state = newMachine.state
+    machine.doNotAdvance()
+  },
+
+  // eg [ "runMachine", [ "emit" ], [ "@_1" ] ]
+  runMachine: (world, machine, registers, path, argNames) => {
+    if(!machine.currentChild()) {
+      let newMachine = world.rootMachine
+
+      path.forEach((name) => {
+        if(name[0] === "@")
+          newMachine = newMachine.child(registers[name])
+        else
+          newMachine = newMachine.child(name)
+      })
+
+      let args = argNames.map((name) => registers[name])
+      log("instantiating", newMachine.name())
+      log("with args", args)
+      newMachine.setArgs(args)
+
+      machine.setCurrentChild(newMachine)
+    }
+
+    machine.currentChild().step()
+
+    if(machine.currentChild().isFinished)
+      machine.deleteCurrentChild()
+    else
+      machine.doNotAdvance()
   },
 }

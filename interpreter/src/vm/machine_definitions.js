@@ -78,10 +78,16 @@ export default () => { return {
       "description": "Interpreters for language constructs",
       "instructions": [
         [
+          "getKey",
+          "@_1",
+          "@ast",
+          "type"
+        ],
+        [
           "becomeMachine",
           [
             "ast",
-            "*[@ast.type]"
+            "@_1"
           ]
         ]
       ],

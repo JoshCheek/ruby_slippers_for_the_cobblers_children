@@ -1,59 +1,120 @@
 "use strict";
 
+import util from "util"
 import {inspect} from "util"
-import instructions from "./instructions";
+import instructionCodes from "./instructions"
 
-// TODO: type could be abstract, in which case this is probably wrong
+let log = (key, value) =>
+  console.log(`  \u001b[34m${key}:\u001b[0m ${inspect(value)}`)
+
 export default class Machine {
   constructor(world, state) {
-    this.world = world
-    this.state = state
+    // console.log(`Defining a machine: ${inspect(state)}`)
+    this.isFinished          = false
+    this.world               = world
+    this.state               = state
+
+    // TODO: move these into the definitions
+    state.instructionPointer = 0
+    state.registers = {}
+    state.labels    = {}
+
+    state.labels = {}
+    state.instructions.forEach(
+      ([instr, name], index) => {
+        if(instr === "label")
+          state.labels[name] = index
+    })
+  }
+
+  setArgs(args) {
+    let l1 = args.length, l2 = this.state.arg_names.length
+    if(l1 != l2) throw(new Error(`LENGTHS DO NOT MATCH! expected:${l2}, actual:${l1}`))
+
+    this.state.arg_names.forEach((argName, index) => {
+      this.state.registers[argName] = args[index]
+    })
+  }
+
+  child(name) {
+    const definition = this.state.children[name]
+    // console.log(`FINDING CHILD: ${name}: ${inspect(definition)}`)
+    return new Machine(this.world, definition)
   }
 
   nextExpression() {
-    do { this.step() } while(!this.foundExpression)
+    do { this.step() } while(!this.foundExpression && !this.isFinished)
     return this.currentExpression()
   }
 
   step() {
+    const instruction = this.getInstruction()
+
+    if(this.isFinished) return
+
     this.foundExpression = false
-    let call        = this.currentInstructionCall(),
-        name        = call[0],
-        args        = call.slice(1),
-        instruction = instructions[name]
+    const name = instruction[0],
+          args = instruction.slice(1),
+          code = instructionCodes[name]
 
-    // console.log(`${inspect(instruction)} ${inspect(instructions)}`)
+    console.log(`\n\u001b[44;37m---- ${this.fullname()} ${this.state.instructionPointer}:${name} ${inspect(args)} ---------------------------------------------------\u001b[0m`)
+    log("pre instructionPointer", this.state.instructionPointer)
+    log("pre registers", this.state.registers)
 
-    instruction.apply(this, args)
+    if(!code)
+      throw(new Error(`No instruction: ${name}`))
+    else
+      code(this.world, this, this.state.registers, ...args)
+
+    this.state.instructionPointer++
+    log("post finished", this.isFinished)
+    log("post instructionPointer", this.state.instructionPointer)
+    log("post registers", this.state.registers)
+
+    // throw(new Error(`code: ${util.inspect(code)}`))
   }
 
-  // helpers
-  currentInstructionCall() {
-    let state        = this.currentState(),
-        substate     = state.currentSubstate,
-        ip           = this.state.instructionPointer,
-        instructions = state[substate],
-        instruction  = instruction = instructions[ip]
+  currentChild() {
+    return this.state.currentChild
+  }
 
-    if(instruction === undefined && substate === 'setup') {
-      state.currentSubstate = 'body'
+  setCurrentChild(child) {
+    this.state.currentChild = child
+  }
+
+  deleteCurrentChild() {
+    delete this.state.currentChild
+  }
+
+  doNotAdvance() {
+    this.state.instructionPointer--
+  }
+
+  setInstructionPointer(value) {
+    this.state.instructionPointer = value
+  }
+
+  name() {
+    return this.state.name
+  }
+
+  getInstruction() {
+    if(this.state.instructionPointer < 0)
       this.state.instructionPointer = 0
-      return this.currentInstructionCall()
-    } else if(!instruction) {
-      throw(new Error(`No instruction! state:${inspect(state)} substate:${inspect(substate)} ip:${inspect(ip)}`))
-    }
+    const instructionPointer = this.state.instructionPointer,
+          instruction        = this.state.instructions[instructionPointer]
+    if(!instruction) this.isFinished = true
     return instruction
   }
 
-  currentState() {
-    return this.state.states[this.state.currentState]
-  }
-
-  currentBinding() {
-    return this.world.callstack.last
-  }
-
   currentExpression() {
-    return this.currentBinding().returnValue
+    return this.world.currentBinding.returnValue
+  }
+
+  fullname() {
+    let ns = this.state.namespace.slice(0)
+    ns.unshift("")
+    ns.push(this.state.name)
+    return ns.join('/')
   }
 }

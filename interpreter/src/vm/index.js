@@ -1,4 +1,6 @@
-import buildWorld from './build_world';
+"use strict"
+import buildWorld from './build_world'
+import {inspect} from 'util'
 
 export default class VM {
   constructor(world) {
@@ -10,17 +12,17 @@ export default class VM {
   }
 
   currentBinding() {
-    return this.world.callstack[this.world.callstack.length-1]
+    return this.world.currentBinding
   }
 
   nextExpression() {
-    const statestack = this.world.statestack
-    while(!this.world.mainMachine.step()) { }
-    return this.currentExpression()
+    // console.log(require("util").inspect(statestack))
+    return this.world.mainMachine.nextExpression()
   }
 
   currentExpression() {
     const id = this.currentBinding().returnValue
+    console.log(`CURRENT VALUE: ${inspect(id)}`)
     return this.lookup(id)
   }
 

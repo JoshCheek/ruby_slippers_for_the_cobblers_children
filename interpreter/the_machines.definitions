@@ -11,7 +11,7 @@ reemit:
 ast: @ast
   > Interpreters for language constructs
 
-  self <- /ast/*[@ast.type]
+  self <- /ast/@ast.type
 
   nil:
     /emit($rNil)
