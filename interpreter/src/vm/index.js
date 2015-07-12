@@ -21,16 +21,10 @@ export default class VM {
   }
 
   currentExpression() {
-    const id = this.currentBinding().returnValue
-    console.log(`CURRENT VALUE: ${inspect(id)}`)
-    return this.lookup(id)
+    return this.currentBinding().returnValue
   }
 
   setCurrentExpression(value) {
-    this.currentBinding().returnValue = value.objectId
-  }
-
-  lookup(id) {
-    return this.world.allObjects[id]
+    this.currentBinding().returnValue = value
   }
 }

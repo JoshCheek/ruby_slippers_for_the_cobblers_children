@@ -17,8 +17,9 @@ export default function buildWorld(ast) {
 
 
   // helpers
-  const instantiate = function(klass) {
-    const instance = { class: klass.objectId, instanceVariables: {} }
+  const instantiate = function(klass, customInspect) {
+    if(!customInspect) customInspect = function() { return `#<${klass.inspect()}:${this.objectId}>` }
+    const instance = { class: klass.objectId, instanceVariables: {}, inspect: customInspect }
     allObjects.track(instance)
     if(klass.internalInit)
       klass.internalInit(instance)
@@ -26,49 +27,54 @@ export default function buildWorld(ast) {
   }
 
   // BasicObject, Object, Class
-  const rClass  = allObjects.track({instanceVariables: {}})
-  rClass.class = rClass.objectId
+  const rClass  = allObjects.track({
+    instanceVariables: {},
+    inspect: () => "rClass"
+  })
+  rClass.class = rClass
 
   const rBasicObject = allObjects.track({
-    class:             rClass.objectId,
+    class:             rClass,
     instanceVariables: {},
+    inspect:           () => "rBasicObject",
   })
 
   const rObject = allObjects.track({
-    class:             rClass.objectId,
+    class:             rClass,
     instanceVariables: {},
+    inspect:           () => "rObject",
   })
 
   rClass.internalInit = function(newClass) {
     newClass.constants       = {}
     newClass.instanceMethods = {}
-    newClass.superclass      = rObject.objectId
+    newClass.superclass      = rObject
   }
 
   rClass.internalInit(rBasicObject)
   rClass.internalInit(rObject)
   rClass.internalInit(rClass)
 
-  rObject.constants["BasicObject"] = rBasicObject.objectId
-  rObject.constants["Object"]      = rObject.objectId
-  rObject.constants["Class"]       = rClass.objectId
+  rObject.constants["BasicObject"] = rBasicObject
+  rObject.constants["Object"]      = rObject
+  rObject.constants["Class"]       = rClass
 
 
   // nil
-  const rNilClass = instantiate(rClass)
-  const rNil      = instantiate(rNilClass)
+  const rNilClass = instantiate(rClass,    () => "rNilClass")
+  const rNil      = instantiate(rNilClass, () => "rNil")
 
   // true
-  const rTrueClass = instantiate(rClass)
-  const rTrue      = instantiate(rTrueClass)
+  const rTrueClass = instantiate(rClass,     () => "rTrueClass")
+  const rTrue      = instantiate(rTrueClass, () => "rtrue")
 
 
   // callstack
-  const main = instantiate(rObject)
+  const main = instantiate(rObject, () => "rMain")
   const toplevelBinding = {
     localVariables: {},
-    self:           main.objectId,
-    returnValue:    rNil.objectId,
+    self:           main,
+    returnValue:    rNil,
   }
 
   // put it all together

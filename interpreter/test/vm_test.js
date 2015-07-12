@@ -1,3 +1,5 @@
+"use strict"
+
 import * as ruby from '../src/ruby';
 import assert from 'assert';
 
