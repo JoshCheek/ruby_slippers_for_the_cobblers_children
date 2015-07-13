@@ -24,7 +24,7 @@ export default class VM {
       if(i++ > 20)
         throw(new Error(`INFINITY! ${this.name()}`))
 
-      if(this.world.machineStack.isFinished())
+      while(this.world.machineStack && this.world.machineStack.isFinished())
         this.world.machineStack = this.world.machineStack.parent()
     }
 

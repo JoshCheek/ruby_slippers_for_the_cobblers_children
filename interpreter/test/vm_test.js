@@ -17,14 +17,7 @@ const interpreterFor = (rawCode, callback) => {
 }
 
 describe('ruby.VM', function() {
-  it.skip('returns nil when asked for the next expression when there is nothing to interpret', (done) => {
-    interpreterFor("", (vm, world) => {
-      for(let i in [0,1,2,3,4,5,6,7,8,9,10])
-        AE(world.rNil,  vm.nextExpression())
-      done()
-    })
-  });
-
+  // TODO: executes empty program
   it('currentExpression starts at nil, and is updated whenever an expression completes', (done) => {
     interpreterFor("true", (vm, world) => {
       AE(world.rNil, vm.currentExpression())
@@ -33,6 +26,15 @@ describe('ruby.VM', function() {
       done()
     })
   })
+
+  it('returns nil when asked for the next expression when there is nothing to interpret', (done) => {
+    interpreterFor("true", (vm, world) => {
+      AE(world.rTrue, vm.nextExpression())
+      for(let i in [0,1,2,3,4,5,6,7,8,9,10])
+        AE(world.rNil,  vm.nextExpression())
+      done()
+    })
+  });
 
   it.skip('interprets multiple expressions', (done) => {
     interpreterFor("nil\ntrue\nfalse", (vm, world) => {
