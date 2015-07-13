@@ -111,6 +111,12 @@ RSpec.describe Defs do
       }
   end
 
+  it 'parses the real definitions' do
+    path = File.expand_path '../../the_machines.definitions', __dir__
+    body = File.read(path)
+    Defs.from_string body # shouldn't explode
+  end
+
   it 'ignores comments: any line beginning with a hash' do
     root = Defs.from_string <<-DEFS.gsub(/^    /, "")
     # comment
