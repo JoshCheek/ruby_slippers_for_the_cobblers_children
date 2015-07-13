@@ -66,7 +66,7 @@ export default function buildWorld(ast) {
 
   // true
   const rTrueClass = instantiate(rClass,     () => "rTrueClass")
-  const rTrue      = instantiate(rTrueClass, () => "rtrue")
+  const rTrue      = instantiate(rTrueClass, () => "rTrue")
 
 
   // callstack

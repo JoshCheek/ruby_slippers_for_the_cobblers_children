@@ -2,8 +2,9 @@
 
 import {inspect} from "util"
 
-let log = (key, value) =>
-  console.log(`  -- \u001b[34m${key}:\u001b[0m ${inspect(value)}`)
+let log = (key, value) => {
+  false && console.log(`  -- \u001b[34m${key}:\u001b[0m ${inspect(value)}`)
+}
 
 export default {
   // eg [ "setInt", "@count", 0 ]
@@ -85,7 +86,16 @@ export default {
 
   // eg [ "registerToGlobal", "@_1", "foundExpression" ]
   registerToGlobal: (world, machine, registers, registerName, globalName) => {
-    world[globalName] = registers[registers]
+    let value = registers[registerName]
+    console.log(globalName)
+    console.log(inspect(value))
+    if(globalName === 'foundExpression' && value.inspect() === 'rTrue')     {
+      machine.state.foundExpression = true // FIXME stupid hack -.^
+      console.log(`\u001b[42mFOUND: ${machine.state.foundExpression}\u001b[0m`)
+    }
+    else {
+      world[globalName] = value
+    }
   },
 
   // eg [ "setKey", "@_1", "returnValue", "@value" ]

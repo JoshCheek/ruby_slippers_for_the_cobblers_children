@@ -12,7 +12,7 @@ RSpec.describe Defs do
       $currentBinding.returnValue <- @value
 
     reemit:
-      $foundExpression <- $rTrue
+      /foundExpression
 
     ast: @ast
       > Interpreters for language constructs
@@ -60,8 +60,7 @@ RSpec.describe Defs do
       description:         "Machine: /reemit",
       arg_names:    [],
       instructions: [
-        [:globalToRegister, :rTrue, :@_1],
-        [:registerToGlobal, :@_1, :foundExpression],
+        [:runMachine, [:foundExpression], []]
       ],
       children: {}
 

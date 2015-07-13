@@ -2,6 +2,12 @@
 
 import * as ruby from '../src/ruby';
 import assert from 'assert';
+import {inspect} from "util"
+
+let AE = function(left, right) {
+  if(left !== right)
+    throw(new Error(`\u001b[31m${inspect(left)} !== ${inspect(right)}`))
+}
 
 const interpreterFor = (rawCode, callback) => {
   ruby.parse(rawCode, (ast) => {
@@ -11,26 +17,24 @@ const interpreterFor = (rawCode, callback) => {
 }
 
 describe('ruby.VM', function() {
-  it('returns nil when asked for the next expression when there is nothing to interpret', (done) => {
-    interpreterFor("true", (vm, world) => {
-      // assert.equal(world.rTrue, vm.nextExpression())
-      // for(let i in [0,1,2,3,4,5,6,7,8,9,10])
-      //   assert.equal(world.rNil,  vm.nextExpression())
-      // assert.equal(1, world.callstack.length); // doesn't accidentally grow
+  it.skip('returns nil when asked for the next expression when there is nothing to interpret', (done) => {
+    interpreterFor("", (vm, world) => {
+      for(let i in [0,1,2,3,4,5,6,7,8,9,10])
+        AE(world.rNil,  vm.nextExpression())
       done()
     })
   });
 
   it('currentExpression starts at nil, and is updated whenever an expression completes', (done) => {
     interpreterFor("true", (vm, world) => {
-      assert.equal(world.rNil, vm.currentExpression())
+      AE(world.rNil, vm.currentExpression())
       vm.nextExpression()
-      assert.equal(world.rTrue, vm.currentExpression())
+      AE(world.rTrue, vm.currentExpression())
       done()
     })
   })
 
-  it('interprets multiple expressions', (done) => {
+  it.skip('interprets multiple expressions', (done) => {
     interpreterFor("nil\ntrue\nfalse", (vm, world) => {
       // assert.equal(world.rNil,  vm.nextExpression());
       // assert.equal(world.rTrue, vm.nextExpression());

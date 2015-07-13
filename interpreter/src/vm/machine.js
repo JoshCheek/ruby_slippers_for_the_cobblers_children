@@ -15,11 +15,10 @@ export default class Machine {
     this.state               = state
 
     // TODO: move these into the definitions
+    state.foundExpression = false
     state.instructionPointer = 0
     state.registers = {}
     state.labels    = {}
-
-    state.labels = {}
     state.instructions.forEach(
       ([instr, name], index) => {
         if(instr === "label")
@@ -43,8 +42,16 @@ export default class Machine {
   }
 
   nextExpression() {
-    do { this.step() } while(!this.foundExpression && !this.isFinished)
-    return this.currentExpression()
+    while(true) {
+      console.log(`PRE ${this.state.foundExpression}`)
+      this.step()
+      if(this.state.foundExpression)
+        console.log(`POST \u001b[42m${this.state.foundExpression}\u001b[0m`)
+      else
+        console.log(`POST \u001b[41m${this.state.foundExpression}\u001b[0m`)
+      if(this.state.foundExpression || this.isFinished)
+        return this.currentExpression()
+    }
   }
 
   step() {
@@ -52,7 +59,7 @@ export default class Machine {
 
     if(this.isFinished) return
 
-    this.foundExpression = false
+    this.state.foundExpression = false
     const name = instruction[0],
           args = instruction.slice(1),
           code = instructionCodes[name]
@@ -70,6 +77,9 @@ export default class Machine {
     log("post finished", this.isFinished)
     log("post instructionPointer", this.state.instructionPointer)
     log("post registers", this.state.registers)
+    log("foundExpression", this.state.foundExpression)
+    // if(args[1] === 'foundExpression')
+    //   throw(new Error(this.state.foundExpression.toString()))
 
     // throw(new Error(`code: ${util.inspect(code)}`))
   }

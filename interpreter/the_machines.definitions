@@ -1,11 +1,15 @@
 main:
   > The main machine, kicks everything else off
   /ast($ast)
+  /ast/nil
 
 emit: @value
   $currentBinding.returnValue <- @value
+  # this is actually bs >.<
+  $foundExpression <- $rTrue
 
 reemit:
+  # this is actually bs >.<
   $foundExpression <- $rTrue
 
 ast: @ast

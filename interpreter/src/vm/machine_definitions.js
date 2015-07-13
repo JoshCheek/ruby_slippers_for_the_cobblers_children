@@ -24,6 +24,14 @@ export default () => { return {
           [
             "@_1"
           ]
+        ],
+        [
+          "runMachine",
+          [
+            "ast",
+            "nil"
+          ],
+          []
         ]
       ],
       "children": {}
@@ -46,6 +54,16 @@ export default () => { return {
           "@_1",
           "returnValue",
           "@value"
+        ],
+        [
+          "globalToRegister",
+          "rTrue",
+          "@_2"
+        ],
+        [
+          "registerToGlobal",
+          "@_2",
+          "foundExpression"
         ]
       ],
       "children": {}
