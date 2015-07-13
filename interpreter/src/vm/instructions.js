@@ -86,7 +86,7 @@ export default {
   // eg [ "jumpToIf", "forloop_end", "@_4" ]
   jumpToIf: (world, machine, registers, label, conditionRegister) => {
     if(registers[conditionRegister])
-      machine.setInstructionPointer(machine.labels[label])
+      machine.setInstructionPointer(machine.instructionPointerFor(label))
   },
 
   // eg [ "label", "forloop_end" ]

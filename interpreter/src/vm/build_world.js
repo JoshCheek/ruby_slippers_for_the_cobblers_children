@@ -68,6 +68,10 @@ export default function buildWorld(ast) {
   const rTrueClass = instantiate(rClass,     () => "rTrueClass")
   const rTrue      = instantiate(rTrueClass, () => "rTrue")
 
+  // false
+  const rFalseClass = instantiate(rClass,      () => "rFalseClass")
+  const rFalse      = instantiate(rFalseClass, () => "rFalse")
+
 
   // callstack
   const main = instantiate(rObject, () => "rMain")
@@ -82,6 +86,7 @@ export default function buildWorld(ast) {
     ast:             ast,
     rNil:            rNil,
     rTrue:           rTrue,
+    rFalse:          rFalse,
     currentBinding:  toplevelBinding,
     allObjects:      allObjects,
     foundExpression: false,

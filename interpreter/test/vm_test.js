@@ -38,8 +38,16 @@ describe('ruby.VM', function() {
 
   it('interprets multiple expressions', (done) => {
     interpreterFor("nil\ntrue\nfalse", (vm, world) => {
-      assert.equal(world.rNil,  vm.nextExpression());
-      assert.equal(world.rTrue, vm.nextExpression());
+      // each individual expression
+      AE(world.rNil,   vm.nextExpression());
+      AE(world.rTrue,  vm.nextExpression());
+      AE(world.rFalse, vm.nextExpression());
+
+      // the collection emits the last one
+      AE(world.rFalse, vm.nextExpression());
+
+      // and now we are done
+      AE(world.rNil,   vm.nextExpression());
       done()
     })
   });
