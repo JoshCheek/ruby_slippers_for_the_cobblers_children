@@ -4,14 +4,26 @@ import util from "util"
 import {inspect} from "util"
 import instructionCodes from "./instructions"
 
-let doLog = true,
+let doLog = false,
     log   = (pairs) => {
-      if(doLog)
-        console.log(
-          "  " + Object.keys(pairs)
-                       .map((key) => `\u001b[34m${key}:\u001b[0m ${inspect(pairs[key])}`)
-                       .join(" | ")
-        )
+      if(!doLog) return
+      console.log(
+        "  " + Object.keys(pairs)
+                     .map((key) => `\u001b[34m${key}:\u001b[0m ${inspect(pairs[key])}`)
+                     .join(" | ")
+      )
+    },
+    logStep = (world, machine, instructionName, instructionArgs) => {
+      if(!doLog) return
+      let stackNames = [], stackMachine = world.machineStack
+
+      while(stackMachine) {
+        stackNames.push(stackMachine.fullname())
+        stackMachine = stackMachine.parent()
+      }
+
+      console.log(`\n\u001b[35mSTACK: \u001b[0m${stackNames.join(", ")}`)
+      console.log(`\u001b[44;37m---- ${machine.fullname()} ${machine.instructionPointer()}:${instructionName} ${inspect(instructionArgs)} ---------------------------------------------------\u001b[0m`)
     }
 
 export default class Machine {
@@ -62,18 +74,9 @@ export default class Machine {
     const instruction = this.getInstruction(),
           name        = instruction[0],
           args        = instruction.slice(1),
-          code        = instructionCodes[name],
-          stackNames  = []
+          code        = instructionCodes[name]
 
-    let machine = this.world.machineStack
-    while(machine) {
-      stackNames.push(machine.fullname())
-      machine = machine.parent()
-    }
-
-
-    console.log(`\n\u001b[35mSTACK: \u001b[0m${stackNames.join(", ")}`)
-    console.log(`\u001b[44;37m---- ${this.fullname()} ${this.instructionPointer()}:${name} ${inspect(args)} ---------------------------------------------------\u001b[0m`)
+    logStep(this.world, this, name, args)
     log({preRegisters: this.state.registers})
 
     if(!code)

@@ -2,7 +2,7 @@
 
 import {inspect} from "util"
 
-let doLog = true,
+let doLog = false,
     log   = (pairs) => {
       if(doLog)
         console.log(
