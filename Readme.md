@@ -1,6 +1,8 @@
 Ruby Slippers For The Cobbler's Children
 ========================================
 
+![Adorable comic](data/ruby_slippers.jpg)
+
 ### Vision (why)
 
 To teach learners to think about Ruby in its underlying model rather than syntactic patterns they've memorized.
