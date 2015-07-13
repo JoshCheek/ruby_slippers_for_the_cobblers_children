@@ -28,7 +28,7 @@ export default {
   // eg [ "eq", "@areEqual", "@userName", "@prospectName" ]
   eq: (world, machine, registers, toRegister, left, right) => {
     const from   = registers[left],
-          to     = registers[right]
+          to     = registers[right],
           result = (from == to)
     registers[toRegister] = result
   },
@@ -80,7 +80,7 @@ export default {
 
   // eg [ "jumpTo", "forloop" ]
   jumpTo: (world, machine, registers, label) => {
-    machine.setInstructionPointer(machine.labels[label])
+    machine.setInstructionPointer(machine.instructionPointerFor(label))
   },
 
   // eg [ "jumpToIf", "forloop_end", "@_4" ]
@@ -117,6 +117,8 @@ export default {
       else
         newMachine = newMachine.child(name, machine.state.parent)
     })
+
+    newMachine.setArgsFromRegisters(registers)
 
     world.machineStack = newMachine
   },

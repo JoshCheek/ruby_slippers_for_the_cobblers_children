@@ -36,10 +36,10 @@ describe('ruby.VM', function() {
     })
   });
 
-  it.skip('interprets multiple expressions', (done) => {
+  it('interprets multiple expressions', (done) => {
     interpreterFor("nil\ntrue\nfalse", (vm, world) => {
-      // assert.equal(world.rNil,  vm.nextExpression());
-      // assert.equal(world.rTrue, vm.nextExpression());
+      assert.equal(world.rNil,  vm.nextExpression());
+      assert.equal(world.rTrue, vm.nextExpression());
       done()
     })
   });

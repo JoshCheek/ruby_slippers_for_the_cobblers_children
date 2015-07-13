@@ -40,6 +40,14 @@ export default class Machine {
     })
   }
 
+  setArgsFromRegisters(registers) {
+    this.state.arg_names.forEach((argName) => {
+      if(!registers[argName])
+        throw(new Error(`Expected register ${argName}, but only had: ${inspect(Object.keys(registers))}`))
+      this.state.registers[argName] = registers[argName]
+    })
+  }
+
   child(name, parent) {
     const definition = this.state.children[name]
     if(!definition) throw(new Error(
@@ -119,5 +127,9 @@ export default class Machine {
 
   isFinished() {
     return !this.getInstruction()
+  }
+
+  instructionPointerFor(label) {
+    return this.state.labels[label]
   }
 }
