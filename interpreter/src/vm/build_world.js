@@ -79,11 +79,12 @@ export default function buildWorld(ast) {
 
   // put it all together
   const world = {
-    ast:            ast,
-    rNil:           rNil,
-    rTrue:          rTrue,
-    currentBinding: toplevelBinding,
-    allObjects:     allObjects
+    ast:             ast,
+    rNil:            rNil,
+    rTrue:           rTrue,
+    currentBinding:  toplevelBinding,
+    allObjects:      allObjects,
+    foundExpression: false,
   }
 
   // not quite right, should be a data structure, not an object.

@@ -4,18 +4,23 @@ import util from "util"
 import {inspect} from "util"
 import instructionCodes from "./instructions"
 
-let log = (key, value) =>
-  console.log(`  \u001b[34m${key}:\u001b[0m ${inspect(value)}`)
+let doLog = true,
+    log   = (pairs) => {
+      if(doLog)
+        console.log(
+          "  " + Object.keys(pairs)
+                       .map((key) => `\u001b[34m${key}:\u001b[0m ${inspect(pairs[key])}`)
+                       .join(" | ")
+        )
+    }
 
 export default class Machine {
   constructor(world, state, parent) {
-    // console.log(`Defining a machine: ${inspect(state)}`)
     this.world               = world
     this.state               = state
 
     // TODO: move these into the definitions
     state.parent             = parent
-    state.foundExpression    = false
     state.instructionPointer = 0
     state.registers          = {}
     state.labels             = {}
@@ -43,33 +48,25 @@ export default class Machine {
     return new Machine(this.world, definition, parent)
   }
 
-  nextExpression() {
-    let i = 0
-    while(true) {
-      console.log(`PRE ${this.state.foundExpression}`)
-      if(this.step()) {
-        console.log(`POST \u001b[42m${this.state.foundExpression}\u001b[0m`)
-        return this.currentExpression()
-      } else {
-        console.log(`POST \u001b[41m${this.state.foundExpression}\u001b[0m`)
-      }
-      if(i++ > 10)
-        throw(new Error(`INFINITY! ${this.name()}`))
-    }
-  }
-
   step() {
-    const instruction = this.getInstruction()
+    if(this.isFinished()) throw(new Error(`${this.name()} is finished!`))
 
-    if(this.isFinished()) return
+    const instruction = this.getInstruction(),
+          name        = instruction[0],
+          args        = instruction.slice(1),
+          code        = instructionCodes[name],
+          stackNames  = []
 
-    this.state.foundExpression = false
-    const name = instruction[0],
-          args = instruction.slice(1),
-          code = instructionCodes[name]
+    let machine = this.world.machineStack
+    while(machine) {
+      stackNames.push(machine.fullname())
+      machine = machine.parent()
+    }
 
-    console.log(`\n\u001b[44;37m---- ${this.fullname()} ${this.instructionPointer()}:${name} ${inspect(args)} ---------------------------------------------------\u001b[0m`)
-    log("pre registers", this.state.registers)
+
+    console.log(`\n\u001b[35mSTACK: \u001b[0m${stackNames.join(", ")}`)
+    console.log(`\u001b[44;37m---- ${this.fullname()} ${this.instructionPointer()}:${name} ${inspect(args)} ---------------------------------------------------\u001b[0m`)
+    log({preRegisters: this.state.registers})
 
     if(!code)
       throw(new Error(`No instruction: ${name}`))
@@ -77,19 +74,18 @@ export default class Machine {
       code(this.world, this, this.state.registers, ...args)
 
     this.setInstructionPointer(this.instructionPointer() + 1)
-    log("post finished", this.isFinished())
-    log("post instructionPointer", this.instructionPointer())
-    log("post registers", this.state.registers)
-    log("foundExpression", this.state.foundExpression)
 
-    if(this.isFinished())
-      this.world.machineStack = this.state.parent
+    log({
+      name:                   this.name(),
+      postFinished:           this.isFinished(),
+      postInstructionPointer: this.instructionPointer(),
+      postRegisters:          this.state.registers,
+      foundExpression:        this.world.foundExpression,
+    })
+  }
 
-    return this.state.foundExpression
-    // if(args[1] === 'foundExpression')
-    //   throw(new Error(this.state.foundExpression.toString()))
-
-    // throw(new Error(`code: ${util.inspect(code)}`))
+  parent() {
+    return this.state.parent
   }
 
   setInstructionPointer(value) {

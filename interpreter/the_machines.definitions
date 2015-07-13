@@ -5,11 +5,9 @@ main:
 
 emit: @value
   $currentBinding.returnValue <- @value
-  # this is actually bs >.<
   $foundExpression <- $rTrue
 
 reemit:
-  # this is actually bs >.<
   $foundExpression <- $rTrue
 
 ast: @ast

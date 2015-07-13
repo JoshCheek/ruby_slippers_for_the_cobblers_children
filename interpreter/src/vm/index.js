@@ -16,8 +16,28 @@ export default class VM {
   }
 
   nextExpression() {
-    // console.log(require("util").inspect(statestack))
-    return this.world.machineStack.nextExpression()
+    this.world.foundExpression = false
+    let i = 0;
+    while(!this.world.foundExpression && this.world.machineStack) {
+      console.log(`STEPPING! -- currentExpression: ${inspect(this.currentExpression())}`)
+      this.world.machineStack.step()
+      if(i++ > 20)
+        throw(new Error(`INFINITY! ${this.name()}`))
+
+      if(this.world.machineStack.isFinished())
+        this.world.machineStack = this.world.machineStack.parent()
+    }
+
+    let hasMachine = !!this.world.machineStack
+    console.log("FINISHED nextExpression")
+    console.log(inspect({
+      foundExpression:   this.world.foundExpression,
+      hasMachine:        hasMachine,
+      isFinished:        (hasMachine && this.world.machineStack.isFinished()),
+      currentExpression: this.currentExpression(),
+    }))
+
+    return this.currentExpression()
   }
 
   currentExpression() {

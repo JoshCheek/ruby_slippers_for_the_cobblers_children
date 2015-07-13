@@ -2,9 +2,15 @@
 
 import {inspect} from "util"
 
-let log = (key, value) => {
-  false && console.log(`  -- \u001b[34m${key}:\u001b[0m ${inspect(value)}`)
-}
+let doLog = true,
+    log   = (pairs) => {
+      if(doLog)
+        console.log(
+          "  " + Object.keys(pairs)
+                       .map((key) => `\u001b[33m${key}:\u001b[0m ${inspect(pairs[key])}`)
+                       .join(" | ")
+        )
+    }
 
 export default {
   // eg [ "setInt", "@count", 0 ]
@@ -31,15 +37,17 @@ export default {
   // note that key may be a direct key, or may be a register
   // (ie calling a key we don't know its value)
   getKey: (world, machine, registers, toRegister, hashRegister, key) => {
-    log("registers", registers)
-    log("toRegister", toRegister)
-    log("hashRegister", hashRegister)
     let prevKey = key
-    log("key", key)
     if(key[0] === '@') key = registers[key]
-    if(prevKey != key)
-      log("key updated to", key)
-    log("registers[hashRegister]", registers[hashRegister])
+
+    log({
+      registers:    registers,
+      toRegister:   toRegister,
+      hashRegister: hashRegister,
+      initialKey:   prevKey,
+      finalKey:     key,
+      register:     registers[hashRegister],
+    })
 
     registers[toRegister] = registers[hashRegister][key]
   },
@@ -62,9 +70,11 @@ export default {
 
   // eg [ "globalToRegister", "ast", "@_1" ]
   globalToRegister: (world, machine, registers, globalName, registerName) => {
-    log("global Name", globalName)
-    log("global Value", world[globalName])
-    log("registerName", registerName)
+    log({
+      globalName: globalName,
+      globalValue: world[globalName],
+      registerName: registerName,
+    })
     registers[registerName] = world[globalName]
   },
 
@@ -87,21 +97,12 @@ export default {
   // eg [ "registerToGlobal", "@_1", "foundExpression" ]
   registerToGlobal: (world, machine, registers, registerName, globalName) => {
     let value = registers[registerName]
-    console.log(globalName)
-    console.log(inspect(value))
-    if(globalName === 'foundExpression' && value.inspect() === 'rTrue')     {
-      machine.state.foundExpression = true // FIXME stupid hack -.^
-      console.log(`\u001b[42mFOUND: ${machine.state.foundExpression}\u001b[0m`)
-    }
-    else {
-      world[globalName] = value
-    }
+    world[globalName] = value
   },
 
   // eg [ "setKey", "@_1", "returnValue", "@value" ]
   setKey: (world, machine, registers, hashRegister, key, valueRegister) => {
-    log('key', key)
-    log('valueRegister', valueRegister)
+    log({key: key, valueRegister: valueRegister})
     if(key[0] === '@') key = registers[key]
     registers[hashRegister][key] = registers[valueRegister]
   },
@@ -131,11 +132,9 @@ export default {
     })
 
     let args = argNames.map((name) => registers[name])
-    log("instantiating", newMachine.name())
-    log("with args", args)
+    log({instantiating: newMachine.name(), withArgs: args})
     newMachine.setArgs(args)
 
     world.machineStack = newMachine
-    newMachine.step()
   },
 }
