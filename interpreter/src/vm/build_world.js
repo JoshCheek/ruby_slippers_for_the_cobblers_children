@@ -87,8 +87,8 @@ export default function buildWorld(ast) {
   }
 
   // not quite right, should be a data structure, not an object.
-  world.rootMachine = new Machine(world, defineMachine())
-  world.mainMachine = world.rootMachine.child("main")
+  world.rootMachine  = new Machine(world, defineMachine(), null)
+  world.machineStack = world.rootMachine.child("main", null)
 
   return world
 }

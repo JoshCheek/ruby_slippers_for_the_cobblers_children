@@ -112,40 +112,30 @@ export default {
     let newMachine = world.rootMachine
     path.forEach((name) => {
       if(name[0] === "@")
-        newMachine = newMachine.child(registers[name])
+        newMachine = newMachine.child(registers[name], machine.state.parent)
       else
-        newMachine = newMachine.child(name)
+        newMachine = newMachine.child(name, machine.state.parent)
     })
 
-    machine.state = newMachine.state
-    machine.doNotAdvance()
+    world.machineStack = newMachine
   },
 
   // eg [ "runMachine", [ "emit" ], [ "@_1" ] ]
   runMachine: (world, machine, registers, path, argNames) => {
-    if(!machine.currentChild()) {
-      let newMachine = world.rootMachine
+    let newMachine = world.rootMachine
+    path.forEach((name) => {
+      if(name[0] === "@")
+        newMachine = newMachine.child(registers[name], machine)
+      else
+        newMachine = newMachine.child(name, machine)
+    })
 
-      path.forEach((name) => {
-        if(name[0] === "@")
-          newMachine = newMachine.child(registers[name])
-        else
-          newMachine = newMachine.child(name)
-      })
+    let args = argNames.map((name) => registers[name])
+    log("instantiating", newMachine.name())
+    log("with args", args)
+    newMachine.setArgs(args)
 
-      let args = argNames.map((name) => registers[name])
-      log("instantiating", newMachine.name())
-      log("with args", args)
-      newMachine.setArgs(args)
-
-      machine.setCurrentChild(newMachine)
-    }
-
-    machine.currentChild().step()
-
-    if(machine.currentChild().isFinished)
-      machine.deleteCurrentChild()
-    else
-      machine.doNotAdvance()
+    world.machineStack = newMachine
+    newMachine.step()
   },
 }

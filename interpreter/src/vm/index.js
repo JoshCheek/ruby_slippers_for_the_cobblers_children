@@ -17,7 +17,7 @@ export default class VM {
 
   nextExpression() {
     // console.log(require("util").inspect(statestack))
-    return this.world.mainMachine.nextExpression()
+    return this.world.machineStack.nextExpression()
   }
 
   currentExpression() {

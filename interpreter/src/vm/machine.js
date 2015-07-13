@@ -8,17 +8,17 @@ let log = (key, value) =>
   console.log(`  \u001b[34m${key}:\u001b[0m ${inspect(value)}`)
 
 export default class Machine {
-  constructor(world, state) {
+  constructor(world, state, parent) {
     // console.log(`Defining a machine: ${inspect(state)}`)
-    this.isFinished          = false
     this.world               = world
     this.state               = state
 
     // TODO: move these into the definitions
-    state.foundExpression = false
+    state.parent             = parent
+    state.foundExpression    = false
     state.instructionPointer = 0
-    state.registers = {}
-    state.labels    = {}
+    state.registers          = {}
+    state.labels             = {}
     state.instructions.forEach(
       ([instr, name], index) => {
         if(instr === "label")
@@ -35,37 +35,40 @@ export default class Machine {
     })
   }
 
-  child(name) {
+  child(name, parent) {
     const definition = this.state.children[name]
-    // console.log(`FINDING CHILD: ${name}: ${inspect(definition)}`)
-    return new Machine(this.world, definition)
+    if(!definition) throw(new Error(
+      `No child ${inspect(name)} for ${inspect(this.name())}, only have: ${this.state.children.map((child) => child.name)}`
+    ))
+    return new Machine(this.world, definition, parent)
   }
 
   nextExpression() {
+    let i = 0
     while(true) {
       console.log(`PRE ${this.state.foundExpression}`)
-      this.step()
-      if(this.state.foundExpression)
+      if(this.step()) {
         console.log(`POST \u001b[42m${this.state.foundExpression}\u001b[0m`)
-      else
-        console.log(`POST \u001b[41m${this.state.foundExpression}\u001b[0m`)
-      if(this.state.foundExpression || this.isFinished)
         return this.currentExpression()
+      } else {
+        console.log(`POST \u001b[41m${this.state.foundExpression}\u001b[0m`)
+      }
+      if(i++ > 10)
+        throw(new Error(`INFINITY! ${this.name()}`))
     }
   }
 
   step() {
     const instruction = this.getInstruction()
 
-    if(this.isFinished) return
+    if(this.isFinished()) return
 
     this.state.foundExpression = false
     const name = instruction[0],
           args = instruction.slice(1),
           code = instructionCodes[name]
 
-    console.log(`\n\u001b[44;37m---- ${this.fullname()} ${this.state.instructionPointer}:${name} ${inspect(args)} ---------------------------------------------------\u001b[0m`)
-    log("pre instructionPointer", this.state.instructionPointer)
+    console.log(`\n\u001b[44;37m---- ${this.fullname()} ${this.instructionPointer()}:${name} ${inspect(args)} ---------------------------------------------------\u001b[0m`)
     log("pre registers", this.state.registers)
 
     if(!code)
@@ -73,31 +76,20 @@ export default class Machine {
     else
       code(this.world, this, this.state.registers, ...args)
 
-    this.state.instructionPointer++
-    log("post finished", this.isFinished)
-    log("post instructionPointer", this.state.instructionPointer)
+    this.setInstructionPointer(this.instructionPointer() + 1)
+    log("post finished", this.isFinished())
+    log("post instructionPointer", this.instructionPointer())
     log("post registers", this.state.registers)
     log("foundExpression", this.state.foundExpression)
+
+    if(this.isFinished())
+      this.world.machineStack = this.state.parent
+
+    return this.state.foundExpression
     // if(args[1] === 'foundExpression')
     //   throw(new Error(this.state.foundExpression.toString()))
 
     // throw(new Error(`code: ${util.inspect(code)}`))
-  }
-
-  currentChild() {
-    return this.state.currentChild
-  }
-
-  setCurrentChild(child) {
-    this.state.currentChild = child
-  }
-
-  deleteCurrentChild() {
-    delete this.state.currentChild
-  }
-
-  doNotAdvance() {
-    this.state.instructionPointer--
   }
 
   setInstructionPointer(value) {
@@ -109,12 +101,13 @@ export default class Machine {
   }
 
   getInstruction() {
+    return this.state.instructions[this.instructionPointer()]
+  }
+
+  instructionPointer() {
     if(this.state.instructionPointer < 0)
       this.state.instructionPointer = 0
-    const instructionPointer = this.state.instructionPointer,
-          instruction        = this.state.instructions[instructionPointer]
-    if(!instruction) this.isFinished = true
-    return instruction
+    return this.state.instructionPointer
   }
 
   currentExpression() {
@@ -124,7 +117,11 @@ export default class Machine {
   fullname() {
     let ns = this.state.namespace.slice(0)
     ns.unshift("")
-    ns.push(this.state.name)
+    ns.push(this.name())
     return ns.join('/')
+  }
+
+  isFinished() {
+    return !this.getInstruction()
   }
 }
