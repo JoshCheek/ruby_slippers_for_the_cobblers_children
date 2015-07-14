@@ -59,7 +59,7 @@ RSpec.describe Defs do
     })
   end
 
-  xit 'parses the real definitions' do
+  it 'parses the real definitions' do
     path = File.expand_path '../../the_machines.definitions', __dir__
     body = File.read(path)
     Defs.from_string body # shouldn't explode

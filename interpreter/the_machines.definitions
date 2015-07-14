@@ -1,3 +1,53 @@
+Templates
+=========
+
+machines(root)
+  export default () => {
+    return {
+      <%= machine root %>
+    }
+  }
+
+
+machine(defn)
+  "name":         <%= defn.name.to_json %>
+  "description":  <%= defn.description.to_json %>,
+  "namespace":    <%= defn.namespace.to_json %>,
+  "arg_names":    <%= defn.arg_names.to_json %>,
+  <% if defn.instructions.length < 2 %>
+    "instructions": <%= defn.instructions.to_json %>,
+  <% else %>
+    "instructions": [
+      <%= defn.instructions.map(&:to_json).join(",\\n") %>
+    ],
+  <% end %>
+  <% if defn.children.empty? %>
+    "children":     {},
+  <% else %>
+    "children": {
+      <% defn.children.map do |name, child| %>
+        "child": <%= child.name.inspect %>: {
+          <%= machine child %>
+        }
+      <% end %>
+    }
+  <% end %>
+
+instructions(instructions)
+  "use strict"
+
+  export default {
+    <% instructions.each do |name, attrs| %>
+      <%= name %>: (world, machine, registers<%= attrs[:argnames].map { |a| ", \#{a}"} %>) => {
+        <%= attrs[:body] %>
+      }
+    <% end %>
+  }
+
+
+Machines
+========
+
 main:
   > The main machine, kicks everything else off
   /ast($ast)
@@ -5,10 +55,9 @@ main:
 
 emit: @value
   $currentBinding.returnValue <- @value
-  $foundExpression <- $rTrue
 
 reemit:
-  $foundExpression <- $rTrue
+  /foundExpression
 
 ast: @ast
   > Interpreters for language constructs
@@ -18,22 +67,70 @@ ast: @ast
   nil:
     /emit($rNil)
 
-  false:
-    /emit($rFalse)
-
-  true:
-    /emit($rTrue)
-
   expressions: @ast
     for @expression in @ast.expressions
       /ast(@expression)
     /reemit
 
-  # class: @ast
-  #   @class      <- /ast/constant(@ast.name_lookup)
-  #   @superclass <- /ast/constant(@ast.superclass)
-  #   if! @class
-  #     @class <- /reopen(@ast.name_lookup, @superclass)
-  #   /pushBinding(@class)
-  #   /ast(@ast.body)
-  #   /reemit
+
+Instructions
+============
+
+setInt(register, initialValue)
+  registers[register] = initialValue
+
+add(register, quantity)
+  if(typeof quantity !== 'number')
+    throw(new Error(`Not a numeber! ${quantity}`))
+  registers[register] += quantity
+
+eq(toRegister, left, right)
+  registers[toRegister] = (registers[left] == registers[right]_
+
+getKey(toRegister, hashRegister, key)
+  if(key[0] === '@') key = registers[key]
+  registers[toRegister] = registers[hashRegister][key]
+
+globalToRegister(globalName, registerName)
+  registers[registerName] = world[globalName]
+
+jumpTo(label)
+  machine.setInstructionPointer(machine.instructionPointerFor(label))
+
+jumpToIf(label, conditionRegister)
+  if(registers[conditionRegister])
+    machine.setInstructionPointer(machine.instructionPointerFor(label))
+
+label(name)
+  // noop
+
+registerToGlobal(registerName, globalName)
+  let value = registers[registerName]
+  world[globalName] = value
+
+setKey(hashRegister, key, valueRegister)
+  if(key[0] === '@') key = registers[key]
+  registers[hashRegister][key] = registers[valueRegister]
+
+becomeMachine(path)
+  let newMachine = world.rootMachine
+  path.forEach((name) => {
+    if(name[0] === "@")
+      newMachine = newMachine.child(registers[name], machine.state.parent)
+    else
+      newMachine = newMachine.child(name, machine.state.parent)
+  })
+  newMachine.setArgsFromRegisters(registers)
+  world.machineStack = newMachine
+
+runMachine(path, argNames)
+  let newMachine = world.rootMachine
+  path.forEach((name) => {
+    if(name[0] === "@")
+      newMachine = newMachine.child(registers[name], machine)
+    else
+      newMachine = newMachine.child(name, machine)
+  })
+  let args = argNames.map((name) => registers[name])
+  newMachine.setArgs(args)
+  world.machineStack = newMachine
