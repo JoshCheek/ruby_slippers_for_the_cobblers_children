@@ -28,10 +28,17 @@ namespace :interpreter do
 
   desc 'Generate the machine definitions'
   task :definitions do
-    infile   = "interpreter/the_machines.definitions"
-    outfile  = "interpreter/src/vm/machine_definitions.js"
-    template = "export default () => { return HERE }".shellescape
-    sh "interpreter/defs/bin/generate  #{infile}  #{outfile}  #{template}"
+    cd 'interpreter' do
+      infile            = "the_machines.definitions"
+      machines_file     = "src/vm/machine_definitions.js"
+      instructions_file = "src/vm/instructions.js"
+
+      sh "defs/bin/generate -m=#{machines_file} -i=#{instructions_file} < #{infile}"
+      sh "npm run exec -- " \
+           "js-beautify --indent-size 2 --unescape-strings --end-with-newline --jslint-happy " \
+                       "--replace #{instructions_file} " \
+                       "--replace #{machines_file} "
+    end
   end
 end
 

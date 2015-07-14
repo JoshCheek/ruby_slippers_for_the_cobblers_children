@@ -63,7 +63,7 @@ export default class Machine {
   child(name, parent) {
     const definition = this.state.children[name]
     if(!definition) throw(new Error(
-      `No child ${inspect(name)} for ${inspect(this.name())}, only have: ${this.state.children.map((child) => child.name)}`
+      `No child ${inspect(name)} for ${inspect(this.name())}, only have: ${Object.keys(this.state.children).map(inspect).join(", ")}`
     ))
     return new Machine(this.world, definition, parent)
   }

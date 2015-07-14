@@ -1,272 +1,128 @@
-export default () => { return {
-  "name": "root",
-  "namespace": [],
-  "arg_names": [],
-  "description": "Machine /",
-  "instructions": [],
-  "children": {
-    "main": {
-      "name": "main",
-      "namespace": [],
-      "arg_names": [],
-      "description": "The main machine, kicks everything else off",
-      "instructions": [
-        [
-          "globalToRegister",
-          "ast",
-          "@_1"
-        ],
-        [
-          "runMachine",
-          [
-            "ast"
+export default () => {
+  return {
+    "name": "root",
+    "description": "Machine /",
+    "namespace": [],
+    "arg_names": [],
+    "instructions": [],
+    "children": {
+      "main": {
+        "name": "main",
+        "description": "The main machine, kicks everything else off",
+        "namespace": [],
+        "arg_names": [],
+        "instructions": [
+          ["globalToRegister", "ast", "@_1"],
+          ["runMachine", ["ast"],
+            ["@_1"]
           ],
-          [
-            "@_1"
+          ["runMachine", ["ast", "nil"],
+            []
           ]
         ],
-        [
-          "runMachine",
-          [
-            "ast",
-            "nil"
-          ],
-          []
-        ]
-      ],
-      "children": {}
-    },
-    "emit": {
-      "name": "emit",
-      "namespace": [],
-      "arg_names": [
-        "@value"
-      ],
-      "description": "Machine: /emit",
-      "instructions": [
-        [
-          "globalToRegister",
-          "currentBinding",
-          "@_1"
+        "children": {},
+      },
+      "emit": {
+        "name": "emit",
+        "description": "Machine: /emit",
+        "namespace": [],
+        "arg_names": ["@value"],
+        "instructions": [
+          ["globalToRegister", "currentBinding", "@_1"],
+          ["setKey", "@_1", "returnValue", "@value"],
+          ["globalToRegister", "rTrue", "@_2"],
+          ["registerToGlobal", "@_2", "foundExpression"]
         ],
-        [
-          "setKey",
-          "@_1",
-          "returnValue",
-          "@value"
+        "children": {},
+      },
+      "reemit": {
+        "name": "reemit",
+        "description": "Machine: /reemit",
+        "namespace": [],
+        "arg_names": [],
+        "instructions": [
+          ["globalToRegister", "rTrue", "@_1"],
+          ["registerToGlobal", "@_1", "foundExpression"]
         ],
-        [
-          "globalToRegister",
-          "rTrue",
-          "@_2"
+        "children": {},
+      },
+      "ast": {
+        "name": "ast",
+        "description": "Interpreters for language constructs",
+        "namespace": [],
+        "arg_names": ["@ast"],
+        "instructions": [
+          ["getKey", "@_1", "@ast", "type"],
+          ["becomeMachine", ["ast", "@_1"]]
         ],
-        [
-          "registerToGlobal",
-          "@_2",
-          "foundExpression"
-        ]
-      ],
-      "children": {}
-    },
-    "reemit": {
-      "name": "reemit",
-      "namespace": [],
-      "arg_names": [],
-      "description": "Machine: /reemit",
-      "instructions": [
-        [
-          "globalToRegister",
-          "rTrue",
-          "@_1"
-        ],
-        [
-          "registerToGlobal",
-          "@_1",
-          "foundExpression"
-        ]
-      ],
-      "children": {}
-    },
-    "ast": {
-      "name": "ast",
-      "namespace": [],
-      "arg_names": [
-        "@ast"
-      ],
-      "description": "Interpreters for language constructs",
-      "instructions": [
-        [
-          "getKey",
-          "@_1",
-          "@ast",
-          "type"
-        ],
-        [
-          "becomeMachine",
-          [
-            "ast",
-            "@_1"
-          ]
-        ]
-      ],
-      "children": {
-        "nil": {
-          "name": "nil",
-          "namespace": [
-            "ast"
-          ],
-          "arg_names": [],
-          "description": "Machine: /ast/nil",
-          "instructions": [
-            [
-              "globalToRegister",
-              "rNil",
-              "@_1"
-            ],
-            [
-              "runMachine",
-              [
-                "emit"
-              ],
-              [
-                "@_1"
+        "children": {
+          "nil": {
+            "name": "nil",
+            "description": "Machine: /ast/nil",
+            "namespace": ["ast"],
+            "arg_names": [],
+            "instructions": [
+              ["globalToRegister", "rNil", "@_1"],
+              ["runMachine", ["emit"],
+                ["@_1"]
               ]
-            ]
-          ],
-          "children": {}
+            ],
+            "children": {},
+          },
+          "false": {
+            "name": "false",
+            "description": "Machine: /ast/false",
+            "namespace": ["ast"],
+            "arg_names": [],
+            "instructions": [
+              ["globalToRegister", "rFalse", "@_1"],
+              ["runMachine", ["emit"],
+                ["@_1"]
+              ]
+            ],
+            "children": {},
+          },
+          "true": {
+            "name": "true",
+            "description": "Machine: /ast/true",
+            "namespace": ["ast"],
+            "arg_names": [],
+            "instructions": [
+              ["globalToRegister", "rTrue", "@_1"],
+              ["runMachine", ["emit"],
+                ["@_1"]
+              ]
+            ],
+            "children": {},
+          },
+          "expressions": {
+            "name": "expressions",
+            "description": "Machine: /ast/expressions",
+            "namespace": ["ast"],
+            "arg_names": ["@ast"],
+            "instructions": [
+              ["setInt", "@_1", 0],
+              ["getKey", "@_2", "@ast", "expressions"],
+              ["getKey", "@_3", "@_2", "length"],
+              ["label", "forloop"],
+              ["eq", "@_4", "@_1", "@_3"],
+              ["jumpToIf", "forloop_end", "@_4"],
+              ["getKey", "@expression", "@_2", "@_1"],
+              ["runMachine", ["ast"],
+                ["@expression"]
+              ],
+              ["add", "@_1", 1],
+              ["jumpTo", "forloop"],
+              ["label", "forloop_end"],
+              ["runMachine", ["reemit"],
+                []
+              ]
+            ],
+            "children": {},
+          },
         },
-        "false": {
-          "name": "false",
-          "namespace": [
-            "ast"
-          ],
-          "arg_names": [],
-          "description": "Machine: /ast/false",
-          "instructions": [
-            [
-              "globalToRegister",
-              "rFalse",
-              "@_1"
-            ],
-            [
-              "runMachine",
-              [
-                "emit"
-              ],
-              [
-                "@_1"
-              ]
-            ]
-          ],
-          "children": {}
-        },
-        "true": {
-          "name": "true",
-          "namespace": [
-            "ast"
-          ],
-          "arg_names": [],
-          "description": "Machine: /ast/true",
-          "instructions": [
-            [
-              "globalToRegister",
-              "rTrue",
-              "@_1"
-            ],
-            [
-              "runMachine",
-              [
-                "emit"
-              ],
-              [
-                "@_1"
-              ]
-            ]
-          ],
-          "children": {}
-        },
-        "expressions": {
-          "name": "expressions",
-          "namespace": [
-            "ast"
-          ],
-          "arg_names": [
-            "@ast"
-          ],
-          "description": "Machine: /ast/expressions",
-          "instructions": [
-            [
-              "setInt",
-              "@_1",
-              0
-            ],
-            [
-              "getKey",
-              "@_2",
-              "@ast",
-              "expressions"
-            ],
-            [
-              "getKey",
-              "@_3",
-              "@_2",
-              "length"
-            ],
-            [
-              "label",
-              "forloop"
-            ],
-            [
-              "eq",
-              "@_4",
-              "@_1",
-              "@_3"
-            ],
-            [
-              "jumpToIf",
-              "forloop_end",
-              "@_4"
-            ],
-            [
-              "getKey",
-              "@expression",
-              "@_2",
-              "@_1"
-            ],
-            [
-              "runMachine",
-              [
-                "ast"
-              ],
-              [
-                "@expression"
-              ]
-            ],
-            [
-              "add",
-              "@_1",
-              1
-            ],
-            [
-              "jumpTo",
-              "forloop"
-            ],
-            [
-              "label",
-              "forloop_end"
-            ],
-            [
-              "runMachine",
-              [
-                "reemit"
-              ],
-              []
-            ]
-          ],
-          "children": {}
-        }
-      }
-    }
+      },
+    },
+
   }
 }
- }
