@@ -6,7 +6,7 @@ require 'defs/parse_machine'
 require 'defs/template'
 require 'defs/parse_template'
 
-require 'defs/instructions'
+require 'defs/instruction_definitions'
 
 class Defs
 end

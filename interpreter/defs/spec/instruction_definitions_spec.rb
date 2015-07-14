@@ -1,8 +1,8 @@
 require 'defs'
 
-RSpec.describe Defs::Instructions do
+RSpec.describe Defs::InstructionDefinitions do
   def parse_instructions(instructions_string)
-    Defs::Instructions.parse(instructions_string)
+    Defs::InstructionDefinitions.parse(instructions_string)
   end
 
   it 'parses instructions, recording the name, args, and body' do

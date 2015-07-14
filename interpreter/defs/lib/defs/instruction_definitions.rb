@@ -1,7 +1,7 @@
 require 'defs/parse_template'
 
 class Defs
-  class Instructions
+  class InstructionDefinitions
     def self.parse(template)
       parsed = ParseTemplate.parse(template)
       parsed.each do |name, attributes|
