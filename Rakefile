@@ -22,8 +22,10 @@ end
 namespace :interpreter do
   desc 'Run interpreter test suite (server needs to be running)'
   task :test do
-    # sh 'interpreter/bin/test'
-    sh 'mrspec interpreter/defs -I interpreter/defs/lib interpreter/defs/spec'
+    cd 'interpreter' do
+      sh 'env NODE_PATH=src mocha --compilers js:babel/register --bail'
+      sh 'mrspec defs -I defs/lib defs/spec --fail-fast'
+    end
   end
 
   desc 'Generate the machine definitions'
