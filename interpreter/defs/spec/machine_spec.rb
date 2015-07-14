@@ -46,7 +46,7 @@ RSpec.describe Defs do
     assert_machine root[:emit],
       name:         :emit,
       namespace:    [],
-      description:         "Machine: /emit",
+      description:  "Machine: /emit",
       arg_names:    [:@value],
       instructions: [
         [:globalToRegister, :currentBinding, :@_1],
@@ -57,7 +57,7 @@ RSpec.describe Defs do
     assert_machine root[:reemit],
       name:         :reemit,
       namespace:    [],
-      description:         "Machine: /reemit",
+      description:  "Machine: /reemit",
       arg_names:    [],
       instructions: [
         [:runMachine, [:foundExpression], []]
@@ -67,7 +67,7 @@ RSpec.describe Defs do
     assert_machine root[:ast],
       name:         :ast,
       namespace:    [],
-      description:         "Interpreters for language constructs",
+      description:  "Interpreters for language constructs",
       arg_names:    [:@ast],
       instructions: [
         [:getKey, :@_1, :@ast, :type],
@@ -77,7 +77,7 @@ RSpec.describe Defs do
         nil: {
           name:         :nil,
           namespace:    [:ast],
-          description:         "Machine: /ast/nil",
+          description:  "Machine: /ast/nil",
           arg_names:    [],
           instructions: [
             [:globalToRegister, :rNil, :@_1],
@@ -88,7 +88,7 @@ RSpec.describe Defs do
         expressions: {
           name:         :expressions,
           namespace:    [:ast],
-          description:         "Machine: /ast/expressions",
+          description:  "Machine: /ast/expressions",
           arg_names:    [:@ast],
           instructions: [
             [:setInt, :@_1, 0],
