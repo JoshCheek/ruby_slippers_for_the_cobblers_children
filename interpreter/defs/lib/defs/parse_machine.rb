@@ -1,6 +1,10 @@
 require 'defs/parse_instructions'
 class Defs
   class ParseMachine
+    def self.from_string(def_string)
+      from_root def_string
+    end
+
     def self.from_root(def_string)
       defn_with_root = "root:\n  > Machine /\n" << def_string.gsub(/^/, '  ')
       call defn_with_root

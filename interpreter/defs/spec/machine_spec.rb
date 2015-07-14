@@ -1,8 +1,8 @@
 require 'defs'
 
-RSpec.describe Defs do
+RSpec.describe Defs::Machine do
   it 'parses this thing' do
-    root = Defs.from_string <<-DEFS.gsub(/^    /, "")
+    root = parse_machine <<-DEFS.gsub(/^    /, "")
     main:
       > The main machine, kicks everything else off
       /ast($ast)
@@ -111,14 +111,8 @@ RSpec.describe Defs do
       }
   end
 
-  it 'parses the real definitions' do
-    path = File.expand_path '../../the_machines.definitions', __dir__
-    body = File.read(path)
-    Defs.from_string body # shouldn't explode
-  end
-
   it 'ignores comments: any line beginning with a hash' do
-    root = Defs.from_string <<-DEFS.gsub(/^    /, "")
+    root = parse_machine <<-DEFS.gsub(/^    /, "")
     # comment
     n:
     # comment
@@ -145,38 +139,9 @@ RSpec.describe Defs do
       }
   end
 
-  it 'converts the thing to JSON' do
-    root = Defs.from_string <<-DEFS.gsub(/^    /, "")
-    n1: @arg1
-      > desc1
-      /machine1()
-
-      n2: @arg2
-        > desc2
-        /machine2()
-    DEFS
-
-    json_data = root.as_json
-    expect(json_data.to_json).to eq root.to_json
-    expect(json_data[:name]).to eq :root
-    expect(json_data[:children]).to eq \
-      n1: {
-        name:           :n1,
-        namespace:      [],
-        arg_names:      [:@arg1],
-        description:    "desc1",
-        instructions:   [[:runMachine, [:machine1], []]],
-        children: {
-          n2: {
-            name:           :n2,
-            namespace:      [:n1],
-            arg_names:      [:@arg2],
-            description:    "desc2",
-            instructions:   [[:runMachine, [:machine2], []]],
-            children:       {}
-          }
-        }
-      }
+  def parse_machine(def_string)
+    def_hash = Defs::ParseMachine.from_string def_string
+    Defs::Machine.new def_hash
   end
 
   def assert_instructions_equal(expected_instrs, actual_instrs)
