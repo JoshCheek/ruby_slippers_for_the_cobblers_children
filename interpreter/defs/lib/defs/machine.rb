@@ -25,8 +25,6 @@ class Defs
       "#<#{self.class}:#{attrs.join}\n>"
     end
 
-    private
-
     attr_reader :children
   end
 end

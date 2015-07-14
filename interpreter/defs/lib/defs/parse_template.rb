@@ -3,7 +3,7 @@ require 'erb'
 class Defs
   class ParseTemplate
     def self.parse(string)
-      string.split(/^(?=\w)/).map { |template|
+      string.strip.split(/^(?=\w)/).map { |template|
         declaration, *bodylines = template.strip.lines
         name, *argnames = declaration.split(/\W+/)
         body = parse_erb outdent(bodylines.join)
