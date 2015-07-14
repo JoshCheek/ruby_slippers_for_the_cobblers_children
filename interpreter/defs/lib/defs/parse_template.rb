@@ -17,7 +17,7 @@ class Defs
     end
 
     def self.parse_erb(erb)
-      ERB.new(erb, nil, "-%<>").src
+      ERB.new(erb, nil, "-").src
     end
   end
 end

@@ -1,44 +1,25 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby -s
 
-# validate args
-infile, outfile, template, *rest = ARGV
-template ||= "HERE"
-if !(infile && outfile && rest.empty?)
-  $stderr.puts "Expected args: infile or dash (stdin), outfile or dash(stdout), [template]"
-  $stderr.puts "  Example template: 'export default function buildMachines() { HERE }'"
-  exit 1
-end
-
-# load lib
 $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 require 'defs'
 
-# read input
-if infile == '-'
-  input = $stdin.read
-else
-  input = File.read infile
+def write_output(filename, body)
+  case filename
+  when nil
+    # noop
+  when '-'
+    $stdout.puts body
+  else
+    File.write filename, body
+  end
 end
 
-# convert
-defs  = Defs.from_string input
-json  = defs.to_json
-
-
-# pretty print it if available
-begin
-  require 'open3'
-  out, err, status = Open3.capture3("jq", ".", stdin_data: json)
-  json = out if status.success?
-rescue Errno::ENOENT
-  # noop, they don't have jq, just use our output
+if ARGV.any? || (!$i && !$m)
+  $stderr.puts "Example: bin/generate  -m=src/vm/machine_definitions.js -i=src/vm/instructions.js < the_machines.definitions"
+  $stderr.puts "There should be no non-flag args, you gave: #{ARGV.inspect}"             if ARGV.any?
+  $stderr.puts "Neither -i nor -m were given, so there is nothing for hte program to do" if (!$i && !$m)
 end
 
-# write result
-result = template.sub("HERE", json)
-result << "\n" unless result.end_with? "\n"
-if outfile == '-'
-  $stdout.puts result
-else
-  File.write outfile, result
-end
+defs = Defs.from_string $stdin.read
+write_output $i, defs[:instructions]
+write_output $m, defs[:machines]
