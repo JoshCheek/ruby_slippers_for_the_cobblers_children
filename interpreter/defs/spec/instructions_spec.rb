@@ -1,6 +1,12 @@
 require 'defs/parse_instructions'
 
-RSpec.describe Defs do
+RSpec.describe Defs::ParseInstruction do
+  def parses!(instructions, expected)
+    lines  = instructions.lines.map(&:chomp)
+    actual = Defs::ParseInstruction.call(lines)
+    expect(actual).to eq expected
+  end
+
   describe 'running a machine' do
     xit 'can be run with no args' do
       parses! '/abc',   [[:runMachine, [:ast], []]]
@@ -63,8 +69,13 @@ RSpec.describe Defs do
   end
 
   describe 'working with arrays' do
-    describe 'pushing' do
-      it 'expands lhs and rhs to ivars'
+    describe 'append' do
+      it 'expands lhs and rhs to ivars' do
+        parses! '@a << @b',   [[:aryAppend, :@a, :@b]]
+        parses! '$a << $b',   [[:globalToRegister, :a, :@_1],
+                               [:globalToRegister, :b, :@_2],
+                               [:aryAppend, :@_1, :@_2]]
+      end
     end
 
 
@@ -86,6 +97,16 @@ RSpec.describe Defs do
       #         [:label, :forloop_end],
 
       #         [:runMachine, [:reemit], []],
+    end
+  end
+
+  describe 'working with hashes' do
+    describe 'literal' do
+      it 'creates an empty hash literal' do
+        parses! '@a <- {}', [[:newHash, :@a]]
+        # parses! '$a <- {}', [[:newHash, :@_1],
+                             # [:registerToGlobal, :@_1, :a]]
+      end
     end
   end
 end

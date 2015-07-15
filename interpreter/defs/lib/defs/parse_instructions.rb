@@ -51,6 +51,10 @@ class Defs
       instr.to_s.include? "<-"
     end
 
+    def append_value?(instr)
+      instr.to_s.include? '<<'
+    end
+
     def no_instruction?(instr)
       instr.strip == ""
     end
@@ -133,6 +137,8 @@ class Defs
         instructions << [:becomeMachine, path]
       elsif set_value? instr
         parse_set_value instr
+      elsif append_value? instr
+        parse_append_value instr
       else
         raise "What to do with: #{instr.inspect}"
       end
@@ -157,9 +163,11 @@ class Defs
         global   = global_name(to_set)
         register = value_to_register(value)
         instructions << [:registerToGlobal, register, global]
+      elsif value == '{}' && register?(to_set)
+        instructions << [:newHash, to_set.intern]
       else
         return instr
-        raise "What is this: #{to_set.inspect}"
+        raise "What is this: #{instr.inspect}"
       end
     end
 
@@ -207,6 +215,14 @@ class Defs
       path            = parse_machine_path(raw_path)
       args            = args.map { |arg| value_to_register arg }
       instructions << [:runMachine, path, args]
+    end
+
+    # @names << @name
+    def parse_append_value(instr)
+      lhs, rhs       = instr.split(/\s*<<\s*/, 2)
+      left_register  = value_to_register(lhs)
+      right_register = value_to_register(rhs)
+      instructions << [:aryAppend, left_register, right_register]
     end
   end
 end
