@@ -37,6 +37,9 @@ ast: @ast
   true:
     /emit($rTrue)
 
+  self:
+    /emit($currentBinding.self)
+
   string: @ast
     /newPrimitive($rString, @ast.value)
 

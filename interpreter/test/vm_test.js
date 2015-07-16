@@ -74,20 +74,20 @@ describe('ruby.VM', function() {
       done()
     })
   });
+
+  // we're ignoring fixnums and symbols for now
+  it('evalutes special constants', (done) => {
+    interpreterFor("nil\ntrue\nfalse\nself", (vm, world) => {
+      AE(world.$rNil,   vm.nextExpression())
+      AE(world.$rTrue,  vm.nextExpression())
+      AE(world.$rFalse, vm.nextExpression())
+      AE(world.$rMain,  vm.nextExpression())
+      done()
+    })
+  })
 })
 
 /*
-    // we're ignoring fixnums and symbols for now
-    d.it('evalutes special constants', function(a) {
-      var interpreter = interpreterFor("nil\ntrue\nfalse\nself");
-      assertNextExpressions(a, interpreter, [
-        world.$rNil,
-        world.$rTrue,
-        world.$rFalse,
-        world.$rMain
-      ]);
-    });
-
     d.it('evaluates a string literal', function(a) {
       var interpreter = interpreterFor('"Josh"');
       var str = interpreter.nextExpression();

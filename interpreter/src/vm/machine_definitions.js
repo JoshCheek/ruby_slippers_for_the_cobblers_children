@@ -121,6 +121,21 @@ export default () => {
             ],
             "children": {},
           },
+          "self": {
+            "name": "self",
+            "description": "Machine: /ast/self",
+            "namespace": ["ast"],
+            "arg_names": [],
+            "labels": {},
+            "instructions": [
+              ["globalToRegister", "$currentBinding", "@_1"],
+              ["getKey", "@_2", "@_1", "self"],
+              ["runMachine", ["emit"],
+                ["@_2"]
+              ]
+            ],
+            "children": {},
+          },
           "string": {
             "name": "string",
             "description": "Machine: /ast/string",
