@@ -39,6 +39,7 @@ RSpec.describe Defs::Machine do
       namespace:      [],
       description:    "The main machine, kicks everything else off",
       arg_names:      [],
+      labels:         {},
       instructions:   [
         [:globalToRegister, :$ast, :@_1],
         [:runMachine, [:ast], [:@_1]],
@@ -95,6 +96,10 @@ RSpec.describe Defs::Machine do
           namespace:    [:ast],
           description:  "Machine: /ast/expressions",
           arg_names:    [:@ast],
+          labels:       {
+            forloop:     3,
+            forloop_end: 10,
+          },
           instructions: [
             [:setInt, :@_1, 0],
             [:getKey, :@_2, :@ast, :expressions],
@@ -170,7 +175,7 @@ RSpec.describe Defs::Machine do
   def assert_machine(machine, assertions)
     assertions.each do |attr, expected|
       case attr
-      when :name, :namespace, :description, :arg_names, :instructions
+      when :name, :namespace, :description, :arg_names, :labels, :instructions
         actual = machine.__send__ attr
         msg = "Expected\n#{machine.inspect.gsub(/^/, '  ')}.#{attr}\n"\
               "    to eq   #{expected.inspect}\n"\

@@ -31,16 +31,10 @@ export default class Machine {
     this.world               = world
     this.state               = state
 
-    // TODO: move these into the definitions
+    // move to index.js
     state.parent             = parent
     state.instructionPointer = 0
     state.registers          = {}
-    state.labels             = {}
-    state.instructions.forEach(
-      ([instr, name], index) => {
-        if(instr === "label")
-          state.labels[name] = index
-    })
   }
 
   child(name, parent) {

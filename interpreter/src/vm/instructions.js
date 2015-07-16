@@ -49,6 +49,7 @@ export default {
   },
 
   becomeMachine: (world, state, machine, registers, path) => {
+    // Note: parent is only necessary for popping, as we don't retain a real stack.
     let newMachine = world.$rootMachine
     path.forEach((name) => {
       if (name[0] === "@")

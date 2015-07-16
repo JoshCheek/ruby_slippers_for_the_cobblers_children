@@ -4,6 +4,7 @@ export default () => {
     "description": "Machine /",
     "namespace": [],
     "arg_names": [],
+    "labels": {},
     "instructions": [],
     "children": {
       "main": {
@@ -11,6 +12,7 @@ export default () => {
         "description": "The main machine, kicks everything else off",
         "namespace": [],
         "arg_names": [],
+        "labels": {},
         "instructions": [
           ["globalToRegister", "$ast", "@_1"],
           ["runMachine", ["ast"],
@@ -27,6 +29,7 @@ export default () => {
         "description": "Machine: /emit",
         "namespace": [],
         "arg_names": ["@value"],
+        "labels": {},
         "instructions": [
           ["globalToRegister", "$currentBinding", "@_1"],
           ["setKey", "@_1", "returnValue", "@value"],
@@ -40,6 +43,7 @@ export default () => {
         "description": "Machine: /reemit",
         "namespace": [],
         "arg_names": [],
+        "labels": {},
         "instructions": [
           ["globalToRegister", "$rTrue", "@_1"],
           ["registerToGlobal", "@_1", "$foundExpression"]
@@ -51,6 +55,7 @@ export default () => {
         "description": "helper for builtin types with fancy data",
         "namespace": [],
         "arg_names": ["@class", "@data"],
+        "labels": {},
         "instructions": [
           ["newHash", "@object"],
           ["setKey", "@object", "class", "@class"],
@@ -68,6 +73,7 @@ export default () => {
         "description": "Interpreters for language constructs",
         "namespace": [],
         "arg_names": ["@ast"],
+        "labels": {},
         "instructions": [
           ["getKey", "@_1", "@ast", "type"],
           ["becomeMachine", ["ast", "@_1"]]
@@ -78,6 +84,7 @@ export default () => {
             "description": "Machine: /ast/nil",
             "namespace": ["ast"],
             "arg_names": [],
+            "labels": {},
             "instructions": [
               ["globalToRegister", "$rNil", "@_1"],
               ["runMachine", ["emit"],
@@ -91,6 +98,7 @@ export default () => {
             "description": "Machine: /ast/false",
             "namespace": ["ast"],
             "arg_names": [],
+            "labels": {},
             "instructions": [
               ["globalToRegister", "$rFalse", "@_1"],
               ["runMachine", ["emit"],
@@ -104,6 +112,7 @@ export default () => {
             "description": "Machine: /ast/true",
             "namespace": ["ast"],
             "arg_names": [],
+            "labels": {},
             "instructions": [
               ["globalToRegister", "$rTrue", "@_1"],
               ["runMachine", ["emit"],
@@ -117,6 +126,7 @@ export default () => {
             "description": "Machine: /ast/string",
             "namespace": ["ast"],
             "arg_names": ["@ast"],
+            "labels": {},
             "instructions": [
               ["globalToRegister", "$rString", "@_1"],
               ["getKey", "@_2", "@ast", "value"],
@@ -131,6 +141,10 @@ export default () => {
             "description": "Machine: /ast/expressions",
             "namespace": ["ast"],
             "arg_names": ["@ast"],
+            "labels": {
+              "forloop": 3,
+              "forloop_end": 10
+            },
             "instructions": [
               ["setInt", "@_1", 0],
               ["getKey", "@_2", "@ast", "expressions"],

@@ -29,6 +29,10 @@ class Defs
       raw_instrs        = lines.take_while { |l| l !~ /^\w+:/ }
 
       self.instructions = ParseInstruction.call raw_instrs
+      self.labels       = instructions.map.with_index
+                                      .select { |(type, *), i| type == :label }
+                                      .map    { |(_, name), i| [name, i] }
+                                      .to_h
       self.children     = parse_children lines.drop(raw_instrs.length).join("\n")
 
       to_h
@@ -38,6 +42,7 @@ class Defs
       { name:           name,
         arg_names:      arg_names,
         description:    description,
+        labels:         labels,
         instructions:   instructions,
         namespace:      namespace,
         children:       children,
@@ -46,7 +51,7 @@ class Defs
 
     private
 
-    attr_accessor :def_string, :name, :arg_names, :namespace, :description, :instructions, :children
+    attr_accessor :def_string, :name, :arg_names, :namespace, :description, :instructions, :children, :labels
 
     def parse_children(children_str)
       children_str.split(/^(?=\w)/)

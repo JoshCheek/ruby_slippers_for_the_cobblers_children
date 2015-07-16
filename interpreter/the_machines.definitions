@@ -63,6 +63,7 @@ machine(defn)
   "description":  <%= defn.description.to_json %>,
   "namespace":    <%= defn.namespace.to_json %>,
   "arg_names":    <%= defn.arg_names.to_json %>,
+  "labels":       <%= defn.labels.to_json %>,
   <%- if defn.instructions.length < 2 -%>
     "instructions": <%= defn.instructions.to_json %>,
   <%- else -%>
@@ -137,6 +138,7 @@ setKey(hashRegister, key, valueRegister)
   registers[hashRegister][key] = registers[valueRegister]
 
 becomeMachine(path)
+  // Note: parent is only necessary for popping, as we don't retain a real stack.
   let newMachine = world.$rootMachine
   path.forEach((name) => {
     if(name[0] === "@")

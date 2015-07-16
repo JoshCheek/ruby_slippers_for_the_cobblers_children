@@ -1,6 +1,6 @@
 class Defs
   class Machine
-    ATTRIBUTES = [:name, :namespace, :arg_names, :description, :instructions].freeze
+    ATTRIBUTES = [:name, :namespace, :arg_names, :description, :labels, :instructions].freeze
 
     def initialize(defn)
       @defn = defn
