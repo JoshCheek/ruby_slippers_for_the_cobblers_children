@@ -1,5 +1,10 @@
 "use strict"
 
+import {
+  inspect
+}
+from 'util'
+
 let constructMachine = function (definition, parent) {
   return {
     definition: definition,
@@ -12,10 +17,10 @@ let constructMachine = function (definition, parent) {
 let _newMachine = function (root, path, registers, parent) {
   let machineDef = root
   path.forEach((name) => {
-    if (name[0] === "@")
-      machineDef = machineDef.children[registers[name]]
-    else
-      machineDef = machineDef.children[name]
+    let registerName = (name[0] === '@' ? registers[name] : name)
+    machineDef = machineDef.children[registerName]
+    if (!machineDef)
+      throw (new Error(`No machine ${inspect(name)} -> ${inspect(registerName)} in ${inspect(path)}`))
   })
   return constructMachine(machineDef, parent)
 }
