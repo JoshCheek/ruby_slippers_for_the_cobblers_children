@@ -1,54 +1,54 @@
 "use strict"
 
 export default {
-  setInt: (world, machine, registers, register, initialValue) => {
+  setInt: (world, state, machine, registers, register, initialValue) => {
     registers[register] = initialValue
   },
 
-  add: (world, machine, registers, register, quantity) => {
+  add: (world, state, machine, registers, register, quantity) => {
     if (typeof quantity !== 'number')
       throw (new Error(`Not a numeber! ${quantity}`))
     registers[register] += quantity
   },
 
-  eq: (world, machine, registers, toRegister, left, right) => {
+  eq: (world, state, machine, registers, toRegister, left, right) => {
     registers[toRegister] = (registers[left] == registers[right])
   },
 
-  getKey: (world, machine, registers, toRegister, hashRegister, key) => {
+  getKey: (world, state, machine, registers, toRegister, hashRegister, key) => {
     if (key[0] === '@') key = registers[key]
     registers[toRegister] = registers[hashRegister][key]
   },
 
-  globalToRegister: (world, machine, registers, globalName, registerName) => {
+  globalToRegister: (world, state, machine, registers, globalName, registerName) => {
     if (world[globalName] == undefined) throw (new Error(`No global ${globalName} in globalToRegister`))
     registers[registerName] = world[globalName]
   },
 
-  jumpTo: (world, machine, registers, label) => {
-    machine.setInstructionPointer(machine.instructionPointerFor(label))
+  jumpTo: (world, state, machine, registers, label) => {
+    machine.setInstructionPointer(state.labels[label])
   },
 
-  jumpToIf: (world, machine, registers, label, conditionRegister) => {
+  jumpToIf: (world, state, machine, registers, label, conditionRegister) => {
     if (registers[conditionRegister])
-      machine.setInstructionPointer(machine.instructionPointerFor(label))
+      machine.setInstructionPointer(state.labels[label])
   },
 
-  label: (world, machine, registers, name) => {
+  label: (world, state, machine, registers, name) => {
     /* noop */
   },
 
-  registerToGlobal: (world, machine, registers, registerName, globalName) => {
+  registerToGlobal: (world, state, machine, registers, registerName, globalName) => {
     let value = registers[registerName]
     world[globalName] = value
   },
 
-  setKey: (world, machine, registers, hashRegister, key, valueRegister) => {
+  setKey: (world, state, machine, registers, hashRegister, key, valueRegister) => {
     if (key[0] === '@') key = registers[key]
     registers[hashRegister][key] = registers[valueRegister]
   },
 
-  becomeMachine: (world, machine, registers, path) => {
+  becomeMachine: (world, state, machine, registers, path) => {
     let newMachine = world.$rootMachine
     path.forEach((name) => {
       if (name[0] === "@")
@@ -60,7 +60,7 @@ export default {
     world.$machineStack = newMachine
   },
 
-  runMachine: (world, machine, registers, path, argNames) => {
+  runMachine: (world, state, machine, registers, path, argNames) => {
     let newMachine = world.$rootMachine
     path.forEach((name) => {
       if (name[0] === "@")
@@ -73,11 +73,11 @@ export default {
     world.$machineStack = newMachine
   },
 
-  newHash: (world, machine, registers, register) => {
+  newHash: (world, state, machine, registers, register) => {
     registers[register] = {}
   },
 
-  aryAppend: (world, machine, registers, aryRegister, toAppendRegister) => {
+  aryAppend: (world, state, machine, registers, aryRegister, toAppendRegister) => {
     registers[aryRegister].push(registers[toAppendRegister])
   },
 

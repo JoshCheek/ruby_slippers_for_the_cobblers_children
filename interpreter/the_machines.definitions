@@ -87,7 +87,7 @@ instructions(instructions)
 
   export default {
     <%- instructions.each do |name, attrs| -%>
-      <%= name %>: (world, machine, registers<%= attrs[:argnames].map { |a| ", #{a}" }.join %>) => {
+      <%= name %>: (world, state, machine, registers<%= attrs[:argnames].map { |a| ", #{a}" }.join %>) => {
         <%= attrs[:body] %>
       },
 
@@ -119,11 +119,11 @@ globalToRegister(globalName, registerName)
   registers[registerName] = world[globalName]
 
 jumpTo(label)
-  machine.setInstructionPointer(machine.instructionPointerFor(label))
+  machine.setInstructionPointer(state.labels[label])
 
 jumpToIf(label, conditionRegister)
   if(registers[conditionRegister])
-    machine.setInstructionPointer(machine.instructionPointerFor(label))
+    machine.setInstructionPointer( state.labels[label])
 
 label(name)
   /* noop */

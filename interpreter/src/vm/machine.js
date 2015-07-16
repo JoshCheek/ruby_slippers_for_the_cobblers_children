@@ -82,7 +82,7 @@ export default class Machine {
     if(!code)
       throw(new Error(`No instruction: ${name}`))
     else
-      code(this.world, this, this.state.registers, ...args)
+      code(this.world, this.state, this, this.state.registers, ...args)
 
     this.setInstructionPointer(this.instructionPointer() + 1)
 
@@ -128,11 +128,8 @@ export default class Machine {
     return ns.join('/')
   }
 
+  // -----  can ignore  -----
   isFinished() {
     return !this.getInstruction()
-  }
-
-  instructionPointerFor(label) {
-    return this.state.labels[label]
   }
 }
