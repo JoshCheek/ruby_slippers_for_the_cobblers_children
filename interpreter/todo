@@ -1,0 +1,12 @@
+Immediate:
+  the_machine.definitions: move templates between the two
+  global vars keep the dollar sign
+  move machine.js into instructions and get rid of it altogether. There should only be the one vm
+  implement special constants (true/false/self)
+
+Maybe future:
+  option to see a list of bytecodes
+  build fails if bytecode emitted doesn't match bytecode signature list
+  build fails if bytecodes are used, but not defined
+  build fails if misalignment between bytecode args and instruction args
+  could use a real parser if we preprocess it to remove the context sensitivity
