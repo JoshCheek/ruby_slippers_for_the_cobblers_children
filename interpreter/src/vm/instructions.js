@@ -21,6 +21,7 @@ export default {
   },
 
   globalToRegister: (world, machine, registers, globalName, registerName) => {
+    if (world[globalName] == undefined) throw (new Error(`No global ${globalName} in globalToRegister`))
     registers[registerName] = world[globalName]
   },
 
@@ -70,6 +71,14 @@ export default {
     let args = argNames.map((name) => registers[name])
     newMachine.setArgs(args)
     world.machineStack = newMachine
+  },
+
+  newHash: (world, machine, registers, register) => {
+    registers[register] = {}
+  },
+
+  aryAppend: (world, machine, registers, aryRegister, toAppendRegister) => {
+    registers[aryRegister].push(registers[toAppendRegister])
   },
 
 }

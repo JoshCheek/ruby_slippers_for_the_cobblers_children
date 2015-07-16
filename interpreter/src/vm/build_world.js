@@ -72,6 +72,8 @@ export default function buildWorld(ast) {
   const rFalseClass = instantiate(rClass,      () => "rFalseClass")
   const rFalse      = instantiate(rFalseClass, () => "rFalse")
 
+  // String
+  const rString     = instantiate(rClass,      () => "rString")
 
   // callstack
   const main = instantiate(rObject, () => "rMain")
@@ -87,6 +89,7 @@ export default function buildWorld(ast) {
     rNil:            rNil,
     rTrue:           rTrue,
     rFalse:          rFalse,
+    rString:         rString,
     currentBinding:  toplevelBinding,
     allObjects:      allObjects,
     foundExpression: false,

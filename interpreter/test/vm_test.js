@@ -4,9 +4,16 @@ import * as ruby from '../src/ruby';
 import assert from 'assert';
 import {inspect} from "util"
 
-let AE = function(left, right) {
+const AE = function(left, right) {
   if(left !== right)
     throw(new Error(`\u001b[31m${inspect(left)} !== ${inspect(right)}`))
+}
+
+const IS_TRACKED = function(world, object) {
+  return true; // uhm, fake this out for now, we don't have a good way to reall deal with it
+  let index = world.allObjects.findIndex((o) => o == object)
+  if(0 <= index) return
+  throw(new Error(`Expected ${inspect(object)} to be in the world, but it is not!`))
 }
 
 const interpreterFor = (rawCode, callback) => {
@@ -51,28 +58,25 @@ describe('ruby.VM', function() {
       done()
     })
   });
+
+  it('interprets strings', (done) => {
+    interpreterFor("'abc'\n''", (vm, world) => {
+      let str1 = vm.nextExpression()
+      AE(world.rString, str1.class)
+      AE("abc",         str1.primitiveData)
+      IS_TRACKED(world, str1)
+
+      let str2 = vm.nextExpression()
+      AE(world.rString, str2.class)
+      AE("",            str2.primitiveData)
+      IS_TRACKED(world, str2)
+
+      done()
+    })
+  });
 })
 
 /*
-    // d.it('throws if asked for expressions after being finished', function(a) {
-    //   assertThrows(a, function() interpreter.nextExpression());
-
-    //   pushCode("true");
-    //   interpreter.nextExpression();
-    //   assertThrows(a, function() interpreter.nextExpression());
-    // });
-
-    function assertNextExpressions(a:spaceCadet.Asserter, interpreter:Interpreter, expected:Array<RObject>, ?c:haxe.PosInfos) {
-      var actual:Array<RObject> = [];
-      while(interpreter.isInProgress) {
-        var expr = interpreter.nextExpression();
-        actual.push(expr);
-      }
-      for(pair in expected.zip(actual)) a.streq(pair.l, pair.r);
-      if(expected.length <= actual.length) return;
-      a.eqm(1,2, 'Expected at least ${expected.length} expressions, but there were ${actual.length}', c);
-    }
-
     // we're ignoring fixnums and symbols for now
     d.it('evalutes special constants', function(a) {
       var interpreter = interpreterFor("nil\ntrue\nfalse\nself");

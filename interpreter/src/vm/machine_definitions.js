@@ -46,6 +46,23 @@ export default () => {
         ],
         "children": {},
       },
+      "newPrimitive": {
+        "name": "newPrimitive",
+        "description": "helper for builtin types with fancy data",
+        "namespace": [],
+        "arg_names": ["@class", "@data"],
+        "instructions": [
+          ["newHash", "@object"],
+          ["setKey", "@object", "class", "@class"],
+          ["newHash", "@_1"],
+          ["setKey", "@object", "instanceVariables", "@_1"],
+          ["setKey", "@object", "primitiveData", "@data"],
+          ["runMachine", ["emit"],
+            ["@object"]
+          ]
+        ],
+        "children": {},
+      },
       "ast": {
         "name": "ast",
         "description": "Interpreters for language constructs",
@@ -91,6 +108,20 @@ export default () => {
               ["globalToRegister", "rTrue", "@_1"],
               ["runMachine", ["emit"],
                 ["@_1"]
+              ]
+            ],
+            "children": {},
+          },
+          "string": {
+            "name": "string",
+            "description": "Machine: /ast/string",
+            "namespace": ["ast"],
+            "arg_names": ["@ast"],
+            "instructions": [
+              ["globalToRegister", "rString", "@_1"],
+              ["getKey", "@_2", "@ast", "value"],
+              ["runMachine", ["newPrimitive"],
+                ["@_1", "@_2"]
               ]
             ],
             "children": {},

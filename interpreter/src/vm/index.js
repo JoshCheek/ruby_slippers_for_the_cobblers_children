@@ -17,11 +17,8 @@ export default class VM {
 
   nextExpression() {
     this.world.foundExpression = false
-    let i = 0;
     while(!this.world.foundExpression && this.world.machineStack) {
       this.world.machineStack.step()
-      if(i++ > 20)
-        throw(new Error(`INFINITY! ${this.name()}`))
 
       while(this.world.machineStack && this.world.machineStack.isFinished())
         this.world.machineStack = this.world.machineStack.parent()
