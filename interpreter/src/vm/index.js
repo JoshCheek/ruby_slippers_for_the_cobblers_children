@@ -1,5 +1,6 @@
 "use strict"
 import buildWorld from './build_world'
+import instructionCodes from "./instructions"
 import {inspect} from 'util'
 
 export default class VM {
@@ -18,13 +19,11 @@ export default class VM {
   nextExpression() {
     this.world.$foundExpression = false
     while(!this.world.$foundExpression && this.world.$machineStack) {
-      this.world.$machineStack.step()
+      this.step(this.world.$machineStack)
 
-      while(this.world.$machineStack && this.world.$machineStack.isFinished())
-        this.world.$machineStack = this.world.$machineStack.state.parent
+      while(this.world.$machineStack && this.isFinished(this.world.$machineStack))
+        this.world.$machineStack = this.world.$machineStack.parent
     }
-
-    let hasMachine = !!this.world.$machineStack
 
     return this.currentExpression()
   }
@@ -35,5 +34,39 @@ export default class VM {
 
   setCurrentExpression(value) {
     this.currentBinding().returnValue = value
+  }
+
+  // ----  machine.js  ----
+
+  step(machine) {
+    if(this.isFinished(machine)) throw(new Error(`${machine.definition.name()} is finished!`))
+
+    const instruction = this.getInstruction(machine),
+          name        = instruction[0],
+          args        = instruction.slice(1),
+          code        = instructionCodes[name]
+
+    // console.log(`INSTRUCTION: ${machine.definition.name}:${name}\t${inspect(args)}`)
+
+    if(!code)
+      throw(new Error(`No instruction: ${name}`))
+    else
+      code(this.world, machine, "DO NOT USE THIS!!", machine.registers, ...args)
+
+    machine.instructionPointer = this.instructionPointer(machine) + 1
+  }
+
+  getInstruction(machine) {
+    return machine.definition.instructions[this.instructionPointer(machine)]
+  }
+
+  instructionPointer(machine) {
+    if(machine.instructionPointer < 0)
+      machine.instructionPointer = 0
+    return machine.instructionPointer
+  }
+
+  isFinished(machine) {
+    return !this.getInstruction(machine)
   }
 }

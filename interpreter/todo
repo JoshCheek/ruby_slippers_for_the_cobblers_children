@@ -1,5 +1,4 @@
 Immediate:
-  move machine.js into instructions and get rid of it altogether. There should only be the one vm
   implement special constants (true/false/self)
 
 Maybe future:

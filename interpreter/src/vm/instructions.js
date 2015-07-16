@@ -1,5 +1,25 @@
 "use strict"
 
+let constructMachine = function (definition, parent) {
+  return {
+    definition: definition,
+    parent: parent,
+    registers: {},
+    instructionPointer: 0,
+  }
+}
+
+let _newMachine = function (root, path, registers, parent) {
+  let machineDef = root
+  path.forEach((name) => {
+    if (name[0] === "@")
+      machineDef = machineDef.children[registers[name]]
+    else
+      machineDef = machineDef.children[name]
+  })
+  return constructMachine(machineDef, parent)
+}
+
 export default {
   setInt: (world, state, machine, registers, register, initialValue) => {
     registers[register] = initialValue
@@ -26,12 +46,12 @@ export default {
   },
 
   jumpTo: (world, state, machine, registers, label) => {
-    state.instructionPointer = state.labels[label]
+    state.instructionPointer = state.definition.labels[label]
   },
 
   jumpToIf: (world, state, machine, registers, label, conditionRegister) => {
     if (registers[conditionRegister])
-      state.instructionPointer = state.labels[label]
+      state.instructionPointer = state.definition.labels[label]
   },
 
   label: (world, state, machine, registers, name) => {
@@ -50,37 +70,26 @@ export default {
 
   becomeMachine: (world, state, machine, registers, path) => {
     // Note: parent is only necessary for popping, as we don't retain a real stack.
-    let newMachine = world.$rootMachine
-    path.forEach((name) => {
-      if (name[0] === "@")
-        newMachine = newMachine.child(registers[name], state.parent)
-      else
-        newMachine = newMachine.child(name, state.parent)
-    })
-    newMachine.state.arg_names.forEach((argName) => {
+    let newMachine = _newMachine(world.$rootMachine, path, registers, state.parent)
+
+    newMachine.definition.arg_names.forEach((argName) => {
       if (!registers[argName])
         throw (new Error(`Expected register ${argName}, but only had: ${inspect(Object.keys(registers))}`))
-      newMachine.state.registers[argName] = registers[argName]
+      newMachine.registers[argName] = registers[argName]
     })
     world.$machineStack = newMachine
   },
 
   runMachine: (world, state, machine, registers, path, argNames) => {
-    let newMachine = world.$rootMachine
-    path.forEach((name) => {
-      if (name[0] === "@")
-        newMachine = newMachine.child(registers[name], machine)
-      else
-        newMachine = newMachine.child(name, machine)
-    })
+    let newMachine = _newMachine(world.$rootMachine, path, registers, state)
     let args = argNames.map((name) => registers[name])
 
     let l1 = args.length,
-      l2 = newMachine.state.arg_names.length
+      l2 = newMachine.definition.arg_names.length
     if (l1 != l2) throw (new Error(`LENGTHS DO NOT MATCH! expected:${l2}, actual:${l1}`))
 
-    newMachine.state.arg_names.forEach((argName, index) => {
-      newMachine.state.registers[argName] = args[index]
+    newMachine.definition.arg_names.forEach((argName, index) => {
+      newMachine.registers[argName] = args[index]
     })
 
     world.$machineStack = newMachine

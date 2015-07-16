@@ -1,7 +1,6 @@
 "use strict";
 
-const defineMachine = require("./machine_definitions"),
-      Machine       = require("./machine")
+const defineMachine = require("./machine_definitions")
 
 export default function buildWorld(ast) {
   // All Objects
@@ -96,12 +95,13 @@ export default function buildWorld(ast) {
   }
 
   // not quite right, should be a data structure, not an object.
-  world.$rootMachine  = new Machine(world, defineMachine())
-  world.$rootMachine.state.parent             = null
-  world.$rootMachine.state.instructionPointer = 0
-  world.$rootMachine.state.registers          = {}
-
-  world.$machineStack = world.$rootMachine.child("main", null)
+  world.$rootMachine  = defineMachine()
+  world.$machineStack = {
+    definition         : world.$rootMachine.children["main"],
+    parent             : null,
+    registers          : {},
+    instructionPointer : 0,
+  }
 
   return world
 }
