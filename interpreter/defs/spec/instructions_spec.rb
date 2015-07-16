@@ -8,12 +8,12 @@ RSpec.describe Defs::ParseInstruction do
   end
 
   describe 'running a machine' do
-    xit 'can be run with no args' do
-      parses! '/abc',   [[:runMachine, [:ast], []]]
-      parses! '/abc()', [[:runMachine, [:ast], []]]
+    it 'can be run with no args' do
+      parses! '/abc',   [[:runMachine, [:abc], []]]
+      parses! '/abc()', [[:runMachine, [:abc], []]]
     end
 
-    xit 'can be run with a namespace' do
+    it 'can be run with a namespace' do
       parses! '/a/b/c', [[:runMachine, [:a, :b, :c], []]]
     end
 
@@ -25,12 +25,12 @@ RSpec.describe Defs::ParseInstruction do
     # /a/@b.c/d
     # /a/@b.c/$e.f.g/h
 
-    xit 'can pass registers as arguments' do
+    it 'can pass registers as arguments' do
       parses! '/a(@b)',     [[:runMachine, [:a], [:@b]]]
       parses! '/a(@b, @c)', [[:runMachine, [:a], [:@b, :@c]]]
     end
 
-    xit 'includes instructions to turn non-register arguments into registers' do
+    it 'includes instructions to turn non-register arguments into registers' do
       parses! '/a($b)', [
         [:globalToRegister, :b, :@_1],
         [:runMachine, [:a], [:@_1]],

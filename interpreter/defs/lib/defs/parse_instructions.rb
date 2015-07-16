@@ -216,9 +216,9 @@ class Defs
 
     # /ast($ast)
     def parse_run_machine(instr)
-      raw_path, *args = instr.chomp(")").split("(")
-      path            = parse_machine_path(raw_path)
-      args            = args.map { |arg| value_to_register arg }
+      raw_path, argstring = instr.chomp(")").split("(")
+      path                = parse_machine_path(raw_path)
+      args                = argstring.to_s.split(", ").map { |arg| value_to_register arg }
       instructions << [:runMachine, path, args]
     end
 
