@@ -53,12 +53,26 @@ RSpec.describe Defs::ParseInstruction do
   end
 
   describe 'setting values' do
-    it 'sets lhs / rhs if they are both ivars'
-    it 'expands rhs to an ivar'
-    it 'expands lhs to an ivar'
-    # $currentBinding.returnValue <- @value
-    #     [:globalToRegister, :currentBinding, :@_1],
-    #     [:setKey, :@_1, :returnValue, :@value],
+    it 'sets lhs and rhs if they are both registers' do
+      parses! '@a <- @b',   [[:registerToRegister, :@b, :@a]]
+    end
+
+    # a lot of room for optimization in here, but that's not very important at the moment
+    it 'expands rhs to a register' do
+      parses! '@a <- $b',   [[:globalToRegister, :b, :@_1],
+                             [:registerToRegister, :@_1, :@a]]
+      parses! '@a <- @b.c', [[:getKey, :@_1, :@b, :c],
+                             [:registerToRegister, :@_1, :@a]]
+      parses! '@a <- $b.c', [[:globalToRegister, :b, :@_1],
+                             [:getKey, :@_2, :@_1, :c],
+                             [:registerToRegister, :@_2, :@a]]
+    end
+
+    it 'expands lhs to a register' do
+      parses! '$a <- @b',   [[:registerToGlobal, :@b, :a]]
+      parses! '$a.b <- @c', [[:globalToRegister, :a, :@_1],
+                             [:setKey, :@_1, :b, :@c]]
+    end
 
     it 'allows `self` on lhs, with a machine to become, on rhs'
     # self <- /ast/@ast.type
@@ -104,6 +118,8 @@ RSpec.describe Defs::ParseInstruction do
     describe 'literal' do
       it 'creates an empty hash literal' do
         parses! '@a <- {}', [[:newHash, :@a]]
+        parses! '@a.b <- {}', [[:newHash, :@_1],
+                               [:setKey, :@a, :b, :@_1]]
         # parses! '$a <- {}', [[:newHash, :@_1],
                              # [:registerToGlobal, :@_1, :a]]
       end

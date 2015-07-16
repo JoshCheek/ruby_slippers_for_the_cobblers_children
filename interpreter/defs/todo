@@ -1,0 +1,6 @@
+option to see a list of bytecodes
+build fails if bytecodes are used, but not defined
+build fails if misalignment between bytecode args and instruction args
+could use a real parser if we preprocess it to remove the context sensitivity
+
+global vars keep the dollar sign

@@ -1,0 +1,20 @@
+Parsing
+  emits syntax nodes and their definitions (parses both)
+  user defines the machines that are turned into syntax nodes
+  user defines how to map them to instruction sequences
+
+Compiling
+  takes the parsed definition and runs the syntax nodes through it to get machine definitions
+  machines may be implemented in native code
+
+Could compile all sequences into a giant array that is then immutable
+  with a linked list stack of machines, like we currently have,
+
+  machineStack 1:
+    instructionPointer (into giant array of code?)
+    stackPointer       (to the current stackFrame)
+    stack:             array of stackFrames
+    stackFrame, array with slots for data(all registers), template, machine
+
+  machineStack 2:
+    {registers, instructionPointer, labels, machineTemplate, parent}

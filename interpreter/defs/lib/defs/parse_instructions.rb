@@ -165,8 +165,9 @@ class Defs
         instructions << [:registerToGlobal, register, global]
       elsif value == '{}' && register?(to_set)
         instructions << [:newHash, to_set.intern]
+      elsif register?(to_set)
+        instructions << [:registerToRegister, value_to_register(value), to_set.intern]
       else
-        return instr
         raise "What is this: #{instr.inspect}"
       end
     end
@@ -179,9 +180,10 @@ class Defs
 
     def value_to_register(value)
       if hash_with_key? value
-        hash, key       = split value, "."
-        hash_register   = value_to_register hash
-        result_register = new_implicit_register
+        hash, key, *rest = split value, "."
+        raise "Go implement multi-key access! #{value.inspect}" if rest.any?
+        hash_register    = value_to_register hash
+        result_register  = new_implicit_register
         instructions << [:getKey, result_register, hash_register, key.intern]
         result_register
       elsif register? value
@@ -191,8 +193,11 @@ class Defs
         register = new_implicit_register
         instructions << [:globalToRegister, global, register]
         register
+      elsif value == '{}'
+        register = new_implicit_register
+        instructions << [:newHash, register]
+        register
       else
-        return value
         raise "What kind of arg is this: #{value.inspect}"
       end
     end
