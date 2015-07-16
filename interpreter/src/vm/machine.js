@@ -15,7 +15,7 @@ let doLog = false,
     },
     logStep = (world, machine, instructionName, instructionArgs) => {
       if(!doLog) return
-      let stackNames = [], stackMachine = world.machineStack
+      let stackNames = [], stackMachine = world.$machineStack
 
       while(stackMachine) {
         stackNames.push(stackMachine.fullname())
@@ -91,7 +91,7 @@ export default class Machine {
       postFinished:           this.isFinished(),
       postInstructionPointer: this.instructionPointer(),
       postRegisters:          this.state.registers,
-      foundExpression:        this.world.foundExpression,
+      foundExpression:        this.world.$foundExpression,
     })
   }
 
@@ -118,7 +118,7 @@ export default class Machine {
   }
 
   currentExpression() {
-    return this.world.currentBinding.returnValue
+    return this.world.$currentBinding.returnValue
   }
 
   fullname() {

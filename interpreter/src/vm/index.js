@@ -12,19 +12,19 @@ export default class VM {
   }
 
   currentBinding() {
-    return this.world.currentBinding
+    return this.world.$currentBinding
   }
 
   nextExpression() {
-    this.world.foundExpression = false
-    while(!this.world.foundExpression && this.world.machineStack) {
-      this.world.machineStack.step()
+    this.world.$foundExpression = false
+    while(!this.world.$foundExpression && this.world.$machineStack) {
+      this.world.$machineStack.step()
 
-      while(this.world.machineStack && this.world.machineStack.isFinished())
-        this.world.machineStack = this.world.machineStack.parent()
+      while(this.world.$machineStack && this.world.$machineStack.isFinished())
+        this.world.$machineStack = this.world.$machineStack.parent()
     }
 
-    let hasMachine = !!this.world.machineStack
+    let hasMachine = !!this.world.$machineStack
 
     return this.currentExpression()
   }

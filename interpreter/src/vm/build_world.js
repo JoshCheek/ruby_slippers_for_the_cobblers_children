@@ -85,19 +85,19 @@ export default function buildWorld(ast) {
 
   // put it all together
   const world = {
-    ast:             ast,
-    rNil:            rNil,
-    rTrue:           rTrue,
-    rFalse:          rFalse,
-    rString:         rString,
-    currentBinding:  toplevelBinding,
-    allObjects:      allObjects,
-    foundExpression: false,
+    $ast:             ast,
+    $rNil:            rNil,
+    $rTrue:           rTrue,
+    $rFalse:          rFalse,
+    $rString:         rString,
+    $currentBinding:  toplevelBinding,
+    $allObjects:      allObjects,
+    $foundExpression: false,
   }
 
   // not quite right, should be a data structure, not an object.
-  world.rootMachine  = new Machine(world, defineMachine(), null)
-  world.machineStack = world.rootMachine.child("main", null)
+  world.$rootMachine  = new Machine(world, defineMachine(), null)
+  world.$machineStack = world.$rootMachine.child("main", null)
 
   return world
 }

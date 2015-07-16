@@ -40,7 +40,7 @@ RSpec.describe Defs::Machine do
       description:    "The main machine, kicks everything else off",
       arg_names:      [],
       instructions:   [
-        [:globalToRegister, :ast, :@_1],
+        [:globalToRegister, :$ast, :@_1],
         [:runMachine, [:ast], [:@_1]],
         [:runMachine, [:ast, :nil], []],
       ],
@@ -52,7 +52,7 @@ RSpec.describe Defs::Machine do
       description:  "Machine: /emit",
       arg_names:    [:@value],
       instructions: [
-        [:globalToRegister, :currentBinding, :@_1],
+        [:globalToRegister, :$currentBinding, :@_1],
         [:setKey, :@_1, :returnValue, :@value],
       ],
       children: {}
@@ -85,7 +85,7 @@ RSpec.describe Defs::Machine do
           description:  "Machine: /ast/nil",
           arg_names:    [],
           instructions: [
-            [:globalToRegister, :rNil, :@_1],
+            [:globalToRegister, :$rNil, :@_1],
             [:runMachine, [:emit], [:@_1]],
           ],
           children: {}

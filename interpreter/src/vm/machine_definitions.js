@@ -12,7 +12,7 @@ export default () => {
         "namespace": [],
         "arg_names": [],
         "instructions": [
-          ["globalToRegister", "ast", "@_1"],
+          ["globalToRegister", "$ast", "@_1"],
           ["runMachine", ["ast"],
             ["@_1"]
           ],
@@ -28,10 +28,10 @@ export default () => {
         "namespace": [],
         "arg_names": ["@value"],
         "instructions": [
-          ["globalToRegister", "currentBinding", "@_1"],
+          ["globalToRegister", "$currentBinding", "@_1"],
           ["setKey", "@_1", "returnValue", "@value"],
-          ["globalToRegister", "rTrue", "@_2"],
-          ["registerToGlobal", "@_2", "foundExpression"]
+          ["globalToRegister", "$rTrue", "@_2"],
+          ["registerToGlobal", "@_2", "$foundExpression"]
         ],
         "children": {},
       },
@@ -41,8 +41,8 @@ export default () => {
         "namespace": [],
         "arg_names": [],
         "instructions": [
-          ["globalToRegister", "rTrue", "@_1"],
-          ["registerToGlobal", "@_1", "foundExpression"]
+          ["globalToRegister", "$rTrue", "@_1"],
+          ["registerToGlobal", "@_1", "$foundExpression"]
         ],
         "children": {},
       },
@@ -79,7 +79,7 @@ export default () => {
             "namespace": ["ast"],
             "arg_names": [],
             "instructions": [
-              ["globalToRegister", "rNil", "@_1"],
+              ["globalToRegister", "$rNil", "@_1"],
               ["runMachine", ["emit"],
                 ["@_1"]
               ]
@@ -92,7 +92,7 @@ export default () => {
             "namespace": ["ast"],
             "arg_names": [],
             "instructions": [
-              ["globalToRegister", "rFalse", "@_1"],
+              ["globalToRegister", "$rFalse", "@_1"],
               ["runMachine", ["emit"],
                 ["@_1"]
               ]
@@ -105,7 +105,7 @@ export default () => {
             "namespace": ["ast"],
             "arg_names": [],
             "instructions": [
-              ["globalToRegister", "rTrue", "@_1"],
+              ["globalToRegister", "$rTrue", "@_1"],
               ["runMachine", ["emit"],
                 ["@_1"]
               ]
@@ -118,7 +118,7 @@ export default () => {
             "namespace": ["ast"],
             "arg_names": ["@ast"],
             "instructions": [
-              ["globalToRegister", "rString", "@_1"],
+              ["globalToRegister", "$rString", "@_1"],
               ["getKey", "@_2", "@ast", "value"],
               ["runMachine", ["newPrimitive"],
                 ["@_1", "@_2"]

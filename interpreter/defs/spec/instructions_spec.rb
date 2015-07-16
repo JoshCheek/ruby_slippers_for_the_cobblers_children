@@ -32,12 +32,12 @@ RSpec.describe Defs::ParseInstruction do
 
     it 'includes instructions to turn non-register arguments into registers' do
       parses! '/a($b)', [
-        [:globalToRegister, :b, :@_1],
+        [:globalToRegister, :$b, :@_1],
         [:runMachine, [:a], [:@_1]],
       ]
       parses! '/a($b, @c, $d)', [
-        [:globalToRegister, :b, :@_1],
-        [:globalToRegister, :d, :@_2],
+        [:globalToRegister, :$b, :@_1],
+        [:globalToRegister, :$d, :@_2],
         [:runMachine, [:a], [:@_1, :@c, :@_2]],
       ]
     end
@@ -59,18 +59,18 @@ RSpec.describe Defs::ParseInstruction do
 
     # a lot of room for optimization in here, but that's not very important at the moment
     it 'expands rhs to a register' do
-      parses! '@a <- $b',   [[:globalToRegister, :b, :@_1],
+      parses! '@a <- $b',   [[:globalToRegister, :$b, :@_1],
                              [:registerToRegister, :@_1, :@a]]
       parses! '@a <- @b.c', [[:getKey, :@_1, :@b, :c],
                              [:registerToRegister, :@_1, :@a]]
-      parses! '@a <- $b.c', [[:globalToRegister, :b, :@_1],
+      parses! '@a <- $b.c', [[:globalToRegister, :$b, :@_1],
                              [:getKey, :@_2, :@_1, :c],
                              [:registerToRegister, :@_2, :@a]]
     end
 
     it 'expands lhs to a register' do
-      parses! '$a <- @b',   [[:registerToGlobal, :@b, :a]]
-      parses! '$a.b <- @c', [[:globalToRegister, :a, :@_1],
+      parses! '$a <- @b',   [[:registerToGlobal, :@b, :$a]]
+      parses! '$a.b <- @c', [[:globalToRegister, :$a, :@_1],
                              [:setKey, :@_1, :b, :@c]]
     end
 
@@ -86,8 +86,8 @@ RSpec.describe Defs::ParseInstruction do
     describe 'append' do
       it 'expands lhs and rhs to ivars' do
         parses! '@a << @b',   [[:aryAppend, :@a, :@b]]
-        parses! '$a << $b',   [[:globalToRegister, :a, :@_1],
-                               [:globalToRegister, :b, :@_2],
+        parses! '$a << $b',   [[:globalToRegister, :$a, :@_1],
+                               [:globalToRegister, :$b, :@_2],
                                [:aryAppend, :@_1, :@_2]]
       end
     end
@@ -121,7 +121,7 @@ RSpec.describe Defs::ParseInstruction do
         parses! '@a.b <- {}', [[:newHash, :@_1],
                                [:setKey, :@a, :b, :@_1]]
         # parses! '$a <- {}', [[:newHash, :@_1],
-                             # [:registerToGlobal, :@_1, :a]]
+                             # [:registerToGlobal, :@_1, :$a]]
       end
     end
   end

@@ -49,7 +49,7 @@ export default {
   },
 
   becomeMachine: (world, machine, registers, path) => {
-    let newMachine = world.rootMachine
+    let newMachine = world.$rootMachine
     path.forEach((name) => {
       if (name[0] === "@")
         newMachine = newMachine.child(registers[name], machine.state.parent)
@@ -57,11 +57,11 @@ export default {
         newMachine = newMachine.child(name, machine.state.parent)
     })
     newMachine.setArgsFromRegisters(registers)
-    world.machineStack = newMachine
+    world.$machineStack = newMachine
   },
 
   runMachine: (world, machine, registers, path, argNames) => {
-    let newMachine = world.rootMachine
+    let newMachine = world.$rootMachine
     path.forEach((name) => {
       if (name[0] === "@")
         newMachine = newMachine.child(registers[name], machine)
@@ -70,7 +70,7 @@ export default {
     })
     let args = argNames.map((name) => registers[name])
     newMachine.setArgs(args)
-    world.machineStack = newMachine
+    world.$machineStack = newMachine
   },
 
   newHash: (world, machine, registers, register) => {

@@ -65,7 +65,7 @@ class Defs
     end
 
     def global_name(name)
-      name[1..-1].intern
+      name.intern
     end
 
     def new_implicit_register

@@ -137,7 +137,7 @@ setKey(hashRegister, key, valueRegister)
   registers[hashRegister][key] = registers[valueRegister]
 
 becomeMachine(path)
-  let newMachine = world.rootMachine
+  let newMachine = world.$rootMachine
   path.forEach((name) => {
     if(name[0] === "@")
       newMachine = newMachine.child(registers[name], machine.state.parent)
@@ -145,10 +145,10 @@ becomeMachine(path)
       newMachine = newMachine.child(name, machine.state.parent)
   })
   newMachine.setArgsFromRegisters(registers)
-  world.machineStack = newMachine
+  world.$machineStack = newMachine
 
 runMachine(path, argNames)
-  let newMachine = world.rootMachine
+  let newMachine = world.$rootMachine
   path.forEach((name) => {
     if(name[0] === "@")
       newMachine = newMachine.child(registers[name], machine)
@@ -157,7 +157,7 @@ runMachine(path, argNames)
   })
   let args = argNames.map((name) => registers[name])
   newMachine.setArgs(args)
-  world.machineStack = newMachine
+  world.$machineStack = newMachine
 
 newHash(register)
   registers[register] = {}
