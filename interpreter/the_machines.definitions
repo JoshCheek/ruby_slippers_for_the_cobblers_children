@@ -1,3 +1,51 @@
+Machines
+========
+
+main:
+  > The main machine, kicks everything else off
+  /ast($ast)
+  /ast/nil
+
+emit: @value
+  $currentBinding.returnValue <- @value
+  $foundExpression <- $rTrue
+
+reemit:
+  $foundExpression <- $rTrue
+
+newPrimitive: @class, @data
+  > helper for builtin types with fancy data
+
+  @object                   <- {}
+  @object.class             <- @class
+  @object.instanceVariables <- {}
+  @object.primitiveData     <- @data
+
+  /emit(@object)
+
+ast: @ast
+  > Interpreters for language constructs
+
+  self <- /ast/@ast.type
+
+  nil:
+    /emit($rNil)
+
+  false:
+    /emit($rFalse)
+
+  true:
+    /emit($rTrue)
+
+  string: @ast
+    /newPrimitive($rString, @ast.value)
+
+  expressions: @ast
+    for @expression in @ast.expressions
+      /ast(@expression)
+    /reemit
+
+
 Templates
 =========
 
@@ -46,53 +94,6 @@ instructions(instructions)
     <%- end -%>
   }
 
-
-Machines
-========
-
-main:
-  > The main machine, kicks everything else off
-  /ast($ast)
-  /ast/nil
-
-emit: @value
-  $currentBinding.returnValue <- @value
-  $foundExpression <- $rTrue
-
-reemit:
-  $foundExpression <- $rTrue
-
-newPrimitive: @class, @data
-  > helper for builtin types with fancy data
-
-  @object                   <- {}
-  @object.class             <- @class
-  @object.instanceVariables <- {}
-  @object.primitiveData     <- @data
-
-  /emit(@object)
-
-ast: @ast
-  > Interpreters for language constructs
-
-  self <- /ast/@ast.type
-
-  nil:
-    /emit($rNil)
-
-  false:
-    /emit($rFalse)
-
-  true:
-    /emit($rTrue)
-
-  string: @ast
-    /newPrimitive($rString, @ast.value)
-
-  expressions: @ast
-    for @expression in @ast.expressions
-      /ast(@expression)
-    /reemit
 
 
 Instructions

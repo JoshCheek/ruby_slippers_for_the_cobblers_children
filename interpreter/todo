@@ -1,5 +1,4 @@
 Immediate:
-  the_machine.definitions: move templates between the two
   global vars keep the dollar sign
   move machine.js into instructions and get rid of it altogether. There should only be the one vm
   implement special constants (true/false/self)
