@@ -30,11 +30,6 @@ export default class Machine {
   constructor(world, state, parent) {
     this.world               = world
     this.state               = state
-
-    // move to index.js
-    state.parent             = parent
-    state.instructionPointer = 0
-    state.registers          = {}
   }
 
   child(name, parent) {
@@ -42,7 +37,12 @@ export default class Machine {
     if(!definition) throw(new Error(
       `No child ${inspect(name)} for ${inspect(this.name())}, only have: ${Object.keys(this.state.children).map(inspect).join(", ")}`
     ))
-    return new Machine(this.world, definition, parent)
+
+    let machine = new Machine(this.world, definition)
+    machine.state.parent             = parent
+    machine.state.instructionPointer = 0
+    machine.state.registers          = {}
+    return machine
   }
 
   step() {

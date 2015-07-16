@@ -96,7 +96,11 @@ export default function buildWorld(ast) {
   }
 
   // not quite right, should be a data structure, not an object.
-  world.$rootMachine  = new Machine(world, defineMachine(), null)
+  world.$rootMachine  = new Machine(world, defineMachine())
+  world.$rootMachine.state.parent             = null
+  world.$rootMachine.state.instructionPointer = 0
+  world.$rootMachine.state.registers          = {}
+
   world.$machineStack = world.$rootMachine.child("main", null)
 
   return world
