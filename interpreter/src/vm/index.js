@@ -21,7 +21,7 @@ export default class VM {
       this.world.$machineStack.step()
 
       while(this.world.$machineStack && this.world.$machineStack.isFinished())
-        this.world.$machineStack = this.world.$machineStack.parent()
+        this.world.$machineStack = this.world.$machineStack.state.parent
     }
 
     let hasMachine = !!this.world.$machineStack

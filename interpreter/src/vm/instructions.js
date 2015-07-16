@@ -26,12 +26,12 @@ export default {
   },
 
   jumpTo: (world, state, machine, registers, label) => {
-    machine.setInstructionPointer(state.labels[label])
+    state.instructionPointer = state.labels[label]
   },
 
   jumpToIf: (world, state, machine, registers, label, conditionRegister) => {
     if (registers[conditionRegister])
-      machine.setInstructionPointer(state.labels[label])
+      state.instructionPointer = state.labels[label]
   },
 
   label: (world, state, machine, registers, name) => {
@@ -52,11 +52,15 @@ export default {
     let newMachine = world.$rootMachine
     path.forEach((name) => {
       if (name[0] === "@")
-        newMachine = newMachine.child(registers[name], machine.state.parent)
+        newMachine = newMachine.child(registers[name], state.parent)
       else
-        newMachine = newMachine.child(name, machine.state.parent)
+        newMachine = newMachine.child(name, state.parent)
     })
-    newMachine.setArgsFromRegisters(registers)
+    newMachine.state.arg_names.forEach((argName) => {
+      if (!registers[argName])
+        throw (new Error(`Expected register ${argName}, but only had: ${inspect(Object.keys(registers))}`))
+      newMachine.state.registers[argName] = registers[argName]
+    })
     world.$machineStack = newMachine
   },
 
@@ -69,7 +73,15 @@ export default {
         newMachine = newMachine.child(name, machine)
     })
     let args = argNames.map((name) => registers[name])
-    newMachine.setArgs(args)
+
+    let l1 = args.length,
+      l2 = newMachine.state.arg_names.length
+    if (l1 != l2) throw (new Error(`LENGTHS DO NOT MATCH! expected:${l2}, actual:${l1}`))
+
+    newMachine.state.arg_names.forEach((argName, index) => {
+      newMachine.state.registers[argName] = args[index]
+    })
+
     world.$machineStack = newMachine
   },
 

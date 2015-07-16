@@ -19,7 +19,7 @@ let doLog = false,
 
       while(stackMachine) {
         stackNames.push(stackMachine.fullname())
-        stackMachine = stackMachine.parent()
+        stackMachine = stackMachine.state.parent
       }
 
       console.log(`\n\u001b[35mSTACK: \u001b[0m${stackNames.join(", ")}`)
@@ -40,23 +40,6 @@ export default class Machine {
       ([instr, name], index) => {
         if(instr === "label")
           state.labels[name] = index
-    })
-  }
-
-  setArgs(args) {
-    let l1 = args.length, l2 = this.state.arg_names.length
-    if(l1 != l2) throw(new Error(`LENGTHS DO NOT MATCH! expected:${l2}, actual:${l1}`))
-
-    this.state.arg_names.forEach((argName, index) => {
-      this.state.registers[argName] = args[index]
-    })
-  }
-
-  setArgsFromRegisters(registers) {
-    this.state.arg_names.forEach((argName) => {
-      if(!registers[argName])
-        throw(new Error(`Expected register ${argName}, but only had: ${inspect(Object.keys(registers))}`))
-      this.state.registers[argName] = registers[argName]
     })
   }
 
@@ -84,7 +67,8 @@ export default class Machine {
     else
       code(this.world, this.state, this, this.state.registers, ...args)
 
-    this.setInstructionPointer(this.instructionPointer() + 1)
+
+    this.state.instructionPointer = this.instructionPointer() + 1
 
     log({
       name:                   this.name(),
@@ -95,13 +79,7 @@ export default class Machine {
     })
   }
 
-  parent() {
-    return this.state.parent
-  }
-
-  setInstructionPointer(value) {
-    this.state.instructionPointer = value
-  }
+  // -----  Private  -----
 
   name() {
     return this.state.name
@@ -117,8 +95,8 @@ export default class Machine {
     return this.state.instructionPointer
   }
 
-  currentExpression() {
-    return this.world.$currentBinding.returnValue
+  isFinished() {
+    return !this.getInstruction()
   }
 
   fullname() {
@@ -126,10 +104,5 @@ export default class Machine {
     ns.unshift("")
     ns.push(this.name())
     return ns.join('/')
-  }
-
-  // -----  can ignore  -----
-  isFinished() {
-    return !this.getInstruction()
   }
 }
