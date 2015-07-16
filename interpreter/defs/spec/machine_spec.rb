@@ -14,6 +14,9 @@ RSpec.describe Defs::Machine do
     reemit:
       /foundExpression
 
+    twoArgs: @a, @b
+      @a <- @b
+
     ast: @ast
       > Interpreters for language constructs
 
@@ -63,6 +66,8 @@ RSpec.describe Defs::Machine do
         [:runMachine, [:foundExpression], []]
       ],
       children: {}
+
+    assert_machine root[:twoArgs], arg_names: [:@a, :@b]
 
     assert_machine root[:ast],
       name:         :ast,

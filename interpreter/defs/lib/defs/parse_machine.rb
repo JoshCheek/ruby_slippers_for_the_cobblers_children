@@ -56,7 +56,7 @@ class Defs
     end
 
     def parse_declaration(line)
-      tokens = line.split(/\s+|\s*:\s*/).map(&:intern)
+      tokens = line.split(/\s*[:,]\s*/).map(&:intern)
       [tokens.shift, tokens]
     end
 
