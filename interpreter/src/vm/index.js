@@ -36,7 +36,8 @@ export default class VM {
   }
 
   currentExpression() {
-    return this.currentBinding().returnValue
+    let bnd = this.currentBinding()
+    return (bnd ? bnd.returnValue : this.world.$rNil)
   }
 
   setCurrentExpression(value) {

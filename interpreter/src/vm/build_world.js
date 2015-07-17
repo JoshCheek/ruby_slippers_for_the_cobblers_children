@@ -94,8 +94,8 @@ export default function buildWorld(ast) {
     $toplevelNamespace: toplevelNamespace,
     $rMain:             main,
     $rTOPLEVEL_BINDING: toplevelBinding,
-    $bindingStack:      toplevelBinding, // callstack
-    $deftargetStack:    toplevelNamespace, // which class/method `def` will add the method to
+    $bindingStack:      null,              // callstack
+    $deftargetStack:    null,              // which class/method `def` will add the method to
 
     // garbage collection or something
     $allObjects:        allObjects,

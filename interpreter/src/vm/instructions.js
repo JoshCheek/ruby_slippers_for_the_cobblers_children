@@ -47,7 +47,8 @@ export default {
   },
 
   globalToRegister: (world, state, machine, registers, globalName, registerName) => {
-    if (world[globalName] == undefined) throw (new Error(`No global ${globalName} in globalToRegister`))
+    if (world[globalName] === undefined)
+      throw (new Error(`No global ${globalName} in globalToRegister`))
     registers[registerName] = world[globalName]
   },
 

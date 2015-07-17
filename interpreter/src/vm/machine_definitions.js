@@ -14,11 +14,21 @@ export default () => {
         "arg_names": [],
         "labels": {},
         "instructions": [
-          ["globalToRegister", "$ast", "@_1"],
+          ["globalToRegister", "$rTOPLEVEL_BINDING", "@_1"],
+          ["registerToRegister", "@_1", "@bindingStack"],
+          ["registerToGlobal", "@bindingStack", "$bindingStack"],
+          ["globalToRegister", "$rObject", "@_2"],
+          ["runMachine", ["pushDeftarget"],
+            ["@_2"]
+          ],
+          ["globalToRegister", "$ast", "@_3"],
           ["runMachine", ["ast"],
-            ["@_1"]
+            ["@_3"]
           ],
           ["runMachine", ["ast", "nil"],
+            []
+          ],
+          ["runMachine", ["popBinding"],
             []
           ]
         ],
@@ -65,6 +75,37 @@ export default () => {
           ["runMachine", ["emit"],
             ["@object"]
           ]
+        ],
+        "children": {},
+      },
+      "pushDeftarget": {
+        "name": "pushDeftarget",
+        "description": "Machine: /pushDeftarget",
+        "namespace": [],
+        "arg_names": ["@toPush"],
+        "labels": {},
+        "instructions": [
+          ["globalToRegister", "$deftargetStack", "@_1"],
+          ["registerToRegister", "@_1", "@stack"],
+          ["newHash", "@deftargetNode"],
+          ["setKey", "@deftargetNode", "parent", "@stack"],
+          ["setKey", "@deftargetNode", "target", "@toPush"],
+          ["registerToGlobal", "@deftargetNode", "$deftargetStack"]
+        ],
+        "children": {},
+      },
+      "popBinding": {
+        "name": "popBinding",
+        "description": "Machine: /popBinding",
+        "namespace": [],
+        "arg_names": [],
+        "labels": {},
+        "instructions": [
+          ["globalToRegister", "$deftargetStack", "@_1"],
+          ["registerToRegister", "@_1", "@stack"],
+          ["getKey", "@_2", "@stack", "parent"],
+          ["registerToRegister", "@_2", "@deftargetNode"],
+          ["registerToGlobal", "@deftargetNode", "$deftargetStack"]
         ],
         "children": {},
       },

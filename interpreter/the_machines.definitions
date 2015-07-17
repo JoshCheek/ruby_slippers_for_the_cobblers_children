@@ -3,8 +3,18 @@ Machines
 
 main:
   > The main machine, kicks everything else off
+
+  # init toplevel
+  @bindingStack <- $rTOPLEVEL_BINDING
+  $bindingStack <- @bindingStack
+  /pushDeftarget($rObject)
+
+  # eval the code
   /ast($ast)
   /ast/nil
+
+  # teardown toplevel
+  /popBinding
 
 emit: @value
   $bindingStack.returnValue <- @value
@@ -22,6 +32,18 @@ newPrimitive: @class, @data
   @object.primitiveData     <- @data
 
   /emit(@object)
+
+pushDeftarget: @toPush
+  @stack                <- $deftargetStack
+  @deftargetNode        <- {}
+  @deftargetNode.parent <- @stack
+  @deftargetNode.target <- @toPush
+  $deftargetStack       <- @deftargetNode
+
+popBinding:
+  @stack          <- $deftargetStack
+  @deftargetNode  <- @stack.parent
+  $deftargetStack <- @deftargetNode
 
 ast: @ast
   > Interpreters for language constructs
@@ -170,7 +192,8 @@ getKey(toRegister, hashRegister, key)
   registers[toRegister] = register
 
 globalToRegister(globalName, registerName)
-  if(world[globalName] == undefined) throw(new Error(`No global ${globalName} in globalToRegister`))
+  if(world[globalName] === undefined)
+    throw(new Error(`No global ${globalName} in globalToRegister`))
   registers[registerName] = world[globalName]
 
 jumpTo(label)

@@ -1,13 +1,4 @@
 Immediate:
-* build_world:
-  * /main should initialize the stack instead of build_world
-    +  $bindingStack <- $rTOPLEVEL_BINDING
-    +  # toplevel visibility should be private
-    +  /pushDeftarget($rObject)
-       /ast($ast)
-    +  /popBinding
-
-
   * Is there a way to declare that accessing a value off the object, that doesn't exist, should raise an error?
   * Does javascript have properties? If so, how do they work?
   * for/in vs for/of
