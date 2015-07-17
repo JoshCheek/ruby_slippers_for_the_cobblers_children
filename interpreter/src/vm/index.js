@@ -20,7 +20,7 @@ export default class VM {
   }
 
   currentBinding() {
-    return this.world.$currentBinding
+    return this.world.$bindingStack
   }
 
   nextExpression() {

@@ -7,7 +7,7 @@ main:
   /ast/nil
 
 emit: @value
-  $currentBinding.returnValue <- @value
+  $bindingStack.returnValue <- @value
   $foundExpression <- $rTrue
 
 reemit:
@@ -38,7 +38,7 @@ ast: @ast
     /emit($rTrue)
 
   self:
-    /emit($currentBinding.self)
+    /emit($bindingStack.self)
 
   string: @ast
     /newPrimitive($rString, @ast.value)
@@ -50,7 +50,7 @@ ast: @ast
 
   get_local_variable: @ast
     # { "type": "get_local_variable", "name": "a" }
-    @locals  <- $currentBinding.localVariables
+    @locals  <- $bindingStack.localVariables
     @varName <- @ast.name
     @value   <- @locals[@varName]
     /emit(@value)
@@ -58,7 +58,7 @@ ast: @ast
   set_local_variable: @ast
     # { "type": "set_local_variable", "name": "a", "value": { "type": "integer", "value": "1", } }
     @varName <- @ast.name
-    @binding <- $currentBinding
+    @binding <- $bindingStack
     @locals  <- @binding.localVariables
     @locals[@varName] <- $rNil
 

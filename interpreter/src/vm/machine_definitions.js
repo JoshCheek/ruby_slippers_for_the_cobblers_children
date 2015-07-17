@@ -31,7 +31,7 @@ export default () => {
         "arg_names": ["@value"],
         "labels": {},
         "instructions": [
-          ["globalToRegister", "$currentBinding", "@_1"],
+          ["globalToRegister", "$bindingStack", "@_1"],
           ["setKey", "@_1", "returnValue", "@value"],
           ["globalToRegister", "$rTrue", "@_2"],
           ["registerToGlobal", "@_2", "$foundExpression"]
@@ -128,7 +128,7 @@ export default () => {
             "arg_names": [],
             "labels": {},
             "instructions": [
-              ["globalToRegister", "$currentBinding", "@_1"],
+              ["globalToRegister", "$bindingStack", "@_1"],
               ["getKey", "@_2", "@_1", "self"],
               ["runMachine", ["emit"],
                 ["@_2"]
@@ -187,7 +187,7 @@ export default () => {
             "arg_names": ["@ast"],
             "labels": {},
             "instructions": [
-              ["globalToRegister", "$currentBinding", "@_1"],
+              ["globalToRegister", "$bindingStack", "@_1"],
               ["getKey", "@_2", "@_1", "localVariables"],
               ["registerToRegister", "@_2", "@locals"],
               ["getKey", "@_3", "@ast", "name"],
@@ -208,7 +208,7 @@ export default () => {
             "instructions": [
               ["getKey", "@_1", "@ast", "name"],
               ["registerToRegister", "@_1", "@varName"],
-              ["globalToRegister", "$currentBinding", "@_2"],
+              ["globalToRegister", "$bindingStack", "@_2"],
               ["registerToRegister", "@_2", "@binding"],
               ["getKey", "@_3", "@binding", "localVariables"],
               ["registerToRegister", "@_3", "@locals"],

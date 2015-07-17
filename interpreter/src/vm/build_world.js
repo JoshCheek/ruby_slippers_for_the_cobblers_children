@@ -95,7 +95,7 @@ export default function buildWorld(ast) {
     $rFalse:          rFalse,
     $rString:         rString,
     $rObject:         rObject,
-    $currentBinding:  toplevelBinding,
+    $bindingStack:    toplevelBinding,
     $rMain:           main,
     $allObjects:      allObjects,
     $foundExpression: false,

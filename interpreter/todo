@@ -1,6 +1,5 @@
 Immediate:
 * build_world:
-  * rename $currentBinding -> $bindingStack
   * Add $deftargetStack
     +    $deftargetStack:    null,             // which class/method `def` will add the method to
   * add $rTOPLEVEL_BINDING

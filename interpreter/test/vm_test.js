@@ -139,7 +139,7 @@ describe('ruby.VM', function() {
                     var1`, (vm, world) => {
 
       const assertLocal = function(name, obj) {
-        let bnd = world.$currentBinding;
+        let bnd = vm.currentBinding()
         AE(obj, bnd.localVariables[name])
       }
 
