@@ -1,7 +1,5 @@
 Immediate:
 * build_world:
-  * Add $deftargetStack
-    +    $deftargetStack:    null,             // which class/method `def` will add the method to
   * add $rTOPLEVEL_BINDING
   +    $rTOPLEVEL_BINDING: toplevelBinding,
   * Add $rToplevelNamespace instead of using $rObject

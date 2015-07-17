@@ -96,6 +96,7 @@ export default function buildWorld(ast) {
     $rString:         rString,
     $rObject:         rObject,
     $bindingStack:    toplevelBinding,
+    $deftargetStack:  rObject, // which class/method `def` will add the method to
     $rMain:           main,
     $allObjects:      allObjects,
     $foundExpression: false,
