@@ -74,6 +74,11 @@ export default function buildWorld(ast) {
   // String
   const rString     = instantiate(rClass,      () => "rString")
 
+  rObject.constants["String"]     = rString
+  rObject.constants["NilClass"]   = rNilClass
+  rObject.constants["TrueClass"]  = rTrueClass
+  rObject.constants["FalseClass"] = rFalseClass
+
   // callstack
   const main = instantiate(rObject, () => "rMain")
   const toplevelBinding = {
@@ -89,6 +94,7 @@ export default function buildWorld(ast) {
     $rTrue:           rTrue,
     $rFalse:          rFalse,
     $rString:         rString,
+    $rObject:         rObject,
     $currentBinding:  toplevelBinding,
     $rMain:           main,
     $allObjects:      allObjects,

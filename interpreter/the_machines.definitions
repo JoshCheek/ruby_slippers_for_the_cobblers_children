@@ -69,8 +69,12 @@ ast: @ast
 
     /reemit
 
-
-
+  constant: @ast
+    # { "type": "constant", "namespace": null, "name": "String", }
+    @name      <- @ast.name
+    @constants <- $rObject.constants
+    @constant  <- @constants[@name]
+    /emit(@constant)
 
 Templates
 =========

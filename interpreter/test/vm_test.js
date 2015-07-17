@@ -152,6 +152,15 @@ describe('ruby.VM', function() {
       done()
     })
   })
+
+  it('evaluates toplevel constant lookup',  (done) => {
+    interpreterFor(`Object; String`, (vm, world) => {
+      AE(world.$rObject, vm.nextExpression());
+      AE(world.$rString, vm.nextExpression());
+      done()
+    })
+  })
+
 })
 
 /*
@@ -162,12 +171,6 @@ describe('ruby.VM', function() {
     // p a # => nil
 
     // // //TODO: local vars with more than 1 binding on the stack
-
-    // d.it('evaluates toplevel constant lookup', function(a) {
-    //   pushCode("Object; String");
-    //   a.eq(interpreter.nextExpression(), world.$objectClass);
-    //   a.eq(interpreter.nextExpression(), world.$stringClass);
-    // });
 
     // d.it('evaluates class and method definitions', function(a) {
     //   pushCode("
