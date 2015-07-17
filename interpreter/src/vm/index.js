@@ -12,6 +12,13 @@ export default class VM {
     return new VM(buildWorld(ast))
   }
 
+  runToEnd() {
+    let expressions = []
+    while(this.world.$machineStack)
+      expressions.push(this.nextExpression())
+    return expressions
+  }
+
   currentBinding() {
     return this.world.$currentBinding
   }

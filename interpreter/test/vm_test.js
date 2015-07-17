@@ -128,13 +128,11 @@ describe('ruby.VM', function() {
       // there is no var2
       assert.equal(undefined, vm.currentBinding().localVariables['var2'])
 
-      // // drain
-      // while(interpreter.isInProgress) // DUPLICATED IN assertNextExpressions
-      //   interpreter.nextExpression()
+      vm.runToEnd()
 
-      // // var1='e', var2='d'
-      // assertString("e", interpreter.stackFrames.peek.binding.lvars.get('var1'))
-      // assertString("d", interpreter.stackFrames.peek.binding.lvars.get('var2'))
+      // var1='e', var2='d'
+      assertString("e", vm.currentBinding().localVariables['var1'])
+      assertString("d", vm.currentBinding().localVariables['var2'])
       done()
     })
   })
@@ -145,7 +143,7 @@ describe('ruby.VM', function() {
       vm.nextExpression()
       var vara = vm.currentBinding().localVariables['a']
       vm.nextExpression()
-      // TODO: rAssertNil(world.$getLocal('b'));
+      AE(world.$rNil, vm.currentBinding().localVariables['b'])
       vm.nextExpression()
       var varb = vm.currentBinding().localVariables['b']
       if(vara != varb) throw(new Error("LOCALS NOT EQUAL!")) // a and b have ref to same obj
