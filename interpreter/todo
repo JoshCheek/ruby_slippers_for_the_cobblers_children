@@ -1,7 +1,5 @@
 Immediate:
 * build_world:
-  * Add note for constant lookup being bs
-    +    # TODO: this is currently bs, there is an algorithm of how to do this (http://cirw.in/blog/constant-lookup.html)
   * rename $currentBinding -> $bindingStack
   * Add $deftargetStack
     +    $deftargetStack:    null,             // which class/method `def` will add the method to
