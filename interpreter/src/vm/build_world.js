@@ -89,28 +89,33 @@ export default function buildWorld(ast) {
   toplevelNamespace.constants["FalseClass"]       = rFalseClass
 
   // put it all together
-  const world = {
-    $ast:               ast,
-    $rNil:              rNil,
-    $rTrue:             rTrue,
-    $rFalse:            rFalse,
-    $rString:           rString,
-    $rObject:           rObject,
-    $rootMachine:       machineDefinitions,
+  return {
+    // important starting places
     $toplevelNamespace: toplevelNamespace,
-    $deftargetStack:    toplevelNamespace, // which class/method `def` will add the method to
-    $bindingStack:      toplevelBinding,
-    $rTOPLEVEL_BINDING: toplevelBinding,
     $rMain:             main,
+    $rTOPLEVEL_BINDING: toplevelBinding,
+    $bindingStack:      toplevelBinding, // callstack
+    $deftargetStack:    toplevelNamespace, // which class/method `def` will add the method to
+
+    // garbage collection or something
     $allObjects:        allObjects,
+
+    // code evaluation
     $foundExpression:   false,
+    $ast:               ast,                // the code to execute
+    $rootMachine:       machineDefinitions, // the instructions for manipulating the world
     $machineStack:      {
       definition         : machineDefinitions.children["main"],
       parent             : null,
       registers          : {},
       instructionPointer : 0,
-    }
-  }
+    },
 
-  return world
+    // convenience objects
+    $rNil:              rNil,
+    $rTrue:             rTrue,
+    $rFalse:            rFalse,
+    $rString:           rString,
+    $rObject:           rObject,
+  }
 }
