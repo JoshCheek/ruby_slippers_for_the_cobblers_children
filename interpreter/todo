@@ -1,5 +1,4 @@
 Immediate:
-  implement special constants (true/false/self)
 
 Maybe future:
   option to see a list of bytecodes

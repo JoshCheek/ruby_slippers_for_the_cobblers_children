@@ -138,6 +138,20 @@ describe('ruby.VM', function() {
       done()
     })
   })
+
+  it('more local vars',  (done) => {
+    interpreterFor(`a = 'x'; b = a`, (vm, world) => {
+      vm.nextExpression()
+      vm.nextExpression()
+      var vara = vm.currentBinding().localVariables['a']
+      vm.nextExpression()
+      // TODO: rAssertNil(world.$getLocal('b'));
+      vm.nextExpression()
+      var varb = vm.currentBinding().localVariables['b']
+      if(vara != varb) throw(new Error("LOCALS NOT EQUAL!")) // a and b have ref to same obj
+      done()
+    })
+  })
 })
 
 /*
@@ -146,17 +160,6 @@ describe('ruby.VM', function() {
     //   a = 1
     // end
     // p a # => nil
-    // d.example('more local vars', function(a) {
-    //   pushCode("a = 'x'; b = a");
-    //   interpreter.nextExpression();
-    //   interpreter.nextExpression();
-    //   var vara = interpreter.getLocal('a');
-    //   interpreter.nextExpression();
-    //   // TODO: rAssertNil(world.$getLocal('b'));
-    //   interpreter.nextExpression();
-    //   var varb = interpreter.getLocal('b');
-    //   a.eq(vara, varb); // a and b have ref to same obj
-    // });
 
     // // //TODO: local vars with more than 1 binding on the stack
 
