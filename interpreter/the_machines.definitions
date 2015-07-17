@@ -73,7 +73,7 @@ ast: @ast
     # TODO: this is currently bs, there is an algorithm of how to do this (http://cirw.in/blog/constant-lookup.html)
     # { "type": "constant", "namespace": null, "name": "String", }
     @name      <- @ast.name
-    @constants <- $rObject.constants
+    @constants <- $toplevelNamespace.constants
     @constant  <- @constants[@name]
     /emit(@constant)
 

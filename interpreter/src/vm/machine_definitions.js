@@ -236,7 +236,7 @@ export default () => {
             "instructions": [
               ["getKey", "@_1", "@ast", "name"],
               ["registerToRegister", "@_1", "@name"],
-              ["globalToRegister", "$rObject", "@_2"],
+              ["globalToRegister", "$toplevelNamespace", "@_2"],
               ["getKey", "@_3", "@_2", "constants"],
               ["registerToRegister", "@_3", "@constants"],
               ["getKey", "@constant", "@constants", "@name"],

@@ -17,7 +17,9 @@ const IS_TRACKED = function(world, object) {
 }
 
 const lookupConst = function(world, name) {
-  throw(new Error(`Implement lookupClass (${name})`))
+  // not totally correct (they can be nested), but prob good enough for now
+  return world.toplevelNamespace.constants[name]
+  // throw(new Error(`Implement lookupClass (${name})`))
 }
 
 
@@ -119,7 +121,7 @@ describe('ruby.VM', function() {
   });
 
   // we're ignoring fixnums and symbols for now
-  it('evalutes special constants', (done) => {
+  it('evalutes special literals', (done) => {
     interpreterFor("nil\ntrue\nfalse\nself", (vm, world) => {
       AE(world.$rNil,   vm.nextExpression())
       AE(world.$rTrue,  vm.nextExpression())

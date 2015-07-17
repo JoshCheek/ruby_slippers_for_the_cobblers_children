@@ -54,11 +54,6 @@ export default function buildWorld(ast) {
   rClass.internalInit(rObject)
   rClass.internalInit(rClass)
 
-  rObject.constants["BasicObject"] = rBasicObject
-  rObject.constants["Object"]      = rObject
-  rObject.constants["Class"]       = rClass
-
-
   // nil
   const rNilClass = instantiate(rClass,    () => "rNilClass")
   const rNil      = instantiate(rNilClass, () => "rNil")
@@ -82,11 +77,16 @@ export default function buildWorld(ast) {
     returnValue:    rNil,
   }
 
-  rObject.constants["TOPLEVEL_BINDING"] = toplevelBinding
-  rObject.constants["String"]           = rString
-  rObject.constants["NilClass"]         = rNilClass
-  rObject.constants["TrueClass"]        = rTrueClass
-  rObject.constants["FalseClass"]       = rFalseClass
+  // constants
+  const toplevelNamespace = rObject
+  toplevelNamespace.constants["TOPLEVEL_BINDING"] = toplevelBinding
+  toplevelNamespace.constants["BasicObject"]      = rBasicObject
+  toplevelNamespace.constants["Object"]           = rObject
+  toplevelNamespace.constants["Class"]            = rClass
+  toplevelNamespace.constants["String"]           = rString
+  toplevelNamespace.constants["NilClass"]         = rNilClass
+  toplevelNamespace.constants["TrueClass"]        = rTrueClass
+  toplevelNamespace.constants["FalseClass"]       = rFalseClass
 
   // put it all together
   const world = {
@@ -96,8 +96,9 @@ export default function buildWorld(ast) {
     $rFalse:            rFalse,
     $rString:           rString,
     $rObject:           rObject,
+    $toplevelNamespace: toplevelNamespace,
+    $deftargetStack:    toplevelNamespace, // which class/method `def` will add the method to
     $bindingStack:      toplevelBinding,
-    $deftargetStack:    rObject, // which class/method `def` will add the method to
     $rTOPLEVEL_BINDING: toplevelBinding,
     $rMain:             main,
     $allObjects:        allObjects,
