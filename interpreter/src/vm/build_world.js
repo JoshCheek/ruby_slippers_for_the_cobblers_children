@@ -74,11 +74,6 @@ export default function buildWorld(ast) {
   // String
   const rString     = instantiate(rClass,      () => "rString")
 
-  rObject.constants["String"]     = rString
-  rObject.constants["NilClass"]   = rNilClass
-  rObject.constants["TrueClass"]  = rTrueClass
-  rObject.constants["FalseClass"] = rFalseClass
-
   // callstack
   const main = instantiate(rObject, () => "rMain")
   const toplevelBinding = {
@@ -87,19 +82,26 @@ export default function buildWorld(ast) {
     returnValue:    rNil,
   }
 
+  rObject.constants["TOPLEVEL_BINDING"] = toplevelBinding
+  rObject.constants["String"]           = rString
+  rObject.constants["NilClass"]         = rNilClass
+  rObject.constants["TrueClass"]        = rTrueClass
+  rObject.constants["FalseClass"]       = rFalseClass
+
   // put it all together
   const world = {
-    $ast:             ast,
-    $rNil:            rNil,
-    $rTrue:           rTrue,
-    $rFalse:          rFalse,
-    $rString:         rString,
-    $rObject:         rObject,
-    $bindingStack:    toplevelBinding,
-    $deftargetStack:  rObject, // which class/method `def` will add the method to
-    $rMain:           main,
-    $allObjects:      allObjects,
-    $foundExpression: false,
+    $ast:               ast,
+    $rNil:              rNil,
+    $rTrue:             rTrue,
+    $rFalse:            rFalse,
+    $rString:           rString,
+    $rObject:           rObject,
+    $bindingStack:      toplevelBinding,
+    $deftargetStack:    rObject, // which class/method `def` will add the method to
+    $rTOPLEVEL_BINDING: toplevelBinding,
+    $rMain:             main,
+    $allObjects:        allObjects,
+    $foundExpression:   false,
   }
 
   // not quite right, should be a data structure, not an object.

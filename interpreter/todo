@@ -1,7 +1,5 @@
 Immediate:
 * build_world:
-  * add $rTOPLEVEL_BINDING
-  +    $rTOPLEVEL_BINDING: toplevelBinding,
   * Add $rToplevelNamespace instead of using $rObject
   * -const defineMachine = require("./machine_definitions")
     +const machineDefinitions = require("./machine_definitions")()
