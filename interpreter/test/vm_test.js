@@ -16,6 +16,49 @@ const IS_TRACKED = function(world, object) {
   throw(new Error(`Expected ${inspect(object)} to be in the world, but it is not!`))
 }
 
+const lookupConst = function(world, name) {
+  throw(new Error(`Implement lookupClass (${name})`))
+}
+
+
+const assertClass = function(world, name, assertions) {
+  let klass = lookupConst(world, name)
+
+  for(let assertionName in assertions) {
+    let value = assertions[assertionName]
+
+    switch(assertionName) {
+      case "name":
+        AE(value, klass.name)
+        break
+      case "class":
+        AE(value, klass.class)
+        break
+      case "numIvars":
+        AE(value, klass.instanceVariables.length)
+        break
+      case "superclass":
+        AE(value, klass.superclass)
+        break
+      case "numConstants":
+        AE(value, klass.constants.length)
+        break
+      case "numMethods":
+        AE(value, klass.methods.length)
+        break
+      // case "methods":
+      //   let methodAssertions = assertions[assertionName]
+      //   // methods:      {
+      //   //   ameth: {args: [], body: null}
+      //   // }
+      //   break
+      default:
+        throw(new Error(`IDK how to assert ${assertionName}!`))
+        break
+    }
+  }
+}
+
 const interpreterFor = (rawCode, callback) => {
   ruby.parse(rawCode, (ast) => {
     const vm = ruby.VM.bootstrap(ast)
@@ -159,6 +202,67 @@ describe('ruby.VM', function() {
     })
   })
 
+  it.skip('evaluates class and method definitions', (done) => {
+    interpreterFor(`
+        # def in a class
+        class A
+          def ameth; end
+        end
+
+        # toplevel def with body
+        def ometh
+          true
+        end
+        ometh
+
+        # def without a body
+        def nobody_meth; end
+        nobody_meth
+
+        # def with arguments
+        def meth_with_args(req, *rest)
+        end
+        # TODO: invoke it
+    `, (vm, world) => {
+      AE(undefined, world.$toplevelNamespace.constants['A']);
+
+      // run the program
+      assertSymbol("ameth", vm.nextExpression()) // A#ameth
+      assertSymbol("ameth", vm.nextExpression()) // A
+
+      assertSymbol("ameth", vm.nextExpression()) // Object#ameth
+      AE(world.$rTrue,      vm.nextExpression())
+      AE(world.$rTrue,      vm.nextExpression())
+
+      assertSymbol("nobody_meth", vm.nextExpression()) // Object#nobody_meth
+      AE(world.$rNil,             vm.nextExpression())
+
+      assertSymbol("meth_with_args", vm.nextExpression()) // Object#meth_with_args
+
+      // class definition
+      assertClass(world, "A", {
+        class:       world.$rClass,
+        numIvars:    0,
+        superclass:  world.$rObject,
+        numConstants: 0,
+        numMethods:   1,
+        methods:      {
+          ameth: {args: [], body: null}
+        }
+      })
+
+      // TODO:
+      // // Object#ometh
+      // var ometh = world.$objectClass.imeths['ometh'];
+      // a.eq("ometh", ometh.name);
+      // a.eq(0, ometh.args.length);
+      // a.streq(ometh.body, Ruby(True({begin:169, end:173})));
+
+      // // Object#meth_with_args
+      // var methWithArgs = world.$objectClass.imeths['meth_with_args'];
+      // a.streq(methWithArgs.args, [Required("req"), Rest("rest")]);
+    })
+  });
 })
 
 /*
@@ -169,72 +273,6 @@ describe('ruby.VM', function() {
     // p a # => nil
 
     // // //TODO: local vars with more than 1 binding on the stack
-
-    // d.it('evaluates class and method definitions', function(a) {
-    //   pushCode("
-    //       # def in a class
-    //       class A
-    //         def ameth; end
-    //       end
-
-    //       # toplevel def with body
-    //       def ometh
-    //         true
-    //       end
-    //       ometh
-
-    //       # def without a body
-    //       def nobody_meth; end
-    //       nobody_meth
-
-    //       # def with arguments
-    //       def meth_with_args(req, *rest)
-    //       end
-    //       # TODO: invoke it
-    //   ");
-
-    //   a.eq(null, world.$toplevelNamespace.constants['A']);
-    //   assertNextExpressions(a, [
-    //     world.$intern("ameth"), // ends def
-    //     world.$intern("ameth"), // ends class
-
-    //     world.$intern("ometh"),
-    //     world.$rTrue,
-    //     world.$rTrue,
-
-    //     world.$intern("nobody_meth"),
-    //     world.$rNil,
-
-    //     world.$intern("meth_with_args"),
-    //   ]);
-
-    //   // class definition
-    //   var aClass = world.$castClass(world.$toplevelNamespace.constants['A']);
-    //   a.eq(world.$classClass,  aClass.klass);       // klass
-    //   a.eq(true, aClass.ivars.empty());            // ivars
-    //   a.eq('A', ruby2.World.$sinspect(aClass));      // name
-    //   a.eq(world.$objectClass, aClass.superclass);  // superclass
-    //   a.eq(true, aClass.constants.empty());        // ivars
-
-    //   // TODO: assert the methods that should exist on it
-
-    //   // A#ameth
-    //   var ameth = aClass.imeths['ameth'];
-    //   // FIXME: Assert klass (should be Method, but haven't made that one yet, so it's Object)
-    //   a.eq("ameth", ameth.name);
-    //   a.eq(0, ameth.args.length);
-    //   a.streq(ameth.body, Ruby(Default));
-
-    //   // Object#ometh
-    //   var ometh = world.$objectClass.imeths['ometh'];
-    //   a.eq("ometh", ometh.name);
-    //   a.eq(0, ometh.args.length);
-    //   a.streq(ometh.body, Ruby(True({begin:169, end:173})));
-
-    //   // Object#meth_with_args
-    //   var methWithArgs = world.$objectClass.imeths['meth_with_args'];
-    //   a.streq(methWithArgs.args, [Required("req"), Rest("rest")]);
-    // });
 
     // // TODO: Test reopening the class
 

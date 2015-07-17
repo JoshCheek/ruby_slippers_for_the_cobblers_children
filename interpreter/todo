@@ -1,4 +1,66 @@
 Immediate:
+* build_world:
+  * Add note for constant lookup being bs
+    +    # TODO: this is currently bs, there is an algorithm of how to do this (http://cirw.in/blog/constant-lookup.html)
+  * rename $currentBinding -> $bindingStack
+  * Add $deftargetStack
+    +    $deftargetStack:    null,             // which class/method `def` will add the method to
+  * add $rTOPLEVEL_BINDING
+  +    $rTOPLEVEL_BINDING: toplevelBinding,
+  * Add $rToplevelNamespace instead of using $rObject
+  * -const defineMachine = require("./machine_definitions")
+    +const machineDefinitions = require("./machine_definitions")()
+    Then make these part of the initial definition of the world, rather than adding them on later
+      +    $rootMachine:       machineDefinitions, // the instructions for manipulating the world
+      +    $machineStack:      {
+      +      definition         : machineDefinitions.children["main"],
+             parent             : null,
+             registers          : {},
+             instructionPointer : 0,
+      +    },
+      -  // not quite right, should be a data structure, not an object.
+      -  world.$rootMachine  = defineMachine()
+      -  world.$machineStack = {
+      -    definition         : world.$rootMachine.children["main"],
+  * /main should initialize the stack instead of build_world
+    +  $bindingStack <- $rTOPLEVEL_BINDING
+    +  # toplevel visibility should be private
+    +  /pushDeftarget($rObject)
+       /ast($ast)
+    +  /popBinding
+
+
+  * Is there a way to declare that accessing a value off the object, that doesn't exist, should raise an error?
+  * Does javascript have properties? If so, how do they work?
+  * for/in vs for/of
+  * Machine for /ast/class
+   class: @ast
+     # { "type": "class",
+     #   "name_lookup": {"type": "constant", "namespace": null, "name": "A"},
+     #   "superclass": null,
+     #   "body": {"type": "method_definition", "name": "b", "args": [], "body": null},
+     # }
+     # requires machines to have return values!
+     @superclass  <- @ast.superclass
+     @name_lookup <- @ast.name_lookup
+     @class <- /findOrCreateClass(@name_lookup, @superclass)
+       # ALGORITHM: find it. if it doesn't exist, create it
+       # REF IMPL: name = node[:name_lookup][:name].intern
+       #           r_object[:constants][name] ||= {
+       #             name:  name.to_s,
+       #             class: r_class,
+       #             constants: {},
+       #             methods: {},
+       #           }
+
+     /pushDeftarget(@klass)
+     /ast(@ast.body)
+     /popDeftarget
+     /reemit
+
+
+
+
 
 Maybe future:
   option to see a list of bytecodes
