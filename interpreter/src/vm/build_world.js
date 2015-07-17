@@ -1,6 +1,6 @@
 "use strict";
 
-const defineMachine = require("./machine_definitions")
+const machineDefinitions = require("./machine_definitions")()
 
 export default function buildWorld(ast) {
   // All Objects
@@ -96,6 +96,7 @@ export default function buildWorld(ast) {
     $rFalse:            rFalse,
     $rString:           rString,
     $rObject:           rObject,
+    $rootMachine:       machineDefinitions,
     $toplevelNamespace: toplevelNamespace,
     $deftargetStack:    toplevelNamespace, // which class/method `def` will add the method to
     $bindingStack:      toplevelBinding,
@@ -103,15 +104,12 @@ export default function buildWorld(ast) {
     $rMain:             main,
     $allObjects:        allObjects,
     $foundExpression:   false,
-  }
-
-  // not quite right, should be a data structure, not an object.
-  world.$rootMachine  = defineMachine()
-  world.$machineStack = {
-    definition         : world.$rootMachine.children["main"],
-    parent             : null,
-    registers          : {},
-    instructionPointer : 0,
+    $machineStack:      {
+      definition         : machineDefinitions.children["main"],
+      parent             : null,
+      registers          : {},
+      instructionPointer : 0,
+    }
   }
 
   return world

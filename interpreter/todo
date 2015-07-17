@@ -1,19 +1,5 @@
 Immediate:
 * build_world:
-  * -const defineMachine = require("./machine_definitions")
-    +const machineDefinitions = require("./machine_definitions")()
-    Then make these part of the initial definition of the world, rather than adding them on later
-      +    $rootMachine:       machineDefinitions, // the instructions for manipulating the world
-      +    $machineStack:      {
-      +      definition         : machineDefinitions.children["main"],
-             parent             : null,
-             registers          : {},
-             instructionPointer : 0,
-      +    },
-      -  // not quite right, should be a data structure, not an object.
-      -  world.$rootMachine  = defineMachine()
-      -  world.$machineStack = {
-      -    definition         : world.$rootMachine.children["main"],
   * /main should initialize the stack instead of build_world
     +  $bindingStack <- $rTOPLEVEL_BINDING
     +  # toplevel visibility should be private
