@@ -48,6 +48,29 @@ ast: @ast
       /ast(@expression)
     /reemit
 
+  get_local_variable: @ast
+    # { "type": "get_local_variable", "name": "a" }
+    @locals  <- $currentBinding.localVariables
+    @varName <- @ast.name
+    @value   <- @locals[@varName]
+    /emit(@value)
+
+  set_local_variable: @ast
+    # { "type": "set_local_variable", "name": "a", "value": { "type": "integer", "value": "1", } }
+    @varName <- @ast.name
+    @binding <- $currentBinding
+    @locals  <- @binding.localVariables
+    @locals[@varName] <- $rNil
+
+    /ast(@ast.value)
+
+    @value   <- @binding.returnValue
+    @locals[@varName] <- @value
+
+    /reemit
+
+
+
 
 Templates
 =========
@@ -138,7 +161,8 @@ eq(toRegister, left, right)
 
 getKey(toRegister, hashRegister, key)
   if(key[0] === '@') key = registers[key]
-  registers[toRegister] = registers[hashRegister][key]
+  let register = registers[hashRegister][key]
+  registers[toRegister] = register
 
 globalToRegister(globalName, registerName)
   if(world[globalName] == undefined) throw(new Error(`No global ${globalName} in globalToRegister`))
@@ -157,6 +181,9 @@ label(name)
 registerToGlobal(registerName, globalName)
   let value = registers[registerName]
   world[globalName] = value
+
+registerToRegister(from, to)
+  registers[to] = registers[from]
 
 setKey(hashRegister, key, valueRegister)
   if(key[0] === '@') key = registers[key]

@@ -59,19 +59,21 @@ RSpec.describe Defs::ParseInstruction do
 
     # a lot of room for optimization in here, but that's not very important at the moment
     it 'expands rhs to a register' do
-      parses! '@a <- $b',   [[:globalToRegister, :$b, :@_1],
-                             [:registerToRegister, :@_1, :@a]]
-      parses! '@a <- @b.c', [[:getKey, :@_1, :@b, :c],
-                             [:registerToRegister, :@_1, :@a]]
-      parses! '@a <- $b.c', [[:globalToRegister, :$b, :@_1],
-                             [:getKey, :@_2, :@_1, :c],
-                             [:registerToRegister, :@_2, :@a]]
+      parses! '@a <- $b',     [[:globalToRegister, :$b, :@_1],
+                               [:registerToRegister, :@_1, :@a]]
+      parses! '@a <- @b.c',   [[:getKey, :@_1, :@b, :c],
+                               [:registerToRegister, :@_1, :@a]]
+      parses! '@a <- $b.c',   [[:globalToRegister, :$b, :@_1],
+                               [:getKey, :@_2, :@_1, :c],
+                               [:registerToRegister, :@_2, :@a]]
+      parses! '@a <- @b[@c]', [[:getKey, :@a, :@b, :@c]]
     end
 
     it 'expands lhs to a register' do
-      parses! '$a <- @b',   [[:registerToGlobal, :@b, :$a]]
-      parses! '$a.b <- @c', [[:globalToRegister, :$a, :@_1],
-                             [:setKey, :@_1, :b, :@c]]
+      parses! '$a <- @b',     [[:registerToGlobal, :@b, :$a]]
+      parses! '$a.b <- @c',   [[:globalToRegister, :$a, :@_1],
+                               [:setKey, :@_1, :b, :@c]]
+      parses! '@a[@b] <- @c', [[:setKey, :@a, :@b, :@c]]
     end
 
     it 'allows `self` on lhs, with a machine to become, on rhs'

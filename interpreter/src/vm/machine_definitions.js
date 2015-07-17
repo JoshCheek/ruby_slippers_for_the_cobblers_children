@@ -180,6 +180,53 @@ export default () => {
             ],
             "children": {},
           },
+          "get_local_variable": {
+            "name": "get_local_variable",
+            "description": "Machine: /ast/get_local_variable",
+            "namespace": ["ast"],
+            "arg_names": ["@ast"],
+            "labels": {},
+            "instructions": [
+              ["globalToRegister", "$currentBinding", "@_1"],
+              ["getKey", "@_2", "@_1", "localVariables"],
+              ["registerToRegister", "@_2", "@locals"],
+              ["getKey", "@_3", "@ast", "name"],
+              ["registerToRegister", "@_3", "@varName"],
+              ["getKey", "@value", "@locals", "@varName"],
+              ["runMachine", ["emit"],
+                ["@value"]
+              ]
+            ],
+            "children": {},
+          },
+          "set_local_variable": {
+            "name": "set_local_variable",
+            "description": "Machine: /ast/set_local_variable",
+            "namespace": ["ast"],
+            "arg_names": ["@ast"],
+            "labels": {},
+            "instructions": [
+              ["getKey", "@_1", "@ast", "name"],
+              ["registerToRegister", "@_1", "@varName"],
+              ["globalToRegister", "$currentBinding", "@_2"],
+              ["registerToRegister", "@_2", "@binding"],
+              ["getKey", "@_3", "@binding", "localVariables"],
+              ["registerToRegister", "@_3", "@locals"],
+              ["globalToRegister", "$rNil", "@_4"],
+              ["setKey", "@locals", "@varName", "@_4"],
+              ["getKey", "@_5", "@ast", "value"],
+              ["runMachine", ["ast"],
+                ["@_5"]
+              ],
+              ["getKey", "@_6", "@binding", "returnValue"],
+              ["registerToRegister", "@_6", "@value"],
+              ["setKey", "@locals", "@varName", "@value"],
+              ["runMachine", ["reemit"],
+                []
+              ]
+            ],
+            "children": {},
+          },
         },
       },
     },

@@ -85,77 +85,67 @@ describe('ruby.VM', function() {
       done()
     })
   })
+
+  it('sets and gets local variables', (done) => {
+    interpreterFor(`var1 = 'b'
+                    'c'
+                    var1
+                    var2 = 'd'
+                    var1 = 'e'
+                    var2
+                    var1`, (vm, world) => {
+
+      const assertLocal = function(name, obj) {
+        let bnd = world.$currentBinding;
+        AE(obj, bnd.localVariables[name])
+      }
+
+      const assertString = function(value, obj) {
+        assert.equal('rString', inspect(obj.class))
+        assert.equal(value, obj.primitiveData)
+      };
+
+      // expr="b", var1=nil
+      let strB = vm.nextExpression()
+      assertString("b", strB)
+      assertLocal("var1", world.$rNil)
+
+      // expr="b", var1="b"
+      strB = vm.nextExpression()
+      assertString("b", strB)
+      assertLocal("var1", strB)
+
+      // expr='c', var1='b'
+      let strC = vm.nextExpression()
+      assertString("c", strC)
+      assertLocal("var1", strB)
+
+      // expr='b', var1='b'
+      strB = vm.nextExpression()
+      assertString("b", strB)
+      assertLocal("var1", strB)
+
+      // there is no var2
+      assert.equal(undefined, vm.currentBinding().localVariables['var2'])
+
+      // // drain
+      // while(interpreter.isInProgress) // DUPLICATED IN assertNextExpressions
+      //   interpreter.nextExpression()
+
+      // // var1='e', var2='d'
+      // assertString("e", interpreter.stackFrames.peek.binding.lvars.get('var1'))
+      // assertString("d", interpreter.stackFrames.peek.binding.lvars.get('var2'))
+      done()
+    })
+  })
 })
 
 /*
-    d.it('evaluates a string literal', function(a) {
-      var interpreter = interpreterFor('"Josh"');
-      var str = interpreter.nextExpression();
-      a.eq(world.$rcString, str.klass);
-      a.streq(str.ivars, new InternalMap());
-      a.eq("Josh", cast(str).value);
-    });
-
     // TODO
     // if false
     //   a = 1
     // end
     // p a # => nil
-    d.it('sets and gets local variables', function(a) {
-      var interpreter = interpreterFor("var1 = 'b'
-                                        'c'
-                                        var1
-                                        var2 = 'd'
-                                        var1 = 'e'
-                                        var2
-                                        var1
-                                        "
-      );
-
-      var assertLocal = function(name, obj:RObject) {
-        var bnd = world.$rToplevelBinding;
-        a.eq(obj, bnd.getLocal(name));
-      }
-
-      var assertString = function(name:String, value:RObject) {
-        a.eq('RB(#<String: ${name.inspect()}>)',
-             value.inspect());
-      };
-
-      var strB;
-
-      // expr="b", var1=nil
-      strB = interpreter.nextExpression();
-      assertString("b", strB);
-      assertLocal("var1", world.$rNil);
-
-      // expr="b", var1="b"
-      strB = interpreter.nextExpression();
-      assertString("b", strB);
-      assertLocal("var1", strB);
-
-      // expr='c', var1='b'
-      var strC = interpreter.nextExpression();
-      assertString("c", strC);
-      assertLocal("var1", strB);
-
-      // expr='b', var1='b'
-      strB = interpreter.nextExpression();
-      assertString("b", strB);
-      assertLocal("var1", strB);
-
-      // there is no var2
-      a.isFalse(interpreter.stackFrames.peek.binding.lvars.exists('var2'));
-
-      // drain
-      while(interpreter.isInProgress) // DUPLICATED IN assertNextExpressions
-        interpreter.nextExpression();
-
-      // var1='e', var2='d'
-      assertString("e", interpreter.stackFrames.peek.binding.lvars.get('var1'));
-      assertString("d", interpreter.stackFrames.peek.binding.lvars.get('var2'));
-    });
-
     // d.example('more local vars', function(a) {
     //   pushCode("a = 'x'; b = a");
     //   interpreter.nextExpression();

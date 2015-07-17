@@ -36,8 +36,6 @@ export default class VM {
     this.currentBinding().returnValue = value
   }
 
-  // ----  machine.js  ----
-
   step(machine) {
     if(this.isFinished(machine)) throw(new Error(`${machine.definition.name()} is finished!`))
 

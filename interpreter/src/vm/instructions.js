@@ -42,7 +42,8 @@ export default {
 
   getKey: (world, state, machine, registers, toRegister, hashRegister, key) => {
     if (key[0] === '@') key = registers[key]
-    registers[toRegister] = registers[hashRegister][key]
+    let register = registers[hashRegister][key]
+    registers[toRegister] = register
   },
 
   globalToRegister: (world, state, machine, registers, globalName, registerName) => {
@@ -66,6 +67,10 @@ export default {
   registerToGlobal: (world, state, machine, registers, registerName, globalName) => {
     let value = registers[registerName]
     world[globalName] = value
+  },
+
+  registerToRegister: (world, state, machine, registers, from, to) => {
+    registers[to] = registers[from]
   },
 
   setKey: (world, state, machine, registers, hashRegister, key, valueRegister) => {

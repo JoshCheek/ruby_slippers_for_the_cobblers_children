@@ -156,6 +156,16 @@ class Defs
         hash_register  = value_to_register hash
         value_register = value_to_register value
         instructions << [:setKey, hash_register, key.to_s.intern, value_register]
+      elsif to_set =~ /^([^\[]+)\[([^\]]+)\]$/
+        hash, key      = $1, $2
+        hash_register  = value_to_register hash
+        value_register = value_to_register value
+        instructions << [:setKey, hash_register, key.to_s.intern, value_register]
+      elsif value =~ /^([^\[]+)\[([^\]]+)\]$/
+        hash, key      = $1, $2
+        hash_register  = value_to_register hash
+        value_register = value_to_register to_set
+        instructions << [:getKey, value_register, hash_register, key.to_s.intern]
       elsif global? to_set
         # "$foundExpression <- $rTrue"
         # [[:globalToRegister, :rTrue, :@_1],
