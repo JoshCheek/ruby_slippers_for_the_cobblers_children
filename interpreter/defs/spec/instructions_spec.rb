@@ -127,4 +127,24 @@ RSpec.describe Defs::ParseInstruction do
       end
     end
   end
+
+  describe 'unless' do
+    it 'jumps to the end of the indented section, if the condition is not true', t:true do
+      parses! "unless @a\n  @b <- @c", [
+        [:to_bool, :@_1, :@a],
+        [:not, :@_2, :@_1],
+        [:jumpToIf, :end_if, :@_2],
+        [:registerToRegister, :@c, :@b],
+        [:label, :end_if],
+      ]
+      parses! "unless $a\n  @b <- @c", [
+        [:globalToRegister, :$a, :@_1],
+        [:to_bool, :@_2, :@_1],
+        [:not, :@_3, :@_2],
+        [:jumpToIf, :end_if, :@_3],
+        [:registerToRegister, :@c, :@b],
+        [:label, :end_if],
+      ]
+    end
+  end
 end

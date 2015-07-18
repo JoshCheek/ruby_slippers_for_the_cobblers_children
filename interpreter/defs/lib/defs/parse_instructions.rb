@@ -89,6 +89,17 @@ class Defs
     def parse_instruction(instr)
       if no_instruction? instr
         # noop
+      elsif instr =~ /^unless\s+(.*?)$/
+        # unless @a
+        #   @b <- @c
+        parse_instruction "if !#{$1}"
+      elsif instr =~ /^if\s+(.*?)$/
+        register = parse_condition $1
+        instructions << [:jumpToIf, :end_if, register]
+        while raw_instructions.any? && raw_instructions.first.start_with?("  ")
+          parse_instruction raw_instructions.shift[2..-1]
+        end
+        instructions << [:label, :end_if]
       elsif for_loop? instr
         # for @expression in @ast.expressions
         #   /ast(@expression)
@@ -238,6 +249,20 @@ class Defs
       left_register  = value_to_register(lhs)
       right_register = value_to_register(rhs)
       instructions << [:aryAppend, left_register, right_register]
+    end
+
+    def parse_condition(instr)
+      if instr =~ /^!(.*?)$/
+        bool_register    = parse_condition $1
+        negated_register = new_implicit_register
+        instructions << [:not, negated_register, bool_register]
+        negated_register
+      else
+        from_register = value_to_register instr
+        bool_register = new_implicit_register
+        instructions << [:to_bool, bool_register, from_register]
+        bool_register
+      end
     end
   end
 end
