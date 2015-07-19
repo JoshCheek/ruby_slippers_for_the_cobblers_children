@@ -115,6 +115,8 @@ Potentially useful in the future
   People here advocate webpack over browserify, and babel-runtime over the work this guy put in.
   IDK, I'm cool with it if I can understand what it does.
 * [nodemon](https://github.com/remy/nodemon) File watching / restarting.
+* [lodash](https://lodash.com/), similar to underscore ([npm](https://www.npmjs.com/package/lodash))
+* My [Object Model](https://gist.github.com/JoshCheek/f2f4fed0c184ad9dbe98) notes from class
 
 
 Javascript Resources
