@@ -24,7 +24,7 @@
 
       // cube1
       var geometry = new THREE.BoxGeometry( 1, 1, 1 ); // width, height, depth
-      var material = new THREE.MeshLambertMaterial( { color: 0x00ff00} );
+      var material = new THREE.MeshLambertMaterial( { color: 0x008822} );
       var cube1    = new THREE.Mesh( geometry, material );
       scene.add(cube1);
 
@@ -34,7 +34,13 @@
       var cube2    = new THREE.Mesh( geometry, material );
       scene.add(cube2);
 
-      // light (only works on MeshLambertMaterial and MeshPhongMaterial
+      // sphere
+      var geometry       = new THREE.SphereGeometry(1, 32, 32); // radius, widthSegments, heightSegments
+      var sphereMaterial = new THREE.MeshLambertMaterial({color: 0xFFFFFF, transparent: true, opacity: 0.3});
+      var sphere         = new THREE.Mesh(geometry, sphereMaterial);
+      scene.add(sphere);
+
+      // spotlight (only works on MeshLambertMaterial and MeshPhongMaterial
       var spotLight = new THREE.SpotLight( 0xffffff );
       spotLight.position.set(30, 30, 30);
 
@@ -49,15 +55,20 @@
 
       scene.add(spotLight);
 
-      // render this shit
+      // blue ambient light
+      var ambient = new THREE.AmbientLight( 0x000033 );
+      scene.add(ambient);
 
+
+      // render this shit
       function render() {
         requestAnimationFrame(render);
-        cube1.rotation.x += 0.1;
-        cube1.rotation.y += 0.1;
+        cube1.rotation.x += 0.03;
+        cube1.rotation.y += 0.05;
 
         cube2.rotation.x += 0.05;
         cube2.rotation.y += 0.03;
+
         renderer.render(scene, camera);
       }
       render();
