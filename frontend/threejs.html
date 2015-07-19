@@ -12,26 +12,53 @@
 
       // setup the scene, camera, and renderer
       var scene    = new THREE.Scene();
+      // var scene    = new THREE.Fog(0xFFFFFF, 0, 1000 )
+
+
       var camera   = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+      camera.position.z = 5;
       var renderer = new THREE.WebGLRenderer();
       renderer.setSize( window.innerWidth, window.innerHeight );
       document.body.appendChild( renderer.domElement );
 
 
-      // draw a box
+      // cube1
+      var geometry = new THREE.BoxGeometry( 1, 1, 1 ); // width, height, depth
+      var material = new THREE.MeshLambertMaterial( { color: 0x00ff00} );
+      var cube1    = new THREE.Mesh( geometry, material );
+      scene.add(cube1);
+
+      // cube2
       var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-      var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-      var cube = new THREE.Mesh( geometry, material );
-      scene.add( cube );
-      camera.position.z = 5;
+      var material = new THREE.MeshLambertMaterial( { color: 0x888800} );
+      var cube2    = new THREE.Mesh( geometry, material );
+      scene.add(cube2);
+
+      // light (only works on MeshLambertMaterial and MeshPhongMaterial
+      var spotLight = new THREE.SpotLight( 0xffffff );
+      spotLight.position.set(30, 30, 30);
+
+      spotLight.castShadow = true;
+
+      spotLight.shadowMapWidth = 1024;
+      spotLight.shadowMapHeight = 1024;
+
+      spotLight.shadowCameraNear = 500;
+      spotLight.shadowCameraFar = 4000;
+      spotLight.shadowCameraFov = 30;
+
+      scene.add(spotLight);
 
       // render this shit
 
       function render() {
-        requestAnimationFrame( render );
-        cube.rotation.x += 0.1;
-        cube.rotation.y += 0.1;
-        renderer.render( scene, camera );
+        requestAnimationFrame(render);
+        cube1.rotation.x += 0.1;
+        cube1.rotation.y += 0.1;
+
+        cube2.rotation.x += 0.05;
+        cube2.rotation.y += 0.03;
+        renderer.render(scene, camera);
       }
       render();
     </script>
