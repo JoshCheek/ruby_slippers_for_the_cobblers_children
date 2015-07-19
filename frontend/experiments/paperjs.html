@@ -12,38 +12,96 @@
 
 <!-- Define inlined PaperScript associate it with myCanvas -->
 <script type="text/paperscript" canvas="myCanvas">
+  var RObject = function(attributes) {
+    this.animations   = []
+    this.paper        = new Path.Circle({
+      center:      attributes.center,
+      fillColor:   '#AAAAFF',
+      radius:      30,
+      strokeColor: 'black',
+    })
+
+    this.isForeground = true
+    if(!attributes.isForeground)
+      this.toBackground()
+
+    while(this.animations.length != 0)
+      this.update()
+  }
+
+  RObject.prototype.update = function() {
+    var animation = this.animations[0]
+    if(animation && !animation(this.paper))
+      this.animations.shift()
+  }
+
+  RObject.prototype.nAnimations = function(times, animation) {
+    this.animations.push(function(paper) {
+      if(times <= 0) return false
+      animation(paper)
+      times--
+      return true
+    })
+  }
+
+  RObject.prototype.toForeground = function() {
+    if(this.isForeground) return
+    this.isForeground = true
+    this.nAnimations(20, function(paper) {
+      paper.scale(100/95)
+    })
+  }
+
+  RObject.prototype.toBackground = function() {
+    if(!this.isForeground) return
+    this.isForeground = false
+    this.nAnimations(20, function(paper) {
+      paper.scale(95/100)
+    })
+  }
+
+
+
   // Two circles, offset from the center
   var offset = [50, 0]
-  var leftCircle = new Path.Circle({
-    center:      view.center - offset,
-    radius:      30,
-    strokeColor: 'black',
-  });
 
-  var rightCircle = new Path.Circle({
-    center:      view.center + offset,
-    radius:      30,
-    strokeColor: 'black',
-  });
+  var leftObject  = new RObject({
+    isForeground: true,
+    center: view.center - offset,
+  })
+
+  var rightObject = new RObject({
+    isForeground: true,
+    center: view.center + offset,
+  })
+  rightObject.toBackground()
 
 	// A line connecting them
   var path = new Path({strokeColor: 'black'});
-  path.moveTo(leftCircle.position)
-  path.lineTo(rightCircle.position);
+  path.moveTo(leftObject.paper.position)
+  path.lineTo(rightObject.paper.position);
 
   function onFrame(event) {
-    leftCircle.position  -= [0.1, Math.random()*10 - 5]
-    rightCircle.position += [0.1, Math.random()*10 - 5]
+    leftObject.update()
+    rightObject.update()
 
-    path.segments[0].point = leftCircle.position
-    path.segments[1].point = rightCircle.position
-
-    // notes:
-    event.count // the number of times the frame event was fired
-    event.time  // The total amount of time passed since the first frame event in seconds
-    event.delta // The time passed in seconds since the last frame event
+    // event.count // the number of times the frame event was fired
+    // event.time  // The total amount of time passed since the first frame event in seconds
+    // event.delta // The time passed in seconds since the last frame event
   }
 
+  function onKeyDown(event) {
+    if(event.key == 'left') {
+      leftObject.toForeground()
+      rightObject.toBackground()
+      return false; // Prevent the key event from bubbling
+
+    } else if(event.key == 'right') {
+      leftObject.toBackground()
+      rightObject.toForeground()
+      return false;
+    }
+  }
 
 
   // // Create a symbol, which we will use to place instances of later:
