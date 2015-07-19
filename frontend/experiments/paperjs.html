@@ -4,20 +4,67 @@
 <!-- Load the Paper.js library -->
 <script type="text/javascript" src="js/paper.js"></script>
 
+<style type="text/css">
+#myCanvas {
+  border: 1px solid blue;
+}
+</style>
+
 <!-- Define inlined PaperScript associate it with myCanvas -->
 <script type="text/paperscript" canvas="myCanvas">
-	// Create a Paper.js Path to draw a line into it:
-  var path  = new Path({strokeColor: 'black'});
-	var start = new Point(100, 100);
-	path.moveTo(start);
-	path.lineTo(start + [ 100, -50 ]); // Note the plus operator on Point objects. PaperScript does that for us, and much more!
-
-  // Create a Paper.js Path to draw a line into it:
-  var path = new Path.Circle({
-    center:      view.center,
+  // Two circles, offset from the center
+  var offset = [50, 0]
+  var leftCircle = new Path.Circle({
+    center:      view.center - offset,
     radius:      30,
     strokeColor: 'black',
   });
+
+  var rightCircle = new Path.Circle({
+    center:      view.center + offset,
+    radius:      30,
+    strokeColor: 'black',
+  });
+
+	// A line connecting them
+  var path = new Path({strokeColor: 'black'});
+  path.moveTo(leftCircle.position)
+  path.lineTo(rightCircle.position);
+
+  function onFrame(event) {
+    leftCircle.position  -= [0.1, Math.random()*10 - 5]
+    rightCircle.position += [0.1, Math.random()*10 - 5]
+
+    path.segments[0].point = leftCircle.position
+    path.segments[1].point = rightCircle.position
+
+    // notes:
+    event.count // the number of times the frame event was fired
+    event.time  // The total amount of time passed since the first frame event in seconds
+    event.delta // The time passed in seconds since the last frame event
+  }
+
+
+
+  // // Create a symbol, which we will use to place instances of later:
+  // var path = new Path.Circle({
+  //   center: [0, 0],
+  //   radius: 10,
+  //   fillColor: 'white',
+  //   strokeColor: 'black'
+  // });
+  // var symbol = new Symbol(path);
+
+  // // place the symbol
+	// var center = Point.random() * view.size;
+	// var placedSymbol = symbol.place(center);
+	// placedSymbol.scale(i / count);
+
+  // // some attributes we can access
+  // item.position.x
+  // item.bounds.width
+  // item.bounds.left
+  // view.size.width
 </script>
 
 </head>
