@@ -16,10 +16,21 @@
     this.animations   = []
     this.paper        = new Path.Circle({
       center:      attributes.center,
-      fillColor:   '#AAAAFF',
       radius:      30,
-      strokeColor: 'black',
     })
+
+    this.paper.fillColor = {
+      gradient: {
+        stops:  [
+          ['white',   0.005],
+          ['#AAAAFF', 0.4],
+          ['#3333FF', 1],
+        ],
+        radial: true,
+      },
+      origin:      (this.paper.position + this.paper.bounds.leftCenter + this.paper.bounds.topCenter)/3,
+      destination: this.paper.bounds.rightCenter,
+    },
 
     this.isForeground = true
     if(!attributes.isForeground)
