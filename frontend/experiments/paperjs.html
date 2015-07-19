@@ -7,18 +7,19 @@
 <style type="text/css">
 #myCanvas {
   border: 1px solid blue;
+  background-color: #333;
 }
 </style>
 
 <!-- Define inlined PaperScript associate it with myCanvas -->
 <script type="text/paperscript" canvas="myCanvas">
   var RObject = function(attributes) {
-    this.animations   = []
-    this.paper        = new Path.Circle({
-      center:      attributes.center,
-      radius:      30,
-    })
+    this.animations = []
+    this.fgCenter   = attributes.fgCenter
+    this.bgCenter   = attributes.bgCenter
+    this.ivars      = []
 
+    this.paper = new Path.Circle({ center: this.fgCenter, radius: 100})
     this.paper.fillColor = {
       gradient: {
         stops:  [
@@ -30,7 +31,7 @@
       },
       origin:      (this.paper.position + this.paper.bounds.leftCenter + this.paper.bounds.topCenter)/3,
       destination: this.paper.bounds.rightCenter,
-    },
+    }
 
     this.isForeground = true
     if(!attributes.isForeground)
@@ -44,6 +45,7 @@
     var animation = this.animations[0]
     if(animation && !animation(this.paper))
       this.animations.shift()
+    this.ivars.forEach(function(ivar) { ivar.update() })
   }
 
   RObject.prototype.nAnimations = function(times, animation) {
@@ -57,40 +59,76 @@
 
   RObject.prototype.toForeground = function() {
     if(this.isForeground) return
-    this.isForeground = true
+    this.isForeground  = true
+    var positionOffset = (this.fgCenter - this.bgCenter) / 20
+    var ivars          = this.ivars
     this.nAnimations(20, function(paper) {
+      paper.position += positionOffset
       paper.scale(100/95)
+      ivars.forEach(function(ivar) { ivar.scale(100/95) })
     })
   }
 
   RObject.prototype.toBackground = function() {
     if(!this.isForeground) return
-    this.isForeground = false
+    this.isForeground  = false
+    var positionOffset = (this.bgCenter - this.fgCenter) / 20
+    var ivars          = this.ivars
     this.nAnimations(20, function(paper) {
+      paper.position += positionOffset
       paper.scale(95/100)
+      ivars.forEach(function(ivar) { ivar.scale(95/100) })
     })
+  }
+
+  RObject.prototype.addIvar = function(name, target) {
+    var ivar = new Ivar(name, this.paper, target.paper)
+    this.ivars.push(ivar)
+  }
+
+  var Ivar = function(name, from, to) {
+    this.name  = name
+    this.from  = from
+    this.to    = to
+
+    this.paperName           = new PointText(from.position)
+    this.paperName.content   = name
+    this.paperName.fillColor = 'white'
+    this.paperName.scale(3)
+
+    this.paperPointer = new Path.Line(this.paperName.position, to.position)
+    this.paperPointer.strokeColor = 'white'
+    this.paperPointer.strokeWidth = 3
+  }
+
+  Ivar.prototype.update = function() {
+    this.paperName.position = this.from.position
+
+    var segments = this.paperPointer.segments
+    segments[0].point = this.paperName.bounds.rightCenter
+    segments[1].point = (this.to.bounds.leftCenter + this.to.position) / 2
+  }
+
+  Ivar.prototype.scale = function(amount) {
+    this.paperName.scale(amount)
   }
 
 
 
   // Two circles, offset from the center
-  var offset = [50, 0]
-
   var leftObject  = new RObject({
     isForeground: true,
-    center: view.center - offset,
+    fgCenter: view.center + [-100, 0],
+    bgCenter: view.center + [-200, 60]
   })
 
   var rightObject = new RObject({
-    isForeground: true,
-    center: view.center + offset,
+    isForeground: false,
+    fgCenter: view.center + [100, 0],
+    bgCenter: view.center + [200, 60]
   })
-  rightObject.toBackground()
 
-	// A line connecting them
-  var path = new Path({strokeColor: 'black'});
-  path.moveTo(leftObject.paper.position)
-  path.lineTo(rightObject.paper.position);
+  leftObject.addIvar("@whatever", rightObject)
 
   function onFrame(event) {
     leftObject.update()
@@ -113,31 +151,10 @@
       return false;
     }
   }
-
-
-  // // Create a symbol, which we will use to place instances of later:
-  // var path = new Path.Circle({
-  //   center: [0, 0],
-  //   radius: 10,
-  //   fillColor: 'white',
-  //   strokeColor: 'black'
-  // });
-  // var symbol = new Symbol(path);
-
-  // // place the symbol
-	// var center = Point.random() * view.size;
-	// var placedSymbol = symbol.place(center);
-	// placedSymbol.scale(i / count);
-
-  // // some attributes we can access
-  // item.position.x
-  // item.bounds.width
-  // item.bounds.left
-  // view.size.width
 </script>
 
 </head>
 <body>
-	<canvas id="myCanvas" resize></canvas>
+	<canvas id="myCanvas" width="800" height="400" resize></canvas>
 </body>
 </html>
