@@ -7,8 +7,14 @@
     </style>
   </head>
   <body>
+    <p id="output">wat</p>
+
     <script src="js/three.min.js"></script>
-      <script>
+    <script>
+      var output = document.getElementById("output")
+      function log(text) {
+        return output.innerHTML = text
+      }
 
       // setup the scene, camera, and renderer
       var scene    = new THREE.Scene();
@@ -34,11 +40,32 @@
       var cube2    = new THREE.Mesh( geometry, material );
       scene.add(cube2);
 
-      // sphere
-      var geometry       = new THREE.SphereGeometry(1, 32, 32); // radius, widthSegments, heightSegments
-      var sphereMaterial = new THREE.MeshLambertMaterial({color: 0xFFFFFF, transparent: true, opacity: 0.3});
-      var sphere         = new THREE.Mesh(geometry, sphereMaterial);
-      scene.add(sphere);
+      // spheres
+      var geometry   = new THREE.SphereGeometry(1, 32, 32); // radius, widthSegments, heightSegments
+      var material   = new THREE.MeshLambertMaterial({color: 0xFFFFFF, transparent: true, opacity: 0.3});
+      var leftSphere = new THREE.Mesh(geometry, material);
+      var rightSphere = new THREE.Mesh(geometry, material);
+      scene.add(leftSphere);
+      scene.add(rightSphere);
+
+      // connect the spheres with a line
+      var material = new THREE.LineBasicMaterial({color: 0x0000ff});
+      var oldLine  = null;
+      var line     = null;
+
+      var setLine = function(leftVec, rightVec) {
+        var lineGeometry = new THREE.Geometry();
+        lineGeometry.vertices.push(leftVec);
+        lineGeometry.vertices.push(rightVec);
+        line = new THREE.Line(lineGeometry, material);
+        scene.add(line)
+        if(oldLine) { scene.remove(oldLine) }
+        oldLine = line
+      }
+      setLine(
+        new THREE.Vector3(-1, 0, 0),
+        new THREE.Vector3(1, 0, 0)
+      )
 
       // spotlight (only works on MeshLambertMaterial and MeshPhongMaterial
       var spotLight = new THREE.SpotLight( 0xffffff );
@@ -59,15 +86,31 @@
       var ambient = new THREE.AmbientLight( 0x000033 );
       scene.add(ambient);
 
+      var framecount = 0
 
       // render this shit
       function render() {
+        framecount++
         requestAnimationFrame(render);
-        cube1.rotation.x += 0.03;
-        cube1.rotation.y += 0.05;
 
-        cube2.rotation.x += 0.05;
-        cube2.rotation.y += 0.03;
+        // don't bother updating 60x per second
+        if(framecount%2 != 0) return;
+
+        cube1.rotation.x = framecount * 0.03;
+        cube1.rotation.y = framecount * 0.05;
+
+        cube2.rotation.x = framecount * 0.05;
+        cube2.rotation.y = framecount * 0.03;
+
+        rightSphere.position.x = framecount * 0.01;
+        rightSphere.position.y = Math.random()*1-0.5;
+        rightSphere.position.z = Math.random()*1-0.5;
+
+        leftSphere.position.x = -rightSphere.position.x;
+        leftSphere.position.y = Math.random()*1-0.5;
+        leftSphere.position.z = Math.random()*1-0.5;
+
+        setLine(leftSphere.position, rightSphere.position);
 
         renderer.render(scene, camera);
       }

@@ -33,8 +33,19 @@ Darwing
       could be fun, might learn some math and some JS
     three.js
       http://threejs.org/examples/#raytracing_sandbox
-      https://www.leiainc.com/
-      http://www.sitepoint.com/building-earth-with-webgl-javascript/?utm_source=javascriptweekly&utm_medium=email
+      examples
+        https://www.leiainc.com/
+        http://www.sitepoint.com/building-earth-with-webgl-javascript/?utm_source=javascriptweekly&utm_medium=email
+      tutorial
+        http://code.tutsplus.com/tutorials/webgl-with-threejs-models-and-animation--net-35993
+      using with Blender
+        https://www.blend4web.com/en/article/36
+      examples
+        https://stemkoski.github.io/Three.js/
+      Particle Engine (smoke, fire, clouds, starts, rain, etc)
+        https://stemkoski.github.io/Three.js/Particle-Engine.html
+      MSDN article on physics engines, I think :P
+        https://msdn.microsoft.com/en-us/library/dn528557(v=vs.85).aspx
 Atom Shell
   For making native GUI apps by treating them like the browser (builds on Chromium)
   forum
