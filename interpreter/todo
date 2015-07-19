@@ -1,17 +1,26 @@
+Currently:
+  figuring out /ast/method_definition
+    need to finish implementing
+    and then generate.
+
+    Test is currently failing, because machine was faked out to emit true
+    "instructions": [
+      ["globalToRegister", "$rTrue", "@_1"],
+      ["runMachine", ["emit"],
+        ["@_1"]
+      ]
+    ],
+
+    but now we need it to add the method to the current deftarget
+    and then emit the symbol of the method name (we don't have symbols yet >.<)
+
+
 Immediate:
   * Is there a way to declare that accessing a value off the object, that doesn't exist, should raise an error?
   * Does javascript have properties? If so, how do they work?
   * for/in vs for/of
   * Machine for /ast/class
    class: @ast
-     # { "type": "class",
-     #   "name_lookup": {"type": "constant", "namespace": null, "name": "A"},
-     #   "superclass": null,
-     #   "body": {"type": "method_definition", "name": "b", "args": [], "body": null},
-     # }
-     # requires machines to have return values!
-     @superclass  <- @ast.superclass
-     @name_lookup <- @ast.name_lookup
      @class <- /findOrCreateClass(@name_lookup, @superclass)
        # ALGORITHM: find it. if it doesn't exist, create it
        # REF IMPL: name = node[:name_lookup][:name].intern
@@ -26,10 +35,8 @@ Immediate:
      /ast(@ast.body)
      /popDeftarget
      /reemit
-
-
-
-
+  * allow machines to return values
+  * rework openClass to return the class rather than pushing the deftarget directly
 
 Maybe future:
   option to see a list of bytecodes

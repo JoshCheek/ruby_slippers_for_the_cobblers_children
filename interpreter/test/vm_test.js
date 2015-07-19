@@ -22,6 +22,11 @@ const lookupConst = function(world, name) {
   // throw(new Error(`Implement lookupClass (${name})`))
 }
 
+const assertSymbol = function(world, value, symbol) {
+  assert.equal('rSymbol', inspect(symbol.class))
+  assert.equal(value, symbol.primitiveData)
+}
+
 
 const assertClass = function(world, name, assertions) {
   let klass = lookupConst(world, name)
@@ -229,17 +234,17 @@ describe('ruby.VM', function() {
       AE(undefined, world.$toplevelNamespace.constants['A']);
 
       // run the program
-      assertSymbol("ameth", vm.nextExpression()) // A#ameth
-      assertSymbol("ameth", vm.nextExpression()) // A
+      assertSymbol(world, "ameth", vm.nextExpression()) // A#ameth
+      assertSymbol(world, "ameth", vm.nextExpression()) // A
 
-      assertSymbol("ameth", vm.nextExpression()) // Object#ameth
+      assertSymbol(world, "ameth", vm.nextExpression()) // Object#ameth
       AE(world.$rTrue,      vm.nextExpression())
       AE(world.$rTrue,      vm.nextExpression())
 
-      assertSymbol("nobody_meth", vm.nextExpression()) // Object#nobody_meth
+      assertSymbol(world, "nobody_meth", vm.nextExpression()) // Object#nobody_meth
       AE(world.$rNil,             vm.nextExpression())
 
-      assertSymbol("meth_with_args", vm.nextExpression()) // Object#meth_with_args
+      assertSymbol(world, "meth_with_args", vm.nextExpression()) // Object#meth_with_args
 
       // class definition
       assertClass(world, "A", {

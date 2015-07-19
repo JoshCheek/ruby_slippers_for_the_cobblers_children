@@ -18,7 +18,7 @@ export default function buildWorld(ast) {
   // helpers
   const instantiate = function(klass, customInspect) {
     if(!customInspect) customInspect = function() { return `#<${klass.inspect()}:${this.objectId}>` }
-    const instance = { class: klass.objectId, instanceVariables: {}, inspect: customInspect }
+    const instance = { class: klass, instanceVariables: {}, inspect: customInspect }
     allObjects.track(instance)
     if(klass.internalInit)
       klass.internalInit(instance)
@@ -75,6 +75,7 @@ export default function buildWorld(ast) {
     localVariables: {},
     self:           main,
     returnValue:    rNil,
+    caller:         null,
   }
 
   // constants

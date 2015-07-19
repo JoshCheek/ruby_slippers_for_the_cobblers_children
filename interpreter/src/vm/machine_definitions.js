@@ -109,6 +109,44 @@ export default () => {
         ],
         "children": {},
       },
+      "openClass": {
+        "name": "openClass",
+        "description": "Machine: /openClass",
+        "namespace": [],
+        "arg_names": ["@name_lookup", "@superclass"],
+        "labels": {
+          "end_if": 21
+        },
+        "instructions": [
+          ["getKey", "@_1", "@name_lookup", "name"],
+          ["registerToRegister", "@_1", "@name"],
+          ["globalToRegister", "$toplevelNamespace", "@_2"],
+          ["registerToRegister", "@_2", "@namespace"],
+          ["getKey", "@_3", "@namespace", "constants"],
+          ["registerToRegister", "@_3", "@constants"],
+          ["to_bool", "@_4", "@constants[@name]"],
+          ["not", "@_5", "@_4"],
+          ["jumpToIf", "end_if", "@_5"],
+          ["newHash", "@class"],
+          ["globalToRegister", "$rClass", "@_6"],
+          ["setKey", "@class", "class", "@_6"],
+          ["newHash", "@_7"],
+          ["setKey", "@class", "instanceVariables", "@_7"],
+          ["newHash", "@_8"],
+          ["setKey", "@class", "constants", "@_8"],
+          ["newHash", "@_9"],
+          ["setKey", "@class", "instanceMethods", "@_9"],
+          ["globalToRegister", "$rObject", "@_10"],
+          ["setKey", "@class", "superclass", "@_10"],
+          ["setKey", "@constants", "@name", "@class"],
+          ["label", "end_if"],
+          ["getKey", "@class", "@constants", "name"],
+          ["runMachine", ["pushDeftarget"],
+            ["@class"]
+          ]
+        ],
+        "children": {},
+      },
       "ast": {
         "name": "ast",
         "description": "Interpreters for language constructs",
@@ -283,6 +321,62 @@ export default () => {
               ["getKey", "@constant", "@constants", "@name"],
               ["runMachine", ["emit"],
                 ["@constant"]
+              ]
+            ],
+            "children": {},
+          },
+          "method_definition": {
+            "name": "method_definition",
+            "description": "Machine: /ast/method_definition",
+            "namespace": ["ast"],
+            "arg_names": ["@ast"],
+            "labels": {},
+            "instructions": [
+              ["globalToRegister", "$rTrue", "@_1"],
+              ["runMachine", ["emit"],
+                ["@_1"]
+              ]
+            ],
+            "children": {},
+          },
+          "class": {
+            "name": "class",
+            "description": "Machine: /ast/class",
+            "namespace": ["ast"],
+            "arg_names": ["@ast"],
+            "labels": {},
+            "instructions": [
+              ["getKey", "@_1", "@ast", "superclass"],
+              ["registerToRegister", "@_1", "@superclass"],
+              ["getKey", "@_2", "@ast", "name_lookup"],
+              ["registerToRegister", "@_2", "@name_lookup"],
+              ["runMachine", ["openClass"],
+                ["@name_lookup", "@superclass"]
+              ],
+              ["globalToRegister", "$deftargetStack", "@_3"],
+              ["registerToRegister", "@_3", "@deftargetStack"],
+              ["getKey", "@_4", "@deftargetStack", "target"],
+              ["registerToRegister", "@_4", "@class"],
+              ["newHash", "@binding"],
+              ["newHash", "@locals"],
+              ["setKey", "@binding", "localVariables", "@locals"],
+              ["setKey", "@binding", "self", "@class"],
+              ["globalToRegister", "$rNil", "@_5"],
+              ["setKey", "@binding", "returnValue", "@_5"],
+              ["globalToRegister", "$bindingStack", "@_6"],
+              ["setKey", "@binding", "caller", "@_6"],
+              ["getKey", "@_7", "@ast", "body"],
+              ["runMachine", ["ast"],
+                ["@_7"]
+              ],
+              ["runMachine", ["popDeftarget"],
+                []
+              ],
+              ["runMachine", ["popBinding"],
+                []
+              ],
+              ["runMachine", ["reemit"],
+                []
               ]
             ],
             "children": {},

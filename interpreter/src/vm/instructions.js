@@ -114,4 +114,12 @@ export default {
     registers[aryRegister].push(registers[toAppendRegister])
   },
 
+  to_bool: (world, state, machine, registers, bool_register, from_register) => {
+    registers[bool_register] = !!registers[from_register]
+  },
+
+  not: (world, state, machine, registers, negated_register, bool_register) => {
+    registers[negated_register] = !registers[bool_register]
+  },
+
 }

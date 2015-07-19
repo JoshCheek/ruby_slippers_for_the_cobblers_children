@@ -45,6 +45,23 @@ popBinding:
   @deftargetNode  <- @stack.parent
   $deftargetStack <- @deftargetNode
 
+openClass: @name_lookup, @superclass
+  # @name_lookup: {"type": "constant", "namespace": null, "name": "A"},
+  # @superclass:  null currently
+  @name      <- @name_lookup.name
+  @namespace <- $toplevelNamespace
+  @constants <- @namespace.constants
+  unless @constants[@name]
+    @class                   <- {}
+    @class.class             <- $rClass
+    @class.instanceVariables <- {}
+    @class.constants         <- {}
+    @class.instanceMethods   <- {}
+    @class.superclass        <- $rObject
+    @constants[@name]        <- @class
+  @class <- @constants[name]
+  /pushDeftarget(@class)
+
 ast: @ast
   > Interpreters for language constructs
 
@@ -98,6 +115,53 @@ ast: @ast
     @constants <- $toplevelNamespace.constants
     @constant  <- @constants[@name]
     /emit(@constant)
+
+  method_definition: @ast
+    # { "type": "method_definition",
+    #   "name": "a",
+    #   "args": [],
+    #   "body": { "type": "integer", "value": "1"},
+    # }
+    @name <- @ast.name
+    @args <- @ast.args
+    @body <- @ast.body
+
+    currentDeftarget.instanceMethods[@name] <- {
+      arguments: @args,
+      body:      @body
+    }
+    # TODO: get the current deftarget
+    # TODO: add the args and body
+
+  class: @ast
+    # { "type": "class",
+    #   "name_lookup": {"type": "constant", "namespace": null, "name": "A"},
+    #   "superclass": null,
+    #   "body": {"type": "method_definition", "name": "b", "args": [], "body": null},
+    # }
+
+    # open the class
+    @superclass  <- @ast.superclass
+    @name_lookup <- @ast.name_lookup
+    /openClass(@name_lookup, @superclass)
+    @deftargetStack <- $deftargetStack
+    @class          <- @deftargetStack.target
+
+    # push the binding
+    @binding <- {}
+    @locals  <- {}
+    @binding.localVariables <- @locals
+    @binding.self           <- @class
+    @binding.returnValue    <- $rNil
+    @binding.caller         <- $bindingStack
+
+    # eval the code
+    /ast(@ast.body)
+
+    # cleanup
+    /popDeftarget
+    /popBinding
+    /reemit
 
 Templates
 =========
@@ -247,3 +311,9 @@ newHash(register)
 
 aryAppend(aryRegister, toAppendRegister)
   registers[aryRegister].push(registers[toAppendRegister])
+
+to_bool(bool_register, from_register)
+  registers[bool_register] = !!registers[from_register]
+
+not(negated_register, bool_register)
+  registers[negated_register] = !registers[bool_register]
