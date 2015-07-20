@@ -1,0 +1,12 @@
+file "elm-stuff" do
+  sh "elm package install"
+end
+
+file "app.html" => "app.elm" do
+  sh 'elm make --output app.html app.elm'
+end
+
+task dependencies: "elm-stuff"
+task build: ["dependencies", "app.html"]
+
+task default: "build"
