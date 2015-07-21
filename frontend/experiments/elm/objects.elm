@@ -1,7 +1,8 @@
 import Color exposing (rgb, rgba, radial, Gradient)
-import Graphics.Collage exposing (collage, Form, scale, move, circle, gradient)
+import Graphics.Collage exposing (collage, LineStyle, Form, scale, move, circle, gradient)
 import Graphics.Element exposing (Element)
 
+import Text exposing (fromString)
 import Keyboard
 import Signal exposing (foldp)
 import Time exposing (..)
@@ -27,14 +28,12 @@ type alias ObjectState =
   }
 
 type alias InstanceVariable =
-  { name   : String
-  , target : ObjectId
+  { name     : String
+  , targetId : ObjectId
   }
 
 type alias WorldState =
-  { leftObj  : ObjectState
-  , rightObj : ObjectState
-  }
+  { allObjects : List ObjectState }
 
 type alias Arrow =
   { x : Int
@@ -55,7 +54,7 @@ model =
   let leftObject  = buildModel 1 True
                       |> addIvar "@other" rightObject.objectId
       rightObject = buildModel 2 False
-  in WorldState leftObject rightObject
+  in WorldState [leftObject, rightObject]
 
 buildModel : ObjectId -> Bool -> ObjectState
 buildModel objectId isActive =
@@ -74,12 +73,18 @@ addIvar name toObjId containingObj =
 -- logic
 
 update : (Time, Arrow) -> WorldState -> WorldState
-update (time, arrow) {leftObj, rightObj} =
+update (time, arrow) {allObjects} =
   let pressedLeft         = (arrow.x ==  1)
       pressedRight        = (arrow.x == -1)
-  in if | pressedLeft  -> WorldState (iterate <| activate   leftObj) (iterate <| deactivate rightObj)
-        | pressedRight -> WorldState (iterate <| deactivate leftObj) (iterate <| activate   rightObj)
-        | otherwise    -> WorldState (iterate leftObj)               (iterate rightObj)
+      leftObj             = case (List.head allObjects) of
+                              Just obj  -> obj
+                              otherwise -> buildModel 1 True
+      rightObj            = case (List.head <| List.drop 1 allObjects) of
+                             Just obj  -> obj
+                             otherwise -> buildModel 2 False
+  in if | pressedLeft  -> WorldState [(iterate <| activate   leftObj), (iterate <| deactivate rightObj)]
+        | pressedRight -> WorldState [(iterate <| deactivate leftObj), (iterate <| activate   rightObj)]
+        | otherwise    -> WorldState [(iterate leftObj),               (iterate rightObj)]
 
 iterate : ObjectState -> ObjectState
 iterate state =
@@ -116,13 +121,37 @@ transitionsTo from to transitions =
 -- view
 
 view : WorldState -> Element
-view {leftObj, rightObj} =
-  let leftSphere  = rObject leftObj.currentState
-      rightSphere = rObject rightObj.currentState
-  in  collage 600 400 [leftSphere, rightSphere]
+view {allObjects} =
+  let viewObjectsById = List.map (\obj -> (obj.objectId, (viewObject obj.currentState))) allObjects
+      viewObjects     = List.map snd viewObjectsById
+      getIvars obj    = List.map (\ivar -> (obj, ivar)) obj.ivars
+      ivarsByObj      = List.foldl (++) [] (List.map getIvars allObjects)
+      viewIvars       = List.foldl (++) [] <| List.map (\(obj, ivar) -> viewIvar obj.currentState ivar viewObjectsById) ivarsByObj
+      viewElements    = viewObjects ++ viewIvars
+  in  collage 600 400 viewElements
 
-rObject : DisplayState -> Form
-rObject {x, y, scale} =
+viewIvar : DisplayState -> InstanceVariable -> List (ObjectId, Form) -> List Form
+viewIvar display ivar viewObjectsById =
+  let targetObject = findObject ivar.targetId viewObjectsById
+      varName      = Text.fromString ivar.name
+                     |> Text.color Color.brown
+                     |> Text.bold
+                     |> Graphics.Collage.text
+                     |> Graphics.Collage.scale 2
+                     |> move (display.x, display.y)
+                     |> Graphics.Collage.scale display.scale
+      arrowPath    = Graphics.Collage.path [(display.x, display.y), (targetObject.x, targetObject.y)]
+      defaultStyle = Graphics.Collage.defaultLine
+      arrowStyle   = { defaultStyle
+                     | cap   <- Graphics.Collage.Round
+                     , color <- Color.brown
+                     , width <- 5 * display.scale
+                     }
+      arrow        = Graphics.Collage.traced arrowStyle arrowPath
+  in  [varName, arrow]
+
+viewObject : DisplayState -> Form
+viewObject {x, y, scale} =
   gradient grad (circle 100)
   |> move  (x, y)
   |> Graphics.Collage.scale scale
@@ -133,3 +162,8 @@ grad =
       baseColour = rgb  150 150 230
       shadow     = rgba  50  70 100 0
   in radial (0, 0) 40 (0, 10) 90 [(0, highlight), (0.8, baseColour), (1, shadow)]
+
+findObject : ObjectId -> List (ObjectId, Form) -> Form
+findObject targetId ((crntId, form)::rest) =
+  if | crntId == targetId -> form
+     | otherwise -> findObject targetId rest
