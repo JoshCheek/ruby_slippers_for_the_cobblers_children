@@ -12,7 +12,7 @@ type Ast
   | AstString String               -- value
   | AstSymbol String               -- value
   | AstSend Ast String (List Ast)  -- target, message, args
-  | AstUnknown String              -- type
+  | AstUnknown String              -- show the type, ie if we forget to parse one
 
 parsedCode : Signal.Mailbox Ast
 parsedCode = Signal.mailbox AstUninitialized
@@ -22,8 +22,7 @@ main = Signal.map show parsedCode.signal
 
 port fetchCode : Task Http.Error ()
 port fetchCode =
-  -- Http.post decoder "http://localhost:3003" (Http.string "123")
-  Http.post decoder "http://localhost:3003" (Http.string "1.a")
+  Http.post decodeAst "http://localhost:3003" (Http.string "1.a 'b', :c, d")
     `Task.andThen` report
 
 report : Ast -> Task x ()
@@ -32,37 +31,28 @@ report result =
 
 
 -- NOTE: toplevel can be null
-decoder : Json.Decoder Ast
-decoder =
+decodeAst : Json.Decoder Ast
+decodeAst =
   Json.oneOf
-  [ Json.null AstNone
-  , ("type" := Json.string) `Json.andThen` decodeAst
-  , blowup
+  [ ("type" := Json.string)
+      `Json.andThen`
+      \t ->
+        case t of
+          "integer" -> decodeInt
+          "send"    -> decodeSend
+          "string"  -> decodeString
+          "symbol"  -> decodeSymbol
+          otherwise -> decodeUnknown
+  , Json.null AstNone
+  -- this shouldn't ever happen, but it already has (https://github.com/elm-lang/core/issues/305), so, leaving it in
+  , Json.customDecoder Json.value (\json -> (Ok <| AstUnknown (toString json)))
   ]
-  -- "type" := Json.string `Json.andThen` decodeAst
-
-blowup =
-  Json.customDecoder Json.value (\json -> (Ok <| AstUnknown (toString json)))
-
-decodeAst : String -> Json.Decoder Ast
-decodeAst t =
-  case t of
-    "integer" -> decodeInt
-    "send"    -> decodeSend
-    "string"  -> decodeString
-    "symbol"  -> decodeSymbol
-    otherwise -> decodeUnknown
 
 decodeInt     = Json.object1 AstInt     ("value"   := Json.string)
 decodeUnknown = Json.object1 AstUnknown ("type"    := Json.string)
-decodeSend    = Json.object3 AstSend
-                             ("target"  := decoder)
-                             ("message" := Json.string)
-                             ("args"    := Json.list decodeUnknown)
-
--- decodeSend    = Json.object1 (\t -> AstSend AstNone "" [])    ("target"  := decoder)
-                                        -- ("message" := Json.string)
-                                        -- ("args"    := (Json.list decoder))
+decodeSend    = Json.object3 AstSend    ("target"  := decodeAst)
+                                        ("message" := Json.string)
+                                        ("args"    := Json.list decodeAst)
 decodeString  = Json.object1 AstString  ("value" := Json.string)
 decodeSymbol  = Json.object1 AstSymbol  ("value" := Json.string)
 
