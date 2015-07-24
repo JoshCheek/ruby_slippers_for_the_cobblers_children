@@ -363,7 +363,7 @@ Josh.tachikomaMesh = function(makeMesh) {
   rearLeftLeg.add(kneeBallJoint)
 
   // leg and foot group
-  var legAndFoot = new THREE.Object3D()
+  var rearLeftShinAndFoot = new THREE.Object3D()
 
   var theActualLegGeometry = new THREE.ConvexGeometry([
     vec(-19, -25, -12),
@@ -382,14 +382,14 @@ Josh.tachikomaMesh = function(makeMesh) {
   theActualLeg.rotation.z = degrees(-15)
   theActualLeg.position.x += len(2)
   theActualLeg.position.y -= len(6)
-  legAndFoot.add(theActualLeg)
+  rearLeftShinAndFoot.add(theActualLeg)
 
   // foot ball joint, rear left leg
   var footBallJoint = makeMesh(new THREE.SphereGeometry(len(1.5), 20, 30))
   footBallJoint.position.x = len(-23)
   footBallJoint.position.y = len(-22)
   footBallJoint.position.z = len(-15)
-  legAndFoot.add(footBallJoint)
+  rearLeftShinAndFoot.add(footBallJoint)
 
   // "ankle" (cone which connects foot to its ball joint)
   var ankle = makeMesh(new THREE.CylinderGeometry(len(0.25), len(1.5), len(2), 9))
@@ -397,7 +397,7 @@ Josh.tachikomaMesh = function(makeMesh) {
   ankle.position.y = len(-23)
   ankle.position.z = len(-15)
   ankle.rotation.z = degrees(45)
-  legAndFoot.add(ankle)
+  rearLeftShinAndFoot.add(ankle)
 
   // wheel is just a very short, wide cylinder
   var wheel = makeMesh(new THREE.CylinderGeometry(len(2.5), len(2.5), len(1.5), 9))
@@ -405,13 +405,28 @@ Josh.tachikomaMesh = function(makeMesh) {
   wheel.position.y = len(-24)
   wheel.position.z = len(-15)
   wheel.rotation.z = degrees(45)
-  legAndFoot.add(wheel)
+  rearLeftShinAndFoot.add(wheel)
 
   // manual re-positioning
-  legAndFoot.rotation.y = degrees(20)
-  legAndFoot.position.x += len(4)
-  legAndFoot.position.z -= len(8.5)
-  rearLeftLeg.add(legAndFoot)
+  rearLeftShinAndFoot.rotation.y = degrees(20)
+  rearLeftShinAndFoot.position.x += len(4)
+  rearLeftShinAndFoot.position.z -= len(8.5)
+  rearLeftLeg.add(rearLeftShinAndFoot)
+
+  // other left legs are cloned from this one
+  var frontLeftLeg        = rearLeftLeg.clone()
+  frontLeftLeg.rotation.y = degrees(-40)
+  frontLeftLeg.position.z -= len(7)
+  frontLeftLeg.position.x -= len(16)
+
+  var leftSideLegs = new THREE.Object3D()
+  leftSideLegs.add(rearLeftLeg)
+  leftSideLegs.add(frontLeftLeg)
+
+  // now clone the left side legs to make the right side legs
+  var rightSideLegs         = leftSideLegs.clone()
+  rightSideLegs.rotation.y  = degrees(180)
+  rightSideLegs.position.z -= len(50)
 
 
   // all together for the tachikoma
@@ -429,7 +444,7 @@ Josh.tachikomaMesh = function(makeMesh) {
            .add(frontEye).add(leftEye).add(rightEye)
            .add(chimneyBase).add(chimneyTrunk).add(chimneyTower)
            // legs
-           .add(rearLeftLeg)
+           .add(leftSideLegs).add(rightSideLegs)
 }
 
 
