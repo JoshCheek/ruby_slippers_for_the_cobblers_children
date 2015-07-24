@@ -430,6 +430,97 @@ Josh.tachikomaMesh = function(makeMesh) {
   rightSideLegs.rotation.y  = degrees(180)
   rightSideLegs.position.z -= len(50)
 
+  // -----  nose gun  -----
+  // ball joint for nose gun
+  var noseGunBallJoint        = makeMesh(new THREE.SphereGeometry(len(2), 20, 30))
+  noseGunBallJoint.position.y = len(-3)
+  noseGunBallJoint.position.z = len(-35)
+
+  // build the nose gun as a group, then add it to the tachikoma, and then position it
+  var noseGunBaseTube     = makeMesh(new THREE.CylinderGeometry(len(1.5), len(1.5), len(4), 9))
+  var noseGunPivot        = makeMesh(new THREE.CylinderGeometry(len(0.5), len(1.5), len(2), 9))
+  noseGunPivot.position.y = len(3)
+
+  var noseGun        = new THREE.Object3D().add(noseGunBaseTube).add(noseGunPivot)
+  noseGun.position.y = len(-6.5)
+  noseGun.position.z = len(-38.5)
+  noseGun.rotation.x = degrees(45)
+
+
+
+  // -----  arms  -----
+  // ball joint for left arm
+  var leftArmBallJoint = makeMesh(new THREE.SphereGeometry(len(2), 20, 30))
+  leftArmBallJoint.position.x = len(4)
+  leftArmBallJoint.position.y = len(-3)
+  leftArmBallJoint.position.z = len(-33)
+
+  // ball joint for right arm
+  // var rightArmBallJoint = applyOffsets(
+  //   {position: {x: -4, y: -3, z: -33}},
+  //   makeMesh(new THREE.SphereGeometry(len(2), 20, 30))
+  // )
+  var rightArmBallJoint = makeMesh(new THREE.SphereGeometry(len(2), 20, 30))
+  rightArmBallJoint.position.x = len(-4)
+  rightArmBallJoint.position.y = len(-3)
+  rightArmBallJoint.position.z = len(-33)
+
+  // first build the arm, then position it
+  // left arm pivot (cone which connects to ball joint)
+  var leftArmPivot           = makeMesh(new THREE.CylinderGeometry(len(0.5), len(1.5), len(2), 9))
+  var leftArmUpperArm        = makeMesh(new THREE.CylinderGeometry(len(2.0), len(2.2), len(4), 9))
+  leftArmUpperArm.position.y = len(-3)
+
+  var leftArmForeArm         = makeMesh(new THREE.CylinderGeometry(len(2.2), len(1.4), len(6), 9))
+  leftArmForeArm.position.y  = len(-8)
+
+  var leftArmTip             = makeMesh(new THREE.CylinderGeometry(len(1.4), len(0.4), len(2), 9))
+  leftArmTip.position.y      = len(-12)
+
+  // fingers
+  var fingerUpper = makeMesh(new THREE.ConvexGeometry([
+    vec(-0.25, -11, -1.0),
+    vec(-0.25, -11, -1.5),
+    vec( 0.25, -11, -1.0),
+    vec( 0.25, -11, -1.5),
+    vec(-0.25, -13, -1.5),
+    vec(-0.25, -13, -2.0),
+    vec( 0.25, -13, -1.5),
+    vec( 0.25, -13, -2.0),
+  ]))
+
+  var fingerLower = makeMesh(new THREE.ConvexGeometry([
+    vec(-0.25, -13, -1.5),
+    vec(-0.25, -13, -2.0),
+    vec( 0.25, -13, -1.5),
+    vec( 0.25, -13, -2.0),
+    vec(-0.25, -15, -1.0),
+    vec(-0.25, -15, -1.5),
+    vec( 0.25, -15, -1.0),
+    vec( 0.25, -15, -1.5),
+  ]))
+
+  var finger            = new THREE.Object3D().add(fingerUpper).add(fingerLower)
+  var leftFinger        = finger.clone()
+  leftFinger.rotation.y = degrees(120)
+
+  var rightFinger        = finger.clone()
+  rightFinger.rotation.y = degrees(-120)
+
+  // left arm
+  var leftArm = new THREE.Object3D()
+                         .add(leftArmPivot)
+                         .add(leftArmUpperArm).add(leftArmForeArm).add(leftArmTip)
+                         .add(finger).add(leftFinger).add(rightFinger)
+  leftArm.position.x = len(4)
+  leftArm.position.y = len(-4)
+  leftArm.position.z = len(-34.5)
+  leftArm.rotation.x = degrees(90)
+
+  // copy arm and move to new starting position
+  var rightArm = leftArm.clone()
+  rightArm.position.x = len(-4)
+
 
   // all together for the tachikoma
   return new THREE.Object3D()
@@ -445,15 +536,19 @@ Josh.tachikomaMesh = function(makeMesh) {
            .add(head)
            .add(frontEye).add(leftEye).add(rightEye)
            .add(chimneyBase).add(chimneyTrunk).add(chimneyTower)
+           .add(noseGunBallJoint).add(noseGun)
            // legs
            .add(leftSideLegs).add(rightSideLegs)
+           // arms
+           .add(leftArmBallJoint).add(leftArm)
+           .add(rightArmBallJoint).add(rightArm)
 }
 
 
 Josh.renderTachikoma = function(domElement, requestAnimationFrame, frameUpdates) {
   // things in the scene
   var tachikoma = Josh.tachikomaMesh(Tachikoma.lambertMesh)
-  var tachikoma = Josh.tachikomaMesh(Tachikoma.wireframeMesh)
+  // var tachikoma = Josh.tachikomaMesh(Tachikoma.wireframeMesh)
 
   // scene (all the threejs objects being considered)
   var scene = new THREE.Scene()
