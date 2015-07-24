@@ -156,14 +156,14 @@ Josh.tachikomaMesh = function() {
   // -----  rear cabin  -----
   var rearCabinGeo = new THREE.ConvexGeometry([
     // top tapering
-    vec(-4, 24, -4),
-    vec(4,  24, -4),
+    vec(-4, 24, -6),
+    vec(4,  24, -6),
     vec(-4, 24,  4),
     vec(4,  24,  4),
 
     // top
-    vec(-7, 23, -7),
-    vec( 7, 23, -7),
+    vec(-7, 23, -9),
+    vec( 7, 23, -9),
     vec(-7, 23,  7),
     vec( 7, 23,  7),
 
@@ -202,11 +202,25 @@ Josh.tachikomaMesh = function() {
     base.position.y = len(2)
     base.rotation.x = degrees(90)
 
+    // base fore
+    var baseFore        = Josh.wireframe(new THREE.CylinderGeometry(len(0.5), len(0.15), len(2), 12))
+    baseFore.position.y = len(2)
+    baseFore.position.z = len(-4)
+    baseFore.rotation.x = degrees(90)
+
+    // base aft
+    var baseAft        = Josh.wireframe(new THREE.CylinderGeometry(len(0.5), len(0.15), len(2), 12))
+    baseAft.position.y = len(2)
+    baseAft.position.z = len(4)
+    baseAft.rotation.x = degrees(-90)
+
     // spinnerette
     var spinnerette = new THREE.Object3D()
     spinnerette.add(reservoir)
     spinnerette.add(sphere)
     spinnerette.add(base)
+    spinnerette.add(baseFore)
+    spinnerette.add(baseAft)
 
     return spinnerette
   }
@@ -242,7 +256,8 @@ Josh.renderTachikoma = function(domElement, requestAnimationFrame, frameUpdates)
 
   // render from back a bit, looking at origin
   var camera = Josh.camera({
-    from:        [0, 0, -3],
+    from:        [0.5, 0.5, -2],
+    to:          [0.0, 0.2,  0],
     aspectRatio: domElement.offsetWidth / domElement.offsetHeight,
   })
 
