@@ -6,7 +6,6 @@ Trying to draw the interpreter
 Todo
 ----
 
-* move my helper functions off into a lib or something
 * make the tachicoma w/ giles
 * integrate w/ interpreter
   * set it up to not run until you click a form button
