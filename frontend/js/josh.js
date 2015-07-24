@@ -283,6 +283,28 @@ Josh.tachikomaMesh = function(makeMesh) {
   upperChin.position.y = len(-3)
   upperChin.position.z = len(-25)
 
+  // -----  head  -----
+
+  var headSphereBSP      = new ThreeBSP(new THREE.SphereGeometry(len(14), 20, 30))
+  var headSubtractionBSP = new ThreeBSP(
+    new THREE.ConvexGeometry([
+      new THREE.Vector4(len(-14), len(-25), len(-30)), // not sure why vector4, given that we're only using 3 points
+      new THREE.Vector4(len(-14), len(-25), len( 20)),
+      new THREE.Vector4(len(-14), len(  5), len(-30)),
+      new THREE.Vector4(len( 14), len(-25), len(-30)),
+      new THREE.Vector4(len(-14), len(  5), len( 20)),
+      new THREE.Vector4(len( 14), len(  5), len( 20)),
+      new THREE.Vector4(len( 14), len(-25), len( 20)),
+      new THREE.Vector4(len( 14), len(  5), len(-30)),
+    ])
+  )
+
+  // carve cube from sphere
+  var headGeo     = headSphereBSP.subtract(headSubtractionBSP).toGeometry()
+  var head        = makeMesh(headGeo)
+  head.position.z = len(-25)
+  head.position.y = len(-5.75)
+
   // all together for the tachikoma
   return new THREE.Object3D().add(rearCabinMesh)
                              .add(leftSpineretteAssembly)
@@ -295,6 +317,7 @@ Josh.tachikomaMesh = function(makeMesh) {
                              .add(neckMain)
                              .add(lowerChin)
                              .add(upperChin)
+                             .add(head)
 }
 
 
@@ -318,7 +341,7 @@ Josh.renderTachikoma = function(domElement, requestAnimationFrame, frameUpdates)
 
   // render from back a bit, looking at origin
   var camera = Josh.camera({
-    from:        [0.5, 0.5, -2],
+    from:        [0.5, 0.5, -2.5],
     to:          [0.0, 0.2,  0],
     aspectRatio: domElement.offsetWidth / domElement.offsetHeight,
   })
