@@ -154,7 +154,9 @@ Tachikoma.lambertMesh = function(geometry) {
 }
 
 Josh.tachikomaMesh = function(makeMesh) {
+
   // -----  helper functions  -----
+
   var unit    = 32 // to translate everything into 'unit' sized: x, y, z all have a max of 1
   var len     = function(n)       { return n / unit }
   var vec     = function(x, y, z) { return new THREE.Vector3(len(x), len(y), len(z)) }
@@ -162,6 +164,7 @@ Josh.tachikomaMesh = function(makeMesh) {
 
 
   // -----  rear cabin  -----
+
   var rearCabinGeo = new THREE.ConvexGeometry([
     // top tapering
     vec(-4, 24, -6),
@@ -192,6 +195,7 @@ Josh.tachikomaMesh = function(makeMesh) {
 
 
   // -----  spinnerettes  -----
+
   function spinnerette(offsets) {
     var baseHeight     = len(3)
     var shooterHeight  = len(2)
@@ -236,17 +240,61 @@ Josh.tachikomaMesh = function(makeMesh) {
     return new THREE.Object3D().add(sphere).add(base).add(backSpinnerette).add(frontSpinnerette)
   }
 
-
-  // all together for the tachikoma
-  var tachikoma = new THREE.Object3D()
-  tachikoma.add(rearCabinMesh)
-
   var leftSpineretteAssembly   = sideSpineretteAssembly().translateY(len(15)).translateX(len(-8.2)).rotateZ(degrees(90))
   var rightSpinneretteAssenbly = sideSpineretteAssembly().translateY(len(15)).translateX(len(8.2)).rotateZ(degrees(-90))
-  tachikoma.add(leftSpineretteAssembly)
-  tachikoma.add(rightSpinneretteAssenbly)
+  var leftTailSpinnerette      = spinnerette({rotation: {x: 90}, position: {x:  7, y: -9, z: 10}})
+  var rightTailSpinnerette     = spinnerette({rotation: {x: 90}, position: {x: -7, y: -9, z: 10}})
 
-  return tachikoma
+
+  // -----  neck  -----
+
+  // cabin/neck connector
+  var cabinNeckConnector        = makeMesh(new THREE.CylinderGeometry(len(5), len(5), len(12), 12))
+  cabinNeckConnector.position.y = len(-6.5)
+  cabinNeckConnector.position.z = len(-7)
+  cabinNeckConnector.rotation.x = degrees(90);
+
+  // joint rim
+  var jointRim        = makeMesh(new THREE.CylinderGeometry(len(4), len(4), len(12), 12))
+  jointRim.position.y = len(-6.5)
+  jointRim.position.z = len(-8)
+  jointRim.rotation.x = degrees(90)
+
+  // ball joint
+  var neckBallJoint        = makeMesh(new THREE.SphereGeometry(len(3), 20, 30))
+  neckBallJoint.position.y = len(-6.5)
+  neckBallJoint.position.z = len(-14)
+
+  // main
+  var neckMain         = makeMesh(new THREE.CylinderGeometry(len(4), len(3), len(12), 12))
+  neckMain.position.y  = len(-6.5)
+  neckMain.position.z  = len(-21)
+  neckMain.rotation.x  = degrees(90)
+
+  // -----  chin  -----
+
+  // lower chin
+  var lowerChin        = makeMesh(new THREE.CylinderGeometry(len(7), len(5), len(5), 12))
+  lowerChin.position.y = len(-8)
+  lowerChin.position.z = len(-25)
+
+  // upper chin
+  var upperChin        = makeMesh(new THREE.CylinderGeometry(len(13), len(7), len(5), 12))
+  upperChin.position.y = len(-3)
+  upperChin.position.z = len(-25)
+
+  // all together for the tachikoma
+  return new THREE.Object3D().add(rearCabinMesh)
+                             .add(leftSpineretteAssembly)
+                             .add(rightSpinneretteAssenbly)
+                             .add(leftTailSpinnerette)
+                             .add(rightTailSpinnerette)
+                             .add(cabinNeckConnector)
+                             .add(jointRim)
+                             .add(neckBallJoint)
+                             .add(neckMain)
+                             .add(lowerChin)
+                             .add(upperChin)
 }
 
 
@@ -270,7 +318,7 @@ Josh.renderTachikoma = function(domElement, requestAnimationFrame, frameUpdates)
 
   // render from back a bit, looking at origin
   var camera = Josh.camera({
-    from:        [0.5, 0.5, -1],
+    from:        [0.5, 0.5, -2],
     to:          [0.0, 0.2,  0],
     aspectRatio: domElement.offsetWidth / domElement.offsetHeight,
   })
