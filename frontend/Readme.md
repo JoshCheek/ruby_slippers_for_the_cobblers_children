@@ -3,6 +3,20 @@ Frontend
 
 Trying to draw the interpreter
 
+Todo
+----
+
+* move my helper functions off into a lib or something
+* make the tachicoma w/ giles
+* integrate w/ interpreter
+  * set it up to not run until you click a form button
+  * render the world
+  * have it kick off the interpreter, slowly iterating through it and drawing the world as it does so
+
+
+Notes
+-----
+
 ```
 Reacting to changes in the world (so we can draw them)
   react.js
@@ -55,4 +69,53 @@ Atom Shell
   example app
     https://github.com/dougnukem/hello-atom
     https://github.com/atom/atom-shell/blob/master/docs/tutorial/quick-start.md
+```
+
+Three.js notes from Giles lesson
+--------------------------------
+
+```
+extrusion
+  gives a 2d object 3d-ness
+
+parametric primitives (aka platonics)
+  sounds like vectorness
+
+use bool operations
+  differences of shapes and such
+
+cartesian plane
+  2 dimensions (x, y)
+
+three.js / webgl
+  fragments are "faces" (I think 2d)
+  learningwebgl.com
+
+  geometry
+    the shape
+    they have their own set of axes
+    ie their x, y, z don't necessarily map to those in the world,
+    so you can put them into containers with expected axes
+    therefore, it also has its own origin
+
+  mesh
+    geometry + material
+
+  scene
+    mesh, light, camera
+
+CODE!
+  webGLRenderer.shadowMapEnabled = true;
+    Turn on shadow calculations
+    (off by default, b/c it's expensive)
+
+  var camera = new THREE.PerspectiveCamera(45,
+    window.innerWidth / window.innerHeight, 0.1, 1000);
+    # 45 = field of view (how far it can see?)
+    # aspect ratio (16x9 typically)
+    # nearest plane  (closest thing you can see)
+    # farthest plane (farthest thing you can see)
+
+  stats
+    setMode(0) // count the frames per second
 ```
