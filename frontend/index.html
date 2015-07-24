@@ -2,19 +2,38 @@
   <head>
     <title>My first Three.js app</title>
     <style>
-      body { margin: 0; }
-      #objectModel {
-        width:  100%;
-        height: 100%;
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+
+      .threejsContainer {
+        float:    left;
+        position: relative;
+        width:    50%;
+        height:   100%;
+        margin:   0px;
+        padding:  0px;
+      }
+      .threejsContainer .stats {
+        position: absolute;
+        left:     0px;
+        right:    0px;
+        margin:   0px;
+        padding:  0px;
       }
     </style>
   </head>
   <body>
 
-    <div id="stats">
+    <div id="objectModel" class="threejsContainer">
+      <div class="stats">
+      </div>
     </div>
 
-    <div id="objectModel">
+    <div id="tachikoma" class="threejsContainer">
+      <div class="stats">
+      </div>
     </div>
 
     <script src="js/three.r71.js"></script>
@@ -22,16 +41,24 @@
     <script src="js/josh.js"></script>
 
     <script>
-      // setup stats
-      var stats = Josh.statistics()
-      document.getElementById('stats').appendChild(stats.domElement)
-
-      // run the example I made up
+      // the example I made up
+      var joshStats = Josh.statistics()
       var objectModelDiv = document.getElementById("objectModel")
+      objectModelDiv.getElementsByClassName("stats")[0].appendChild(joshStats.domElement)
       Josh.renderExample(
         objectModelDiv,
         requestAnimationFrame,
-        function() { stats.update() }
+        function() { joshStats.update() }
+      )
+
+      // Giles' tachikoma (http://gilesbowkett.blogspot.com/2014/04/build-anime-robot-in-webgl-using-threejs.html)
+      var tachiStats = Josh.statistics()
+      var tachikomaDiv = document.getElementById("tachikoma")
+      tachikomaDiv.getElementsByClassName("stats")[0].appendChild(tachiStats.domElement)
+      Josh.renderTachikoma(
+        tachikomaDiv,
+        requestAnimationFrame,
+        function() { tachiStats.update() }
       )
     </script>
   </body>

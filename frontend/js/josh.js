@@ -14,6 +14,8 @@ Josh.spotlight = function(attrs) {
   if(attrs == undefined) attrs = {}
   var colour = attrs.colour || 0xffffff
   var from   = attrs.from   || [0, 0, 0]
+  // var width  = attrs.width  || 1024
+  // var height = attrs.height ||
   var light  = new THREE.SpotLight(colour)
   light.position.set(from[0], from[1], from[2])
 
@@ -32,14 +34,13 @@ Josh.spotlight = function(attrs) {
 // what we can see of the scene
 Josh.camera = function(attrs) {
   if(attrs == undefined) attrs = {}
-  var from   = attrs.from || [0, 0, 0]
-  var to     = attrs.to   || [0, 0, 0]
-  var camera = new THREE.PerspectiveCamera(
-    45,                                      // field of view (how
-    window.innerWidth / window.innerHeight,  // aspect ratio
-    0.1,                                     // nearest plane (closest thing you can see)
-    100                                      // fartheest plane (farthest thing you can see)
-  )
+  var from   = attrs.from        || [0, 0, 0]
+  var to     = attrs.to          || [0, 0, 0]
+  var ar     = attrs.aspectRatio || 16/9
+  var fov    = attrs.fieldOfView || 45
+  var near   = attrs.nearPlane   || 0.1  // closest thing you can see
+  var far    = attrs.farPlane    || 1000 // farthest thing you can see
+  var camera = new THREE.PerspectiveCamera(fov, ar, 0.1, 100)
   camera.position.x = from[0]
   camera.position.y = from[1]
   camera.position.z = from[2]
@@ -47,6 +48,7 @@ Josh.camera = function(attrs) {
 
   return camera
 }
+
 
 Josh.cube = function(attrs) {
   if(attrs == undefined) attrs = {}
@@ -77,11 +79,6 @@ Josh.sphere = function(attrs) {
 Josh.statistics = function() {
   var stats = new Stats()
   stats.setMode(0) // count the frames per second
-
-  stats.domElement.style.position = 'absolute'
-  stats.domElement.style.left     = '0px'
-  stats.domElement.style.top      = '0px'
-
   return stats
 }
 
@@ -109,7 +106,10 @@ Josh.renderExample = function(domElement, requestAnimationFrame, frameUpdates) {
   domElement.appendChild(renderer.domElement)
 
   // render from back a bit, looking at origin
-  var camera = Josh.camera({from: [0, 0, -5]})
+  var camera = Josh.camera({
+    from:        [0, 0, -5],
+    aspectRatio: domElement.offsetWidth / domElement.offsetHeight,
+  })
 
   // render this shit
   var framecount = 0
@@ -135,3 +135,6 @@ Josh.renderExample = function(domElement, requestAnimationFrame, frameUpdates) {
 
   render()
 }
+
+
+Josh.renderTachikoma = Josh.renderExample
