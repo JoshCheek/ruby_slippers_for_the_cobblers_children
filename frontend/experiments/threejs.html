@@ -2,119 +2,80 @@
   <head>
     <title>My first Three.js app</title>
     <style>
-      body { margin: 0; }
-      canvas { width: 100%; height: 100% }
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+
+      .threejsContainer {
+        float:    left;
+        position: relative;
+        width:    50%;
+        height:   100%;
+        margin:   0px;
+        padding:  0px;
+      }
+
+      .threejsContainer .stats {
+        position: absolute;
+        top:      0px;
+        left:     0px;
+        margin:   0px;
+        padding:  0px;
+      }
+
+      .threejsContainer .controls {
+        position: absolute;
+        top:      0px;
+        right:    0px;
+        margin:   0px;
+        padding:  0px;
+      }
     </style>
   </head>
   <body>
-    <p id="output">wat</p>
 
-    <script src="js/three.min.js"></script>
+    <div id="objectModel" class="threejsContainer">
+      <div class="stats">
+      </div>
+    </div>
+
+    <div id="tachikoma" class="threejsContainer">
+      <div class="stats"></div>
+      <div class="controls"></div>
+    </div>
+
+    <script type="text/javascript" src="js/three.min.r71.js"></script>
+    <script type="text/javascript" src="js/stats.js"></script>
+    <script type="text/javascript" src="js/josh.js"></script>
+    <script type="text/javascript" src="js/ConvexGeometry.js"></script>
+    <script type="text/javascript" src="js/ThreeBSP.js"></script>
+    <script type="text/javascript" src="js/SubdivisionModifier.js"></script>
+    <script type="text/javascript" src="js/dat.gui.js"></script>
+
     <script>
-      var output = document.getElementById("output")
-      function log(text) {
-        return output.innerHTML = text
-      }
-
-      // setup the scene, camera, and renderer
-      var scene    = new THREE.Scene();
-      // var scene    = new THREE.Fog(0xFFFFFF, 0, 1000 )
-
-
-      var camera   = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-      camera.position.z = 5;
-      var renderer = new THREE.WebGLRenderer();
-      renderer.setSize( window.innerWidth, window.innerHeight );
-      document.body.appendChild( renderer.domElement );
-
-
-      // cube1
-      var geometry = new THREE.BoxGeometry( 1, 1, 1 ); // width, height, depth
-      var material = new THREE.MeshLambertMaterial( { color: 0x008822} );
-      var cube1    = new THREE.Mesh( geometry, material );
-      scene.add(cube1);
-
-      // cube2
-      var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-      var material = new THREE.MeshLambertMaterial( { color: 0x888800} );
-      var cube2    = new THREE.Mesh( geometry, material );
-      scene.add(cube2);
-
-      // spheres
-      var geometry   = new THREE.SphereGeometry(1, 32, 32); // radius, widthSegments, heightSegments
-      var material   = new THREE.MeshLambertMaterial({color: 0xFFFFFF, transparent: true, opacity: 0.3});
-      var leftSphere = new THREE.Mesh(geometry, material);
-      var rightSphere = new THREE.Mesh(geometry, material);
-      scene.add(leftSphere);
-      scene.add(rightSphere);
-
-      // connect the spheres with a line
-      var material = new THREE.LineBasicMaterial({color: 0x0000ff});
-      var oldLine  = null;
-      var line     = null;
-
-      var setLine = function(leftVec, rightVec) {
-        var lineGeometry = new THREE.Geometry();
-        lineGeometry.vertices.push(leftVec);
-        lineGeometry.vertices.push(rightVec);
-        line = new THREE.Line(lineGeometry, material);
-        scene.add(line)
-        if(oldLine) { scene.remove(oldLine) }
-        oldLine = line
-      }
-      setLine(
-        new THREE.Vector3(-1, 0, 0),
-        new THREE.Vector3(1, 0, 0)
+      // the example I made up
+      var joshStats = Josh.statistics()
+      var objectModelDiv = document.getElementById("objectModel")
+      objectModelDiv.getElementsByClassName("stats")[0].appendChild(joshStats.domElement)
+      Josh.renderExample(
+        objectModelDiv,
+        requestAnimationFrame,
+        function() { joshStats.update() }
       )
 
-      // spotlight (only works on MeshLambertMaterial and MeshPhongMaterial
-      var spotLight = new THREE.SpotLight( 0xffffff );
-      spotLight.position.set(30, 30, 30);
+      // Giles' tachikoma (http://gilesbowkett.blogspot.com/2014/04/build-anime-robot-in-webgl-using-threejs.html)
+      var tachiStats = Josh.statistics()
+      var tachikomaDiv = document.getElementById("tachikoma")
+      tachikomaDiv.getElementsByClassName("stats")[0].appendChild(tachiStats.domElement)
+      var tachiCamera = Josh.renderTachikoma(
+        tachikomaDiv,
+        requestAnimationFrame,
+        function() { tachiStats.update() }
+      )
 
-      spotLight.castShadow = true;
-
-      spotLight.shadowMapWidth = 1024;
-      spotLight.shadowMapHeight = 1024;
-
-      spotLight.shadowCameraNear = 500;
-      spotLight.shadowCameraFar = 4000;
-      spotLight.shadowCameraFov = 30;
-
-      scene.add(spotLight);
-
-      // blue ambient light
-      var ambient = new THREE.AmbientLight( 0x000033 );
-      scene.add(ambient);
-
-      var framecount = 0
-
-      // render this shit
-      function render() {
-        framecount++
-        requestAnimationFrame(render);
-
-        // don't bother updating 60x per second
-        if(framecount%2 != 0) return;
-
-        cube1.rotation.x = framecount * 0.03;
-        cube1.rotation.y = framecount * 0.05;
-
-        cube2.rotation.x = framecount * 0.05;
-        cube2.rotation.y = framecount * 0.03;
-
-        rightSphere.position.x = framecount * 0.01;
-        rightSphere.position.y = Math.random()*1-0.5;
-        rightSphere.position.z = Math.random()*1-0.5;
-
-        leftSphere.position.x = -rightSphere.position.x;
-        leftSphere.position.y = Math.random()*1-0.5;
-        leftSphere.position.z = Math.random()*1-0.5;
-
-        setLine(leftSphere.position, rightSphere.position);
-
-        renderer.render(scene, camera);
-      }
-      render();
+      // so we can move it around as we play w/ it
+      window.cam = tachiCamera
     </script>
   </body>
 </html>
