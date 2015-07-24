@@ -136,5 +136,87 @@ Josh.renderExample = function(domElement, requestAnimationFrame, frameUpdates) {
   render()
 }
 
+Josh.wireframe = function(geometry) {
+  var basicMaterial = new THREE.MeshBasicMaterial({
+    color:       0x0000ff,
+    transparent: true,
+    opacity:     0.5,
+  })
+  basicMaterial.side = THREE.DoubleSide
+  var wireframeMaterial = new THREE.MeshBasicMaterial({color: 0x000000, wireframe: true})
+  var mesh = THREE.SceneUtils.createMultiMaterialObject(geometry, [basicMaterial, wireframeMaterial])
 
-Josh.renderTachikoma = Josh.renderExample
+  return mesh
+}
+
+
+Josh.tachikomaMesh = function() {
+  var max = 10 // to translate everything into 'unit' sized: x, y, z all have a max of 1
+
+  var vec = function(x, y, z) {
+    return new THREE.Vector3(x/max, y/max, z/max);
+  }
+
+  var tachikoma = new THREE.Object3D()
+  var cubeGeo   = new THREE.ConvexGeometry([
+    vec(-10, 10, -10),
+    vec( 10, 10, -10),
+    vec(-10, 10,  10),
+    vec( 10, 10,  10),
+
+    vec(-10, -10, -10),
+    vec( 10, -10, -10),
+    vec(-10, -10,  10),
+    vec( 10, -10,  10),
+  ])
+
+  var cubeMesh = Josh.wireframe(cubeGeo)
+  tachikoma.add(cubeMesh)
+
+  return tachikoma
+}
+
+
+Josh.renderTachikoma = function(domElement, requestAnimationFrame, frameUpdates) {
+  // things in the scene
+  var tachikoma = Josh.tachikomaMesh()
+
+  // scene (all the threejs objects being considered)
+  var scene = new THREE.Scene()
+  scene.add(Josh.ambientlight({colour: 0xffffff}))
+  scene.add(tachikoma)
+
+  // add to DOM
+  var renderer = new THREE.WebGLRenderer()
+  renderer.setClearColor(0xdddddd, 1.0)
+  renderer.shadowMapEnabled = true // calculates shadows when true (this is apparently expensive, so turn it off if we don't wind up needing it)
+  renderer.setSize(domElement.offsetWidth, domElement.offsetHeight)
+  domElement.appendChild(renderer.domElement)
+
+  // render from back a bit, looking at origin
+  var camera = Josh.camera({
+    from:        [0, 0, -5],
+    aspectRatio: domElement.offsetWidth / domElement.offsetHeight,
+  })
+
+  // render this shit
+  var framecount = 0
+
+  var render = function() {
+    framecount++ // render half as frequently since 60fps seems to be a lot
+
+    if((framecount%2) == 0) {
+      requestAnimationFrame(render)
+      return
+    }
+
+    tachikoma.rotation.y += 0.01
+    frameUpdates()
+    renderer.render(scene, camera)
+    requestAnimationFrame(render)
+  }
+
+  render()
+
+  return camera
+}

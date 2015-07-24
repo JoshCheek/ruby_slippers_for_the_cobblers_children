@@ -39,6 +39,7 @@
     <script src="js/three.r71.js"></script>
     <script src="js/stats.js"></script>
     <script src="js/josh.js"></script>
+    <script src="js/ConvexGeometry.js"></script>
 
     <script>
       // the example I made up
@@ -55,11 +56,14 @@
       var tachiStats = Josh.statistics()
       var tachikomaDiv = document.getElementById("tachikoma")
       tachikomaDiv.getElementsByClassName("stats")[0].appendChild(tachiStats.domElement)
-      Josh.renderTachikoma(
+      var tachiCamera = Josh.renderTachikoma(
         tachikomaDiv,
         requestAnimationFrame,
         function() { tachiStats.update() }
       )
+
+      // so we can move it around as we play w/ it
+      window.cam = tachiCamera
     </script>
   </body>
 </html>
