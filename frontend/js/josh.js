@@ -157,76 +157,68 @@ Josh.tachikomaMesh = function() {
   var rearCabinGeo = new THREE.ConvexGeometry([
     // top tapering
     vec(-4, 24, -4),
-    vec(4, 24, -4),
-    vec(-4, 24, 4),
-    vec(4, 24, 4),
+    vec(4,  24, -4),
+    vec(-4, 24,  4),
+    vec(4,  24,  4),
 
     // top
     vec(-7, 23, -7),
-    vec(7, 23, -7),
-    vec(-7, 23, 7),
-    vec(7, 23, 7),
+    vec( 7, 23, -7),
+    vec(-7, 23,  7),
+    vec( 7, 23,  7),
 
     // bottom
     vec(-10, -10, -10),
-    vec(10, -10, -10),
-    vec(-10, -10, 10),
-    vec(10, -10, 10),
+    vec( 10, -10, -10),
+    vec(-10, -10,  10),
+    vec( 10, -10,  10),
 
     // bottom tapering
     vec(-8, -12, -8),
-    vec(8, -12, -8),
-    vec(-8, -12, 8),
-    vec(8, -12, 8),
+    vec( 8, -12, -8),
+    vec(-8, -12,  8),
+    vec( 8, -12,  8),
   ])
 
   var rearCabinMesh = Josh.wireframe(rearCabinGeo)
 
 
   // -----  spinnerets  -----
-  var spinnerets                = new THREE.Object3D()
+  function spinnerette() {
+    var sphereRadius = len(3)
 
-  // left sphere
-  spinnerets.sphereLGeo         = new THREE.SphereGeometry(len(3), len(20), len(30))
-  spinnerets.sphereL            = Josh.wireframe(spinnerets.sphereLGeo)
-  spinnerets.sphereL.position.y = len(15)
-  spinnerets.sphereL.position.x = len(-8)
+    // reservoir
+    var reservoir = Josh.wireframe(new THREE.CylinderGeometry(len(3.5),     // radius top
+                                                              len(3.5),     // radius bottom
+                                                              sphereRadius, // height (set to the sphere's radius to make it half as long as the sphere)
+                                                              32))          // num sgements
+    reservoir.position.y = -sphereRadius/2 // divide by 2, b/c it's centered on the sphere, so it's already halfway down
 
-  // right sphere
-  spinnerets.sphereRGeo         = new THREE.SphereGeometry(len(3), len(20), len(30))
-  spinnerets.sphereR            = Josh.wireframe(spinnerets.sphereRGeo)
-  spinnerets.sphereR.position.y = len(15)
-  spinnerets.sphereR.position.x = len(8)
+    // sphere
+    var sphere = Josh.wireframe(new THREE.SphereGeometry(sphereRadius, 20, 30)) // radius, widthSegments, heightSegments
 
-  // reservoir
-  spinnerets.reservoirGeo         = new THREE.CylinderGeometry(len(3.5), len(3.5), len(17), 32) // radius top, radius bottom, height, num sgements
-  spinnerets.reservoir            = Josh.wireframe(spinnerets.reservoirGeo)
-  spinnerets.reservoir.position.y = len(15)
-  spinnerets.reservoir.rotation.z = degrees(90)
+    // base
+    var base        = Josh.wireframe(new THREE.CylinderGeometry(len(1), len(1), sphereRadius*2, 12))
+    base.position.y = len(2)
+    base.rotation.x = degrees(90)
 
-  // left base
-  spinnerets.baseLGeo         = new THREE.CylinderGeometry(len(1), len(1), len(6), 12)
-  spinnerets.baseL            = Josh.wireframe(spinnerets.baseLGeo)
-  spinnerets.baseL.position.x = len(-10)
-  spinnerets.baseL.position.y = len(15)
-  spinnerets.baseL.rotation.x = degrees(90)
+    // spinnerette
+    var spinnerette = new THREE.Object3D()
+    spinnerette.add(reservoir)
+    spinnerette.add(sphere)
+    spinnerette.add(base)
 
-  // right base
-  spinnerets.baseRGeo         = new THREE.CylinderGeometry(len(1), len(1), len(6), 12)
-  spinnerets.baseR            = Josh.wireframe(spinnerets.baseLGeo)
-  spinnerets.baseR.position.x = len(10)
-  spinnerets.baseR.position.y = len(15)
-  spinnerets.baseR.rotation.x = degrees(90)
-
+    return spinnerette
+  }
 
   // all together for the tachikoma
   var tachikoma = new THREE.Object3D()
   tachikoma.add(rearCabinMesh)
-  tachikoma.add(spinnerets.sphereR)
-  tachikoma.add(spinnerets.sphereL)
-  tachikoma.add(spinnerets.reservoir)
-  tachikoma.add(spinnerets.baseR)
-  tachikoma.add(spinnerets.baseL)
+
+  var leftSpinnerette  = spinnerette().translateY(len(15)).translateX(len(-8)).rotateZ(degrees(90))
+  var rightSpinnerette = spinnerette().translateY(len(15)).translateX(len(8)).rotateZ(degrees(-90))
+  tachikoma.add(leftSpinnerette)
+  tachikoma.add(rightSpinnerette)
 
   return tachikoma
 }
