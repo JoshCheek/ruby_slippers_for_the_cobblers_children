@@ -605,7 +605,7 @@ Josh.renderTachikoma = function(domElement, requestAnimationFrame, frameUpdates)
 
   // scene (all the threejs objects being considered)
   var scene = new THREE.Scene()
-  scene.add(Josh.ambientlight({colour: 0x222222}))
+  scene.add(Josh.ambientlight({colour: 0x0c0c0c}))
   scene.add(tachikoma)
   scene.add(Josh.spotlight({colour: 0xffffff, from: [0, 0, -10]}))  // a bit behind our camera
 
@@ -613,7 +613,7 @@ Josh.renderTachikoma = function(domElement, requestAnimationFrame, frameUpdates)
   // add to DOM
   var renderer = new THREE.WebGLRenderer()
   renderer.setClearColor(0xdddddd, 1.0)
-  renderer.shadowMapEnabled = true // calculates shadows when true (this is apparently expensive, so turn it off if we don't wind up needing it)
+  renderer.shadowMapEnabled = false // calculates shadows when true (this is apparently expensive, so turn it off if we don't wind up needing it)
   renderer.setSize(domElement.offsetWidth, domElement.offsetHeight)
   domElement.appendChild(renderer.domElement)
 

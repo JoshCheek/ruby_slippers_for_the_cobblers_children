@@ -6,7 +6,6 @@ Trying to draw the interpreter
 Todo
 ----
 
-* make the tachicoma w/ giles
 * integrate w/ interpreter
   * set it up to not run until you click a form button
   * render the world
