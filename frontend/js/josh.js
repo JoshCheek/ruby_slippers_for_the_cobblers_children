@@ -329,7 +329,7 @@ Josh.tachikomaMesh = function(makeMesh) {
   // leg group!
   var rearLeftLeg = new THREE.Object3D()
 
-  // shoulder, rear left leg
+  // shoulder
   var rearLeftLegShoulder = makeMesh(new THREE.CylinderGeometry(len(4), len(1.5), len(9), 9));
   rearLeftLegShoulder.position.x = len(-6.5)
   rearLeftLegShoulder.position.y = len(-6.5)
@@ -338,14 +338,14 @@ Josh.tachikomaMesh = function(makeMesh) {
   rearLeftLegShoulder.rotation.z = degrees(65)
   rearLeftLeg.add(rearLeftLegShoulder)
 
-  // shoulder ball joint, rear left leg
+  // shoulder ball joint
   var shoulderBallJoint = makeMesh(new THREE.SphereGeometry(len(3), 20, 30))
   shoulderBallJoint.position.x = len(-11.5)
   shoulderBallJoint.position.y = len(-6.5)
   shoulderBallJoint.position.z = len(-19.5)
   rearLeftLeg.add(shoulderBallJoint)
 
-  // "thigh", rear left leg
+  // "thigh"
   var thigh = makeMesh(new THREE.CylinderGeometry(len(1.25), len(1.25), len(9), 9))
   thigh.position.x = len(-15.5)
   thigh.position.y = len(-6)
@@ -355,12 +355,63 @@ Josh.tachikomaMesh = function(makeMesh) {
   thigh.rotation.z = degrees(65)
   rearLeftLeg.add(thigh)
 
-  // knee ball joint, rear left leg
+  // knee ball joint
   var kneeBallJoint = makeMesh(new THREE.SphereGeometry(len(2.25), 20, 30))
   kneeBallJoint.position.x = len(-18)
   kneeBallJoint.position.y = len(-5)
   kneeBallJoint.position.z = len(-16.5)
   rearLeftLeg.add(kneeBallJoint)
+
+  // leg and foot group
+  var legAndFoot = new THREE.Object3D()
+
+  var theActualLegGeometry = new THREE.ConvexGeometry([
+    vec(-19, -25, -12),
+    vec(-19, -25, -18),
+    vec(-23, -25, -12),
+    vec(-23, -25, -18),
+    vec(-17,   1, -10),
+    vec(-17,   1, -20),
+    vec(-25,   1, -20),
+    vec(-25,   1, -10),
+  ])
+
+  // add a SubdivisionModifier, like a C4D Subdivision Surface
+  new THREE.SubdivisionModifier(3).modify(theActualLegGeometry)
+  var theActualLeg = makeMesh(theActualLegGeometry)
+  theActualLeg.rotation.z = degrees(-15)
+  theActualLeg.position.x += len(2)
+  theActualLeg.position.y -= len(6)
+  legAndFoot.add(theActualLeg)
+
+  // foot ball joint, rear left leg
+  var footBallJoint = makeMesh(new THREE.SphereGeometry(len(1.5), 20, 30))
+  footBallJoint.position.x = len(-23)
+  footBallJoint.position.y = len(-22)
+  footBallJoint.position.z = len(-15)
+  legAndFoot.add(footBallJoint)
+
+  // "ankle" (cone which connects foot to its ball joint)
+  var ankle = makeMesh(new THREE.CylinderGeometry(len(0.25), len(1.5), len(2), 9))
+  ankle.position.x = len(-22)
+  ankle.position.y = len(-23)
+  ankle.position.z = len(-15)
+  ankle.rotation.z = degrees(45)
+  legAndFoot.add(ankle)
+
+  // wheel is just a very short, wide cylinder
+  var wheel = makeMesh(new THREE.CylinderGeometry(len(2.5), len(2.5), len(1.5), 9))
+  wheel.position.x = len(-21)
+  wheel.position.y = len(-24)
+  wheel.position.z = len(-15)
+  wheel.rotation.z = degrees(45)
+  legAndFoot.add(wheel)
+
+  // manual re-positioning
+  legAndFoot.rotation.y = degrees(20)
+  legAndFoot.position.x += len(4)
+  legAndFoot.position.z -= len(8.5)
+  rearLeftLeg.add(legAndFoot)
 
 
   // all together for the tachikoma
