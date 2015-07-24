@@ -30,6 +30,8 @@ Josh.spotlight = function(attrs) {
   light.shadowCameraFar  = 4000
   light.shadowCameraFov  = 30
 
+  light.intensity        = 0.9
+
   return light
 }
 
@@ -155,7 +157,45 @@ Tachikoma.lambertMesh = function(geometry) {
   return mesh
 }
 
-Josh.tachikomaMesh = function(makeMesh) {
+Josh.tachikomaMesh = function(useWireframe) {
+  var blueMaterial = new THREE.MeshPhongMaterial({
+    color: 0x0000cc,
+    specular: 0x0000ff,
+    shininess: 45
+  });
+  var whiteMaterial = new THREE.MeshPhongMaterial({
+    color: 0xffffff,
+    specular: 0xffffff,
+    shininess: 65
+  });
+  var greyMaterial = new THREE.MeshPhongMaterial({
+    color: 0xdddddd,
+    specular: 0xffffff,
+    shininess: 100,
+    reflectivity: 100
+  });
+  var blackMaterial = new THREE.MeshPhongMaterial({
+    color: 0x000000,
+    specular: 0x222222
+  });
+
+  var makeMesh = function(geometry, type) {
+    if(useWireframe) {
+      return Tachikoma.wireframeMesh(geometry)
+    } else {
+      var material = null
+      switch(type) {
+        case "blue"  : material = blueMaterial  ; break
+        case "white" : material = whiteMaterial ; break
+        case "grey"  : material = greyMaterial  ; break
+        case "black" : material = blackMaterial ; break
+        default      : throw(new Error("What kind of mesh is " + type))
+      }
+      return new THREE.Mesh(geometry, material)
+    }
+  }
+
+
   // -----  helper functions  -----
 
   var unit    = 50 // to translate everything into 'unit' sized: x, y, z all have a max of 1
@@ -198,15 +238,15 @@ Josh.tachikomaMesh = function(makeMesh) {
     vec( 8, -12,  8),
   ])
 
-  var rearCabinMesh = makeMesh(rearCabinGeo)
+  var rearCabinMesh = makeMesh(rearCabinGeo, "blue")
 
   // -----  spinnerettes  -----
 
   function spinnerette(offsets) {
     var baseHeight     = len(3)
     var shooterHeight  = len(2)
-    var base           = makeMesh(new THREE.CylinderGeometry(len(1),   len(1),   baseHeight,    12))
-    var shooter        = makeMesh(new THREE.CylinderGeometry(len(0.15),len(0.5), shooterHeight, 12))
+    var base           = makeMesh(new THREE.CylinderGeometry(len(1),   len(1),   baseHeight,    12), "grey")
+    var shooter        = makeMesh(new THREE.CylinderGeometry(len(0.15),len(0.5), shooterHeight, 12), "grey")
     shooter.position.y = baseHeight/2 + shooterHeight/2
     var spinnerette    = new THREE.Object3D().add(base).add(shooter)
     return applyOffsets(offsets, spinnerette)
@@ -218,11 +258,11 @@ Josh.tachikomaMesh = function(makeMesh) {
     var sphereRadius = len(3)
 
     // base
-    var base        = makeMesh(new THREE.CylinderGeometry(len(3.5), len(3.5), sphereRadius, 32))
+    var base        = makeMesh(new THREE.CylinderGeometry(len(3.5), len(3.5), sphereRadius, 32), "grey")
     base.position.y = -sphereRadius/2 // lower it to the bottom half of the sphere (divide by 2, b/c it's centered on the sphere, so it's already halfway down)
 
     // sphere
-    var sphere = makeMesh(new THREE.SphereGeometry(sphereRadius, 20, 30)) // radius, widthSegments, heightSegments
+    var sphere = makeMesh(new THREE.SphereGeometry(sphereRadius, 20, 30), "grey") // radius, widthSegments, heightSegments
 
     // spinnerettes
     var backSpinnerette  = spinnerette({rotation: {x:  90}, position: {y: 2, z:  1.5}})
@@ -241,24 +281,24 @@ Josh.tachikomaMesh = function(makeMesh) {
   // -----  neck  -----
 
   // cabin/neck connector
-  var cabinNeckConnector        = makeMesh(new THREE.CylinderGeometry(len(5), len(5), len(12), 12))
+  var cabinNeckConnector        = makeMesh(new THREE.CylinderGeometry(len(5), len(5), len(12), 12), "blue")
   cabinNeckConnector.position.y = len(-6.5)
   cabinNeckConnector.position.z = len(-7)
   cabinNeckConnector.rotation.x = degrees(90);
 
   // joint rim
-  var jointRim        = makeMesh(new THREE.CylinderGeometry(len(4), len(4), len(12), 12))
+  var jointRim        = makeMesh(new THREE.CylinderGeometry(len(4), len(4), len(12), 12), "grey")
   jointRim.position.y = len(-6.5)
   jointRim.position.z = len(-8)
   jointRim.rotation.x = degrees(90)
 
   // ball joint
-  var neckBallJoint        = makeMesh(new THREE.SphereGeometry(len(3), 20, 30))
+  var neckBallJoint        = makeMesh(new THREE.SphereGeometry(len(3), 20, 30), "grey")
   neckBallJoint.position.y = len(-6.5)
   neckBallJoint.position.z = len(-14)
 
   // main
-  var neckMain         = makeMesh(new THREE.CylinderGeometry(len(4), len(3), len(12), 12))
+  var neckMain         = makeMesh(new THREE.CylinderGeometry(len(4), len(3), len(12), 12), "grey")
   neckMain.position.y  = len(-6.5)
   neckMain.position.z  = len(-21)
   neckMain.rotation.x  = degrees(90)
@@ -266,12 +306,12 @@ Josh.tachikomaMesh = function(makeMesh) {
   // -----  chin  -----
 
   // lower chin
-  var lowerChin        = makeMesh(new THREE.CylinderGeometry(len(7), len(5), len(5), 12))
+  var lowerChin        = makeMesh(new THREE.CylinderGeometry(len(7), len(5), len(5), 12), "grey")
   lowerChin.position.y = len(-8)
   lowerChin.position.z = len(-25)
 
   // upper chin
-  var upperChin        = makeMesh(new THREE.CylinderGeometry(len(13), len(7), len(5), 12))
+  var upperChin        = makeMesh(new THREE.CylinderGeometry(len(13), len(7), len(5), 12), "blue")
   upperChin.position.y = len(-3)
   upperChin.position.z = len(-25)
 
@@ -293,36 +333,36 @@ Josh.tachikomaMesh = function(makeMesh) {
 
   // carve cube from sphere
   var headGeo     = headSphereBSP.subtract(headSubtractionBSP).toGeometry()
-  var head        = makeMesh(headGeo)
+  var head        = makeMesh(headGeo, "blue")
   head.position.z = len(-25)
   head.position.y = len(-5.65)
 
   // -----  eyes  -----
 
   function eye(offsets) {
-    return applyOffsets(offsets, makeMesh(new THREE.SphereGeometry(len(3), 20, 30)))
+    return applyOffsets(offsets, makeMesh(new THREE.SphereGeometry(len(3), 20, 30), "white"))
   }
 
   // front eye
-  var frontEye = eye({position: {         y:   4, z: -32}})
-  var leftEye  = eye({position: {x: -6.5, y:   4, z: -25}})
-  var rightEye = eye({position: {x:  6.5, y:   4, z: -25}})
-  var assEye   = eye({position: {         y: -10,       }})
+  var frontEye = eye({position: {       y:   4, z: -32}})
+  var leftEye  = eye({position: {x: -7, y:   4, z: -25}})
+  var rightEye = eye({position: {x:  7, y:   4, z: -25}})
+  var assEye   = eye({position: {       y: -10,       }})
 
   // -----  chimney  -----
 
   // chimney base
-  var chimneyBase        = makeMesh(new THREE.CylinderGeometry(len(2), len(2), len(1), 12))
+  var chimneyBase        = makeMesh(new THREE.CylinderGeometry(len(2), len(2), len(1), 12), "blue")
   chimneyBase.position.y = len(8.5)
   chimneyBase.position.z = len(-25)
 
   //  chimney trunk
-  var chimneyTrunk        = makeMesh(new THREE.CylinderGeometry(len(1.5), len(1.5), len(4), 12))
+  var chimneyTrunk        = makeMesh(new THREE.CylinderGeometry(len(1.5), len(1.5), len(4), 12), "blue")
   chimneyTrunk.position.y = len(10)
   chimneyTrunk.position.z = len(-25)
 
   //  chimney tower
-  var chimneyTower        = makeMesh(new THREE.CylinderGeometry(len(1), len(1), len(4), 12))
+  var chimneyTower        = makeMesh(new THREE.CylinderGeometry(len(1), len(1), len(4), 12), "blue")
   chimneyTower.position.y = len(14)
   chimneyTower.position.z = len(-25)
 
@@ -332,7 +372,7 @@ Josh.tachikomaMesh = function(makeMesh) {
   var rearLeftLeg = new THREE.Object3D()
 
   // shoulder
-  var rearLeftLegShoulder = makeMesh(new THREE.CylinderGeometry(len(4), len(1.5), len(9), 9));
+  var rearLeftLegShoulder = makeMesh(new THREE.CylinderGeometry(len(4), len(1.5), len(9), 9), "grey")
   rearLeftLegShoulder.position.x = len(-6.5)
   rearLeftLegShoulder.position.y = len(-6.5)
   rearLeftLegShoulder.position.z = len(-22)
@@ -341,14 +381,14 @@ Josh.tachikomaMesh = function(makeMesh) {
   rearLeftLeg.add(rearLeftLegShoulder)
 
   // shoulder ball joint
-  var shoulderBallJoint = makeMesh(new THREE.SphereGeometry(len(3), 20, 30))
+  var shoulderBallJoint = makeMesh(new THREE.SphereGeometry(len(3), 20, 30), "grey")
   shoulderBallJoint.position.x = len(-11.5)
   shoulderBallJoint.position.y = len(-6.5)
   shoulderBallJoint.position.z = len(-19.5)
   rearLeftLeg.add(shoulderBallJoint)
 
   // "thigh"
-  var thigh = makeMesh(new THREE.CylinderGeometry(len(1.25), len(1.25), len(9), 9))
+  var thigh = makeMesh(new THREE.CylinderGeometry(len(1.25), len(1.25), len(9), 9), "grey")
   thigh.position.x = len(-15.5)
   thigh.position.y = len(-6)
   thigh.position.z = len(-17.5)
@@ -358,11 +398,25 @@ Josh.tachikomaMesh = function(makeMesh) {
   rearLeftLeg.add(thigh)
 
   // knee ball joint
-  var kneeBallJoint = makeMesh(new THREE.SphereGeometry(len(2.25), 20, 30))
+  var kneeBallJoint = makeMesh(new THREE.SphereGeometry(len(2.25), 20, 30), "grey")
   kneeBallJoint.position.x = len(-18)
   kneeBallJoint.position.y = len(-5)
   kneeBallJoint.position.z = len(-16.5)
   rearLeftLeg.add(kneeBallJoint)
+
+  // kneecap
+  var kneecap            = new THREE.Object3D()
+  var kneecapCone        = makeMesh(new THREE.CylinderGeometry(len(1.25), len(3), len(8), 9), "blue")
+  kneecapCone.rotation.x = degrees(90)
+
+  kneecap.add(kneecapCone)
+
+  kneecap.rotation.y = degrees(-65)
+  kneecap.position.x = len(-15)
+  kneecap.position.y = len(-5)
+  kneecap.position.z = len(-18)
+
+  rearLeftLeg.add(kneecap)
 
   // leg and foot group
   var rearLeftShinAndFoot = new THREE.Object3D()
@@ -380,21 +434,21 @@ Josh.tachikomaMesh = function(makeMesh) {
 
   // add a SubdivisionModifier, like a C4D Subdivision Surface
   new THREE.SubdivisionModifier(3).modify(theActualLegGeometry)
-  var theActualLeg = makeMesh(theActualLegGeometry)
+  var theActualLeg = makeMesh(theActualLegGeometry, "blue")
   theActualLeg.rotation.z = degrees(-15)
   theActualLeg.position.x += len(2)
   theActualLeg.position.y -= len(6)
   rearLeftShinAndFoot.add(theActualLeg)
 
   // foot ball joint, rear left leg
-  var footBallJoint = makeMesh(new THREE.SphereGeometry(len(1.5), 20, 30))
+  var footBallJoint = makeMesh(new THREE.SphereGeometry(len(1.5), 20, 30), "grey")
   footBallJoint.position.x = len(-23)
   footBallJoint.position.y = len(-22)
   footBallJoint.position.z = len(-15)
   rearLeftShinAndFoot.add(footBallJoint)
 
   // "ankle" (cone which connects foot to its ball joint)
-  var ankle = makeMesh(new THREE.CylinderGeometry(len(0.25), len(1.5), len(2), 9))
+  var ankle = makeMesh(new THREE.CylinderGeometry(len(0.25), len(1.5), len(2), 9), "grey")
   ankle.position.x = len(-22)
   ankle.position.y = len(-23)
   ankle.position.z = len(-15)
@@ -402,7 +456,7 @@ Josh.tachikomaMesh = function(makeMesh) {
   rearLeftShinAndFoot.add(ankle)
 
   // wheel is just a very short, wide cylinder
-  var wheel = makeMesh(new THREE.CylinderGeometry(len(2.5), len(2.5), len(1.5), 9))
+  var wheel = makeMesh(new THREE.CylinderGeometry(len(2.5), len(2.5), len(1.5), 9), "black")
   wheel.position.x = len(-21)
   wheel.position.y = len(-24)
   wheel.position.z = len(-15)
@@ -432,13 +486,13 @@ Josh.tachikomaMesh = function(makeMesh) {
 
   // -----  nose gun  -----
   // ball joint for nose gun
-  var noseGunBallJoint        = makeMesh(new THREE.SphereGeometry(len(2), 20, 30))
+  var noseGunBallJoint        = makeMesh(new THREE.SphereGeometry(len(2), 20, 30), "grey")
   noseGunBallJoint.position.y = len(-3)
   noseGunBallJoint.position.z = len(-35)
 
   // build the nose gun as a group, then add it to the tachikoma, and then position it
-  var noseGunBaseTube     = makeMesh(new THREE.CylinderGeometry(len(1.5), len(1.5), len(4), 9))
-  var noseGunPivot        = makeMesh(new THREE.CylinderGeometry(len(0.5), len(1.5), len(2), 9))
+  var noseGunBaseTube     = makeMesh(new THREE.CylinderGeometry(len(1.5), len(1.5), len(4), 9), "grey")
+  var noseGunPivot        = makeMesh(new THREE.CylinderGeometry(len(0.5), len(1.5), len(2), 9), "grey")
   noseGunPivot.position.y = len(3)
 
   var noseGun        = new THREE.Object3D().add(noseGunBaseTube).add(noseGunPivot)
@@ -450,7 +504,7 @@ Josh.tachikomaMesh = function(makeMesh) {
 
   // -----  arms  -----
   // ball joint for left arm
-  var leftArmBallJoint = makeMesh(new THREE.SphereGeometry(len(2), 20, 30))
+  var leftArmBallJoint = makeMesh(new THREE.SphereGeometry(len(2), 20, 30), "grey")
   leftArmBallJoint.position.x = len(4)
   leftArmBallJoint.position.y = len(-3)
   leftArmBallJoint.position.z = len(-33)
@@ -460,21 +514,21 @@ Josh.tachikomaMesh = function(makeMesh) {
   //   {position: {x: -4, y: -3, z: -33}},
   //   makeMesh(new THREE.SphereGeometry(len(2), 20, 30))
   // )
-  var rightArmBallJoint = makeMesh(new THREE.SphereGeometry(len(2), 20, 30))
+  var rightArmBallJoint = makeMesh(new THREE.SphereGeometry(len(2), 20, 30), "grey")
   rightArmBallJoint.position.x = len(-4)
   rightArmBallJoint.position.y = len(-3)
   rightArmBallJoint.position.z = len(-33)
 
   // first build the arm, then position it
   // left arm pivot (cone which connects to ball joint)
-  var leftArmPivot           = makeMesh(new THREE.CylinderGeometry(len(0.5), len(1.5), len(2), 9))
-  var leftArmUpperArm        = makeMesh(new THREE.CylinderGeometry(len(2.0), len(2.2), len(4), 9))
+  var leftArmPivot           = makeMesh(new THREE.CylinderGeometry(len(0.5), len(1.5), len(2), 9), "grey")
+  var leftArmUpperArm        = makeMesh(new THREE.CylinderGeometry(len(2.0), len(2.2), len(4), 9), "blue")
   leftArmUpperArm.position.y = len(-3)
 
-  var leftArmForeArm         = makeMesh(new THREE.CylinderGeometry(len(2.2), len(1.4), len(6), 9))
+  var leftArmForeArm         = makeMesh(new THREE.CylinderGeometry(len(2.2), len(1.4), len(6), 9), "blue")
   leftArmForeArm.position.y  = len(-8)
 
-  var leftArmTip             = makeMesh(new THREE.CylinderGeometry(len(1.4), len(0.4), len(2), 9))
+  var leftArmTip             = makeMesh(new THREE.CylinderGeometry(len(1.4), len(0.4), len(2), 9), "grey")
   leftArmTip.position.y      = len(-12)
 
   // fingers
@@ -487,7 +541,7 @@ Josh.tachikomaMesh = function(makeMesh) {
     vec(-0.25, -13, -2.0),
     vec( 0.25, -13, -1.5),
     vec( 0.25, -13, -2.0),
-  ]))
+  ]), "grey")
 
   var fingerLower = makeMesh(new THREE.ConvexGeometry([
     vec(-0.25, -13, -1.5),
@@ -498,7 +552,7 @@ Josh.tachikomaMesh = function(makeMesh) {
     vec(-0.25, -15, -1.5),
     vec( 0.25, -15, -1.0),
     vec( 0.25, -15, -1.5),
-  ]))
+  ]), "grey")
 
   var finger            = new THREE.Object3D().add(fingerUpper).add(fingerLower)
   var leftFinger        = finger.clone()
@@ -547,14 +601,14 @@ Josh.tachikomaMesh = function(makeMesh) {
 
 Josh.renderTachikoma = function(domElement, requestAnimationFrame, frameUpdates) {
   // things in the scene
-  var tachikoma = Josh.tachikomaMesh(Tachikoma.lambertMesh)
-  // var tachikoma = Josh.tachikomaMesh(Tachikoma.wireframeMesh)
+  var tachikoma = Josh.tachikomaMesh(false)
 
   // scene (all the threejs objects being considered)
   var scene = new THREE.Scene()
   scene.add(Josh.ambientlight({colour: 0x222222}))
   scene.add(tachikoma)
   scene.add(Josh.spotlight({colour: 0xffffff, from: [0, 0, -10]}))  // a bit behind our camera
+
 
   // add to DOM
   var renderer = new THREE.WebGLRenderer()
@@ -586,14 +640,14 @@ Josh.renderTachikoma = function(domElement, requestAnimationFrame, frameUpdates)
 
   var positionFolder = gui.addFolder("Position")
   positionFolder.open()
-  positionFolder.add(controls, "tachikomaPosX", -5, 5)
-                .step(0.5)
+  positionFolder.add(controls, "tachikomaPosX", -2, 2)
+                .step(0.2)
                 .onChange(function () { tachikoma.position.x = controls.tachikomaPosX })
-  positionFolder.add(controls, "tachikomaPosY", -5, 5)
-                .step(0.5)
+  positionFolder.add(controls, "tachikomaPosY", -2, 2)
+                .step(0.2)
                 .onChange(function () { tachikoma.position.y = controls.tachikomaPosY })
-  positionFolder.add(controls, "tachikomaPosZ", -5, 5)
-                .step(0.5)
+  positionFolder.add(controls, "tachikomaPosZ", -2, 2)
+                .step(0.2)
                 .onChange(function () { tachikoma.position.z = controls.tachikomaPosZ })
 
   var rotationFolder = gui.addFolder("Rotation")
