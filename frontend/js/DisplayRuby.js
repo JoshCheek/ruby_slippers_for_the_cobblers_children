@@ -40,7 +40,7 @@ DisplayRuby.prototype.domElement = function() {
 
 DisplayRuby.prototype.updateWidth  = function(width)  { this.updateSize(width, this.height) }
 DisplayRuby.prototype.updateHeight = function(height) { this.updateSize(this.width, height) }
-DisplayRuby.prototype.updateSize   = function(width, height) {
+DisplayRuby.prototype.updateSize   = function(width, height, world) {
   this.width       = width
   this.height      = height
   this.aspectRatio = width / height

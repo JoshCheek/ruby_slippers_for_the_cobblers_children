@@ -3,6 +3,16 @@ Frontend
 
 Trying to draw the interpreter
 
+Compiling the interpreter
+-------------------------
+
+```fish
+$ cd ../interpreter
+$ babel src -d compiled
+$ browserify -o ruby.js (find compiled -type f) -r ./compiled/ruby.js:ruby
+$ mv ruby.js ../frontend/js/ruby.js
+```
+
 Todo
 ----
 
