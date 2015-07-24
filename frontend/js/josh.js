@@ -137,25 +137,23 @@ Josh.renderExample = function(domElement, requestAnimationFrame, frameUpdates) {
 }
 
 Josh.wireframe = function(geometry) {
-  var basicMaterial = new THREE.MeshBasicMaterial({
-    color:       0x0000ff,
-    transparent: true,
-    opacity:     0.5,
-  })
-  basicMaterial.side = THREE.DoubleSide
   var wireframeMaterial = new THREE.MeshBasicMaterial({color: 0x000000, wireframe: true})
-  var mesh = THREE.SceneUtils.createMultiMaterialObject(geometry, [basicMaterial, wireframeMaterial])
-
+  var basicMaterial     = new THREE.MeshBasicMaterial({color: 0xffff00, transparent: true, opacity: 0.5})
+  basicMaterial.side    = THREE.DoubleSide
+  var mesh              = THREE.SceneUtils.createMultiMaterialObject(geometry, [basicMaterial, wireframeMaterial])
   return mesh
 }
 
 
 Josh.tachikomaMesh = function() {
-  var unit = 30 // to translate everything into 'unit' sized: x, y, z all have a max of 1
-  var len  = function(n) { return n / unit }
-  var vec  = function(x, y, z) { return new THREE.Vector3(len(x), len(y), len(z)) }
+  // -----  helper functions  -----
+  var unit    = 32 // to translate everything into 'unit' sized: x, y, z all have a max of 1
+  var len     = function(n)       { return n / unit }
+  var vec     = function(x, y, z) { return new THREE.Vector3(len(x), len(y), len(z)) }
+  var degrees = function(deg)     { return deg * Math.PI / 180 }
 
-  // rear cabin
+
+  // -----  rear cabin  -----
   var rearCabinGeo = new THREE.ConvexGeometry([
     // top tapering
     vec(-4, 24, -4),
@@ -185,18 +183,40 @@ Josh.tachikomaMesh = function() {
   var rearCabinMesh = Josh.wireframe(rearCabinGeo)
 
 
-  // spinnerets
+  // -----  spinnerets  -----
   var spinnerets                = new THREE.Object3D()
 
+  // left sphere
   spinnerets.sphereLGeo         = new THREE.SphereGeometry(len(3), len(20), len(30))
   spinnerets.sphereL            = Josh.wireframe(spinnerets.sphereLGeo)
   spinnerets.sphereL.position.y = len(15)
   spinnerets.sphereL.position.x = len(-8)
 
+  // right sphere
   spinnerets.sphereRGeo         = new THREE.SphereGeometry(len(3), len(20), len(30))
   spinnerets.sphereR            = Josh.wireframe(spinnerets.sphereRGeo)
   spinnerets.sphereR.position.y = len(15)
   spinnerets.sphereR.position.x = len(8)
+
+  // reservoir
+  spinnerets.reservoirGeo         = new THREE.CylinderGeometry(len(3.5), len(3.5), len(17), 32) // radius top, radius bottom, height, num sgements
+  spinnerets.reservoir            = Josh.wireframe(spinnerets.reservoirGeo)
+  spinnerets.reservoir.position.y = len(15)
+  spinnerets.reservoir.rotation.z = degrees(90)
+
+  // left base
+  spinnerets.baseLGeo         = new THREE.CylinderGeometry(len(1), len(1), len(6), 12)
+  spinnerets.baseL            = Josh.wireframe(spinnerets.baseLGeo)
+  spinnerets.baseL.position.x = len(-10)
+  spinnerets.baseL.position.y = len(15)
+  spinnerets.baseL.rotation.x = degrees(90)
+
+  // right base
+  spinnerets.baseRGeo         = new THREE.CylinderGeometry(len(1), len(1), len(6), 12)
+  spinnerets.baseR            = Josh.wireframe(spinnerets.baseLGeo)
+  spinnerets.baseR.position.x = len(10)
+  spinnerets.baseR.position.y = len(15)
+  spinnerets.baseR.rotation.x = degrees(90)
 
 
   // all together for the tachikoma
@@ -204,6 +224,9 @@ Josh.tachikomaMesh = function() {
   tachikoma.add(rearCabinMesh)
   tachikoma.add(spinnerets.sphereR)
   tachikoma.add(spinnerets.sphereL)
+  tachikoma.add(spinnerets.reservoir)
+  tachikoma.add(spinnerets.baseR)
+  tachikoma.add(spinnerets.baseL)
 
   return tachikoma
 }
