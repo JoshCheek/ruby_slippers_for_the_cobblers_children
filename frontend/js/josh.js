@@ -151,27 +151,41 @@ Josh.wireframe = function(geometry) {
 
 
 Josh.tachikomaMesh = function() {
-  var max = 10 // to translate everything into 'unit' sized: x, y, z all have a max of 1
+  var max = 24 // to translate everything into 'unit' sized: x, y, z all have a max of 1
 
   var vec = function(x, y, z) {
     return new THREE.Vector3(x/max, y/max, z/max);
   }
 
   var tachikoma = new THREE.Object3D()
-  var cubeGeo   = new THREE.ConvexGeometry([
-    vec(-10, 10, -10),
-    vec( 10, 10, -10),
-    vec(-10, 10,  10),
-    vec( 10, 10,  10),
+  var rearCabinGeo = new THREE.ConvexGeometry([
+    // top tapering
+    vec(-4, 24, -4),
+    vec(4, 24, -4),
+    vec(-4, 24, 4),
+    vec(4, 24, 4),
 
+    // top
+    vec(-7, 23, -7),
+    vec(7, 23, -7),
+    vec(-7, 23, 7),
+    vec(7, 23, 7),
+
+    // bottom
     vec(-10, -10, -10),
-    vec( 10, -10, -10),
-    vec(-10, -10,  10),
-    vec( 10, -10,  10),
+    vec(10, -10, -10),
+    vec(-10, -10, 10),
+    vec(10, -10, 10),
+
+    // bottom tapering
+    vec(-8, -12, -8),
+    vec(8, -12, -8),
+    vec(-8, -12, 8),
+    vec(8, -12, 8),
   ])
 
-  var cubeMesh = Josh.wireframe(cubeGeo)
-  tachikoma.add(cubeMesh)
+  var rearCabinMesh = Josh.wireframe(rearCabinGeo)
+  tachikoma.add(rearCabinMesh)
 
   return tachikoma
 }
