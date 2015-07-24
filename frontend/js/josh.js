@@ -154,7 +154,6 @@ Tachikoma.lambertMesh = function(geometry) {
 }
 
 Josh.tachikomaMesh = function(makeMesh) {
-
   // -----  helper functions  -----
 
   var unit    = 32 // to translate everything into 'unit' sized: x, y, z all have a max of 1
@@ -207,25 +206,17 @@ Josh.tachikomaMesh = function(makeMesh) {
     var base           = makeMesh(new THREE.CylinderGeometry(len(1),   len(1),   baseHeight,    12))
     var shooter        = makeMesh(new THREE.CylinderGeometry(len(0.15),len(0.5), shooterHeight, 12))
     shooter.position.y = baseHeight/2 + shooterHeight/2
-
-    var spinnerette = new THREE.Object3D()
-    spinnerette.add(base)
-    spinnerette.add(shooter)
-
-    applyOffsets(offsets, spinnerette)
-
-    return spinnerette
+    var spinnerette    = new THREE.Object3D().add(base).add(shooter)
+    return applyOffsets(offsets, spinnerette)
   }
 
 
+  // CylinderGeometry(radiusTop, radiusBottom, height, numSegments)
   function sideSpineretteAssembly() {
     var sphereRadius = len(3)
 
     // base
-    var base = makeMesh(new THREE.CylinderGeometry(len(3.5),     // radius top
-                                                   len(3.5),     // radius bottom
-                                                   sphereRadius, // height (set to the sphere's radius to make it half as long as the sphere)
-                                                   32))          // num sgements
+    var base        = makeMesh(new THREE.CylinderGeometry(len(3.5), len(3.5), sphereRadius, 32))
     base.position.y = -sphereRadius/2 // lower it to the bottom half of the sphere (divide by 2, b/c it's centered on the sphere, so it's already halfway down)
 
     // sphere
@@ -287,14 +278,14 @@ Josh.tachikomaMesh = function(makeMesh) {
   var headSphereBSP      = new ThreeBSP(new THREE.SphereGeometry(len(14), 30, 30))
   var headSubtractionBSP = new ThreeBSP(
     new THREE.ConvexGeometry([
-      new THREE.Vector4(len(-14), len(-25), len(-30)), // not sure why vector4, given that we're only using 3 points
-      new THREE.Vector4(len(-14), len(-25), len( 20)),
-      new THREE.Vector4(len(-14), len(  5), len(-30)),
-      new THREE.Vector4(len( 14), len(-25), len(-30)),
-      new THREE.Vector4(len(-14), len(  5), len( 20)),
-      new THREE.Vector4(len( 14), len(  5), len( 20)),
-      new THREE.Vector4(len( 14), len(-25), len( 20)),
-      new THREE.Vector4(len( 14), len(  5), len(-30)),
+      vec(-14, -25, -30),
+      vec(-14, -25,  20),
+      vec(-14,   5, -30),
+      vec( 14, -25, -30),
+      vec(-14,   5,  20),
+      vec( 14,   5,  20),
+      vec( 14, -25,  20),
+      vec( 14,   5, -30),
     ])
   )
 
@@ -307,9 +298,7 @@ Josh.tachikomaMesh = function(makeMesh) {
   // -----  eyes  -----
 
   function eye(offsets) {
-    var eye = makeMesh(new THREE.SphereGeometry(len(3), 20, 30))
-    applyOffsets(offsets, eye)
-    return eye
+    return applyOffsets(offsets, makeMesh(new THREE.SphereGeometry(len(3), 20, 30)))
   }
 
   // front eye
@@ -375,26 +364,21 @@ Josh.tachikomaMesh = function(makeMesh) {
 
 
   // all together for the tachikoma
-  return new THREE.Object3D().add(rearCabinMesh)
-                             .add(leftSpineretteAssembly)
-                             .add(rightSpinneretteAssenbly)
-                             .add(leftTailSpinnerette)
-                             .add(rightTailSpinnerette)
-                             .add(cabinNeckConnector)
-                             .add(jointRim)
-                             .add(neckBallJoint)
-                             .add(neckMain)
-                             .add(lowerChin)
-                             .add(upperChin)
-                             .add(head)
-                             .add(frontEye)
-                             .add(leftEye)
-                             .add(rightEye)
-                             .add(assEye)
-                             .add(chimneyBase)
-                             .add(chimneyTrunk)
-                             .add(chimneyTower)
-                             .add(rearLeftLeg)
+  return new THREE.Object3D()
+           // cabin
+           .add(rearCabinMesh)
+           .add(leftSpineretteAssembly).add(rightSpinneretteAssenbly)
+           .add(leftTailSpinnerette).add(rightTailSpinnerette)
+           .add(assEye)
+           // neck
+           .add(cabinNeckConnector).add(jointRim).add(neckBallJoint).add(neckMain)
+           .add(lowerChin).add(upperChin)
+           // head
+           .add(head)
+           .add(frontEye).add(leftEye).add(rightEye)
+           .add(chimneyBase).add(chimneyTrunk).add(chimneyTower)
+           // legs
+           .add(rearLeftLeg)
 }
 
 
