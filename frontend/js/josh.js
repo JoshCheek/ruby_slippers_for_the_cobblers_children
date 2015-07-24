@@ -151,13 +151,11 @@ Josh.wireframe = function(geometry) {
 
 
 Josh.tachikomaMesh = function() {
-  var max = 24 // to translate everything into 'unit' sized: x, y, z all have a max of 1
+  var unit = 30 // to translate everything into 'unit' sized: x, y, z all have a max of 1
+  var len  = function(n) { return n / unit }
+  var vec  = function(x, y, z) { return new THREE.Vector3(len(x), len(y), len(z)) }
 
-  var vec = function(x, y, z) {
-    return new THREE.Vector3(x/max, y/max, z/max);
-  }
-
-  var tachikoma = new THREE.Object3D()
+  // rear cabin
   var rearCabinGeo = new THREE.ConvexGeometry([
     // top tapering
     vec(-4, 24, -4),
@@ -185,7 +183,27 @@ Josh.tachikomaMesh = function() {
   ])
 
   var rearCabinMesh = Josh.wireframe(rearCabinGeo)
+
+
+  // spinnerets
+  var spinnerets                = new THREE.Object3D()
+
+  spinnerets.sphereLGeo         = new THREE.SphereGeometry(len(3), len(20), len(30))
+  spinnerets.sphereL            = Josh.wireframe(spinnerets.sphereLGeo)
+  spinnerets.sphereL.position.y = len(15)
+  spinnerets.sphereL.position.x = len(-8)
+
+  spinnerets.sphereRGeo         = new THREE.SphereGeometry(len(3), len(20), len(30))
+  spinnerets.sphereR            = Josh.wireframe(spinnerets.sphereRGeo)
+  spinnerets.sphereR.position.y = len(15)
+  spinnerets.sphereR.position.x = len(8)
+
+
+  // all together for the tachikoma
+  var tachikoma = new THREE.Object3D()
   tachikoma.add(rearCabinMesh)
+  tachikoma.add(spinnerets.sphereR)
+  tachikoma.add(spinnerets.sphereL)
 
   return tachikoma
 }
@@ -209,7 +227,7 @@ Josh.renderTachikoma = function(domElement, requestAnimationFrame, frameUpdates)
 
   // render from back a bit, looking at origin
   var camera = Josh.camera({
-    from:        [0, 0, -5],
+    from:        [0, 0, -3],
     aspectRatio: domElement.offsetWidth / domElement.offsetHeight,
   })
 
@@ -224,7 +242,7 @@ Josh.renderTachikoma = function(domElement, requestAnimationFrame, frameUpdates)
       return
     }
 
-    tachikoma.rotation.y += 0.01
+    tachikoma.rotation.y += 0.02
     frameUpdates()
     renderer.render(scene, camera)
     requestAnimationFrame(render)
