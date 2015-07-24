@@ -136,7 +136,10 @@ Josh.renderExample = function(domElement, requestAnimationFrame, frameUpdates) {
   render()
 }
 
-Josh.wireframe = function(geometry) {
+
+var Tachikoma = {}
+
+Tachikoma.wireframeMesh = function(geometry) {
   var wireframeMaterial = new THREE.MeshBasicMaterial({color: 0x000000, wireframe: true})
   var basicMaterial     = new THREE.MeshBasicMaterial({color: 0xffff00, transparent: true, opacity: 0.5})
   basicMaterial.side    = THREE.DoubleSide
@@ -144,8 +147,13 @@ Josh.wireframe = function(geometry) {
   return mesh
 }
 
+Tachikoma.lambertMesh = function(geometry) {
+  var material = new THREE.MeshLambertMaterial({color: 0xffff00})
+  var mesh     = new THREE.Mesh(geometry, material)
+  return mesh
+}
 
-Josh.tachikomaMesh = function() {
+Josh.tachikomaMesh = function(makeMesh) {
   // -----  helper functions  -----
   var unit    = 32 // to translate everything into 'unit' sized: x, y, z all have a max of 1
   var len     = function(n)       { return n / unit }
@@ -180,59 +188,66 @@ Josh.tachikomaMesh = function() {
     vec( 8, -12,  8),
   ])
 
-  var rearCabinMesh = Josh.wireframe(rearCabinGeo)
+  var rearCabinMesh = makeMesh(rearCabinGeo)
 
 
-  // -----  spinnerets  -----
+  // -----  spinnerettes  -----
   function spinnerette() {
+    var baseHeight     = len(3)
+    var shooterHeight  = len(2)
+    var base           = makeMesh(new THREE.CylinderGeometry(len(1),   len(1),   baseHeight,    12))
+    var shooter        = makeMesh(new THREE.CylinderGeometry(len(0.15),len(0.5), shooterHeight, 12))
+    shooter.position.y = baseHeight/2 + shooterHeight/2
+
+    var spinnerette = new THREE.Object3D()
+    spinnerette.add(base)
+    spinnerette.add(shooter)
+
+    return spinnerette
+  }
+
+  function sideSpineretteAssembly() {
     var sphereRadius = len(3)
 
     // reservoir
-    var reservoir = Josh.wireframe(new THREE.CylinderGeometry(len(3.5),     // radius top
-                                                              len(3.5),     // radius bottom
-                                                              sphereRadius, // height (set to the sphere's radius to make it half as long as the sphere)
-                                                              32))          // num sgements
-    reservoir.position.y = -sphereRadius/2 // divide by 2, b/c it's centered on the sphere, so it's already halfway down
+    var reservoir = makeMesh(new THREE.CylinderGeometry(len(3.5),     // radius top
+                                                        len(3.5),     // radius bottom
+                                                        sphereRadius, // height (set to the sphere's radius to make it half as long as the sphere)
+                                                        32))          // num sgements
+    reservoir.position.y = -sphereRadius/2 // lower it to the bottom half of the sphere (divide by 2, b/c it's centered on the sphere, so it's already halfway down)
 
     // sphere
-    var sphere = Josh.wireframe(new THREE.SphereGeometry(sphereRadius, 20, 30)) // radius, widthSegments, heightSegments
+    var sphere = makeMesh(new THREE.SphereGeometry(sphereRadius, 20, 30)) // radius, widthSegments, heightSegments
 
-    // base
-    var base        = Josh.wireframe(new THREE.CylinderGeometry(len(1), len(1), sphereRadius*2, 12))
-    base.position.y = len(2)
-    base.rotation.x = degrees(90)
+    // spinnerettes
+    var backSpinnerette         = spinnerette()
+    backSpinnerette.position.y  = len(2)         // move it towards the top of the sphere
+    backSpinnerette.position.z  = len(1.5)       // move it towards the back
+    backSpinnerette.rotation.x  = degrees(90)    // face back
 
-    // base fore
-    var baseFore        = Josh.wireframe(new THREE.CylinderGeometry(len(0.5), len(0.15), len(2), 12))
-    baseFore.position.y = len(2)
-    baseFore.position.z = len(-4)
-    baseFore.rotation.x = degrees(90)
-
-    // base aft
-    var baseAft        = Josh.wireframe(new THREE.CylinderGeometry(len(0.5), len(0.15), len(2), 12))
-    baseAft.position.y = len(2)
-    baseAft.position.z = len(4)
-    baseAft.rotation.x = degrees(-90)
+    var frontSpinnerette        = spinnerette()
+    frontSpinnerette.position.y = len(2)         // move it towards the top of the sphere
+    frontSpinnerette.position.z = len(-1.5)      // move it towards the front
+    frontSpinnerette.rotation.x = degrees(-90)   // face forward
 
     // spinnerette
-    var spinnerette = new THREE.Object3D()
-    spinnerette.add(reservoir)
-    spinnerette.add(sphere)
-    spinnerette.add(base)
-    spinnerette.add(baseFore)
-    spinnerette.add(baseAft)
+    var assembly = new THREE.Object3D()
+    assembly.add(reservoir)
+    assembly.add(sphere)
+    assembly.add(backSpinnerette)
+    assembly.add(frontSpinnerette)
 
-    return spinnerette
+    return assembly
   }
 
   // all together for the tachikoma
   var tachikoma = new THREE.Object3D()
   tachikoma.add(rearCabinMesh)
 
-  var leftSpinnerette  = spinnerette().translateY(len(15)).translateX(len(-8)).rotateZ(degrees(90))
-  var rightSpinnerette = spinnerette().translateY(len(15)).translateX(len(8)).rotateZ(degrees(-90))
-  tachikoma.add(leftSpinnerette)
-  tachikoma.add(rightSpinnerette)
+  var leftSpineretteAssembly   = sideSpineretteAssembly().translateY(len(15)).translateX(len(-8.2)).rotateZ(degrees(90))
+  var rightSpinneretteAssenbly = sideSpineretteAssembly().translateY(len(15)).translateX(len(8.2)).rotateZ(degrees(-90))
+  tachikoma.add(leftSpineretteAssembly)
+  tachikoma.add(rightSpinneretteAssenbly)
 
   return tachikoma
 }
@@ -240,12 +255,14 @@ Josh.tachikomaMesh = function() {
 
 Josh.renderTachikoma = function(domElement, requestAnimationFrame, frameUpdates) {
   // things in the scene
-  var tachikoma = Josh.tachikomaMesh()
+  var tachikoma = Josh.tachikomaMesh(Tachikoma.lambertMesh)
+  var tachikoma = Josh.tachikomaMesh(Tachikoma.wireframeMesh)
 
   // scene (all the threejs objects being considered)
   var scene = new THREE.Scene()
-  scene.add(Josh.ambientlight({colour: 0xffffff}))
+  scene.add(Josh.ambientlight({colour: 0x222222}))
   scene.add(tachikoma)
+  scene.add(Josh.spotlight({colour: 0xffffff, from: [0, 0, -10]}))  // a bit behind our camera
 
   // add to DOM
   var renderer = new THREE.WebGLRenderer()
@@ -256,7 +273,7 @@ Josh.renderTachikoma = function(domElement, requestAnimationFrame, frameUpdates)
 
   // render from back a bit, looking at origin
   var camera = Josh.camera({
-    from:        [0.5, 0.5, -2],
+    from:        [0.5, 0.5, -1],
     to:          [0.0, 0.2,  0],
     aspectRatio: domElement.offsetWidth / domElement.offsetHeight,
   })
