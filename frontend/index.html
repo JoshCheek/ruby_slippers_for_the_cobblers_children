@@ -15,67 +15,37 @@
         margin:   0px;
         padding:  0px;
       }
-
-      .threejsContainer .stats {
-        position: absolute;
-        top:      0px;
-        left:     0px;
-        margin:   0px;
-        padding:  0px;
-      }
-
-      .threejsContainer .controls {
-        position: absolute;
-        top:      0px;
-        right:    0px;
-        margin:   0px;
-        padding:  0px;
-      }
     </style>
   </head>
   <body>
 
-    <div id="objectModel" class="threejsContainer">
-      <div class="stats">
-      </div>
-    </div>
-
-    <div id="tachikoma" class="threejsContainer">
-      <div class="stats"></div>
-      <div class="controls"></div>
+    <div id="ruby-display" class="threejsContainer">
     </div>
 
     <script type="text/javascript" src="js/three.r71.js"></script>
     <script type="text/javascript" src="js/stats.js"></script>
-    <script type="text/javascript" src="js/josh.js"></script>
+    <script type="text/javascript" src="js/DisplayRuby.js"></script>
     <script type="text/javascript" src="js/ConvexGeometry.js"></script>
     <script type="text/javascript" src="js/ThreeBSP.js"></script>
     <script type="text/javascript" src="js/SubdivisionModifier.js"></script>
     <script type="text/javascript" src="js/dat.gui.js"></script>
 
     <script>
-      // the example I made up
-      var joshStats = Josh.statistics()
-      var objectModelDiv = document.getElementById("objectModel")
-      objectModelDiv.getElementsByClassName("stats")[0].appendChild(joshStats.domElement)
-      Josh.renderExample(
-        objectModelDiv,
-        requestAnimationFrame,
-        function() { joshStats.update() }
-      )
+      var div         = document.getElementById("ruby-display")
+      var width       = div.offsetWidth
+      var height      = div.offsetHeight
+      var displayRuby = new DisplayRuby({width: width, height: height})
+      div.appendChild(displayRuby.domElement())
 
-      // Giles' tachikoma (http://gilesbowkett.blogspot.com/2014/04/build-anime-robot-in-webgl-using-threejs.html)
-      var tachiStats = Josh.statistics()
-      var tachikomaDiv = document.getElementById("tachikoma")
-      tachikomaDiv.getElementsByClassName("stats")[0].appendChild(tachiStats.domElement)
-      var tachiCamera = Josh.renderTachikoma(
-        tachikomaDiv,
-        requestAnimationFrame,
-        function() { tachiStats.update() }
-      )
+      var renderRuby = function() {
+        if(div.offsetWidth  !== width)  displayRuby.updateWidth(width=div.offsetWidth)
+        if(div.offsetHeight !== height) displayRuby.updateHeight(height=div.offsetHeight)
 
-      // so we can move it around as we play w/ it
-      window.cam = tachiCamera
+        displayRuby.update(div.offsetWidth, div.offsetHeight)
+        requestAnimationFrame(renderRuby)
+      }
+
+      renderRuby()
     </script>
   </body>
 </html>
