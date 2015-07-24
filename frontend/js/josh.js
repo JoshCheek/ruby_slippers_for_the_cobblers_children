@@ -2,6 +2,8 @@
 
 var Josh = {}
 
+Josh.degrees = function(deg) { return deg * Math.PI / 180 }
+
 Josh.ambientlight = function(attrs) {
   if(attrs == undefined) attrs = {}
   var colour = attrs.colour || 0xffffff
@@ -156,10 +158,10 @@ Tachikoma.lambertMesh = function(geometry) {
 Josh.tachikomaMesh = function(makeMesh) {
   // -----  helper functions  -----
 
-  var unit    = 32 // to translate everything into 'unit' sized: x, y, z all have a max of 1
+  var unit    = 50 // to translate everything into 'unit' sized: x, y, z all have a max of 1
   var len     = function(n)       { return n / unit }
   var vec     = function(x, y, z) { return new THREE.Vector3(len(x), len(y), len(z)) }
-  var degrees = function(deg)     { return deg * Math.PI / 180 }
+  var degrees = Josh.degrees
 
   function applyOffsets(offsets, object) {
     for(var axis in offsets.rotation) object.rotation[axis] = degrees(offsets.rotation[axis])
@@ -468,10 +470,45 @@ Josh.renderTachikoma = function(domElement, requestAnimationFrame, frameUpdates)
 
   // render from back a bit, looking at origin
   var camera = Josh.camera({
-    from:        [0.5, 0.5, -2.5],
-    to:          [0.0, 0.2,  0],
+    from:        [0.5, 0.2, -2.5],
+    to:          [0.0, 0.0,  0.0],
     aspectRatio: domElement.offsetWidth / domElement.offsetHeight,
   })
+
+  // set up the control gui
+  var controls = new function () {
+    this.tachikomaPosX = tachikoma.position.x
+    this.tachikomaPosY = tachikoma.position.y
+    this.tachikomaPosZ = tachikoma.position.z
+
+    this.tachikomaRotX = tachikoma.rotation.x
+    this.tachikomaRotY = tachikoma.rotation.y
+    this.tachikomaRotZ = tachikoma.rotation.z
+  }
+
+  var gui = new dat.GUI({autoPlace: false});
+  domElement.getElementsByClassName("controls")[0].appendChild(gui.domElement)
+
+  var positionFolder = gui.addFolder("Position")
+  positionFolder.open()
+  positionFolder.add(controls, "tachikomaPosX", -5, 5)
+                .step(0.5)
+                .onChange(function () { tachikoma.position.x = controls.tachikomaPosX })
+  positionFolder.add(controls, "tachikomaPosY", -5, 5)
+                .step(0.5)
+                .onChange(function () { tachikoma.position.y = controls.tachikomaPosY })
+  positionFolder.add(controls, "tachikomaPosZ", -5, 5)
+                .step(0.5)
+                .onChange(function () { tachikoma.position.z = controls.tachikomaPosZ })
+
+  var rotationFolder = gui.addFolder("Rotation")
+  rotationFolder.open()
+  rotationFolder.add(controls, "tachikomaRotX", -360, 360)
+                .onChange(function () { tachikoma.rotation.x = Josh.degrees(controls.tachikomaRotX) })
+  rotationFolder.add(controls, "tachikomaRotY", -360, 360)
+                .onChange(function () { tachikoma.rotation.y = Josh.degrees(controls.tachikomaRotY) })
+  rotationFolder.add(controls, "tachikomaRotZ", -360, 360)
+                .onChange(function () { tachikoma.rotation.z = Josh.degrees(controls.tachikomaRotZ) })
 
   // render this shit
   var framecount = 0
@@ -484,7 +521,6 @@ Josh.renderTachikoma = function(domElement, requestAnimationFrame, frameUpdates)
       return
     }
 
-    tachikoma.rotation.y += 0.04
     frameUpdates()
     renderer.render(scene, camera)
     requestAnimationFrame(render)
