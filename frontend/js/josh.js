@@ -192,7 +192,7 @@ Josh.tachikomaMesh = function(makeMesh) {
 
 
   // -----  spinnerettes  -----
-  function spinnerette() {
+  function spinnerette(offsets) {
     var baseHeight     = len(3)
     var shooterHeight  = len(2)
     var base           = makeMesh(new THREE.CylinderGeometry(len(1),   len(1),   baseHeight,    12))
@@ -203,42 +203,39 @@ Josh.tachikomaMesh = function(makeMesh) {
     spinnerette.add(base)
     spinnerette.add(shooter)
 
+    for(var axis in offsets.rotation) {
+      spinnerette.rotation[axis] = degrees(offsets.rotation[axis])
+    }
+
+    for(var axis in offsets.position) {
+      spinnerette.position[axis] = len(offsets.position[axis])
+    }
+
     return spinnerette
   }
+
 
   function sideSpineretteAssembly() {
     var sphereRadius = len(3)
 
-    // reservoir
-    var reservoir = makeMesh(new THREE.CylinderGeometry(len(3.5),     // radius top
-                                                        len(3.5),     // radius bottom
-                                                        sphereRadius, // height (set to the sphere's radius to make it half as long as the sphere)
-                                                        32))          // num sgements
-    reservoir.position.y = -sphereRadius/2 // lower it to the bottom half of the sphere (divide by 2, b/c it's centered on the sphere, so it's already halfway down)
+    // base
+    var base = makeMesh(new THREE.CylinderGeometry(len(3.5),     // radius top
+                                                   len(3.5),     // radius bottom
+                                                   sphereRadius, // height (set to the sphere's radius to make it half as long as the sphere)
+                                                   32))          // num sgements
+    base.position.y = -sphereRadius/2 // lower it to the bottom half of the sphere (divide by 2, b/c it's centered on the sphere, so it's already halfway down)
 
     // sphere
     var sphere = makeMesh(new THREE.SphereGeometry(sphereRadius, 20, 30)) // radius, widthSegments, heightSegments
 
     // spinnerettes
-    var backSpinnerette         = spinnerette()
-    backSpinnerette.position.y  = len(2)         // move it towards the top of the sphere
-    backSpinnerette.position.z  = len(1.5)       // move it towards the back
-    backSpinnerette.rotation.x  = degrees(90)    // face back
+    var backSpinnerette  = spinnerette({rotation: {x:  90}, position: {y: 2, z:  1.5}})
+    var frontSpinnerette = spinnerette({rotation: {x: -90}, position: {y: 2, z: -1.5}})
 
-    var frontSpinnerette        = spinnerette()
-    frontSpinnerette.position.y = len(2)         // move it towards the top of the sphere
-    frontSpinnerette.position.z = len(-1.5)      // move it towards the front
-    frontSpinnerette.rotation.x = degrees(-90)   // face forward
-
-    // spinnerette
-    var assembly = new THREE.Object3D()
-    assembly.add(reservoir)
-    assembly.add(sphere)
-    assembly.add(backSpinnerette)
-    assembly.add(frontSpinnerette)
-
-    return assembly
+    // all together now!
+    return new THREE.Object3D().add(sphere).add(base).add(backSpinnerette).add(frontSpinnerette)
   }
+
 
   // all together for the tachikoma
   var tachikoma = new THREE.Object3D()
