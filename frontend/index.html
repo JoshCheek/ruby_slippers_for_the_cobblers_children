@@ -10,7 +10,7 @@
       .threejsContainer {
         float:    left;
         position: relative;
-        width:    50%;
+        width:    100%;
         height:   100%;
         margin:   0px;
         padding:  0px;
@@ -23,18 +23,12 @@
     </div>
 
     <script type="text/javascript" src="js/three.r71.js"></script>
-    <script type="text/javascript" src="js/stats.js"></script>
     <script type="text/javascript" src="js/DisplayRuby.js"></script>
-    <script type="text/javascript" src="js/ConvexGeometry.js"></script>
-    <script type="text/javascript" src="js/ThreeBSP.js"></script>
-    <script type="text/javascript" src="js/SubdivisionModifier.js"></script>
-    <script type="text/javascript" src="js/dat.gui.js"></script>
     <script type="text/javascript" src="js/ruby.js"></script>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-git2.min.js"></script>
 
     <script>
       // Fuck you, HTTP
-      var ast = {"type":"send","target":{"type":"integer","value":"1","location":{"filename":"(eval)","begin":0,"end":1}},"message":"a","args":[],"location":{"filename":"(eval)","begin":0,"end":3}}
+      var ast = {"type":"string", "value":"a"}
 
       // interpreter
       var ruby = require("ruby")
@@ -45,7 +39,7 @@
       var div         = document.getElementById("ruby-display")
       var width       = div.offsetWidth
       var height      = div.offsetHeight
-      var displayRuby = new DisplayRuby({width: width, height: height})
+      var displayRuby = new DisplayRuby({width: width, height: height, world: vm.world})
       div.appendChild(displayRuby.domElement())
 
       var renderRuby = function() {
@@ -53,9 +47,10 @@
         if(div.offsetHeight !== height) displayRuby.updateHeight(height=div.offsetHeight)
 
         displayRuby.update(div.offsetWidth, div.offsetHeight, vm.world)
-        requestAnimationFrame(renderRuby)
+        // requestAnimationFrame(renderRuby)
       }
 
+      vm.nextExpression()
       renderRuby()
     </script>
   </body>
