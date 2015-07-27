@@ -17,6 +17,15 @@ $ bin/build
 $ npm install
 ```
 
+Exporting for the frontend
+--------------------------
+
+```sh
+$ babel src -d compiled
+$ browserify -o ruby.js (find compiled -type f) -r ./compiled/ruby.js:ruby
+$ mv ruby.js ../frontend/js/ruby.js
+```
+
 Locating Source Code
 --------------------
 
