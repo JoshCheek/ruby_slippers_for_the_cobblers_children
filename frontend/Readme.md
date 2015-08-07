@@ -55,6 +55,9 @@ Darwing
       could be fun, might learn some math and some JS
     three.js
       http://threejs.org/examples/#raytracing_sandbox
+      inspiration
+        http://acko.net/files/on-webgl/whittaker/raytrace-creepy.html
+        http://acko.net/blog/on-webgl/
       examples
         https://www.leiainc.com/
         http://www.sitepoint.com/building-earth-with-webgl-javascript/?utm_source=javascriptweekly&utm_medium=email
