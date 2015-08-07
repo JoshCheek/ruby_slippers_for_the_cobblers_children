@@ -134,6 +134,8 @@ Interpreter Notes
   * List of [Rubinius bytecodes](http://rubini.us/doc/en/virtual-machine/instructions/)
   * [RubySpec](https://github.com/rubyspec/rubyspec), Brian's work to formally define Ruby's behaviour.
     Looks like [this](https://github.com/ruby/ruby/blob/1026907467ea3d5441e1bfa95f5f37b431a684f3/spec/default.mspec) is integration for MRI.
+  * [RubySpec is reborn](http://eregon.github.io/rubyspec/2015/07/29/rubyspec-is-reborn.html) mixed feelings here,
+    I'm really glad it's still being maintained, but seems like an FU to Brian.
   * [I think this is where Ruby's specification starts](https://github.com/ruby/ruby/blob/trunk/test/runner.rb)
     as in you can presumably do something like `ruby test/runner.rb` decided to go look at it to see if it seemed viable as a test suite
     (as in "doesn't depend on a C implementation"),

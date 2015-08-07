@@ -126,6 +126,8 @@ Potentially useful in the future
 * [nodemon](https://github.com/remy/nodemon) File watching / restarting.
 * [lodash](https://lodash.com/), similar to underscore ([npm](https://www.npmjs.com/package/lodash))
 * My [Object Model](https://gist.github.com/JoshCheek/f2f4fed0c184ad9dbe98) notes from class
+* Using coroutines to make a threading lib and os and so forth: [http://www.dabeaz.com/coroutines/Coroutines.pdf](http://www.dabeaz.com/coroutines/Coroutines.pdf)
+
 
 
 Javascript Resources
