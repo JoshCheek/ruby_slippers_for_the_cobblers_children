@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# compile state machine
+ragel microscript.c.rl -Co microscript.c &&
+  # compile C code
+  gcc main.c -o microscript &&
+
+  # run C code
+  ./microscript &&
+
+  # passing an arg implies we want to see the graph
+  if test -n "$1"
+  then
+    # generate the graph
+    ragel microscript.c.rl -Vpo microscript.dot &&
+      # generate the image
+      dot -T png -o microscript.png microscript.dot &&
+      # open the image
+      open microscript.png
+  else
+    true
+  fi &&
+
+  # if all that passed, add it to git
+  git add . &&
+  git status .
