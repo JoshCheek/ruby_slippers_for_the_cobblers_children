@@ -169,6 +169,23 @@ end
   #   fret            (Return to last fcall)
   #   fbreak          (immediately break out of the execute loop -- mostly for use with the nooend write option)
 
+  # -----  Dealing with whitespace sensitivity  -----
+  # Here we go, pretty sure this is what I've been looking for! (p46)
+  # It declares a scanner named "head_name". Then, after matching "Header:",
+  # it calls the scanner. When the scanner completes, it returns.
+  # Note that this requires a state stack (ts, te, act)
+  #
+  #   Scanners can be used to process sub-languages, as well as for tokenizing programming languages.
+  #   In the following example a scanner is used to tokenize the contents of a header field.
+  #
+  #     word = [a-z]+;
+  #     head_name = ’Header’;
+  #     header := |*
+  #       word;
+  #       ’ ’;
+  #       ’\n’ => { fret; };
+  #     *|;
+  #     main := ( head_name ’:’ @{ fcall header; } )*;
 
   # -----  Actions  -----
   # Intent here is to modify a var tracking indented depth when we know it increases or decreases
