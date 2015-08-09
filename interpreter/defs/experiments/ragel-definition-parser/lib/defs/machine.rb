@@ -1,14 +1,18 @@
 class Defs
   class Machine
-    ATTRIBUTES = [:name, :namespace, :arg_names, :description, :labels, :instructions].freeze
+    attr_accessor :name, :namespace, :arg_names, :description, :labels, :instructions, :children
 
-    def initialize(defn)
-      @defn = defn
-      @children = defn.fetch(:children).map { |name, child| [name, self.class.new(child)] }.to_h
-    end
-
-    ATTRIBUTES.each do |attr|
-      define_method(attr) { @defn.fetch attr }
+    def initialize(attributes={})
+      attributes        = attributes.dup
+      self.name         = attributes.delete(:name)         || ""
+      self.namespace    = attributes.delete(:namespace)    || []
+      self.arg_names    = attributes.delete(:arg_names)    || []
+      self.description  = attributes.delete(:description)  || ""
+      self.labels       = attributes.delete(:labels)       || []
+      self.instructions = attributes.delete(:instructions) || []
+      self.children     = (attributes.delete(:children)    || [])
+                            .map { |name, child| [name, self.class.new(child)] }
+                            .to_h
     end
 
     def [](key)
@@ -18,13 +22,10 @@ class Defs
     end
 
     def inspect
-      attrs = ATTRIBUTES.map do |name|
-        "\n  #{name}: #{@defn.fetch(name).inspect}"
-      end
-      attrs << "\n  children: #{children.keys}"
+      attrs = [:name, :namespace, :arg_names, :description, :labels, :instructions]
+                .map { |name| "\n  #{name}: #{@defn.fetch(name).inspect}" } \
+                << "\n  children: #{children.keys}"
       "#<#{self.class}:#{attrs.join}\n>"
     end
-
-    attr_reader :children
   end
 end
