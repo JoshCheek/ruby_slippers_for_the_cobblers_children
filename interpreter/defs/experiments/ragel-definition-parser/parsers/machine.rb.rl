@@ -275,16 +275,10 @@ end
   instruction_placeholder = indentation "/ast($ast)\n" indentation "/ast/nil\n"
 ;
 
-  machine_definition   =
-    # line1
-    indentation                  >{log indentation: p}
-    (machine_name %RecordName )  >{log machine_name: p}
-    ":"                          >{log colon: p}
-    (machine_args %RecordArgs    >{ log args: p })
-    "\n"
-                                 >Indent
-                                 >{log enter_newline: fpc}
-                                 %{ log exit_newline: fpc }
+  machine_definition = indentation (machine_name %RecordName ) ":" (machine_args %RecordArgs) "\n"
+
+
+
      # description with optional blank lines
     # (blank_line*)           >{log blank_lines_from_defn: p}
     # machine_description     >{log description_from_defn: p}
@@ -292,11 +286,38 @@ end
     (indentation >{ log pre_description_indentation: p }
 "> The main machine, kicks everything else off\n") %{ log desc: fpc, p: p, eof: eof }
     # instructions
-
     # children
   ;
 
   main := (blank_line* (machine_definition)*) ${ puts "-- #{p}: #{data[p].inspect} --" };
+
+# -------------------------
+  indentation        = ""
+  sp                 = [\t\v\f\r ]
+  blank_line         = (sp* "\n")*;
+
+
+  description        = indentation sp ">" sp [^\n]* "\n";
+  instruction        = indentation sp ">" sp [^\n]* "\n";
+
+  machine_body := |*
+    blank_line*
+    (indentation description)*
+    blank_line*
+    (indentation instruction)*
+    blank_line*
+    (indentation machine_definition blank_line*)*
+  *|;
+
+  machine_args = ""; # placeholder
+
+  machine_definition = machine_name %RecordName ":" machine_args "\n" @{
+    push_indentation
+    fcall machine_body;
+    pop_indentation
+  };
+
+  main := blank_line* machine_definition* blank_line*;
 }%%
 
 
