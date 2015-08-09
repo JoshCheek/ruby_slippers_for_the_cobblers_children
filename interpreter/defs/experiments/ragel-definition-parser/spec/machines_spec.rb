@@ -1,6 +1,6 @@
 require 'defs/parse'
 
-RSpec.describe 'Defs.parse_machine' do
+RSpec.describe 'Defs::Parse::Machine' do
   it 'parses this thing', t:true do
     root = parse_machine <<-DEFS.gsub(/^    /, "")
     main:
@@ -150,8 +150,7 @@ RSpec.describe 'Defs.parse_machine' do
   end
 
   def parse_machine(def_string)
-    def_hash = Defs::ParseMachine.call def_string
-    Defs::Machine.new def_hash
+    Defs::Parse::Machine.call def_string
   end
 
   def assert_instructions_equal(expected_instrs, actual_instrs)

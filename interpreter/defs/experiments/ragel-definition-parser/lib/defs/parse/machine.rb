@@ -1,20 +1,49 @@
 
 # line 1 "parsers/machine.rb.rl"
-# Note: The "# %" are fake comments to fix vim's highlighting
 
+# line 6 "parsers/machine.rb.rl"
 
-# line 8 "parsers/machine.rb.rl"
- # %
 
 
 
 require 'defs/machine'
 
 class Defs
-  class ParseMachine
+  module Parse
+    class Machine
+      def self.call(string)
+        new(string).call
+      end
 
-    
-# line 18 "lib/defs/parse/machine.rb"
+      def initialize(string)
+        self.string = string
+      end
+
+      def call
+        self.attributes ||= parse Defs::Machine.new, string
+      end
+
+      private
+
+      attr_accessor :string, :attributes
+
+      def parse(machine, data)
+        # Machine attributes that we need to parse and set:
+        #   name          String
+        #   namespace     Array
+        #   arg_names     Array
+        #   description   String
+        #   labels        Array
+        #   instructions  Array
+        #   children      Array
+
+
+        # Emit the constant static data needed by the machine.
+        # placing it here is a stopgap until I make a bit more progress
+        # (it defines this data as attr_accessors on the singleton class,
+        # but I think I'd like it to be private constants)
+        
+# line 47 "lib/defs/parse/machine.rb"
 class << self
 	attr_accessor :_machine_defs_key_offsets
 	private :_machine_defs_key_offsets, :_machine_defs_key_offsets=
@@ -82,82 +111,56 @@ end
 self.machine_defs_en_main = 1;
 
 
-# line 18 "parsers/machine.rb.rl"
-    # % comment to fix highlighting
+# line 47 "parsers/machine.rb.rl"
 
-    def self.call(string)
-      new(string).call
-    end
-
-    def initialize(string)
-      self.string = string
-    end
-
-    def call
-      self.attributes ||= parse Machine.new, string
-    end
-
-    private
-
-
-    def parse(machine, data)
-      # Machine attributes that we need to parse and set:
-      #   name          String
-      #   namespace     Array
-      #   arg_names     Array
-      #   description   String
-      #   labels        Array
-      #   instructions  Array
-      #   children      Array
-
-      # Ragel user guide:
-      #   http://www.colm.net/files/ragel/ragel-guide-6.9.pdf
-      #
-      # `write init` sets variable values
-      #   Ragel variables (p36)
-      #     cs    - Current state
-      #               one of:
-      #                 <machine_name>_error       = 0
-      #                 <machine_name>_start       = 1
-      #                 <machine_name>_first_final = 2
-      #               So, if our parser is named "machine_defs",
-      #                 Then we would have a local variable `machine_defs_error` with a value of 0.
-      #                 Presumably if it's higher than 2, it's the 2nd or 3rd or nth final state.
-      #     p     - Data pointer, an index into the data string
-      #     pe    - Data end pointer, (data.length)
-      #     eof   - End of file pointer. Set to -1, but then to pe on the last buffer block
-      #             (we aren't currently buffering)
-      #     data  - Something indexable (ie Array or String) containting the data to process.
-      #     stack - An array of integers representing states (If the stack must resize dynamically,
-      #             the Pre-push and Post-Pop statements can be used to do this)
-      #     top   - Integer offset to the next available spot on the top of the stack
-      #
-      #   Scanners vars (p46)
-      #     > We have to manage these if we process using multiple calls... currently, we don't
-      #     > But may still be able to use them to find matches instead of building up tokens
-      #     > a character at a time like they did in the C example.
-      #
-      #     ts    - Token start, integer offset to input data.
-      #             It is used for recording where the current token match begins.
-      #     te    - Token end, Integer offset to input data.
-      #             Records where a match ends and scanning of the next token will begin.
-      #     act   - Integer sometimes used by scanner code to track the most recent successful match.
-      #
-      # `write exec` will be the implementation.
-      #   If it uses `fcall` or `fret` statements, then stack and top variables must be defined.
-      #   If a longest-match construction is used, variables for managing backtracking are required
-      #   (I think ts, te, act, maybe stack stuff, not sure)
-      
-# line 152 "lib/defs/parse/machine.rb"
+        # Ragel user guide:
+        #   http://www.colm.net/files/ragel/ragel-guide-6.9.pdf
+        #
+        # `write init` sets variable values
+        #   Ragel variables (p36)
+        #     cs    - Current state
+        #               one of:
+        #                 <machine_name>_error       = 0
+        #                 <machine_name>_start       = 1
+        #                 <machine_name>_first_final = 2
+        #               So, if our parser is named "machine_defs",
+        #                 Then we would have a local variable `machine_defs_error` with a value of 0.
+        #                 Presumably if it's higher than 2, it's the 2nd or 3rd or nth final state.
+        #     p     - Data pointer, an index into the data string
+        #     pe    - Data end pointer, (data.length)
+        #     eof   - End of file pointer. Set to -1, but then to pe on the last buffer block
+        #             (we aren't currently buffering)
+        #     data  - Something indexable (ie Array or String) containting the data to process.
+        #     stack - An array of integers representing states (If the stack must resize dynamically,
+        #             the Pre-push and Post-Pop statements can be used to do this)
+        #     top   - Integer offset to the next available spot on the top of the stack
+        #
+        #   Scanners vars (p46)
+        #     > We have to manage these if we process using multiple calls... currently, we don't
+        #     > But may still be able to use them to find matches instead of building up tokens
+        #     > a character at a time like they did in the C example.
+        #
+        #     ts    - Token start, integer offset to input data.
+        #             It is used for recording where the current token match begins.
+        #     te    - Token end, Integer offset to input data.
+        #             Records where a match ends and scanning of the next token will begin.
+        #     act   - Integer sometimes used by scanner code to track the most recent successful match.
+        #
+        # `write exec` will be the implementation.
+        #   If it uses `fcall` or `fret` statements, then stack and top variables must be defined.
+        #   If a longest-match construction is used, variables for managing backtracking are required
+        #   (I think ts, te, act, maybe stack stuff, not sure)
+        
+# line 155 "lib/defs/parse/machine.rb"
 begin
 	p ||= 0
 	pe ||= data.length
 	cs = machine_defs_start
 end
 
-# line 83 "parsers/machine.rb.rl"
-      
-# line 161 "lib/defs/parse/machine.rb"
+# line 86 "parsers/machine.rb.rl"
+        
+# line 164 "lib/defs/parse/machine.rb"
 begin
 	_klen, _trans, _keys = nil
 	_goto_level = 0
@@ -249,12 +252,11 @@ begin
 	end
 	end
 
-# line 84 "parsers/machine.rb.rl"
+# line 87 "parsers/machine.rb.rl"
+
+        machine
+      end
     end
-
-    private
-
-    attr_accessor :string, :attributes
   end
 end
 

@@ -23,7 +23,7 @@ class Defs
 
     def inspect
       attrs = [:name, :namespace, :arg_names, :description, :labels, :instructions]
-                .map { |name| "\n  #{name}: #{@defn.fetch(name).inspect}" } \
+                .map { |name| "\n  #{name}: #{__send__(name).inspect}" } \
                 << "\n  children: #{children.keys}"
       "#<#{self.class}:#{attrs.join}\n>"
     end
