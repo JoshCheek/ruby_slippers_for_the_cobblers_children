@@ -331,23 +331,23 @@ begin
 			_acts += 1
 			case _machine_defs_actions[_acts - 1]
 when 0 then
-# line 113 "parsers/machine.rb.rl"
+# line 176 "parsers/machine.rb.rl"
 		begin
  		end
 when 1 then
-# line 114 "parsers/machine.rb.rl"
+# line 177 "parsers/machine.rb.rl"
 		begin
  		end
 when 2 then
-# line 115 "parsers/machine.rb.rl"
+# line 178 "parsers/machine.rb.rl"
 		begin
  		end
 when 3 then
-# line 117 "parsers/machine.rb.rl"
+# line 180 "parsers/machine.rb.rl"
 		begin
  		end
 when 4 then
-# line 118 "parsers/machine.rb.rl"
+# line 181 "parsers/machine.rb.rl"
 		begin
  		end
 # line 354 "lib/defs/parse/machine.rb"
@@ -379,7 +379,7 @@ when 4 then
 		__acts += 1
 		case _machine_defs_actions[__acts - 1]
 when 1 then
-# line 114 "parsers/machine.rb.rl"
+# line 177 "parsers/machine.rb.rl"
 		begin
  		end
 # line 386 "lib/defs/parse/machine.rb"
@@ -406,7 +406,7 @@ end
 
 
 
-# line 136 "parsers/machine.rb.rl"
+# line 199 "parsers/machine.rb.rl"
 
 
 

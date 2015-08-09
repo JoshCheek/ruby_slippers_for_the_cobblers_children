@@ -106,6 +106,69 @@ end
   #   expr $ action All Transition Action
   #   expr % action Leaving Actions
 
+  # Some notes that WhiteQuark wrote that sound relevant
+  # https://github.com/whitequark/parser/blob/d52492b15f306d18fa52aeab60068114d1da4770/lib/parser/lexer.rl#L16
+  #
+  #  * The code for extracting matched token is:
+  #
+  #       @source[@ts...@te]
+  #
+  #  * If an action emits the token and transitions to another state, use
+  #    these Ragel commands:
+  #
+  #       emit($whatever)
+  #       fnext $next_state; fbreak;
+  #
+  #    If you perform `fgoto` in an action which does not emit a token nor
+  #    rewinds the stream pointer, the parser's side-effectful,
+  #    context-sensitive lookahead actions will break in a hard to detect
+  #    and debug way.
+  #
+  #  * If an action does not emit a token:
+  #
+  #       fgoto $next_state;
+  #
+  #  * If an action features lookbehind, i.e. matches characters with the
+  #    intent of passing them to another action:
+  #
+  #       p = @ts - 1
+  #       fgoto $next_state;
+  #
+  #    or, if the lookbehind consists of a single character:
+  #
+  #       fhold; fgoto $next_state;
+  #
+  #  * Ragel merges actions. So, if you have `e_lparen = '(' %act` and
+  #    `c_lparen = '('` and a lexer action `e_lparen | c_lparen`, the result
+  #    _will_ invoke the action `act`.
+  #
+  #    e_something stands for "something with **e**mbedded action".
+  #
+  #  * EOF is explicit and is matched by `c_eof`. If you want to introspect
+  #    the state of the lexer, add this rule to the state:
+  #
+  #       c_eof => do_eof;
+  #
+  #  * If you proceed past EOF, the lexer will complain:
+  #
+  #       NoMethodError: undefined method `ord' for nil:NilClass
+
+  # It looks like there are a whole host of methods we can call from within our code (p26)
+  #
+  #   fpc (p), fc (*p), fcurs (current state), ftargs (target state),
+  #   fentry(<label>) (an integer value of label -- this value can refer to multiple labels)
+  #   fhold           (do not advance over the current char),
+  #   fexec <expr>    (set the next char to process)
+  #   fgoto <label>   (Jump to an entry point defined by label),
+  #   fgoto *<expr>   (expr must evaluate to an integer value representing a state)
+  #   fnext <label>   (set the next state)
+  #   fnext *<expr>   (same)
+  #   fcall <label>   (Push the target state and jump immediately to the entry point defined by <label>,
+  #                    See section 6.1 for more information.)
+  #   fcall *<expr>   (same)
+  #   fret            (Return to last fcall)
+  #   fbreak          (immediately break out of the execute loop -- mostly for use with the nooend write option)
+
 
   # -----  Actions  -----
   # Intent here is to modify a var tracking indented depth when we know it increases or decreases
