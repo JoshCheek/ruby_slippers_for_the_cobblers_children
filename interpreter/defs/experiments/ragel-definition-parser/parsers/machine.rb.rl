@@ -23,7 +23,20 @@ class Defs
 
       attr_accessor :string, :attributes
 
+      def log(msgs)
+        pairs = msgs.map { |k,v|
+          kv = "\e[41;37m#{k} - #{v}\e[0m"
+          if v.kind_of? Fixnum
+            kv << " \e[32m#{string[0...v].inspect}\e[0m | \e[33m#{string[v..20].inspect}\e[0m"
+          end
+          kv
+        }.join("\n")
+        puts "#{pairs.gsub(/^/, '  ').gsub(/\A */, '')}"
+      end
+
       def parse(machine, data)
+        indentations = []
+
         # Machine attributes that we need to parse and set:
         #   name          String
         #   namespace     Array
@@ -32,7 +45,6 @@ class Defs
         #   labels        Array
         #   instructions  Array
         #   children      Array
-
 
         # Emit the constant static data needed by the machine.
         # placing it here is a stopgap until I make a bit more progress
@@ -91,6 +103,11 @@ class Defs
         #   (I think ts, te, act, maybe stack stuff, not sure)
         %% write init;
         %% write exec;
+
+        if(cs == machine_defs_error)
+          require 'pp'
+          pp(p: p, consumed: data[0...p], up_next: data[p..p+40], indentations: indentations)
+        end
 
         machine
       end
@@ -190,27 +207,71 @@ end
   # -----  Actions  -----
   # Intent here is to modify a var tracking indented depth when we know it increases or decreases
   # and then offset the data pointer appropriately, if we do not have appropriate indentation.
-  action Indent { }
-  action Outdent { }
-  action ConsumeIndentation { }
+  action Indent {
+    indentations << [p]
+    puts "Indenting: #{indentations.inspect}"
+  }
+
+  action Outdent {
+    if indentations.empty?
+      raise "indentations: #{indentations.inspect}" if indentations.empty?
+    end
+    puts "Outdenting to #{indentations.inspect}"
+    indentations.pop
+  }
+
+  action SkipIndentation {
+    needed = "  " * indentations.length
+    actual = data[fpc, indentations.length*2]
+
+    if needed.length.zero?
+      puts "p=#{p} SKIPPING b/c NO INDENTATION NEEDED"
+    elsif needed == actual
+      puts "p=#{p} THEY ARE EQUAL, CALLING `fexec #{p} + #{needed.length.next}`";
+      fexec fpc + needed.length.next;
+    else
+      puts "p=#{p} NOT EQUAL: needed #{needed.inspect} actual #{actual.inspect}"
+    end
+  }
+
+  action UnskipIndentation {
+    if indentations.last
+      puts "p=#{p} UNSKIPPING INDENTATION TO #{indentations.last}"
+      fexec indentations.last.pop;
+    end
+  }
+
 
   action RecordName { }
   action RecordArgs { }
 
   # -----  State Transitions  -----
-  newline                = "\n" >ConsumeIndentation;
-  blank_line             = newline [\t\v\f\r ];
-  machine_name           = "main";
-  machine_args           = "";
-  machine_description    = "placeholder";
-  instructions           = "placeholder";
+  indentation          = "" %SkipIndentation %err(UnskipIndentation);
+  blank_line           = ((indentation [\t\v\f\r ] "\n")*) >{ log blank_line: p };
+  machine_name         = indentation "main";
+  machine_args         = "";
+  machine_description  = ((indentation ">" [ ,A-Za-z]* "\n")*) >{ log description: p, current: fc.chr.inspect };
+  instructions         = indentation "placeholder";
 
-  machine_definition = machine_name %RecordName   ":"   machine_args %RecordArgs   newline %Indent
-                         blank_line*
-                         machine_description?
-                         blank_line*
-                         instructions %Outdent
-                       ;
+  machine_definition   =
+    # line1
+    indentation                  >{log indentation: p}
+    (machine_name %RecordName )  >{log machine_name: p}
+    ":"                          >{log colon: p}
+    (machine_args %RecordArgs    >{ log args: p })
+    "\n"                         >{log newline: p}
+                                 >Indent
+                                 %err(Outdent)
+     # description with optional blank lines
+    (blank_line*)           >{log blank_lines_from_defn: p}
+    machine_description     >{log description_from_defn: p}
+    (blank_line*)           >{log blank_lines_from_defn: p}
+
+    # instructions
+    instructions %Outdent
+
+    # children
+                             ;
 
   main := blank_line* (machine_definition blank_line*)*;
 }%%

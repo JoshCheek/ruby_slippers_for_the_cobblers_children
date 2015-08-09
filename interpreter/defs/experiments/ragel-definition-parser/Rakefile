@@ -3,7 +3,7 @@ desc 'Default: compile all parsers and run tests'
 task default: [:cm, :test]
 
 desc 'Run tests'
-task(:test) { sh 'mrspec' }
+task(:test) { sh 'mrspec', '--fail-fast' }
 
 # Aliases
 desc 'Alias for compile:machine'
