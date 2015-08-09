@@ -1,9 +1,4 @@
-%%{
-  machine machine_defs;
-
-  # placeholder
-  main := "x";
-}%%
+%% machine machine_defs;
 
 
 
@@ -78,6 +73,18 @@ class Defs
         #             Records where a match ends and scanning of the next token will begin.
         #     act   - Integer sometimes used by scanner code to track the most recent successful match.
         #
+        #   Overriding the code generated when these variables are used (p37)
+        #     Example: `access state->;` https://github.com/zedshaw/utu/blob/5eda0d2430f52cb0e42db63f3d268675f10c5901/src/hub/hub.rl#L21
+        #
+        #     getkey   <code>;             - how to get the char from p
+        #     access   <code>;             - how to access the machine data persisted across buffer blocks
+        #                                    (if you have to use this, read the paragraph around it)
+        #     variable <name> <code>;      - tell it how to access a specific variable (var name is first arg),
+        #                                    eg `variable p @current_index`
+        #     prepush { <code> };          - use to ensure the stack has room to push onto
+        #     postpop { <code> };          - opposite of prepush
+        #     write <component> [options]; - Generate parts of the machine (data, start, first_final, error, init, exec, exports)
+        #
         # `write exec` will be the implementation.
         #   If it uses `fcall` or `fret` statements, then stack and top variables must be defined.
         #   If a longest-match construction is used, variables for managing backtracking are required
@@ -90,6 +97,44 @@ class Defs
     end
   end
 end
+
+
+%%{
+  # Transition actions (https://github.com/calio/ragel-cheat-sheet/#transition-actions)
+  #   expr > action Entering Action
+  #   expr @ action Finishing Action
+  #   expr $ action All Transition Action
+  #   expr % action Leaving Actions
+
+
+  # -----  Actions  -----
+  # Intent here is to modify a var tracking indented depth when we know it increases or decreases
+  # and then offset the data pointer appropriately, if we do not have appropriate indentation.
+  action Indent { }
+  action Outdent { }
+  action ConsumeIndentation { }
+
+  action RecordName { }
+  action RecordArgs { }
+
+  # -----  State Transitions  -----
+  newline                = "\n" >ConsumeIndentation;
+  blank_line             = newline [\t\v\f\r ];
+  machine_name           = "main";
+  machine_args           = "";
+  machine_description    = "placeholder";
+  instructions           = "placeholder";
+
+  machine_definition = machine_name %RecordName   ":"   machine_args %RecordArgs   newline %Indent
+                         blank_line*
+                         machine_description?
+                         blank_line*
+                         instructions %Outdent
+                       ;
+
+  main := blank_line* (machine_definition blank_line*)*;
+}%%
+
 
 # %%{
 #   machine microscript;
