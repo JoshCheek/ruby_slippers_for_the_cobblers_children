@@ -5,31 +5,32 @@ RSpec.describe 'Defs::Parse::Machine' do
     root = parse_machine <<-DEFS.gsub(/^    /, "")
     main:
       > The main machine, kicks everything else off
-      /ast($ast)
-      /ast/nil
-
-    emit: @value
-      $currentBinding.returnValue <- @value
-
-    reemit:
-      /foundExpression
-
-    twoArgs: @a, @b
-      @a <- @b
-
-    ast: @ast
-      > Interpreters for language constructs
-
-      self <- /ast/@ast.type
-
-      nil:
-        /emit($rNil)
-
-      expressions: @ast
-        for @expression in @ast.expressions
-          /ast(@expression)
-        /reemit
     DEFS
+      # /ast($ast)
+      # /ast/nil
+
+#     emit: @value
+#       $currentBinding.returnValue <- @value
+
+#     reemit:
+#       /foundExpression
+
+#     twoArgs: @a, @b
+#       @a <- @b
+
+#     ast: @ast
+#       > Interpreters for language constructs
+
+#       self <- /ast/@ast.type
+
+#       nil:
+#         /emit($rNil)
+
+#       expressions: @ast
+#         for @expression in @ast.expressions
+#           /ast(@expression)
+#         /reemit
+#     DEFS
 
     expect(root.description).to_not be_empty
     assert_machine root, name: :root, namespace: []

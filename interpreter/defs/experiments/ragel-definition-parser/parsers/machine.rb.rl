@@ -24,6 +24,7 @@ class Defs
       attr_accessor :string, :attributes
 
       def log(msgs)
+        msgs = msgs.to_a << [:indentations, @indentations]
         pairs = msgs.map { |k,v|
           kv = "\e[41;37m#{k} - #{v}\e[0m"
           if v.kind_of? Fixnum
@@ -35,7 +36,7 @@ class Defs
       end
 
       def parse(machine, data)
-        indentations = []
+        @indentations = []
 
         # Machine attributes that we need to parse and set:
         #   name          String
@@ -51,6 +52,7 @@ class Defs
         # (it defines this data as attr_accessors on the singleton class,
         # but I think I'd like it to be private constants)
         %% write data;
+        eof = data.length
 
         # Ragel user guide:
         #   http://www.colm.net/files/ragel/ragel-guide-6.9.pdf
@@ -104,10 +106,15 @@ class Defs
         %% write init;
         %% write exec;
 
+        puts
         if(cs == machine_defs_error)
-          require 'pp'
-          pp(p: p, consumed: data[0...p], up_next: data[p..p+40], indentations: indentations)
+          print "\e[31m"
+        else
+          print "\e[32m"
         end
+        require 'pp'
+        pp(cs: cs, p: p, consumed: data[0...p], up_next: data[p..p+40], indentations: @indentations)
+        print "\e[0m"
 
         machine
       end
@@ -208,36 +215,44 @@ end
   # Intent here is to modify a var tracking indented depth when we know it increases or decreases
   # and then offset the data pointer appropriately, if we do not have appropriate indentation.
   action Indent {
-    indentations << [p]
-    puts "Indenting: #{indentations.inspect}"
+    @indentations << [p.next]
+    puts "Indenting: #{@indentations.inspect}"
   }
 
   action Outdent {
-    if indentations.empty?
-      raise "indentations: #{indentations.inspect}" if indentations.empty?
+    if @indentations.empty?
+      raise "indentations: #{@indentations.inspect}" if @indentations.empty?
     end
-    puts "Outdenting to #{indentations.inspect}"
-    indentations.pop
+    @indentations.pop
+    puts "Outdenting to #{@indentations.inspect}"
   }
 
   action SkipIndentation {
-    needed = "  " * indentations.length
-    actual = data[fpc, indentations.length*2]
+    needed = "  " * @indentations.length
+    actual = data[fpc, @indentations.length*2]
 
+    puts "NEEDED: #{needed.inspect} ACTUAL: #{actual.inspect}"
     if needed.length.zero?
       puts "p=#{p} SKIPPING b/c NO INDENTATION NEEDED"
     elsif needed == actual
-      puts "p=#{p} THEY ARE EQUAL, CALLING `fexec #{p} + #{needed.length.next}`";
-      fexec fpc + needed.length.next;
+      new_index = needed.length.next
+      @indentations.last << p
+      puts "p=#{p} THEY ARE EQUAL, CALLING `fexec #{p} + #{new_index}`";
+      fexec fpc + new_index;
     else
       puts "p=#{p} NOT EQUAL: needed #{needed.inspect} actual #{actual.inspect}"
     end
   }
 
   action UnskipIndentation {
-    if indentations.last
-      puts "p=#{p} UNSKIPPING INDENTATION TO #{indentations.last}"
-      fexec indentations.last.pop;
+    if @indentations.last
+      log pre_unskip: p
+      new_index = @indentations.last.pop.next
+      puts "p=#{p} UNSKIPPING INDENTATION TO #{new_index}"
+      fexec new_index;
+      log post_unskip: p
+    else
+      log nothing_to_unskip: p
     end
   }
 
@@ -246,12 +261,19 @@ end
   action RecordArgs { }
 
   # -----  State Transitions  -----
-  indentation          = "" %SkipIndentation %err(UnskipIndentation);
-  blank_line           = ((indentation [\t\v\f\r ] "\n")*) >{ log blank_line: p };
+  indentation          = "" >SkipIndentation %err(UnskipIndentation);
+  blank_line           = ((indentation [\t\v\f\r ] "\n")*)
+                           >{ log enter_blank_line: p }
+                           %{ log exit_blank_line: p };
   machine_name         = indentation "main";
   machine_args         = "";
-  machine_description  = ((indentation ">" [ ,A-Za-z]* "\n")*) >{ log description: p, current: fc.chr.inspect };
-  instructions         = indentation "placeholder";
+  machine_description  = ( indentation >{ log description_indentation: p }
+      ">"
+      [ ,A-Za-z]*
+      "\n"
+                         ) >{ log description: p, current: fc.chr.inspect };
+  instruction_placeholder = indentation "/ast($ast)\n" indentation "/ast/nil\n"
+;
 
   machine_definition   =
     # line1
@@ -259,21 +281,22 @@ end
     (machine_name %RecordName )  >{log machine_name: p}
     ":"                          >{log colon: p}
     (machine_args %RecordArgs    >{ log args: p })
-    "\n"                         >{log newline: p}
+    "\n"
                                  >Indent
-                                 %err(Outdent)
+                                 >{log enter_newline: fpc}
+                                 %{ log exit_newline: fpc }
      # description with optional blank lines
-    (blank_line*)           >{log blank_lines_from_defn: p}
-    machine_description     >{log description_from_defn: p}
-    (blank_line*)           >{log blank_lines_from_defn: p}
+    # (blank_line*)           >{log blank_lines_from_defn: p}
+    # machine_description     >{log description_from_defn: p}
 
+    (indentation >{ log pre_description_indentation: p }
+"> The main machine, kicks everything else off\n") %{ log desc: fpc, p: p, eof: eof }
     # instructions
-    instructions %Outdent
 
     # children
-                             ;
+  ;
 
-  main := blank_line* (machine_definition blank_line*)*;
+  main := (blank_line* (machine_definition)*) ${ puts "-- #{p}: #{data[p].inspect} --" };
 }%%
 
 
