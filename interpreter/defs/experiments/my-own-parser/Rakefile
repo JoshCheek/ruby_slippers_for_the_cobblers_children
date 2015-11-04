@@ -1,0 +1,50 @@
+# Non-compile tasks
+desc 'Default: compile all parsers and run tests'
+task default: [:cm, :test]
+
+desc 'Run tests'
+task(:test) { sh 'mrspec', '--fail-fast' }
+
+# Aliases
+desc 'Alias for compile:machine'
+task cm: 'compile:machine'
+
+# Parser file management
+parsers_in_dir    = 'parsers'
+parsers_out_dir   = 'lib/defs/parse'
+dot_out_dir       = 'graphs'
+parse_machine_in  = "#{parsers_in_dir }/machine.rb.rl"
+parse_machine_out = "#{parsers_out_dir}/machine.rb"
+parse_machine_dot = "#{dot_out_dir    }/machine.dot"
+parse_machine_img = "#{dot_out_dir    }/machine.png"
+task(:ensure_output_dir)  { sh "mkdir", "-p", parsers_out_dir }
+task(:ensure_dot_out_dir) { sh "mkdir", "-p", dot_out_dir     }
+
+# Compile parsers
+namespace :compile do
+  desc 'Compile the machine parser'
+  task machine: :ensure_output_dir do
+    # compile the parser with ragel
+    sh "ragel", "-R",                    # lang = Ruby
+                "-o", parse_machine_out, # output filename
+                parse_machine_in         # input filename
+  end
+end
+
+# Dot diagrams
+namespace :dot do
+  desc 'Machine parser diagram'
+  task machine: :ensure_dot_out_dir do
+    # generate the dot definition for the state machine
+    sh "ragel", "-R",                     # lang = Ruby
+                "-V",                     # generate a "dot" file (graphviz directed graph)
+                "-p",                     # display printable characters on labels.
+                "-o", parse_machine_dot,  # output filename
+                parse_machine_in          # input filename
+
+    # generate a graph showing the transitions through the state machine, using graphviz' dot
+    sh "dot", "-T", "png",                # output an image (portable network graphics)
+              "-o", parse_machine_img,    # output filename
+              parse_machine_dot           # input filename
+  end
+end
