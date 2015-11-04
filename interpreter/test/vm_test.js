@@ -209,7 +209,7 @@ describe('ruby.VM', function() {
     })
   })
 
-  it.skip('evaluates class and method definitions', (done) => {
+  it('evaluates class and method definitions', (done) => {
     interpreterFor(`
         # def in a class
         class A
@@ -233,7 +233,7 @@ describe('ruby.VM', function() {
     `, (vm, world) => {
       AE(undefined, world.$toplevelNamespace.constants['A']);
 
-      // run the program
+      // -----  run the program  -----
       assertSymbol(world, "ameth", vm.nextExpression()) // A#ameth
       assertSymbol(world, "ameth", vm.nextExpression()) // A
 
@@ -246,7 +246,7 @@ describe('ruby.VM', function() {
 
       assertSymbol(world, "meth_with_args", vm.nextExpression()) // Object#meth_with_args
 
-      // class definition
+      // -----  class definition  -----
       assertClass(world, "A", {
         class:       world.$rClass,
         numIvars:    0,
@@ -258,16 +258,16 @@ describe('ruby.VM', function() {
         }
       })
 
-      // TODO:
-      // // Object#ometh
-      // var ometh = world.$objectClass.imeths['ometh'];
-      // a.eq("ometh", ometh.name);
-      // a.eq(0, ometh.args.length);
-      // a.streq(ometh.body, Ruby(True({begin:169, end:173})));
+      // -----  method definitions  -----
+      // Object#ometh
+      var ometh = world.$rObject.instanceMethods['ometh'];
+      a.eq("ometh", ometh.name);
+      a.eq(0, ometh.args.length);
+      a.streq(ometh.body, Ruby(True({begin:169, end:173})));
 
-      // // Object#meth_with_args
-      // var methWithArgs = world.$objectClass.imeths['meth_with_args'];
-      // a.streq(methWithArgs.args, [Required("req"), Rest("rest")]);
+      // Object#meth_with_args
+      var methWithArgs = world.$rObject.instanceMethods['meth_with_args'];
+      a.streq(methWithArgs.args, [Required("req"), Rest("rest")]);
     })
   });
 })
@@ -347,9 +347,9 @@ describe('ruby.VM', function() {
     //   var userClassObj:Dynamic = world.$toplevelNamespace.constants['User'];
     //   var userClass:RClass     = userClassObj;
 
-    //   a.neq(null, userClass.imeths['initialize']);
-    //   a.neq(null, userClass.imeths['name']);
-    //   a.neq(null, userClass.imeths['name=']);
+    //   a.neq(null, userClass.instanceMethods['initialize']);
+    //   a.neq(null, userClass.instanceMethods['name']);
+    //   a.neq(null, userClass.instanceMethods['name=']);
 
     //   // the code successfully printed
     //   a.streq(["Josh\n"], world.$printedToStdout);

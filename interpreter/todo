@@ -1,4 +1,9 @@
 Currently:
+  Switch the parser over to a real parser (treetop or ragel or http://weblog.jamisbuck.org/2015/7/30/writing-a-simple-recursive-descent-parser.html)
+  Then get /ast/method_definition working
+    It needs the other machines to be able to return return values, b/c currently it is using strings where it needs symbols.
+    so it needs to be able to intern the string to get the method name
+    also needs a deftarget stack.
   figuring out /ast/method_definition
     need to finish implementing
     and then generate.

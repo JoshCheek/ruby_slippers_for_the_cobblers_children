@@ -332,10 +332,23 @@ export default () => {
             "arg_names": ["@ast"],
             "labels": {},
             "instructions": [
-              ["globalToRegister", "$rTrue", "@_1"],
-              ["runMachine", ["emit"],
-                ["@_1"]
-              ]
+              ["getKey", "@_1", "@ast", "name"],
+              ["registerToRegister", "@_1", "@name"],
+              ["runMachine", ["intern"],
+                ["@name"]
+              ],
+              ["globalToRegister", "$currentExpression", "@_2"],
+              ["registerToRegister", "@_2", "@name"],
+              ["getKey", "@_3", "@ast", "args"],
+              ["registerToRegister", "@_3", "@args"],
+              ["getKey", "@_4", "@ast", "body"],
+              ["registerToRegister", "@_4", "@body"],
+              ["newHash", "@method"],
+              ["setKey", "@method", "arguments", "@args"],
+              ["setKey", "@method", "body", "@body"],
+              ["globalToRegister", "$rObject", "@_5"],
+              ["newHash", "@_6"],
+              ["setKey", "@_5", "instanceMethods[@name]", "@_6"]
             ],
             "children": {},
           },
@@ -353,24 +366,19 @@ export default () => {
               ["runMachine", ["openClass"],
                 ["@name_lookup", "@superclass"]
               ],
-              ["globalToRegister", "$deftargetStack", "@_3"],
-              ["registerToRegister", "@_3", "@deftargetStack"],
-              ["getKey", "@_4", "@deftargetStack", "target"],
-              ["registerToRegister", "@_4", "@class"],
+              ["globalToRegister", "$rObject", "@_3"],
+              ["registerToRegister", "@_3", "@class"],
               ["newHash", "@binding"],
               ["newHash", "@locals"],
               ["setKey", "@binding", "localVariables", "@locals"],
               ["setKey", "@binding", "self", "@class"],
-              ["globalToRegister", "$rNil", "@_5"],
-              ["setKey", "@binding", "returnValue", "@_5"],
-              ["globalToRegister", "$bindingStack", "@_6"],
-              ["setKey", "@binding", "caller", "@_6"],
-              ["getKey", "@_7", "@ast", "body"],
+              ["globalToRegister", "$rNil", "@_4"],
+              ["setKey", "@binding", "returnValue", "@_4"],
+              ["globalToRegister", "$bindingStack", "@_5"],
+              ["setKey", "@binding", "caller", "@_5"],
+              ["getKey", "@_6", "@ast", "body"],
               ["runMachine", ["ast"],
-                ["@_7"]
-              ],
-              ["runMachine", ["popDeftarget"],
-                []
+                ["@_6"]
               ],
               ["runMachine", ["popBinding"],
                 []

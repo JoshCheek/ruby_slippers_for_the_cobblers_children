@@ -62,6 +62,15 @@ openClass: @name_lookup, @superclass
   @class <- @constants[name]
   /pushDeftarget(@class)
 
+intern: @name
+  > Turns a JS string into a Ruby Symbol
+
+  @class                    <- $rSymbol
+  @object                   <- {}
+  @object.class             <- @class
+  @object.instanceVariables <- {}
+  @object.primitiveData     <- @name
+
 ast: @ast
   > Interpreters for language constructs
 
@@ -123,13 +132,16 @@ ast: @ast
     #   "body": { "type": "integer", "value": "1"},
     # }
     @name <- @ast.name
+    /intern(@name)
+    @name <- $currentExpression
     @args <- @ast.args
     @body <- @ast.body
 
-    currentDeftarget.instanceMethods[@name] <- {
-      arguments: @args,
-      body:      @body
-    }
+    # TODO: should be current deftarget, not rObject
+    @method           <- {}
+    @method.arguments <- @args
+    @method.body      <- @body
+    $rObject.instanceMethods[@name] <- {}
     # TODO: get the current deftarget
     # TODO: add the args and body
 
@@ -144,8 +156,9 @@ ast: @ast
     @superclass  <- @ast.superclass
     @name_lookup <- @ast.name_lookup
     /openClass(@name_lookup, @superclass)
-    @deftargetStack <- $deftargetStack
-    @class          <- @deftargetStack.target
+    # @deftargetStack <- $deftargetStack
+    # @class          <- @deftargetStack.target
+    @class <- $rObject
 
     # push the binding
     @binding <- {}
@@ -159,7 +172,7 @@ ast: @ast
     /ast(@ast.body)
 
     # cleanup
-    /popDeftarget
+    # /popDeftarget
     /popBinding
     /reemit
 

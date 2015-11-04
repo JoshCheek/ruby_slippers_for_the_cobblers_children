@@ -26,7 +26,7 @@ export default class VM {
   nextExpression() {
     this.world.$foundExpression = false
     while(!this.world.$foundExpression && this.world.$machineStack) {
-      this.step(this.world.$machineStack)
+      this.step(this.world.$machineStack) // this will return the return value
 
       while(this.world.$machineStack && this.isFinished(this.world.$machineStack))
         this.world.$machineStack = this.world.$machineStack.parent
@@ -57,7 +57,7 @@ export default class VM {
     if(!code)
       throw(new Error(`No instruction: ${name}`))
     else
-      code(this.world, machine, "DO NOT USE THIS!!", machine.registers, ...args)
+      code(this.world, machine, "DO NOT USE THIS!!", machine.registers, ...args) // this will return the return value!
 
     machine.instructionPointer = this.instructionPointer(machine) + 1
   }
