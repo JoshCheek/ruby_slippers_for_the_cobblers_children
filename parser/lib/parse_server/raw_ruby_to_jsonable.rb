@@ -197,6 +197,12 @@ module ParseServer
           name:     ast.children.first.to_s,
           location: location_hash(ast),
         }
+      when :optarg
+        { type:          :optional_arg,
+          default_value: translate(ast.children.last),
+          name:          ast.children.first.to_s,
+          location:      location_hash(ast),
+        }
       when :const
         # TODO: __ENCODING__
         assert_children ast, 2

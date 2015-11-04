@@ -421,7 +421,7 @@ RSpec.describe ParseServer::RawRubyToJsonable do
         standard_assertions method_definition, type: :method_definition, location: ['f.rb', 0, code.length]
         arg, *remaining_args = method_definition[:args]
         expect(remaining_args).to be_empty
-        expect(method_definition['body']).to eq nil
+        expect(method_definition[:body]).to eq nil
         standard_assertions arg, type: type, location: ['f.rb', 6, 6+arg_code.length]
         arg
       end
@@ -431,7 +431,11 @@ RSpec.describe ParseServer::RawRubyToJsonable do
         expect(arg[:name]).to eq 'b'
       end
 
-      example 'optional arg'
+      example 'optional arg' do
+        arg = assert_arg arg_code: 'b="a"', type: :optional_arg
+        expect(arg[:name]).to eq 'b'
+        is_string! arg[:default_value], "a"
+      end
 
       example 'splatted args' do
         arg = assert_arg arg_code: '*b', type: :rest_arg
