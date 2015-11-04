@@ -415,29 +415,29 @@ RSpec.describe ParseServer::RawRubyToJsonable do
     end
 
     context 'with args' do
-      example 'required arg' do
-        # (def :a (args (arg :b)) nil)
-        method_definition = call 'def a(b) end', filename: 'f.rb'
-        standard_assertions method_definition, type: :method_definition, location: ['f.rb', 0, 12]
-        arg, *rest = method_definition[:args]
-        expect(rest).to be_empty
-
-        standard_assertions arg, type: :required_arg, location: ['f.rb', 6, 7]
-        expect(arg[:name]).to eq 'b'
-
+      def assert_arg(arg_code:, type:)
+        code              = "def a(#{arg_code}) end"
+        method_definition = call code, filename: 'f.rb'
+        standard_assertions method_definition, type: :method_definition, location: ['f.rb', 0, code.length]
+        arg, *remaining_args = method_definition[:args]
+        expect(remaining_args).to be_empty
         expect(method_definition['body']).to eq nil
+        standard_assertions arg, type: type, location: ['f.rb', 6, 6+arg_code.length]
+        arg
+      end
+
+      example 'required arg' do
+        arg = assert_arg arg_code: 'b', type: :required_arg
+        expect(arg[:name]).to eq 'b'
       end
 
       example 'optional arg'
-      example 'splatted args' do
-        method_definition = call 'def a(*b) end', filename: 'f.rb'
-        standard_assertions method_definition, type: :method_definition
-        arg, *remaining_args = method_definition[:args]
-        expect(remaining_args).to be_empty
 
-        standard_assertions arg, type: :rest_arg, location: ['f.rb', 6, 8]
+      example 'splatted args' do
+        arg = assert_arg arg_code: '*b', type: :rest_arg
         expect(arg[:name]).to eq 'b'
       end
+
       example 'required keyword arg'
       example 'optional keyword arg'
       example 'remaining keyword args'
