@@ -10,6 +10,7 @@ group :test, :development do
 end
 
 group :test do
+  gem 'mrspec'
   gem 'rspec'
   gem 'rack-test'
 end
