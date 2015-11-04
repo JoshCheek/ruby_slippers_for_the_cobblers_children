@@ -187,19 +187,45 @@ module ParseServer
       when :arg
         # (def :a (args (arg :b)) (int 1))
         assert_children ast, 1
-        { type:     :required_arg,
-          name:     ast.children.first.to_s,
-          location: location_hash(ast),
+        { type:          :required_arg,
+          name:          ast.children.first.to_s,
+          location:      location_hash(ast),
         }
       when :restarg
         assert_children ast, 1
-        { type:     :rest_arg,
-          name:     ast.children.first.to_s,
-          location: location_hash(ast),
+        { type:          :rest_arg,
+          name:          ast.children.first.to_s,
+          location:      location_hash(ast),
         }
       when :optarg
+        assert_children ast, 2
         { type:          :optional_arg,
           default_value: translate(ast.children.last),
+          name:          ast.children.first.to_s,
+          location:      location_hash(ast),
+        }
+      when :kwarg
+        assert_children ast, 1
+        { type:          :keyword_arg,
+          name:          ast.children.first.to_s,
+          location:      location_hash(ast),
+        }
+      when :kwoptarg
+        assert_children ast, 2
+        { type:          :optional_keyword_rest,
+          default_value: translate(ast.children.last),
+          name:          ast.children.first.to_s,
+          location:      location_hash(ast),
+        }
+      when :kwrestarg
+        assert_children ast, 1
+        { type:          :keyword_rest_arg,
+          name:          ast.children.first.to_s,
+          location:      location_hash(ast),
+        }
+      when :blockarg
+        assert_children ast, 1
+        { type:          :block_arg,
           name:          ast.children.first.to_s,
           location:      location_hash(ast),
         }

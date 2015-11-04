@@ -442,10 +442,28 @@ RSpec.describe ParseServer::RawRubyToJsonable do
         expect(arg[:name]).to eq 'b'
       end
 
-      example 'required keyword arg'
-      example 'optional keyword arg'
-      example 'remaining keyword args'
-      example 'block arg'
+      example 'required keyword arg' do
+        arg = assert_arg arg_code: 'b:', type: :keyword_arg
+        expect(arg[:name]).to eq 'b'
+      end
+
+      example 'optional keyword arg' do
+        arg = assert_arg arg_code: 'b: "s"', type: :optional_keyword_rest
+        expect(arg[:name]).to eq 'b'
+        is_string! arg[:default_value], "s"
+      end
+
+      example 'remaining keyword args' do
+        arg = assert_arg arg_code: '**b', type: :keyword_rest_arg
+        expect(arg[:name]).to eq 'b'
+      end
+
+      example 'block arg' do
+        arg = assert_arg arg_code: '&b', type: :block_arg
+        expect(arg[:name]).to eq 'b'
+      end
+
+      example 'shadowed arg'
       example 'all together'
     end
 
