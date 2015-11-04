@@ -448,7 +448,7 @@ RSpec.describe ParseServer::RawRubyToJsonable do
       end
 
       example 'optional keyword arg' do
-        arg = assert_arg arg_code: 'b: "s"', type: :optional_keyword_rest
+        arg = assert_arg arg_code: 'b: "s"', type: :optional_keyword_arg
         expect(arg[:name]).to eq 'b'
         is_string! arg[:default_value], "s"
       end
@@ -463,8 +463,20 @@ RSpec.describe ParseServer::RawRubyToJsonable do
         expect(arg[:name]).to eq 'b'
       end
 
-      example 'shadowed arg'
-      example 'all together'
+      example 'all together' do
+        code  = "def a(b,c='d',*e,f:,g:'h',**i,&j) end"
+        method_definition = call code, filename: 'f.rb'
+        required, optional, splat, keyword, optional_keyword, keyrest, block, *remaining_args = method_definition[:args]
+        expect(remaining_args).to be_empty
+
+        standard_assertions required,         type: :required_arg,         location: ['f.rb',  6,  7]
+        standard_assertions optional,         type: :optional_arg,         location: ['f.rb',  8, 13]
+        standard_assertions splat,            type: :rest_arg,             location: ['f.rb', 14, 16]
+        standard_assertions keyword,          type: :keyword_arg,          location: ['f.rb', 17, 19]
+        standard_assertions optional_keyword, type: :optional_keyword_arg, location: ['f.rb', 20, 25]
+        standard_assertions keyrest,          type: :keyword_rest_arg,     location: ['f.rb', 26, 29]
+        standard_assertions block,            type: :block_arg,            location: ['f.rb', 30, 32]
+      end
     end
 
     example 'with a body' do

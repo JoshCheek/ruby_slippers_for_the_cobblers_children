@@ -212,7 +212,7 @@ module ParseServer
         }
       when :kwoptarg
         assert_children ast, 2
-        { type:          :optional_keyword_rest,
+        { type:          :optional_keyword_arg,
           default_value: translate(ast.children.last),
           name:          ast.children.first.to_s,
           location:      location_hash(ast),
